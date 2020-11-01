@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditViewModel" />
+    </data>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_name_title" />
+
+                <EditText
+                    android:id="@+id/edit_name_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:hint="@string/edit_name_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="text"
+                    android:text="@={viewModel.name}" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_domain_title" />
+
+                <EditText
+                    android:id="@+id/edit_domain_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:hint="@string/edit_domain_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textEmailAddress"
+                    android:text="@={viewModel.domain}" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_host_title" />
+
+                <EditText
+                    android:id="@+id/edit_host_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/edit_host_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textEmailAddress"
+                    android:text="@={viewModel.host}" />
+
+                <ImageButton
+                    android:id="@+id/edit_host_search_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null"
+                    android:onClick="@{() -> viewModel.onClickSearchHost()}"
+                    android:src="@android:drawable/ic_menu_search" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_folder_title" />
+
+                <EditText
+                    android:id="@+id/edit_directory_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:hint="@string/edit_folder_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textEmailAddress"
+                    android:onClick="@{() -> viewModel.onClickSearchDirectory()}"
+                    android:text="@={viewModel.folder}" />
+
+                <ImageButton
+                    android:id="@+id/edit_directory_search_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null"
+                    android:importantForAutofill="no"
+                    android:src="@android:drawable/ic_menu_search" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_user_title" />
+
+                <EditText
+                    android:id="@+id/edit_user_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:enabled="@{!viewModel.anonymous}"
+                    android:hint="@string/edit_user_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textEmailAddress"
+
+                    android:text="@={viewModel.user}" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_password_title" />
+
+                <EditText
+                    android:id="@+id/edit_password_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:enabled="@{!viewModel.anonymous}"
+                    android:hint="@string/edit_password_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textPassword"
+                    android:text="@={viewModel.password}" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@null" />
+
+                <CheckBox
+                    android:id="@+id/edit_anonymous_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:checked="@={viewModel.anonymous}"
+                    android:text="@string/edit_anonymous_label" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_shared_uri_title" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:padding="4dp"
+                    android:text="@={viewModel.uri}" />
+
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp">
+
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="3"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
+                    android:text="@string/edit_check_connection_button" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="3"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/edit_cancel_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{ () -> viewModel.onClickCancel() }"
+                        android:text="@string/edit_cancel_button" />
+
+                    <Button
+                        android:id="@+id/edit_ok_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{ () -> viewModel.onClickAccept() }"
+                        android:text="@string/edit_accept_button" />
+
+                </LinearLayout>
+
+            </TableRow>
+
+        </TableLayout>
+
+    </ScrollView>
+
+</layout>

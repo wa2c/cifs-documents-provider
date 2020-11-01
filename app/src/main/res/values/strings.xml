@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">CIFS Documents Provider</string>
+    <string name="app_summary">共有フォルダ</string>
+
+
+    <!-- Edit Screen -->
+    <string name="edit_name_title">識別名</string>
+    <string name="edit_name_hint">未入力の場合はホスト</string>
+    <string name="edit_domain_title">ドメイン</string>
+    <string name="edit_domain_hint">(オプション)</string>
+    <string name="edit_host_title">ホスト</string>
+    <string name="edit_host_hint">IPアドレス/ホスト名</string>
+    <string name="edit_folder_title">フォルダ</string>
+    <string name="edit_folder_hint">未入力の場合は/</string>
+    <string name="edit_user_title">ユーザ名</string>
+    <string name="edit_user_hint">(匿名の場合は無効)</string>
+    <string name="edit_password_title">パスワード</string>
+    <string name="edit_password_hint">(匿名の場合は無効)</string>
+    <string name="edit_version_title">バージョン</string>
+    <string name="edit_version_hint">バージョン</string>
+    <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_shared_uri_title">共有URI</string>
+    <string name="edit_check_connection_button">接続確認</string>
+    <string name="edit_accept_button">登録</string>
+    <string name="edit_cancel_button">破棄</string>
+
+</resources>
