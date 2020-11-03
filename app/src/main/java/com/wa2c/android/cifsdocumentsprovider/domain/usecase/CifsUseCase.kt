@@ -24,7 +24,9 @@ class CifsUseCase @Inject constructor(
     private val preferencesRepository: PreferencesRepository
 ) {
     /** CIFS Connection buffer */
-    private val _connections: MutableList<CifsConnection> by lazy { loadConnections().toMutableList() }
+    private val _connections: MutableList<CifsConnection> by lazy {
+        preferencesRepository.cifsSettings.map { it.toModel() }.toMutableList()
+    }
 
     /**
      * Get CIFS Context
@@ -53,13 +55,26 @@ class CifsUseCase @Inject constructor(
         return _connections
     }
 
-    fun loadConnections(): List<CifsConnection> {
-        return preferencesRepository.cifsSettings.map { it.toModel() }
+    /**
+     * Save connection
+     */
+    fun saveConnection(connection: CifsConnection) {
+        _connections.indexOfFirst { it.id == connection.id }.let { index ->
+            if (index >= 0) {
+                _connections[index] = connection
+            } else {
+                _connections.add(connection)
+            }
+        }
+        preferencesRepository.cifsSettings = _connections.map { it.toData() }
     }
 
-    fun saveConnections(connectionList: List<CifsConnection>) {
-        preferencesRepository.cifsSettings = connectionList.map { it.toData() }
-        _connections.renew(connectionList)
+    /**
+     * Delete connection
+     */
+    fun deleteConnection(id: Long) {
+        _connections.removeIf { it.id == id }
+        preferencesRepository.cifsSettings = _connections.map { it.toData() }
     }
 
     /**

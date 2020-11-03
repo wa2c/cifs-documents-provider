@@ -7,11 +7,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CifsSetting(
-    var name: String,
-    var domain: String?,
-    var host: String,
-    var folder: String?,
-    var user: String?,
-    var password: String?,
-    var anonymous: Boolean
+    val id: Long,
+    val name: String,
+    val domain: String?,
+    val host: String,
+    val folder: String?,
+    val user: String?,
+    val password: String?,
+    val anonymous: Boolean
 )

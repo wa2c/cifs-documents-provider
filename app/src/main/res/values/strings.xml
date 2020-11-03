@@ -2,6 +2,8 @@
     <string name="app_name">CIFS Documents Provider</string>
     <string name="app_summary">共有フォルダ</string>
 
+    <!-- Main Screen -->
+
 
     <!-- Edit Screen -->
     <string name="edit_name_title">識別名</string>
@@ -21,7 +23,10 @@
     <string name="edit_anonymous_label">匿名</string>
     <string name="edit_shared_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>
-    <string name="edit_accept_button">登録</string>
-    <string name="edit_cancel_button">破棄</string>
+    <string name="edit_check_connection_ok_message">接続OK</string>
+    <string name="edit_check_connection_ng_message">接続NG</string>
+    <string name="edit_save_button">保存</string>
+    <string name="edit_cancel_button">戻る</string>
+    <string name="edit_delete_button">削除</string>
 
 </resources>

@@ -16,6 +16,16 @@
     <fragment
         android:id="@+id/editFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditFragment"
-        android:label="EditFragment" />
+        android:label="EditFragment" >
+        <argument
+            android:name="cifsConnection"
+            app:argType="com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="index"
+            app:argType="integer"
+            android:defaultValue="-1" />
+    </fragment>
 
 </navigation>

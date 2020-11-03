@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -254,6 +255,14 @@
                     android:orientation="horizontal">
 
                     <Button
+                        android:id="@+id/edit_delete_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{ () -> viewModel.onClickDelete() }"
+                        android:text="@string/edit_delete_button"
+                        app:visible="@{ !viewModel.isNew }" />
+
+                    <Button
                         android:id="@+id/edit_cancel_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -265,7 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:onClick="@{ () -> viewModel.onClickAccept() }"
-                        android:text="@string/edit_accept_button" />
+                        android:text="@string/edit_save_button" />
 
                 </LinearLayout>
 

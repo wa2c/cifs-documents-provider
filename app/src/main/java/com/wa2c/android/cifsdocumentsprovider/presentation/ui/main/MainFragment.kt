@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentMainBinding
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,15 +29,20 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         }
         viewModel.let {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
+            it.cifsConnections.observe(viewLifecycleOwner, ::onLoadConnection)
         }
     }
 
     private fun onNavigate(event: MainViewModel.Nav) {
         when (event) {
             is MainViewModel.Nav.Edit -> {
-                navigateSafe(MainFragmentDirections.actionMainFragmentToEditFragment())
+                navigateSafe(MainFragmentDirections.actionMainFragmentToEditFragment(event.connection))
             }
         }
+    }
+
+    private fun onLoadConnection(list: List<CifsConnection>) {
+        binding.cifsList.adapter = CifsListAdapter(viewModel, list)
     }
 
 }

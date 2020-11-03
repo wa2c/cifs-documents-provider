@@ -26,16 +26,14 @@ class EditViewModel @ViewModelInject constructor(
     private val _navigationEvent = LiveEvent<Nav>()
     val navigationEvent: LiveData<Nav> = _navigationEvent
 
-    private val cifsConnections = mutableListOf<CifsConnection>()
-    //val cifsConnections = _cifsConnections as LiveData<List<CifsConnection>>
 
-    var name = MutableLiveData<String>()
-    var domain = MutableLiveData<String>()
-    var host = MutableLiveData<String>()
-    var folder = MutableLiveData<String>()
-    var user = MutableLiveData<String>()
-    var password = MutableLiveData<String>()
-    var anonymous = MutableLiveData<Boolean>()
+    var name = MutableLiveData<String?>()
+    var domain = MutableLiveData<String?>()
+    var host = MutableLiveData<String?>()
+    var folder = MutableLiveData<String?>()
+    var user = MutableLiveData<String?>()
+    var password = MutableLiveData<String?>()
+    var anonymous = MutableLiveData<Boolean?>()
 
     val uri = MediatorLiveData<String>().apply {
         fun post() { postValue(cifsUseCase.getConnectionUri(name.value, folder.value)) }
@@ -43,41 +41,65 @@ class EditViewModel @ViewModelInject constructor(
         addSource(folder) { post() }
     }
 
-    fun initialize() {
-        load()
+    private var currentId: Long = NEW_ID
+
+    val isNew: Boolean
+        get() = currentId < 0
+
+    private fun getNewId(): Long {
+        return System.currentTimeMillis()
+    }
+
+
+    fun initialize(connection: CifsConnection?) {
+        deployCifsConnection(connection)
     }
 
     private fun save() {
-        createCifsServer()?.let {
-            cifsUseCase.saveConnections(listOf(it))
+        createCifsConnection()?.let {
+            cifsUseCase.saveConnection(it)
+            currentId = it.id
         }
     }
 
-    private fun load() {
-        cifsUseCase.loadConnections().let {
-            logD(it)
-        }
+    private fun delete() {
+        cifsUseCase.deleteConnection(currentId)
     }
 
-    private fun getNewName(): String {
-        return "New Data"
+    /**
+     * Deploy connection data.
+     */
+    private fun deployCifsConnection(connection: CifsConnection?) {
+        currentId = connection?.id ?: NEW_ID
+        name.value = connection?.name
+        domain.value = connection?.domain
+        host.value = connection?.host
+        folder.value = connection?.folder
+        user.value = connection?.user
+        password.value = connection?.password
+        anonymous.value = connection?.anonymous ?: false
     }
 
-    private fun createCifsServer(): CifsConnection? {
+    /**
+     * Create connection data
+     */
+    private fun createCifsConnection(): CifsConnection? {
+        val isAnonymous = anonymous.value ?: false
         return CifsConnection(
-            name = name.value?.ifEmpty { null } ?: getNewName(),
+            id = if (isNew) getNewId() else currentId ,
+            name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
             folder = folder.value?.ifEmpty { null },
-            user = user.value?.ifEmpty { null },
-            password = password.value?.ifEmpty { null },
-            anonymous = anonymous.value ?: false
+            user = if (isAnonymous) null else user.value?.ifEmpty { null },
+            password = if (isAnonymous) null else password.value?.ifEmpty { null },
+            anonymous = isAnonymous
         )
     }
 
 
+
     fun onClickSearchHost() {
-//        val a= cifsUseCase.cifsClient
         logD("")
     }
 
@@ -92,15 +114,20 @@ class EditViewModel @ViewModelInject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val isConnected = createCifsServer()?.let { cifsUseCase.checkConnection(it) } ?: false
+                    val isConnected = createCifsConnection()?.let { cifsUseCase.checkConnection(it) } ?: false
                     if (!isConnected) throw IOException()
                 }
             }.onSuccess {
-                _navigationEvent.value = Nav.Warning("よい")
+                _navigationEvent.value = Nav.CheckResult(true)
             }.onFailure {
-                _navigationEvent.value = Nav.Warning("だめ")
+                _navigationEvent.value = Nav.CheckResult(false)
             }
         }
+    }
+
+    fun onClickDelete() {
+        cifsUseCase.deleteConnection(currentId)
+        _navigationEvent.value = Nav.Back
     }
 
     fun onClickCancel() {
@@ -116,17 +143,23 @@ class EditViewModel @ViewModelInject constructor(
             }
         }
 
-        if (cifsConnections.any { it.name == inputName}) {
-            Nav.Warning("Exists")
+        if (cifsUseCase.provideConnections().any { it.name == inputName}) {
+            _navigationEvent.value = Nav.Warning("Exists")
             return
         }
 
         save()
+        _navigationEvent.value = Nav.Back
     }
 
     sealed class Nav {
         object Back : Nav()
+        data class CheckResult(val result: Boolean): Nav()
         data class Warning(val message: String): Nav()
+    }
+
+    companion object {
+        private const val NEW_ID: Long = -1
     }
 
 }

@@ -14,14 +14,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Button"
-            android:onClick="@{ () -> viewModel.onClickButton() }"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/cifs_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/layout_cifs_item"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

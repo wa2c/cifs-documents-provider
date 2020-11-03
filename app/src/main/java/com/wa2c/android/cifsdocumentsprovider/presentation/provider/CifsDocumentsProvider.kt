@@ -36,7 +36,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Storage Manager */
     private val sm: StorageManager by lazy {
-        providerContext.getSystemService(android.content.Context.STORAGE_SERVICE) as android.os.storage.StorageManager
+        providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
     }
 
     /** Cifs UseCase */
@@ -71,7 +71,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (documentId.isRoot()) {
             // Root
-            cifsUseCase.loadConnections().forEach { connection ->
+            cifsUseCase.provideConnections().forEach { connection ->
                 includeConnection(cursor, connection)
             }
         } else {
@@ -92,7 +92,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): Cursor? {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
-            cifsUseCase.loadConnections().forEach { connection ->
+            cifsUseCase.provideConnections().forEach { connection ->
                 val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
                 includeFile(cursor, file, connection.name)
             }
@@ -171,7 +171,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 )
                 row.add(DocumentsContract.Document.COLUMN_SIZE, file.length())
             }
-            row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
+            row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name.trim('/'))
             row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified())
         }
     }
