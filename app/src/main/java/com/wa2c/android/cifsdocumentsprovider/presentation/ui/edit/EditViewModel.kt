@@ -26,7 +26,6 @@ class EditViewModel @ViewModelInject constructor(
     private val _navigationEvent = LiveEvent<Nav>()
     val navigationEvent: LiveData<Nav> = _navigationEvent
 
-
     var name = MutableLiveData<String?>()
     var domain = MutableLiveData<String?>()
     var host = MutableLiveData<String?>()
@@ -35,8 +34,14 @@ class EditViewModel @ViewModelInject constructor(
     var password = MutableLiveData<String?>()
     var anonymous = MutableLiveData<Boolean?>()
 
-    val uri = MediatorLiveData<String>().apply {
-        fun post() { postValue(cifsUseCase.getConnectionUri(name.value, folder.value)) }
+    val connectionUri = MediatorLiveData<String>().apply {
+        fun post() { postValue(CifsConnection.getConnectionUri(host.value, folder.value)) }
+        addSource(host) { post() }
+        addSource(folder) { post() }
+    }
+
+    val providerUri = MediatorLiveData<String>().apply {
+        fun post() { postValue( CifsConnection.getProviderUri(name.value, folder.value)) }
         addSource(name) { post() }
         addSource(folder) { post() }
     }
@@ -126,30 +131,30 @@ class EditViewModel @ViewModelInject constructor(
     }
 
     fun onClickDelete() {
-        cifsUseCase.deleteConnection(currentId)
-        _navigationEvent.value = Nav.Back
-    }
-
-    fun onClickCancel() {
-        _navigationEvent.value = Nav.Back
+        launch {
+            delete()
+            _navigationEvent.value = Nav.Back
+        }
     }
 
     fun onClickAccept() {
-        val inputName = name.value.let { text ->
-            if (text.isNullOrBlank()) {
-                (host.value ?: "").also { name.value = it }
-            } else {
-                text
+        launch {
+            val inputName = name.value.let { text ->
+                if (text.isNullOrBlank()) {
+                    (host.value ?: "").also { name.value = it }
+                } else {
+                    text
+                }
             }
-        }
 
-        if (cifsUseCase.provideConnections().any { it.name == inputName}) {
-            _navigationEvent.value = Nav.Warning("Exists")
-            return
-        }
+            if (cifsUseCase.provideConnections().any { it.name == inputName }) {
+                _navigationEvent.value = Nav.Warning("Exists")
+                return@launch
+            }
 
-        save()
-        _navigationEvent.value = Nav.Back
+            save()
+            _navigationEvent.value = Nav.Back
+        }
     }
 
     sealed class Nav {

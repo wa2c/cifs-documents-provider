@@ -3,7 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.usecase
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.renew
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
@@ -36,21 +35,8 @@ class CifsUseCase @Inject constructor(
     }
 
     /**
-     * Get connection uri (content://)
+     * Provide connection list
      */
-    fun getConnectionUri(name: String?, path: String?): String {
-        return if (name.isNullOrEmpty()) ""
-        else "content://$URI_AUTHORITY/" + Paths.get( name, path ?: "").toString() + "/"
-    }
-
-    /**
-     * Get connection URI (smb://)
-     */
-    fun getCifsUri(host: String?, path: String?): String {
-        return if (host.isNullOrEmpty()) ""
-        else "smb://" + Paths.get( host, path ?: "").toString() + "/"
-    }
-
     fun provideConnections(): List<CifsConnection> {
         return _connections
     }
@@ -82,7 +68,7 @@ class CifsUseCase @Inject constructor(
      */
     fun getCifsFile(connection: CifsConnection): SmbFile? {
         return try {
-            cifsClient.getFile(getCifsUri(connection.host, connection.folder), getCifsContext(connection))
+            cifsClient.getFile(connection.connectionUri, getCifsContext(connection))
         } catch (e: Exception) {
             logE(e)
             null

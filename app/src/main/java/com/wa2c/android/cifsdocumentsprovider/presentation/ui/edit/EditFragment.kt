@@ -1,25 +1,34 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * Edit Screen
  */
 @AndroidEntryPoint
-class EditFragment: Fragment(R.layout.fragment_edit) {
+class EditFragment : Fragment(R.layout.fragment_edit) {
 
     /** View Model */
     private val viewModel by viewModels<EditViewModel>()
+
     /** Binding */
     private val binding: FragmentEditBinding by viewBinding()
 
@@ -28,8 +37,18 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setHasOptionsMenu(true)
+        (activity as? AppCompatActivity)?.supportActionBar?.let {
+            it.setIcon(null)
+            it.setTitle(R.string.edit_title)
+            it.setDisplayShowHomeEnabled(true)
+            it.setDisplayHomeAsUpEnabled(true)
+            it.setDisplayShowTitleEnabled(true)
+        }
+
         binding.let {
             it.viewModel = viewModel
+            requireActivity()
         }
 
         viewModel.let {
@@ -38,10 +57,41 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        if (!viewModel.isNew) {
+            inflater.inflate(R.menu.menu_edit, menu)
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onNavigate(EditViewModel.Nav.Back)
+                return true
+            }
+            R.id.edit_menu_delete -> {
+                navigateSafe(
+                    MessageDialogDirections.actionGlobalMessageDialog(
+                        message = getString(R.string.edit_message_confirmation_delete),
+                        positiveText = getString(android.R.string.ok),
+                        neutralText = getString(android.R.string.cancel)
+                    )
+                )
+                setDialogResult { result ->
+                    if (result == DialogInterface.BUTTON_POSITIVE) {
+                        viewModel.onClickDelete()
+                    }
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     private fun onNavigate(event: EditViewModel.Nav) {
         when (event) {
             is EditViewModel.Nav.Back -> {
-                findNavController().popBackStack()
+                findNavController().popBackStack(R.id.editFragment, true)
             }
             is EditViewModel.Nav.CheckResult -> {
                 val message =

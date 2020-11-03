@@ -28,4 +28,37 @@
             android:defaultValue="-1" />
     </fragment>
 
+    <dialog
+        android:id="@+id/messageDialog"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialog"
+        android:label="MessageDialog" >
+        <argument
+            android:name="message"
+            app:argType="string" />
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="positiveText"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="neutralText"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="negativeButton"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </dialog>
+
+    <action
+        android:id="@+id/action_global_messageDialog"
+        app:destination="@id/messageDialog" />
+
 </navigation>

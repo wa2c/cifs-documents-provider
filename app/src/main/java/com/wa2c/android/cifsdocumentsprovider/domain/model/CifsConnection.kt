@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.ifNullOrEmpty
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
@@ -22,9 +23,13 @@ data class CifsConnection(
     val anonymous: Boolean
 ): Parcelable, Serializable {
 
-    /** URI */
-    val cifsUri: String
-        get() = if (host.isEmpty()) "" else "smb://" + Paths.get( host, folder ?: "").toString() + "/"
+    /** Connection URI (smb://) */
+    val connectionUri: String
+        get() = getConnectionUri(host, folder)
+
+    /** Provider URI (content://) */
+    val providerUri: String
+        get() = getProviderUri(name, folder)
 
     companion object {
 
@@ -42,6 +47,16 @@ data class CifsConnection(
                 password = null,
                 anonymous = false
             )
+        }
+
+        fun getConnectionUri(host: String?, folder: String?): String {
+            return if (host.isNullOrEmpty()) ""
+            else "smb://" + Paths.get( host, folder ?: "").toString() + "/"
+        }
+
+        fun getProviderUri(name: String?, folder: String?): String {
+            return if (name.isNullOrEmpty()) ""
+            else "content://$URI_AUTHORITY/" + Paths.get( name, folder ?: "").toString() + "/"
         }
 
     }

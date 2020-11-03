@@ -34,7 +34,7 @@ class CifsListAdapter(
             binding.cifsListItemSummary.visibility = View.VISIBLE
 
             binding.cifsListItemTitle.text = item.name
-            binding.cifsListItemSummary.text = item.cifsUri
+            binding.cifsListItemSummary.text = item.connectionUri
         } else {
             binding.cifsListItemAdd.visibility = View.VISIBLE
             binding.cifsListItemTitle.visibility = View.GONE
@@ -47,7 +47,7 @@ class CifsListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return itemList.count() + 1
+        return itemList.count() + 1 // item count + add button
     }
 
 }
