@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
-import com.wa2c.android.cifsdocumentsprovider.common.utils.ifNullOrEmpty
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.android.parcel.Parcelize
@@ -29,7 +28,7 @@ data class CifsConnection(
 
     /** Provider URI (content://) */
     val providerUri: String
-        get() = getProviderUri(name, folder)
+        get() = getProviderUri(host, folder)
 
     companion object {
 
@@ -54,9 +53,9 @@ data class CifsConnection(
             else "smb://" + Paths.get( host, folder ?: "").toString() + "/"
         }
 
-        fun getProviderUri(name: String?, folder: String?): String {
-            return if (name.isNullOrEmpty()) ""
-            else "content://$URI_AUTHORITY/" + Paths.get( name, folder ?: "").toString() + "/"
+        fun getProviderUri(host: String?, folder: String?): String {
+            return if (host.isNullOrEmpty()) ""
+            else "content://$URI_AUTHORITY/" + Paths.get( host, folder ?: "").toString() + "/"
         }
 
     }

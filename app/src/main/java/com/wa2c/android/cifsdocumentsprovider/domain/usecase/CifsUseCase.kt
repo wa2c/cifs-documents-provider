@@ -3,7 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.usecase
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -13,10 +12,10 @@ import jcifs.CIFSContext
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.nio.file.Paths
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsUseCase @Inject constructor(
     private val cifsClient: CifsClient,
@@ -66,35 +65,50 @@ class CifsUseCase @Inject constructor(
     /**
      * Get CIFS File from connection.
      */
-    fun getCifsFile(connection: CifsConnection): SmbFile? {
-        return try {
-            cifsClient.getFile(connection.connectionUri, getCifsContext(connection))
-        } catch (e: Exception) {
-            logE(e)
-            null
+    suspend fun getCifsFile(connection: CifsConnection): SmbFile? {
+        return withContext(Dispatchers.IO) {
+            try {
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection))
+            } catch (e: Exception) {
+                logE(e)
+                null
+            }
         }
     }
 
     /**
      * Get CIFS File from uri.
      */
-    fun getCifsFile(uri: String): SmbFile? {
-        val uriHost = try { Uri.parse(uri).host } catch (e: Exception) { return null }
-        _connections.firstOrNull { it.host == uriHost }?.let {
-            return cifsClient.getFile(uri, getCifsContext(it))
+    suspend fun getCifsFile(uri: String): SmbFile? {
+        return  withContext(Dispatchers.IO) {
+            val uriHost = try { Uri.parse(uri).host } catch (e: Exception) { return@withContext null }
+            _connections.firstOrNull { it.host == uriHost }?.let {
+                return@withContext cifsClient.getFile(uri, getCifsContext(it))
+            }
+            return@withContext null
         }
-        return null
     }
 
+    /**
+     * Get children CIFS files from uri.
+     */
+    suspend fun getCifsFileChildren(uri: String): Array<SmbFile> {
+        return withContext(Dispatchers.IO) {
+            getCifsFile(uri)?.listFiles() ?: emptyArray()
+        }
+    }
 
+    /**
+     * Check setting connectivity.
+     */
     suspend fun checkConnection(connection: CifsConnection): Boolean {
-        return try {
-            return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
+            try {
                 getCifsFile(connection)?.exists() ?: false
+            } catch (e: Exception) {
+                logW(e)
+                false
             }
-        } catch (e: Exception) {
-            logW(e)
-            false
         }
     }
 

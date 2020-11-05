@@ -41,7 +41,7 @@ class EditViewModel @ViewModelInject constructor(
     }
 
     val providerUri = MediatorLiveData<String>().apply {
-        fun post() { postValue( CifsConnection.getProviderUri(name.value, folder.value)) }
+        fun post() { postValue( CifsConnection.getProviderUri(host.value, folder.value)) }
         addSource(name) { post() }
         addSource(folder) { post() }
     }
