@@ -112,4 +112,29 @@ class CifsUseCase @Inject constructor(
         }
     }
 
+    /**
+     * Check whether a smb file is directory.
+     */
+    suspend fun isDirectory(smbFile: SmbFile): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                smbFile.isDirectory
+            } catch (e: Exception) {
+                logW(e)
+                false
+            }
+        }
+    }
+
+    suspend fun getSize(smbFile: SmbFile): Long {
+        return withContext(Dispatchers.IO) {
+            try {
+                smbFile.length()
+            } catch (e: Exception) {
+                logW(e)
+                0
+            }
+        }
+    }
+
 }

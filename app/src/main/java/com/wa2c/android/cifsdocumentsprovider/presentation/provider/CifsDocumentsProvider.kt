@@ -18,7 +18,9 @@ import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesReposit
 import com.wa2c.android.cifsdocumentsprovider.domain.usecase.CifsUseCase
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbUnsupportedOperationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.nio.file.Paths
 
 /**
@@ -56,7 +58,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return MatrixCursor(projection.toRootProjection()).also {
             it.newRow().apply {
                 add(DocumentsContract.Root.COLUMN_ROOT_ID, sharedAuthority)
-                add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, "/")
+                add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
                 add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
                 add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
                 add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_SUPPORTS_CREATE or DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD)
@@ -74,10 +76,12 @@ class CifsDocumentsProvider : DocumentsProvider() {
             includeRoot(cursor)
         } else {
             // File / Directory
-            documentId?.let {
-                val uri = getCifsUri(it)
-                val file = runBlocking { cifsUseCase.getCifsFile(uri) } ?: return@let
-                includeFile(cursor, file)
+            runBlocking {
+                documentId?.let {
+                    val uri = getCifsUri(it)
+                    val file = cifsUseCase.getCifsFile(uri) ?: return@let
+                    includeFile(cursor, file)
+                }
             }
         }
         return cursor
@@ -90,19 +94,28 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): Cursor? {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
-            cifsUseCase.provideConnections().forEach { connection ->
-                val file = runBlocking { cifsUseCase.getCifsFile(connection) } ?: return@forEach
-                includeFile(cursor, file, connection.name)
+            runBlocking {
+                cifsUseCase.provideConnections().forEach { connection ->
+                    val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
+                    includeFile(cursor, file, connection.name)
+                }
             }
         } else {
-            val uri = getCifsDirectoryUri(parentDocumentId!!)
-            runBlocking { cifsUseCase.getCifsFileChildren(uri) }.forEach { file ->
-                includeFile(cursor, file)
+            runBlocking {
+                val uri = getCifsDirectoryUri(parentDocumentId!!)
+                cifsUseCase.getCifsFileChildren(uri).forEach {file ->
+                    includeFile(cursor, file)
+                }
             }
         }
         return cursor
     }
 
+    override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
+        val parent = if (parentDocumentId.isRoot()) "/" else parentDocumentId ?: return false
+        val child = documentId ?: return false
+        return child.indexOf(parent) == 0
+    }
 
     override fun openDocument(
         documentId: String?,
@@ -134,7 +147,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     private fun includeRoot(cursor: MatrixCursor) {
         cursor.newRow().let { row ->
-            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, "/" )
+            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
             row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
             row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE)
             row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
@@ -143,10 +156,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun includeFile(cursor: MatrixCursor, file: SmbFile, name: String? = null) {
+    private suspend fun includeFile(cursor: MatrixCursor, file: SmbFile, name: String? = null) {
         cursor.newRow().let { row ->
-            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId)
-            if (file.isDirectory) {
+            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
+            if (file.isFolder()) {
                 row.add(
                     DocumentsContract.Document.COLUMN_MIME_TYPE,
                     DocumentsContract.Document.MIME_TYPE_DIR
@@ -165,10 +178,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     DocumentsContract.Document.COLUMN_FLAGS,
                     DocumentsContract.Document.FLAG_SUPPORTS_DELETE or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
                 )
-                row.add(DocumentsContract.Document.COLUMN_SIZE, file.length())
+                row.add(DocumentsContract.Document.COLUMN_SIZE, cifsUseCase.getSize(smbFile = file))
             }
             row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name.trim('/'))
-            row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
+            row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, 0) // TODO
         }
     }
 
@@ -210,17 +223,24 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun String?.isRoot(): Boolean {
-        return (this.isNullOrEmpty() || this == "/")
-    }
-
     /**
      * Get Document ID from CIFS file
      */
-    private val SmbFile.documentId: String
-        get() = Paths.get(this.server, this.url.path ).toString() + if (this.isDirectory) "/" else ""
+    private  suspend fun SmbFile.getDocumentId(): String {
+        return Paths.get(this.server, this.url.path).toString() + if (this.isFolder()) "/" else ""
+    }
+
+    private fun String?.isRoot(): Boolean {
+        return (this.isNullOrEmpty() || this == ROOT_DOCUMENT_ID)
+    }
+
+    private suspend fun SmbFile.isFolder(): Boolean {
+        return cifsUseCase.isDirectory(this@isFolder)
+    }
 
     companion object {
+
+        private const val ROOT_DOCUMENT_ID = "/"
 
         private val DEFAULT_ROOT_PROJECTION: Array<String> = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,
