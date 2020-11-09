@@ -6,12 +6,14 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.toData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.toModel
 import jcifs.CIFSContext
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -65,7 +67,46 @@ class CifsUseCase @Inject constructor(
     /**
      * Get CIFS File from connection.
      */
-    suspend fun getCifsFile(connection: CifsConnection): SmbFile? {
+    suspend fun getCifsFile(connection: CifsConnection): CifsFile? {
+        return getSmbFile(connection)?.toCifsFile()
+    }
+
+    /**
+     * Get CIFS File from uri.
+     */
+    suspend fun getCifsFile(uri: String): CifsFile? {
+        return getSmbFile(uri)?.toCifsFile()
+    }
+
+    /**
+     * Get children CIFS files from uri.
+     */
+    suspend fun getCifsFileChildren(uri: String): List<CifsFile> {
+        return withContext(Dispatchers.IO) {
+            try {
+                getSmbFile(uri)?.listFiles()?.mapNotNull { it.toCifsFile() } ?: emptyList()
+            } catch (e: Exception) {
+                logW(e)
+                emptyList()
+            }
+        }
+    }
+
+    /**
+     * Check setting connectivity.
+     */
+    suspend fun checkConnection(connection: CifsConnection): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                getSmbFile(connection)?.exists() ?: false
+            } catch (e: Exception) {
+                logW(e)
+                false
+            }
+        }
+    }
+
+    suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return withContext(Dispatchers.IO) {
             try {
                 cifsClient.getFile(connection.connectionUri, getCifsContext(connection))
@@ -76,65 +117,39 @@ class CifsUseCase @Inject constructor(
         }
     }
 
-    /**
-     * Get CIFS File from uri.
-     */
-    suspend fun getCifsFile(uri: String): SmbFile? {
-        return  withContext(Dispatchers.IO) {
+    suspend fun getSmbFile(uri: String): SmbFile? {
+         return withContext(Dispatchers.IO) {
             val uriHost = try { Uri.parse(uri).host } catch (e: Exception) { return@withContext null }
             _connections.firstOrNull { it.host == uriHost }?.let {
-                return@withContext cifsClient.getFile(uri, getCifsContext(it))
+                cifsClient.getFile(uri, getCifsContext(it))
             }
-            return@withContext null
+        }
+    }
+
+
+
+
+
+    private suspend fun SmbFile.toCifsFile(): CifsFile? {
+        return withContext(Dispatchers.IO) {
+            val uri = url.toUri() ?: return@withContext null
+            CifsFile(
+                name = name.trim('/'),
+                server = server,
+                uri = uri,
+                size = 0L,
+                lastModified = 0L,
+                isDirectory = uri.toString().lastOrNull() == '/'
+            )
         }
     }
 
     /**
-     * Get children CIFS files from uri.
+     * Convert java.net.URL to android.net.Uri
      */
-    suspend fun getCifsFileChildren(uri: String): Array<SmbFile> {
-        return withContext(Dispatchers.IO) {
-            getCifsFile(uri)?.listFiles() ?: emptyArray()
-        }
+    private fun URL.toUri(): Uri? {
+        return try { Uri.parse(this.toString()) } catch (e: Exception) { null }
     }
 
-    /**
-     * Check setting connectivity.
-     */
-    suspend fun checkConnection(connection: CifsConnection): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                getCifsFile(connection)?.exists() ?: false
-            } catch (e: Exception) {
-                logW(e)
-                false
-            }
-        }
-    }
-
-    /**
-     * Check whether a smb file is directory.
-     */
-    suspend fun isDirectory(smbFile: SmbFile): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                smbFile.isDirectory
-            } catch (e: Exception) {
-                logW(e)
-                false
-            }
-        }
-    }
-
-    suspend fun getSize(smbFile: SmbFile): Long {
-        return withContext(Dispatchers.IO) {
-            try {
-                smbFile.length()
-            } catch (e: Exception) {
-                logW(e)
-                0
-            }
-        }
-    }
 
 }

@@ -1,8 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 
 import android.content.Context
+import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.graphics.Point
 import android.net.Uri
 import android.os.CancellationSignal
 import android.os.Handler
@@ -15,12 +17,10 @@ import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.usecase.CifsUseCase
-import jcifs.smb.SmbFile
 import jcifs.smb.SmbUnsupportedOperationException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.nio.file.Paths
 
 /**
@@ -117,13 +117,21 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return child.indexOf(parent) == 0
     }
 
+    override fun openDocumentThumbnail(
+        documentId: String?,
+        sizeHint: Point?,
+        signal: CancellationSignal?
+    ): AssetFileDescriptor? {
+        return null
+    }
+
     override fun openDocument(
         documentId: String?,
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
         val uri = documentId?.let { getCifsFileUri(it) } ?: return null
-        val file = runBlocking { cifsUseCase.getCifsFile(uri) } ?: return null
+        val file = runBlocking { cifsUseCase.getSmbFile(uri) } ?: return null
         return sm.openProxyFileDescriptor(
             ParcelFileDescriptor.parseMode(mode),
             CifsProxyFileCallback(file),
@@ -139,7 +147,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val documentId = Paths.get(parentDocumentId, displayName).toString()
         val uri = getCifsFileUri(documentId)
         runBlocking { cifsUseCase.getCifsFile(uri) }?.let { file ->
-            file.createNewFile()
+//            file.createNewFile()
             return documentId
         }
         throw SmbUnsupportedOperationException()
@@ -156,10 +164,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private suspend fun includeFile(cursor: MatrixCursor, file: SmbFile, name: String? = null) {
+    private suspend fun includeFile(cursor: MatrixCursor, file: CifsFile, name: String? = null) {
         cursor.newRow().let { row ->
             row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
-            if (file.isFolder()) {
+            if (file.isDirectory) {
                 row.add(
                     DocumentsContract.Document.COLUMN_MIME_TYPE,
                     DocumentsContract.Document.MIME_TYPE_DIR
@@ -172,16 +180,16 @@ class CifsDocumentsProvider : DocumentsProvider() {
             } else {
                 row.add(
                     DocumentsContract.Document.COLUMN_MIME_TYPE,
-                    getMimeType(file.url.toString())
+                    getMimeType(file.uri.toString())
                 )
                 row.add(
                     DocumentsContract.Document.COLUMN_FLAGS,
                     DocumentsContract.Document.FLAG_SUPPORTS_DELETE or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
                 )
-                row.add(DocumentsContract.Document.COLUMN_SIZE, cifsUseCase.getSize(smbFile = file))
+                row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
             }
-            row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name.trim('/'))
-            row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, 0) // TODO
+            row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
+            row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.size)
         }
     }
 
@@ -226,16 +234,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /**
      * Get Document ID from CIFS file
      */
-    private  suspend fun SmbFile.getDocumentId(): String {
-        return Paths.get(this.server, this.url.path).toString() + if (this.isFolder()) "/" else ""
+    private fun CifsFile.getDocumentId(): String {
+        return Paths.get(this.server, this.uri.path).toString() + if (this.isDirectory) "/" else ""
     }
 
+    /**
+     * True if the document id is root.
+     */
     private fun String?.isRoot(): Boolean {
         return (this.isNullOrEmpty() || this == ROOT_DOCUMENT_ID)
-    }
-
-    private suspend fun SmbFile.isFolder(): Boolean {
-        return cifsUseCase.isDirectory(this@isFolder)
     }
 
     companion object {

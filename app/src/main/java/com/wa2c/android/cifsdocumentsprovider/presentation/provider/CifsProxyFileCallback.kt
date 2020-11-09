@@ -19,9 +19,12 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
-import android.util.Log
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.math.min
 
@@ -31,14 +34,17 @@ class CifsProxyFileCallback(
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
-        smbFile.openRandomAccess("rw").also {
-            isAccessOpened = true
-        }
+        runBlocking { withContext(Dispatchers.IO) {
+            val a= smbFile.exists()
+            smbFile.openRandomAccess("r").also {
+                isAccessOpened = true
+            }
+        } }
     }
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        return smbFile.length() // smbFile.length()
+        return access.length()
     }
 
     @Throws(ErrnoException::class)
@@ -75,7 +81,7 @@ class CifsProxyFileCallback(
             if (isAccessOpened) access.close()
             smbFile.close()
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to close file", e)
+            logE(e)
         }
     }
 

@@ -11,7 +11,7 @@ fun logI(message: Any?, vararg args: Any?) = Timber.asTree().i(message.toString(
 /** Log a warning message */
 fun logW(message: Any?, vararg args: Any?) = Timber.asTree().w(message.toString(), *args)
 /** Log an error message */
-fun logE(message: Any?, vararg args: Any?) = fun() {
+fun logE(message: Any?, vararg args: Any?) = run {
     if (message is Throwable) { Timber.asTree().e(message) }
     Timber.asTree().e(message.toString(), *args)
 }
