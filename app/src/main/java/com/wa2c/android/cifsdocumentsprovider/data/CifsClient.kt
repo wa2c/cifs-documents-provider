@@ -22,6 +22,8 @@ class CifsClient @Inject constructor() {
         val property = Properties().apply {
             setProperty("jcifs.smb.client.minVersion", "SMB210")
             setProperty("jcifs.smb.client.maxVersion", "SMB300")
+            setProperty("jcifs.smb.client.responseTimeout", "10000")
+            setProperty("jcifs.smb.client.connTimeout", "10000")
         }
 
         return BaseContext(PropertyConfiguration(property))

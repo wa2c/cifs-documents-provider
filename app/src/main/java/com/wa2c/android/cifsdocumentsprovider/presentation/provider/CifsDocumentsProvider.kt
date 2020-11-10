@@ -19,7 +19,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.usecase.CifsUseCase
-import jcifs.smb.SmbUnsupportedOperationException
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
 
@@ -28,26 +27,22 @@ import java.nio.file.Paths
  */
 class CifsDocumentsProvider : DocumentsProvider() {
 
-    /** Handler thread */
-    private val handlerThread = HandlerThread(this.javaClass.simpleName).also { it.start() }
-    /** Handler */
-    private val handler: Handler = Handler(handlerThread.looper)
-
     /** Context */
     private val providerContext: Context by lazy { context!! }
-
-    /** Storage Manager */
-    private val sm: StorageManager by lazy {
-        providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-    }
 
     /** Cifs UseCase */
     private val cifsUseCase: CifsUseCase by lazy {
         CifsUseCase(CifsClient(), PreferencesRepository(providerContext))
     }
 
+    /** Handler thread */
+    private var handlerThread: HandlerThread? = null
+
+    /** Authority */
     private val sharedAuthority: String
         get() = providerContext.packageName + ".documents"
+
+
 
     override fun onCreate(): Boolean {
         return true
@@ -132,10 +127,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): ParcelFileDescriptor? {
         val uri = documentId?.let { getCifsFileUri(it) } ?: return null
         val file = runBlocking { cifsUseCase.getSmbFile(uri) } ?: return null
-        return sm.openProxyFileDescriptor(
+
+        val thread = HandlerThread(this.javaClass.simpleName).also { it.start() }
+        handlerThread = thread
+
+        return (providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager).openProxyFileDescriptor(
             ParcelFileDescriptor.parseMode(mode),
-            CifsProxyFileCallback(file),
-            handler
+            CifsProxyFileCallback(file, mode),
+            Handler(thread.looper)
         )
     }
 
@@ -145,12 +144,21 @@ class CifsDocumentsProvider : DocumentsProvider() {
         displayName: String
     ): String? {
         val documentId = Paths.get(parentDocumentId, displayName).toString()
-        val uri = getCifsFileUri(documentId)
-        runBlocking { cifsUseCase.getCifsFile(uri) }?.let { file ->
-//            file.createNewFile()
-            return documentId
+        val isCreated = runBlocking { cifsUseCase.createCifsFile(getCifsFileUri(documentId)) }
+        return if (isCreated) documentId else null
+    }
+
+    override fun deleteDocument(documentId: String?) {
+        documentId?.let {
+            runBlocking { cifsUseCase.deleteCifsFile(getCifsFileUri(it)) }
         }
-        throw SmbUnsupportedOperationException()
+    }
+
+    override fun shutdown() {
+        handlerThread?.let {
+            it.quit()
+            handlerThread = null
+        }
     }
 
     private fun includeRoot(cursor: MatrixCursor) {
@@ -164,7 +172,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private suspend fun includeFile(cursor: MatrixCursor, file: CifsFile, name: String? = null) {
+    private fun includeFile(cursor: MatrixCursor, file: CifsFile, name: String? = null) {
         cursor.newRow().let { row ->
             row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
             if (file.isDirectory) {

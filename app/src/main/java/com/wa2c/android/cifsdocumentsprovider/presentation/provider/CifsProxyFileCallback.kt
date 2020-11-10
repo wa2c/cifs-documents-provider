@@ -28,15 +28,18 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import kotlin.math.min
 
+/**
+ * CIFS Proxy File Callback
+ */
 class CifsProxyFileCallback(
-    private val smbFile: SmbFile
+    private val smbFile: SmbFile,
+    private val mode: String
 ) : ProxyFileDescriptorCallback() {
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
         runBlocking { withContext(Dispatchers.IO) {
-            val a= smbFile.exists()
-            smbFile.openRandomAccess("r").also {
+            smbFile.openRandomAccess(mode).also {
                 isAccessOpened = true
             }
         } }
@@ -44,7 +47,12 @@ class CifsProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        return access.length()
+        try {
+            return access.length()
+        } catch (e: IOException) {
+            throwErrnoException(e)
+        }
+        return 0
     }
 
     @Throws(ErrnoException::class)
@@ -81,12 +89,14 @@ class CifsProxyFileCallback(
             if (isAccessOpened) access.close()
             smbFile.close()
         } catch (e: IOException) {
-            logE(e)
+            throwErrnoException(e)
         }
     }
 
     @Throws(ErrnoException::class)
     private fun throwErrnoException(e: IOException) {
+        logE(e)
+
         // Hack around that SambaProxyFileCallback throws ErrnoException rather than IOException
         // assuming the underlying cause is an ErrnoException.
         if (e.cause is ErrnoException) {

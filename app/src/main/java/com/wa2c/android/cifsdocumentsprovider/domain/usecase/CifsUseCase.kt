@@ -93,6 +93,31 @@ class CifsUseCase @Inject constructor(
     }
 
     /**
+     * Create new file.
+     */
+    suspend fun createCifsFile(uri: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            getSmbFile(uri)?.let {
+                it.createNewFile()
+                true
+            } ?: false
+        }
+    }
+
+    /**
+     * Delete a file.
+     */
+    suspend fun deleteCifsFile(uri: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            getSmbFile(uri)?.let {
+                it.delete()
+                true
+            } ?: false
+        }
+    }
+
+
+    /**
      * Check setting connectivity.
      */
     suspend fun checkConnection(connection: CifsConnection): Boolean {
