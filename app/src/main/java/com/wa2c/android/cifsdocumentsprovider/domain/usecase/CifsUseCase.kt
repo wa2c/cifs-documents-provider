@@ -29,6 +29,8 @@ class CifsUseCase @Inject constructor(
         preferencesRepository.cifsSettings.map { it.toModel() }.toMutableList()
     }
 
+    /** CIFS Context cache */
+    private val contextCache: LruCache<CifsConnection, CIFSContext> = LruCache(10)
     /** CIFS File cache */
     private val fileCache: LruCache<String, SmbFile> = LruCache(100)
 
@@ -36,7 +38,9 @@ class CifsUseCase @Inject constructor(
      * Get CIFS Context
      */
     private fun getCifsContext(connection: CifsConnection): CIFSContext {
-        return cifsClient.getAuth(connection.user, connection.password, connection.domain)
+        return contextCache[connection] ?: cifsClient.getAuth(connection.user, connection.password, connection.domain).also {
+            contextCache.put(connection, it)
+        }
     }
 
     /**
