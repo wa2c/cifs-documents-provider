@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.usecase
 
 import android.net.Uri
+import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
@@ -27,6 +28,9 @@ class CifsUseCase @Inject constructor(
     private val _connections: MutableList<CifsConnection> by lazy {
         preferencesRepository.cifsSettings.map { it.toModel() }.toMutableList()
     }
+
+    /** CIFS File cache */
+    private val fileCache: LruCache<String, SmbFile> = LruCache(100)
 
     /**
      * Get CIFS Context
@@ -143,18 +147,24 @@ class CifsUseCase @Inject constructor(
     }
 
     suspend fun getSmbFile(uri: String): SmbFile? {
-         return withContext(Dispatchers.IO) {
-            val uriHost = try { Uri.parse(uri).host } catch (e: Exception) { return@withContext null }
+        return fileCache[uri] ?: withContext(Dispatchers.IO) {
+            val uriHost = try {
+                Uri.parse(uri).host
+            } catch (e: Exception) {
+                return@withContext null
+            }
             _connections.firstOrNull { it.host == uriHost }?.let {
-                cifsClient.getFile(uri, getCifsContext(it))
+                cifsClient.getFile(uri, getCifsContext(it)).also { file ->
+                    fileCache.put(uri, file)
+                }
             }
         }
+
     }
 
-
-
-
-
+    /**
+     * Convert SmbFile to CifsFile
+     */
     private suspend fun SmbFile.toCifsFile(): CifsFile? {
         return withContext(Dispatchers.IO) {
             val uri = url.toUri() ?: return@withContext null
@@ -162,8 +172,8 @@ class CifsUseCase @Inject constructor(
                 name = name.trim('/'),
                 server = server,
                 uri = uri,
-                size = 0L,
-                lastModified = 0L,
+                size = length(),
+                lastModified = lastModified,
                 isDirectory = uri.toString().lastOrNull() == '/'
             )
         }

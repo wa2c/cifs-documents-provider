@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.data
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext
+import jcifs.context.CIFSContextWrapper
 import jcifs.smb.NtlmPasswordAuthenticator
 import jcifs.smb.SmbFile
 import java.util.*
@@ -26,8 +27,8 @@ class CifsClient @Inject constructor() {
             setProperty("jcifs.smb.client.connTimeout", "10000")
         }
 
-        return BaseContext(PropertyConfiguration(property))
-            .withCredentials(NtlmPasswordAuthenticator(domain, user, password))
+        return  CIFSContextWrapper(BaseContext(PropertyConfiguration(property))
+            .withCredentials(NtlmPasswordAuthenticator(domain, user, password)))
     }
 
     /**

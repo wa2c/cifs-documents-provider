@@ -15,6 +15,7 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
@@ -52,7 +53,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
             it.newRow().apply {
-                add(DocumentsContract.Root.COLUMN_ROOT_ID, sharedAuthority)
+                add(DocumentsContract.Root.COLUMN_ROOT_ID, URI_AUTHORITY)
                 add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
                 add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
                 add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))

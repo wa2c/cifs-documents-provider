@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
+import android.net.Uri
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
@@ -26,10 +27,6 @@ data class CifsConnection(
     val connectionUri: String
         get() = getConnectionUri(host, folder)
 
-    /** Provider URI (content://) */
-    val providerUri: String
-        get() = getProviderUri(host, folder)
-
     companion object {
 
         /**
@@ -55,7 +52,7 @@ data class CifsConnection(
 
         fun getProviderUri(host: String?, folder: String?): String {
             return if (host.isNullOrEmpty()) ""
-            else "content://$URI_AUTHORITY/" + Paths.get( host, folder ?: "").toString() + "/"
+            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host, folder ?: "").toString() + "/")
         }
 
     }
