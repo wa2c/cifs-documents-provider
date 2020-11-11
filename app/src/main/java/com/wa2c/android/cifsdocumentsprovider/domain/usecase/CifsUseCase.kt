@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.usecase
 
 import android.net.Uri
-import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
@@ -11,7 +10,6 @@ import jcifs.CIFSContext
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,8 +26,12 @@ class CifsUseCase @Inject constructor(
 
     /** CIFS Context cache */
     private val contextCache = CifsContextCache()
+    /** SMB File cache */
+    private val smbFileCache = SmbFileCache()
     /** CIFS File cache */
-    private val fileCache = SmbFileCache()
+    private val cifsFileCache = CifsFileCache()
+
+
 
     /**
      * Get CIFS Context
@@ -73,14 +75,14 @@ class CifsUseCase @Inject constructor(
      * Get CIFS File from connection.
      */
     suspend fun getCifsFile(connection: CifsConnection): CifsFile? {
-        return getSmbFile(connection)?.toCifsFile()
+        return cifsFileCache.get(connection) ?: getSmbFile(connection)?.toCifsFile()
     }
 
     /**
      * Get CIFS File from uri.
      */
     suspend fun getCifsFile(uri: String): CifsFile? {
-        return getSmbFile(uri)?.toCifsFile()
+        return  cifsFileCache.get(uri) ?: getSmbFile(uri)?.toCifsFile()
     }
 
     /**
@@ -89,7 +91,10 @@ class CifsUseCase @Inject constructor(
     suspend fun getCifsFileChildren(uri: String): List<CifsFile> {
         return withContext(Dispatchers.IO) {
             try {
-                getSmbFile(uri)?.listFiles()?.mapNotNull { it.toCifsFile() } ?: emptyList()
+                getSmbFile(uri)?.listFiles()?.mapNotNull {
+                    smbFileCache.get(it.url) ?: smbFileCache.put(it.url, it)
+                    it.toCifsFile()
+                } ?: emptyList()
             } catch (e: Exception) {
                 logW(e)
                 emptyList()
@@ -128,7 +133,7 @@ class CifsUseCase @Inject constructor(
     suspend fun checkConnection(connection: CifsConnection): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                getSmbFile(connection)?.exists() ?: false
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection))?.exists() ?: false
             } catch (e: Exception) {
                 logW(e)
                 false
@@ -137,9 +142,11 @@ class CifsUseCase @Inject constructor(
     }
 
     suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
-        return withContext(Dispatchers.IO) {
+        return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection))
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).also {
+                    smbFileCache.put(connection, it)
+                }
             } catch (e: Exception) {
                 logE(e)
                 null
@@ -148,7 +155,7 @@ class CifsUseCase @Inject constructor(
     }
 
     suspend fun getSmbFile(uri: String): SmbFile? {
-        return fileCache[uri] ?: withContext(Dispatchers.IO) {
+        return smbFileCache[uri] ?: withContext(Dispatchers.IO) {
             val uriHost = try {
                 Uri.parse(uri).host
             } catch (e: Exception) {
@@ -156,35 +163,30 @@ class CifsUseCase @Inject constructor(
             }
             _connections.firstOrNull { it.host == uriHost }?.let {
                 cifsClient.getFile(uri, getCifsContext(it)).also { file ->
-                    fileCache.put(uri, file)
+                    smbFileCache.put(uri, file)
                 }
             }
         }
-
     }
 
     /**
      * Convert SmbFile to CifsFile
      */
     private suspend fun SmbFile.toCifsFile(): CifsFile? {
-        return withContext(Dispatchers.IO) {
-            val uri = url.toUri() ?: return@withContext null
+        val urlText = url.toString()
+        return cifsFileCache.get(urlText) ?: withContext(Dispatchers.IO) {
             CifsFile(
                 name = name.trim('/'),
                 server = server,
-                uri = uri,
+                uri = Uri.parse(urlText),
                 size = length(),
                 lastModified = lastModified,
-                isDirectory = uri.toString().lastOrNull() == '/'
-            )
+                isDirectory = urlText.lastOrNull() == '/'
+            ).let {
+                cifsFileCache.put(urlText, it)
+                it
+            }
         }
-    }
-
-    /**
-     * Convert java.net.URL to android.net.Uri
-     */
-    private fun URL.toUri(): Uri? {
-        return try { Uri.parse(this.toString()) } catch (e: Exception) { null }
     }
 
 }
