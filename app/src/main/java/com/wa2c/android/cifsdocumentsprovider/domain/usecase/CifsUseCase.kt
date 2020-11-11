@@ -6,10 +6,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.domain.model.toData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.toModel
+import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.Dispatchers
@@ -30,15 +27,15 @@ class CifsUseCase @Inject constructor(
     }
 
     /** CIFS Context cache */
-    private val contextCache: LruCache<CifsConnection, CIFSContext> = LruCache(10)
+    private val contextCache = CifsContextCache()
     /** CIFS File cache */
-    private val fileCache: LruCache<String, SmbFile> = LruCache(100)
+    private val fileCache = SmbFileCache()
 
     /**
      * Get CIFS Context
      */
     private fun getCifsContext(connection: CifsConnection): CIFSContext {
-        return contextCache[connection] ?: cifsClient.getAuth(connection.user, connection.password, connection.domain).also {
+        return contextCache[connection] ?: cifsClient.getConnection(connection.user, connection.password, connection.domain).also {
             contextCache.put(connection, it)
         }
     }
@@ -189,6 +186,5 @@ class CifsUseCase @Inject constructor(
     private fun URL.toUri(): Uri? {
         return try { Uri.parse(this.toString()) } catch (e: Exception) { null }
     }
-
 
 }
