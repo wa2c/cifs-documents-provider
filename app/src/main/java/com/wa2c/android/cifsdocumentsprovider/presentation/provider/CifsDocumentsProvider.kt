@@ -5,7 +5,6 @@ import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
-import android.net.Uri
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.HandlerThread
@@ -38,11 +37,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Handler thread */
     private var handlerThread: HandlerThread? = null
-
-    /** Authority */
-    private val sharedAuthority: String
-        get() = providerContext.packageName + ".documents"
-
 
 
     override fun onCreate(): Boolean {
@@ -189,7 +183,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             } else {
                 row.add(
                     DocumentsContract.Document.COLUMN_MIME_TYPE,
-                    getMimeType(file.uri.toString())
+                    getMimeType(file.name)
                 )
                 row.add(
                     DocumentsContract.Document.COLUMN_FLAGS,
@@ -215,13 +209,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return "smb://${documentId}"
     }
 
-    private fun getMimeType(uriString: String?): String {
-        if (uriString.isNullOrEmpty()) return "*/*"
-        val extension =
-            MimeTypeMap.getFileExtensionFromUrl(Uri.encode(Uri.parse(uriString).lastPathSegment))
+    private fun getMimeType(fileName: String?): String {
+        val extension = fileName?.substringAfterLast('.', "")
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-        return if (mimeType.isNullOrEmpty()) "*/*"
-        else mimeType
+        return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
     }
 
     private fun Array<String>?.toRootProjection(): Array<String> {

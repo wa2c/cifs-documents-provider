@@ -106,7 +106,4 @@ class CifsProxyFileCallback(
         }
     }
 
-    companion object {
-        private const val TAG = "SambaProxyFileCallback"
-    }
 }

@@ -9,13 +9,6 @@ import kotlin.coroutines.CoroutineContext
 
 
 /**
- * Do action if null or empty
- */
-fun <C, R> C?.ifNullOrEmpty(defaultValue: () -> R?): R?
-        where R : CharSequence?, C : R?
-        = if (isNullOrEmpty()) defaultValue() else this
-
-/**
  * Renew collection elements.
  */
 fun <E, T : MutableCollection<E>> T.renew(v: Collection<E>): T {
