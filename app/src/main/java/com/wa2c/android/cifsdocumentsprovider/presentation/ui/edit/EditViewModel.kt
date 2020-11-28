@@ -123,11 +123,17 @@ class EditViewModel @ViewModelInject constructor(
                     if (!isConnected) throw IOException()
                 }
             }.onSuccess {
-                _navigationEvent.value = Nav.CheckResult(true)
-            }.onFailure {
-                _navigationEvent.value = Nav.CheckResult(false)
+                _navigationEvent.value = Nav.CheckConnectionResult(true)
+                _navigationEvent.value = Nav.CheckConnectionResult(false)
             }
         }
+    }
+
+    /**
+     * Check picker
+     */
+    fun onClickCheckPicker() {
+        _navigationEvent.value = Nav.CheckPicker
     }
 
     fun onClickDelete() {
@@ -159,7 +165,8 @@ class EditViewModel @ViewModelInject constructor(
 
     sealed class Nav {
         object Back : Nav()
-        data class CheckResult(val result: Boolean): Nav()
+        data class CheckConnectionResult(val result: Boolean): Nav()
+        object CheckPicker: Nav()
         data class Warning(val message: String): Nav()
     }
 

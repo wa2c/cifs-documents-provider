@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -248,14 +249,37 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp">
 
-                <Button
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_span="3"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
-                    android:text="@string/edit_check_connection_button" />
+                    android:layout_weight="1">
+
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
+                        android:text="@string/edit_check_connection_button"
+                        app:icon="@drawable/ic_check"
+                        app:iconGravity="textStart" />
+
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="8dp"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:onClick="@{ () -> viewModel.onClickCheckPicker() }"
+                        android:text="@string/edit_check_picker_button"
+                        app:icon="@drawable/ic_check_picker"
+                        app:iconGravity="textStart" />
+
+                </LinearLayout>
 
             </TableRow>
 
@@ -265,13 +289,14 @@
                 android:layout_marginTop="16dp">
 
                 <Button
-                    style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_span="3"
                     android:layout_weight="1"
                     android:onClick="@{ () -> viewModel.onClickAccept() }"
-                    android:text="@string/edit_save_button" />
+                    android:text="@string/edit_save_button"
+                    app:icon="@drawable/ic_save"
+                    app:iconGravity="textStart" />
 
             </TableRow>
 

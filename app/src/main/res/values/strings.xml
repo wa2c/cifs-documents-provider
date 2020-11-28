@@ -25,6 +25,7 @@
     <string name="edit_connection_uri_title">接続URI</string>
     <string name="edit_provider_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>
+    <string name="edit_check_picker_button">起動確認</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_cancel_button">戻る</string>
     <string name="edit_delete_button">削除</string>
