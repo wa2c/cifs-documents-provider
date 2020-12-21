@@ -14,6 +14,7 @@ import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
@@ -81,13 +82,18 @@ class CifsDocumentsProvider : DocumentsProvider() {
         parentDocumentId: String?,
         projection: Array<String>?,
         sortOrder: String?
-    ): Cursor? {
+    ): Cursor {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
                 cifsUseCase.provideConnections().forEach { connection ->
-                    val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
-                    includeFile(cursor, file, connection.name)
+                    try {
+                        val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
+                        includeFile(cursor, file, connection.name)
+                    } catch (e: Exception) {
+                        //Toast.makeText(context, "Error", Toast.LENGTH_SHORT).show()
+                        logE(e)
+                    }
                 }
             }
         } else {
@@ -167,32 +173,56 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun includeFile(cursor: MatrixCursor, file: CifsFile, name: String? = null) {
+    private fun includeFile(cursor: MatrixCursor, file: CifsFile?, name: String? = null) {
         cursor.newRow().let { row ->
-            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
-            if (file.isDirectory) {
-                row.add(
-                    DocumentsContract.Document.COLUMN_MIME_TYPE,
-                    DocumentsContract.Document.MIME_TYPE_DIR
-                )
-                row.add(
-                    DocumentsContract.Document.COLUMN_FLAGS,
-                    DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
-                )
-                row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
-            } else {
-                row.add(
-                    DocumentsContract.Document.COLUMN_MIME_TYPE,
-                    getMimeType(file.name)
-                )
-                row.add(
-                    DocumentsContract.Document.COLUMN_FLAGS,
-                    DocumentsContract.Document.FLAG_SUPPORTS_DELETE or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
-                )
-                row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
+            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file?.getDocumentId() ?: ERROR_DOCUMENT_ID)
+            when {
+                file == null -> {
+                    // Error
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, ERROR_DOCUMENT_ID)
+                    row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
+                    row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, "エラーです")
+                    row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, 0)
+                    row.add(
+                        DocumentsContract.Document.COLUMN_MIME_TYPE,
+                        "*/*"
+                    )
+                    row.add(
+                        DocumentsContract.Document.COLUMN_FLAGS,
+                        DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT
+                    )
+                }
+                file.isDirectory -> {
+                    // Directory
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
+                    row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
+                    row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
+                    row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
+                    row.add(
+                        DocumentsContract.Document.COLUMN_MIME_TYPE,
+                        DocumentsContract.Document.MIME_TYPE_DIR
+                    )
+                    row.add(
+                        DocumentsContract.Document.COLUMN_FLAGS,
+                        DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE
+                    )
+                }
+                else -> {
+                    // File
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
+                    row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
+                    row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
+                    row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
+                    row.add(
+                        DocumentsContract.Document.COLUMN_MIME_TYPE,
+                        getMimeType(file.name)
+                    )
+                    row.add(
+                        DocumentsContract.Document.COLUMN_FLAGS,
+                        DocumentsContract.Document.FLAG_SUPPORTS_DELETE or DocumentsContract.Document.FLAG_SUPPORTS_WRITE
+                    )
+                }
             }
-            row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
-            row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.size)
         }
     }
 
@@ -248,6 +278,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     companion object {
 
         private const val ROOT_DOCUMENT_ID = "/"
+        private const val ERROR_DOCUMENT_ID = "////"
 
         private val DEFAULT_ROOT_PROJECTION: Array<String> = arrayOf(
             DocumentsContract.Root.COLUMN_ROOT_ID,

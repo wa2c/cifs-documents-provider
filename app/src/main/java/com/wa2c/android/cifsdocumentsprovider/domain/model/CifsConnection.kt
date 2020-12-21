@@ -7,13 +7,14 @@ import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.android.parcel.Parcelize
 import java.io.Serializable
 import java.nio.file.Paths
+import java.util.*
 
 /**
  * CIFS Connection
  */
 @Parcelize
 data class CifsConnection(
-    val id: Long,
+    val id: String,
     val name: String,
     val domain: String?,
     val host: String,
@@ -29,12 +30,16 @@ data class CifsConnection(
 
     companion object {
 
+        fun newId(): String {
+            return UUID.randomUUID().toString()
+        }
+
         /**
          * Create new data
          */
         fun new(): CifsConnection {
             return CifsConnection(
-                id = System.currentTimeMillis(),
+                id = newId(),
                 name = "",
                 domain = null,
                 host = "",
@@ -45,14 +50,14 @@ data class CifsConnection(
             )
         }
 
-        fun getConnectionUri(host: String?, folder: String?): String {
+        fun getConnectionUri(host: CharSequence?, folder: CharSequence?): String {
             return if (host.isNullOrEmpty()) ""
-            else "smb://" + Paths.get( host, folder ?: "").toString() + "/"
+            else "smb://" + Paths.get( host.toString(), folder?.toString() ?: "").toString() + "/"
         }
 
-        fun getProviderUri(host: String?, folder: String?): String {
+        fun getProviderUri(host: CharSequence?, folder: CharSequence?): String {
             return if (host.isNullOrEmpty()) ""
-            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host, folder ?: "").toString() + "/")
+            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host.toString(), folder?.toString() ?: "").toString() + "/")
         }
 
     }

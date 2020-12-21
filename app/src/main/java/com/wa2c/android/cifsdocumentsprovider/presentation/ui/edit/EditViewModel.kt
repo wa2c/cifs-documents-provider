@@ -41,19 +41,16 @@ class EditViewModel @ViewModelInject constructor(
     }
 
     val providerUri = MediatorLiveData<String>().apply {
-        fun post() { postValue( CifsConnection.getProviderUri(host.value, folder.value)) }
+        fun post() { postValue(CifsConnection.getProviderUri(host.value, folder.value)) }
         addSource(name) { post() }
         addSource(folder) { post() }
     }
 
-    private var currentId: Long = NEW_ID
+    private var currentId: String = NEW_ID
 
     val isNew: Boolean
-        get() = currentId < 0
+        get() = currentId == NEW_ID
 
-    private fun getNewId(): Long {
-        return System.currentTimeMillis()
-    }
 
 
     fun initialize(connection: CifsConnection?) {
@@ -91,7 +88,7 @@ class EditViewModel @ViewModelInject constructor(
     private fun createCifsConnection(): CifsConnection? {
         val isAnonymous = anonymous.value ?: false
         return CifsConnection(
-            id = if (isNew) getNewId() else currentId ,
+            id = if (isNew) CifsConnection.newId() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
@@ -100,12 +97,6 @@ class EditViewModel @ViewModelInject constructor(
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
             anonymous = isAnonymous
         )
-    }
-
-
-
-    fun onClickSearchHost() {
-        logD("")
     }
 
     fun onClickSearchDirectory() {
@@ -145,19 +136,6 @@ class EditViewModel @ViewModelInject constructor(
 
     fun onClickAccept() {
         launch {
-            val inputName = name.value.let { text ->
-                if (text.isNullOrBlank()) {
-                    (host.value ?: "").also { name.value = it }
-                } else {
-                    text
-                }
-            }
-
-            if (cifsUseCase.provideConnections().any { it.name == inputName }) {
-                _navigationEvent.value = Nav.Warning("Exists")
-                return@launch
-            }
-
             save()
             _navigationEvent.value = Nav.Back
         }
@@ -167,11 +145,10 @@ class EditViewModel @ViewModelInject constructor(
         object Back : Nav()
         data class CheckConnectionResult(val result: Boolean): Nav()
         object CheckPicker: Nav()
-        data class Warning(val message: String): Nav()
     }
 
     companion object {
-        private const val NEW_ID: Long = -1
+        private const val NEW_ID: String = ""
     }
 
 }

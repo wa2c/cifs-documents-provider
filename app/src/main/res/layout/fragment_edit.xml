@@ -25,6 +25,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_name_title" />
@@ -49,6 +50,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_domain_title" />
@@ -73,6 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_host_title" />
@@ -81,20 +84,13 @@
                     android:id="@+id/edit_host_edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_span="2"
                     android:layout_weight="1"
                     android:hint="@string/edit_host_hint"
                     android:importantForAutofill="no"
                     android:inputType="textEmailAddress"
                     android:text="@={viewModel.host}" />
 
-                <ImageButton
-                    android:id="@+id/edit_host_search_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@null"
-                    android:onClick="@{() -> viewModel.onClickSearchHost()}"
-                    android:src="@android:drawable/ic_menu_search" />
-
             </TableRow>
 
             <TableRow
@@ -104,39 +100,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_folder_title" />
-
-                <EditText
-                    android:id="@+id/edit_directory_edit_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:hint="@string/edit_folder_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textEmailAddress"
-                    android:onClick="@{() -> viewModel.onClickSearchDirectory()}"
-                    android:text="@={viewModel.folder}" />
-
-                <ImageButton
-                    android:id="@+id/edit_directory_search_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@null"
-                    android:importantForAutofill="no"
-                    android:src="@android:drawable/ic_menu_search" />
-
-            </TableRow>
-
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_user_title" />
@@ -162,6 +126,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_password_title" />
@@ -187,6 +152,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@null" />
@@ -209,6 +175,41 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
+                    android:text="@string/edit_folder_title" />
+
+                <EditText
+                    android:id="@+id/edit_directory_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:hint="@string/edit_folder_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="textEmailAddress"
+                    android:onClick="@{() -> viewModel.onClickSearchDirectory()}"
+                    android:text="@={viewModel.folder}" />
+
+                <ImageButton
+                    android:id="@+id/edit_directory_search_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:contentDescription="@null"
+                    android:importantForAutofill="no"
+                    android:src="@drawable/ic_folder" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_connection_uri_title" />
@@ -230,6 +231,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
                     android:text="@string/edit_provider_uri_title" />

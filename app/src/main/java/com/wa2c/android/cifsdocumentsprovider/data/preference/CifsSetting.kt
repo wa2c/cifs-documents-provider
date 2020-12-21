@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CifsSetting(
-    val id: Long,
+    val id: String,
     val name: String,
     val domain: String?,
     val host: String,

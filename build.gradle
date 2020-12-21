@@ -2,10 +2,10 @@
 buildscript {
 
     ext {
-        kotlin_version = '1.4.10'
+        kotlin_version = '1.4.20'
         coroutine_version = '1.3.7'
         lifecycle_version = '2.2.0'
-        navigation_version = '2.3.1'
+        navigation_version = '2.3.2'
         dagger_hilt_version = '2.29-alpha'
         dagger_hilt_view_model_version = "1.0.0-alpha02"
     }
@@ -16,7 +16,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.0"
+        classpath "com.android.tools.build:gradle:4.1.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$navigation_version"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$dagger_hilt_version"

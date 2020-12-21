@@ -66,7 +66,7 @@ class CifsUseCase @Inject constructor(
     /**
      * Delete connection
      */
-    fun deleteConnection(id: Long) {
+    fun deleteConnection(id: String) {
         _connections.removeIf { it.id == id }
         preferencesRepository.cifsSettings = _connections.map { it.toData() }
     }

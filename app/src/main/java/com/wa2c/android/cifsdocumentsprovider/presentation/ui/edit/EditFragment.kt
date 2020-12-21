@@ -3,7 +3,9 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -18,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
@@ -32,7 +35,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
     /** View Model */
     private val viewModel by viewModels<EditViewModel>()
-
     /** Binding */
     private val binding: FragmentEditBinding by viewBinding()
 
@@ -42,6 +44,19 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private val checkPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show() }
+        }
+    }
+
+    /** Open launcher */
+    private val selectDirectoryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri = result.data?.data?.toString() ?: return@registerForActivityResult
+            val path = uri.removePrefix(CifsConnection.getProviderUri(binding.editHostEditText.text, null))
+            if (uri == path) {
+                return@registerForActivityResult
+            } else {
+                binding.editDirectoryEditText.setText(Uri.decode(path))
+            }
         }
     }
 
@@ -67,6 +82,14 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             it.initialize(args.cifsConnection)
         }
 
+        binding.editDirectorySearchButton.setOnClickListener {
+            // Launch check
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+                putExtra(DocumentsContract.EXTRA_INITIAL_URI, CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text))
+            }
+            selectDirectoryLauncher.launch(intent)
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -85,7 +108,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             R.id.edit_menu_delete -> {
                 navigateSafe(
                     MessageDialogDirections.actionGlobalMessageDialog(
-                        message = getString(R.string.edit_message_confirmation_delete),
+                        message = getString(R.string.edit_delete_confirmation_message),
                         positiveText = getString(android.R.string.ok),
                         neutralText = getString(android.R.string.cancel)
                     )
@@ -120,9 +143,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 }.let {
                     checkPickerLauncher.launch(it)
                 }
-            }
-            is EditViewModel.Nav.Warning -> {
-                Toast.makeText(requireContext(), event.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
