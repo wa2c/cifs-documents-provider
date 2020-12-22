@@ -24,6 +24,10 @@ data class CifsConnection(
     val anonymous: Boolean
 ): Parcelable, Serializable {
 
+    /** RootURI (smb://) */
+    val rootUri: String
+        get() = getConnectionUri(host, null)
+
     /** Connection URI (smb://) */
     val connectionUri: String
         get() = getConnectionUri(host, folder)

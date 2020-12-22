@@ -75,7 +75,7 @@ class CifsUseCase @Inject constructor(
      * Get CIFS File from connection.
      */
     suspend fun getCifsFile(connection: CifsConnection): CifsFile? {
-        return cifsFileCache.get(connection) ?: getSmbFile(connection)?.toCifsFile()
+        return cifsFileCache.get(connection) ?: getRootFile(connection)?.toCifsFile()
     }
 
     /**
@@ -90,15 +90,15 @@ class CifsUseCase @Inject constructor(
      */
     suspend fun getCifsFileChildren(uri: String): List<CifsFile> {
         return withContext(Dispatchers.IO) {
-            try {
                 getSmbFile(uri)?.listFiles()?.mapNotNull {
-                    smbFileCache.get(it.url) ?: smbFileCache.put(it.url, it)
-                    it.toCifsFile()
+                    try {
+                        smbFileCache.get(it.url) ?: smbFileCache.put(it.url, it)
+                        it.toCifsFile()
+                    } catch (e: Exception) {
+                        logW(e)
+                        null
+                    }
                 } ?: emptyList()
-            } catch (e: Exception) {
-                logW(e)
-                emptyList()
-            }
         }
     }
 
@@ -141,10 +141,10 @@ class CifsUseCase @Inject constructor(
         }
     }
 
-    suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
+    suspend fun getRootFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).also {
+                cifsClient.getFile(connection.rootUri, getCifsContext(connection)).also {
                     smbFileCache.put(connection, it)
                 }
             } catch (e: Exception) {

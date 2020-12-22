@@ -33,5 +33,8 @@
     <string name="edit_delete_button">削除</string>
     <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
 
+    <!-- DocumentsProvider -->
+    <string name="provider_error_message">エラーが発生しました</string>
+
 
 </resources>
