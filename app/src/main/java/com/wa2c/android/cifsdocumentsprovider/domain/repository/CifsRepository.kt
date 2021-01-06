@@ -1,10 +1,10 @@
-package com.wa2c.android.cifsdocumentsprovider.domain.usecase
+package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
 import jcifs.smb.SmbFile
@@ -15,9 +15,9 @@ import javax.inject.Singleton
 
 @Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
-class CifsUseCase @Inject constructor(
+class CifsRepository @Inject constructor(
     private val cifsClient: CifsClient,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: AppPreferences
 ) {
     /** CIFS Connection buffer */
     private val _connections: MutableList<CifsConnection> by lazy {
@@ -43,10 +43,16 @@ class CifsUseCase @Inject constructor(
     }
 
     /**
-     * Provide connection list
+     * Load connection
      */
-    fun provideConnections(): List<CifsConnection> {
-        return _connections
+    fun loadConnection(): List<CifsConnection>  {
+        return preferencesRepository.cifsSettings.let { list ->
+            list.map { data ->
+                data.toModel().also {
+                    contextCache.put(it, cifsClient.getConnection(it.user, it.password, it.domain))
+                }
+            }
+        }
     }
 
     /**
@@ -72,7 +78,7 @@ class CifsUseCase @Inject constructor(
     }
 
     /**
-     * Get CIFS File from connection.
+     * Get CIFS File from connection.`
      */
     suspend fun getCifsFile(connection: CifsConnection): CifsFile? {
         return cifsFileCache.get(connection) ?: getRootFile(connection)?.toCifsFile()
@@ -172,7 +178,7 @@ class CifsUseCase @Inject constructor(
     /**
      * Convert SmbFile to CifsFile
      */
-    private suspend fun SmbFile.toCifsFile(): CifsFile? {
+    private suspend fun SmbFile.toCifsFile(): CifsFile {
         val urlText = url.toString()
         return cifsFileCache.get(urlText) ?: withContext(Dispatchers.IO) {
             CifsFile(

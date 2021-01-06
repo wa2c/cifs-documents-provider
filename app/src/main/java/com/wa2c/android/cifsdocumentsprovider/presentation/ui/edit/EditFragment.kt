@@ -19,6 +19,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
@@ -26,6 +27,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
+
 
 /**
  * Edit Screen
@@ -40,10 +42,32 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
     private val args: EditFragmentArgs by navArgs()
 
+    private val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { result ->
+//                if(result.resultCode == Activity.RESULT_OK) {
+//                    result.data?.data?.let {
+//                        logD(it)
+//                    }
+//                }
+        logD(result)
+    }
+
+    private val directoryLauncher2 = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+//                if(result.resultCode == Activity.RESULT_OK) {
+//                    result.data?.data?.let {
+//                        logD(it)
+//                    }
+//                }
+        logD(result)
+    }
+
     /** Picker launcher */
     private val checkPickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show() }
+            result.data?.data?.let { Toast.makeText(
+                requireContext(),
+                it.toString(),
+                Toast.LENGTH_SHORT
+            ).show() }
         }
     }
 
@@ -51,7 +75,12 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private val selectDirectoryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK) {
             val uri = result.data?.data?.toString() ?: return@registerForActivityResult
-            val path = uri.removePrefix(CifsConnection.getProviderUri(binding.editHostEditText.text, null))
+            val path = uri.removePrefix(
+                CifsConnection.getProviderUri(
+                    binding.editHostEditText.text,
+                    null
+                )
+            )
             if (uri == path) {
                 return@registerForActivityResult
             } else {
@@ -84,13 +113,58 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         binding.editDirectorySearchButton.setOnClickListener {
             // Launch check
+//            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+//                putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse("content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2F"))
+//                    //CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text))
+//            }
+//            selectDirectoryLauncher.launch(intent)
+
+            //directoryLauncher.launch(Uri.parse(CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text)))
+            //directoryLauncher.launch(Uri.parse("content://com.android.externalstorage.documents/tree/primary%3Atest"))
+            // content://com.android.externalstorage.documents/tree/primary%3Atest
+
+
+            //directoryLauncher.contract.
+            //directoryLauncher.launch(CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text).toUri())
+
+
+//            content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2FWorkspace%2F
+//
+//            content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2FRecord%2F
+
+
+            // content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2FUsers%2F
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
-                putExtra(DocumentsContract.EXTRA_INITIAL_URI, CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text))
+                //putExtra(DocumentsContract.EXTRA_INITIAL_URI, CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text).toUri())
+                putExtra(DocumentsContract.EXTRA_INITIAL_URI, Uri.parse("content://com.android.externalstorage.documents/tree/primary%3Atest"))
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+
+               // val file = DocumentFile.fromTreeUri(requireContext(), Uri.parse("content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2F"))
+                //putExtra(EXTRA_INITIAL_URI, file!!.uri)
+
+//                putExtra(
+//                    DocumentsContract.EXTRA_INITIAL_URI,
+//                    Uri.parse("content://com.wa2c.android.cifsdocumentsprovider.documents/tree/192.168.0.168%2F")
+//                )
             }
-            selectDirectoryLauncher.launch(intent)
+            startActivityForResult(intent, 2)
+
         }
 
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        logD(requestCode)
+        data?.data?.let {
+            requireContext().contentResolver.takePersistableUriPermission(
+                it,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)

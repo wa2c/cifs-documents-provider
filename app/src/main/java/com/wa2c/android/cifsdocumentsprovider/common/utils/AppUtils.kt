@@ -1,7 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
-import android.view.View
-import androidx.databinding.BindingAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -26,7 +24,9 @@ fun <K, V, T : MutableMap<K, V>> T.renew(m: Map<K, V>): T {
     return this
 }
 
-
+/**
+ * Main Coroutine Scope
+ */
 class MainCoroutineScope: CoroutineScope {
     val job = Job()
 
@@ -35,7 +35,3 @@ class MainCoroutineScope: CoroutineScope {
 }
 
 
-@BindingAdapter("visible")
-fun View.isVisible(isVisible: Boolean) {
-    visibility = if (isVisible) View.VISIBLE else View.GONE
-}

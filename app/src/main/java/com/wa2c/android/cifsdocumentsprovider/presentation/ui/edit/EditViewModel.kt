@@ -9,7 +9,7 @@ import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.usecase.CifsUseCase
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -20,7 +20,7 @@ import java.io.IOException
  * Edit Screen ViewModel
  */
 class EditViewModel @ViewModelInject constructor(
-    private val cifsUseCase: CifsUseCase
+    private val cifsUseCase: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = LiveEvent<Nav>()

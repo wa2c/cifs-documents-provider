@@ -15,7 +15,6 @@ class CifsContextCache: LruCache<CifsConnection, CIFSContext>(10)
  */
 class SmbFileCache: LruCache<Serializable, SmbFile>(100)
 
-
 /**
  * CIFS File cache
  */

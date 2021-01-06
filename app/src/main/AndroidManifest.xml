@@ -25,7 +25,7 @@
         </activity>
 
         <provider
-            android:name="com.wa2c.android.cifsdocumentsprovider.presentation.provider.CifsDocumentsProvider"
+            android:name=".presentation.provider.CifsDocumentsProvider"
             android:authorities="com.wa2c.android.cifsdocumentsprovider.documents"
             android:exported="true"
             android:grantUriPermissions="true"

@@ -15,11 +15,11 @@ import javax.inject.Singleton
  * Preference repository
  */
 @Singleton
-class PreferencesRepository @Inject constructor(
+class AppPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val appPreferences: SharedPreferences = context.getSharedPreferences("App", Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences = context.getSharedPreferences("App", Context.MODE_PRIVATE)
 
     /**
      * CIFS settings
@@ -27,7 +27,7 @@ class PreferencesRepository @Inject constructor(
     var cifsSettings: List<CifsSetting>
         get() {
             return try {
-                Json.decodeFromString(appPreferences.getString(PREFKEY_CIFS_SETTINGS, "{}")!!)
+                Json.decodeFromString(preferences.getString(PREFKEY_CIFS_SETTINGS, "{}")!!)
             } catch(e: Exception) {
                 logE(e)
                 emptyList()
@@ -35,7 +35,7 @@ class PreferencesRepository @Inject constructor(
         }
         set(value) {
             try {
-                appPreferences.edit { putString(PREFKEY_CIFS_SETTINGS, Json.encodeToString(value)) }
+                preferences.edit { putString(PREFKEY_CIFS_SETTINGS, Json.encodeToString(value)) }
             } catch (e: Exception) {
                 logE(e)
             }

@@ -1,5 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
+import android.view.View
+import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -38,4 +40,9 @@ fun Fragment.navigateSafe(directions: NavDirections) {
     if (destinationId != null && navController.currentDestination?.id != destinationId) {
         navController.navigate(directions)
     }
+}
+
+@BindingAdapter("visible")
+fun View.isVisible(isVisible: Boolean) {
+    visibility = if (isVisible) View.VISIBLE else View.GONE
 }

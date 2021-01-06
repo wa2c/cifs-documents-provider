@@ -1,8 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 
 import android.content.Context
-import android.content.IntentSender
-import android.content.pm.ProviderInfo
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -16,9 +14,9 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.PreferencesRepository
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.domain.usecase.CifsUseCase
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
 
@@ -31,8 +29,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val providerContext: Context by lazy { context!! }
 
     /** Cifs UseCase */
-    private val cifsUseCase: CifsUseCase by lazy {
-        CifsUseCase(CifsClient(), PreferencesRepository(providerContext))
+    private val cifsUseCase: CifsRepository by lazy {
+        CifsRepository(CifsClient(), AppPreferences(providerContext))
     }
 
     /** Handler thread */
@@ -85,7 +83,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
-                cifsUseCase.provideConnections().forEach { connection ->
+                cifsUseCase.loadConnection().forEach { connection ->
                     try {
                         val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
