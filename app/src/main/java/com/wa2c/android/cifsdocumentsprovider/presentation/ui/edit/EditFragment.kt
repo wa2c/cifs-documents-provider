@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -64,6 +65,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             it.setDisplayHomeAsUpEnabled(true)
             it.setDisplayShowTitleEnabled(true)
         }
+        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                viewModel.onClickBack()
+            }
+        })
 
         binding.let {
             it.viewModel = viewModel
@@ -76,6 +82,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
             it.initialize(args.cifsConnection)
         }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -100,7 +107,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                onNavigate(EditViewModel.Nav.Back)
+                viewModel.onClickBack()
                 return true
             }
             R.id.edit_menu_delete -> {
@@ -124,7 +131,22 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private fun onNavigate(event: EditViewModel.Nav) {
         when (event) {
             is EditViewModel.Nav.Back -> {
-                findNavController().popBackStack(R.id.editFragment, true)
+                if (event.changed) {
+                    navigateSafe(
+                        MessageDialogDirections.actionGlobalMessageDialog(
+                            message = getString(R.string.edit_back_confirmation_message),
+                            positiveText = getString(android.R.string.ok),
+                            neutralText = getString(android.R.string.cancel)
+                        )
+                    )
+                    setDialogResult { result ->
+                        if (result == DialogInterface.BUTTON_POSITIVE) {
+                            findNavController().popBackStack(R.id.editFragment, true)
+                        }
+                    }
+                } else {
+                    findNavController().popBackStack(R.id.editFragment, true)
+                }
             }
             is EditViewModel.Nav.CheckConnectionResult -> {
                 // Connection check

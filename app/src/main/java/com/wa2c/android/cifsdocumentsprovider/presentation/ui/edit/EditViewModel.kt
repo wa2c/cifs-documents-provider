@@ -51,8 +51,10 @@ class EditViewModel @ViewModelInject constructor(
         get() = currentId == NEW_ID
 
 
+    private var initConnection: CifsConnection? = null
 
     fun initialize(connection: CifsConnection?) {
+        initConnection = connection
         deployCifsConnection(connection)
     }
 
@@ -60,6 +62,7 @@ class EditViewModel @ViewModelInject constructor(
         createCifsConnection()?.let {
             cifsRepository.saveConnection(it)
             currentId = it.id
+            initConnection = it
         }
     }
 
@@ -122,7 +125,7 @@ class EditViewModel @ViewModelInject constructor(
     fun onClickDelete() {
         launch {
             delete()
-            _navigationEvent.value = Nav.Back
+            _navigationEvent.value = Nav.Back()
         }
     }
 
@@ -132,12 +135,16 @@ class EditViewModel @ViewModelInject constructor(
     fun onClickAccept() {
         launch {
             save()
-            _navigationEvent.value = Nav.Back
+            _navigationEvent.value = Nav.Back()
         }
     }
 
+    fun onClickBack() {
+        _navigationEvent.value = Nav.Back(initConnection != createCifsConnection())
+    }
+
     sealed class Nav {
-        object Back : Nav()
+        data class Back(val changed: Boolean = false) : Nav()
         data class CheckConnectionResult(val result: Boolean): Nav()
     }
 

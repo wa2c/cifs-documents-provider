@@ -32,6 +32,7 @@
     <string name="edit_save_button">保存</string>
     <string name="edit_cancel_button">戻る</string>
     <string name="edit_delete_button">削除</string>
+    <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
     <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
 
     <!-- DocumentsProvider -->
