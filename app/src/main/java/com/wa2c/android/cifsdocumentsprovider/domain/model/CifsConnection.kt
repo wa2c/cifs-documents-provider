@@ -83,7 +83,7 @@ fun CifsConnection.toData(): CifsSetting {
         host = this.host,
         folder = this.folder,
         user = this.user,
-        password = this.password?.let { try { encrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
+        password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous
     )
 }

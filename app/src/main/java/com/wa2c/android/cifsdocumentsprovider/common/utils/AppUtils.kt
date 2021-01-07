@@ -33,5 +33,3 @@ class MainCoroutineScope: CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 }
-
-

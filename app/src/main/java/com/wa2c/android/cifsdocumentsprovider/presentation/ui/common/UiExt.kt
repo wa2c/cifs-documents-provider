@@ -1,6 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
+import android.content.Context
 import android.view.View
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -46,3 +49,33 @@ fun Fragment.navigateSafe(directions: NavDirections) {
 fun View.isVisible(isVisible: Boolean) {
     visibility = if (isVisible) View.VISIBLE else View.GONE
 }
+
+
+/**
+ * Show toast
+ */
+fun Context.toast(@StringRes textId: Int) {
+    Toast.makeText(this, textId, Toast.LENGTH_SHORT).show()
+}
+
+/**
+ * Show toast
+ */
+fun Context.toast(text: CharSequence) {
+    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+}
+
+/**
+ * Show toast
+ */
+fun Fragment.toast(@StringRes textId: Int) {
+    Toast.makeText(requireContext(), textId, Toast.LENGTH_SHORT).show()
+}
+
+/**
+ * Show toast
+ */
+fun Fragment.toast(text: CharSequence) {
+    Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
+}
+

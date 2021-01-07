@@ -45,8 +45,8 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         viewModel.let {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
             it.cifsConnections.observe(viewLifecycleOwner, ::onLoadConnection)
+            it.init()
         }
-
     }
 
     private fun onNavigate(event: MainViewModel.Nav) {

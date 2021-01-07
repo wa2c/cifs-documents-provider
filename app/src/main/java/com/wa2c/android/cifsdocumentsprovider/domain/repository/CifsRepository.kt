@@ -36,20 +36,27 @@ class CifsRepository @Inject constructor(
     /**
      * Get CIFS Context
      */
-    private fun getCifsContext(connection: CifsConnection): CIFSContext {
-        return contextCache[connection] ?: cifsClient.getConnection(connection.user, connection.password, connection.domain).also {
-            contextCache.put(connection, it)
+    private suspend fun getCifsContext(connection: CifsConnection): CIFSContext {
+        return contextCache[connection] ?: withContext(Dispatchers.IO) {
+            cifsClient.getConnection(connection.user, connection.password, connection.domain).also {
+                contextCache.put(connection, it)
+            }
         }
     }
 
     /**
      * Load connection
      */
-    fun loadConnection(): List<CifsConnection>  {
-        return preferencesRepository.cifsSettings.let { list ->
-            list.map { data ->
-                data.toModel().also {
-                    contextCache.put(it, cifsClient.getConnection(it.user, it.password, it.domain))
+    suspend fun loadConnection(): List<CifsConnection>  {
+        return withContext(Dispatchers.IO) {
+            preferencesRepository.cifsSettings.let { list ->
+                list.map { data ->
+                    data.toModel().also {
+                        contextCache.put(
+                            it,
+                            cifsClient.getConnection(it.user, it.password, it.domain)
+                        )
+                    }
                 }
             }
         }
@@ -139,7 +146,7 @@ class CifsRepository @Inject constructor(
     suspend fun checkConnection(connection: CifsConnection): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection))?.exists() ?: false
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).exists()
             } catch (e: Exception) {
                 logW(e)
                 false

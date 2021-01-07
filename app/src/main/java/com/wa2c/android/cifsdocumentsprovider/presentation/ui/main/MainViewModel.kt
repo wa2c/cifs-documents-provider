@@ -9,19 +9,30 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Main Screen ViewModel
  */
 class MainViewModel @ViewModelInject constructor(
-    private val cifsUseCase: CifsRepository
+    private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = LiveEvent<Nav>()
     val navigationEvent: LiveData<Nav> = _navigationEvent
 
-    val cifsConnections: LiveData<List<CifsConnection>> = MutableLiveData(cifsUseCase.loadConnection())
+    private val _cifsConnection: MutableLiveData<List<CifsConnection>> = MutableLiveData()
+    val cifsConnections: LiveData<List<CifsConnection>> = _cifsConnection
 
+    fun init() {
+        launch {
+            runCatching {
+               cifsRepository.loadConnection()
+            }.onSuccess {
+                _cifsConnection.value = it
+            }
+        }
+    }
 
     fun onClickItem(connection: CifsConnection?) {
         _navigationEvent.value = Nav.Edit(connection)

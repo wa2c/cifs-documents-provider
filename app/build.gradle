@@ -22,7 +22,7 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "K", "\"com.wa2c.android.cifsdocumentsprovider\"")
+        buildConfigField("String", "K", "\"com.wa2c.android\"")
     }
 
     buildTypes {

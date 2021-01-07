@@ -189,7 +189,6 @@
                     android:hint="@string/edit_folder_hint"
                     android:importantForAutofill="no"
                     android:inputType="textEmailAddress"
-                    android:onClick="@{() -> viewModel.onClickSearchDirectory()}"
                     android:text="@={viewModel.folder}" />
 
                 <ImageButton
@@ -251,37 +250,18 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp">
 
-                <LinearLayout
+                <Button
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:layout_weight="1"
                     android:layout_span="3"
-                    android:layout_weight="1">
-
-                    <Button
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
-                        android:text="@string/edit_check_connection_button"
-                        app:icon="@drawable/ic_check"
-                        app:iconGravity="textStart" />
-
-                    <Button
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="8dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:onClick="@{ () -> viewModel.onClickCheckPicker() }"
-                        android:text="@string/edit_check_picker_button"
-                        app:icon="@drawable/ic_check_picker"
-                        app:iconGravity="textStart" />
-
-                </LinearLayout>
+                    android:gravity="center"
+                    android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
+                    android:text="@string/edit_check_connection_button"
+                    app:icon="@drawable/ic_check"
+                    app:iconGravity="textStart" />
 
             </TableRow>
 

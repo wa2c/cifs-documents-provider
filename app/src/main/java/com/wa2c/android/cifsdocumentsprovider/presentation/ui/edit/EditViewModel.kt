@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +19,7 @@ import java.io.IOException
  * Edit Screen ViewModel
  */
 class EditViewModel @ViewModelInject constructor(
-    private val cifsUseCase: CifsRepository
+    private val cifsRepository: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = LiveEvent<Nav>()
@@ -59,13 +58,13 @@ class EditViewModel @ViewModelInject constructor(
 
     private fun save() {
         createCifsConnection()?.let {
-            cifsUseCase.saveConnection(it)
+            cifsRepository.saveConnection(it)
             currentId = it.id
         }
     }
 
     private fun delete() {
-        cifsUseCase.deleteConnection(currentId)
+        cifsRepository.deleteConnection(currentId)
     }
 
     /**
@@ -99,10 +98,6 @@ class EditViewModel @ViewModelInject constructor(
         )
     }
 
-    fun onClickSearchDirectory() {
-        logD("")
-    }
-
     /**
      * Check connection
      */
@@ -110,23 +105,20 @@ class EditViewModel @ViewModelInject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val isConnected = createCifsConnection()?.let { cifsUseCase.checkConnection(it) } ?: false
+                    val isConnected = createCifsConnection()?.let { cifsRepository.checkConnection(it) } ?: false
                     if (!isConnected) throw IOException()
                 }
             }.onSuccess {
                 _navigationEvent.value = Nav.CheckConnectionResult(true)
+            }.onFailure {
                 _navigationEvent.value = Nav.CheckConnectionResult(false)
             }
         }
     }
 
     /**
-     * Check picker
+     * Delete Click
      */
-    fun onClickCheckPicker() {
-        _navigationEvent.value = Nav.CheckPicker
-    }
-
     fun onClickDelete() {
         launch {
             delete()
@@ -134,6 +126,9 @@ class EditViewModel @ViewModelInject constructor(
         }
     }
 
+    /**
+     * Save Click
+     */
     fun onClickAccept() {
         launch {
             save()
@@ -144,7 +139,6 @@ class EditViewModel @ViewModelInject constructor(
     sealed class Nav {
         object Back : Nav()
         data class CheckConnectionResult(val result: Boolean): Nav()
-        object CheckPicker: Nav()
     }
 
     companion object {

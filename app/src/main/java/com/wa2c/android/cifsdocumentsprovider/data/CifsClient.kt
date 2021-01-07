@@ -36,7 +36,7 @@ class CifsClient @Inject constructor() {
     /**
      * Get file.
      */
-    fun getFile(uri: String, cifsContext: CIFSContext): SmbFile? {
+    fun getFile(uri: String, cifsContext: CIFSContext): SmbFile {
         return SmbFile(uri, cifsContext).apply {
             connectTimeout = CONNECTION_TIMEOUT
             readTimeout = READ_TIMEOUT

@@ -28,8 +28,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /** Context */
     private val providerContext: Context by lazy { context!! }
 
-    /** Cifs UseCase */
-    private val cifsUseCase: CifsRepository by lazy {
+    /** Cifs Repository */
+    private val cifsRepository: CifsRepository by lazy {
         CifsRepository(CifsClient(), AppPreferences(providerContext))
     }
 
@@ -67,7 +67,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 documentId?.let {
                     val uri = getCifsUri(it)
-                    val file = cifsUseCase.getCifsFile(uri) ?: return@let
+                    val file = cifsRepository.getCifsFile(uri) ?: return@let
                     includeFile(cursor, file)
                 }
             }
@@ -83,9 +83,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
-                cifsUseCase.loadConnection().forEach { connection ->
+                cifsRepository.loadConnection().forEach { connection ->
                     try {
-                        val file = cifsUseCase.getCifsFile(connection) ?: return@forEach
+                        val file = cifsRepository.getCifsFile(connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
                     } catch (e: Exception) {
                         logE(e)
@@ -95,7 +95,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         } else {
             runBlocking {
                 val uri = getCifsDirectoryUri(parentDocumentId!!)
-                cifsUseCase.getCifsFileChildren(uri).forEach {file ->
+                cifsRepository.getCifsFileChildren(uri).forEach { file ->
                     try {
                         includeFile(cursor, file)
                     } catch (e: Exception) {
@@ -127,7 +127,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
         val uri = documentId?.let { getCifsFileUri(it) } ?: return null
-        val file = runBlocking { cifsUseCase.getSmbFile(uri) } ?: return null
+        val file = runBlocking { cifsRepository.getSmbFile(uri) } ?: return null
 
         val thread = HandlerThread(this.javaClass.simpleName).also { it.start() }
         handlerThread = thread
@@ -145,13 +145,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
         displayName: String
     ): String? {
         val documentId = Paths.get(parentDocumentId, displayName).toString()
-        val isCreated = runBlocking { cifsUseCase.createCifsFile(getCifsFileUri(documentId)) }
+        val isCreated = runBlocking { cifsRepository.createCifsFile(getCifsFileUri(documentId)) }
         return if (isCreated) documentId else null
     }
 
     override fun deleteDocument(documentId: String?) {
         documentId?.let {
-            runBlocking { cifsUseCase.deleteCifsFile(getCifsFileUri(it)) }
+            runBlocking { cifsRepository.deleteCifsFile(getCifsFileUri(it)) }
         }
     }
 
