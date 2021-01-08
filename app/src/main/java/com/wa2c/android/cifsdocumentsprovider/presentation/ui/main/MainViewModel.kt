@@ -25,19 +25,12 @@ class MainViewModel @ViewModelInject constructor(
     val cifsConnections: LiveData<List<CifsConnection>> = _cifsConnection
 
     fun init() {
-        launch {
-            runCatching {
-               cifsRepository.loadConnection()
-            }.onSuccess {
-                _cifsConnection.value = it
-            }
-        }
+        _cifsConnection.value = cifsRepository.loadConnection()
     }
 
     fun onClickItem(connection: CifsConnection?) {
         _navigationEvent.value = Nav.Edit(connection)
     }
-
 
     sealed class Nav {
         data class Edit(val connection: CifsConnection?): Nav()

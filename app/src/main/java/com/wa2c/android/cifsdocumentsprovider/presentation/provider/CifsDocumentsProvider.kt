@@ -1,10 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 
 import android.content.Context
+import android.content.pm.ProviderInfo
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
+import android.net.Uri
 import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
@@ -28,9 +30,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /** Context */
     private val providerContext: Context by lazy { context!! }
 
+    private val appPreferences: AppPreferences by lazy { AppPreferences(providerContext) }
+
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
-        CifsRepository(CifsClient(), AppPreferences(providerContext))
+        CifsRepository(CifsClient(), appPreferences)
     }
 
     /** Handler thread */
@@ -83,7 +87,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
-                cifsRepository.loadConnection().forEach { connection ->
+                cifsRepository.loadConnectionTemporal().ifEmpty { cifsRepository.loadConnection() }.forEach { connection ->
                     try {
                         val file = cifsRepository.getCifsFile(connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)

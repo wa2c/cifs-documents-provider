@@ -17,11 +17,11 @@ import javax.inject.Singleton
 @Singleton
 class CifsRepository @Inject constructor(
     private val cifsClient: CifsClient,
-    private val preferencesRepository: AppPreferences
+    private val appPreferences: AppPreferences
 ) {
     /** CIFS Connection buffer */
     private val _connections: MutableList<CifsConnection> by lazy {
-        preferencesRepository.cifsSettings.map { it.toModel() }.toMutableList()
+        appPreferences.cifsSettings.map { it.toModel() }.toMutableList()
     }
 
     /** CIFS Context cache */
@@ -30,8 +30,6 @@ class CifsRepository @Inject constructor(
     private val smbFileCache = SmbFileCache()
     /** CIFS File cache */
     private val cifsFileCache = CifsFileCache()
-
-
 
     /**
      * Get CIFS Context
@@ -47,18 +45,9 @@ class CifsRepository @Inject constructor(
     /**
      * Load connection
      */
-    suspend fun loadConnection(): List<CifsConnection>  {
-        return withContext(Dispatchers.IO) {
-            preferencesRepository.cifsSettings.let { list ->
-                list.map { data ->
-                    data.toModel().also {
-                        contextCache.put(
-                            it,
-                            cifsClient.getConnection(it.user, it.password, it.domain)
-                        )
-                    }
-                }
-            }
+    fun loadConnection(): List<CifsConnection>  {
+        return appPreferences.cifsSettings.let { list ->
+            list.map { data -> data.toModel() }
         }
     }
 
@@ -73,7 +62,31 @@ class CifsRepository @Inject constructor(
                 _connections.add(connection)
             }
         }
-        preferencesRepository.cifsSettings = _connections.map { it.toData() }
+        appPreferences.cifsSettings = _connections.map { it.toData() }
+    }
+
+    /**
+     * Load connection temporal
+     */
+    fun loadConnectionTemporal(): List<CifsConnection>  {
+        return appPreferences.cifsSettingsTemporal.let { list ->
+            list.map { data -> data.toModel() }
+        }
+    }
+
+
+    /**
+     * Save connection temporal
+     */
+    fun saveConnectionTemporal(connection: CifsConnection) {
+        appPreferences.cifsSettingsTemporal = listOf(connection.toData())
+    }
+
+    /**
+     * Clear connection tempral
+     */
+    fun clearConnectionTemporal() {
+        appPreferences.cifsSettingsTemporal = emptyList()
     }
 
     /**
@@ -81,7 +94,7 @@ class CifsRepository @Inject constructor(
      */
     fun deleteConnection(id: String) {
         _connections.removeIf { it.id == id }
-        preferencesRepository.cifsSettings = _connections.map { it.toData() }
+        appPreferences.cifsSettings = _connections.map { it.toData() }
     }
 
     /**

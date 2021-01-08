@@ -58,12 +58,31 @@ class EditViewModel @ViewModelInject constructor(
         deployCifsConnection(connection)
     }
 
+    /**
+     * Save connection
+     */
     private fun save() {
         createCifsConnection()?.let {
             cifsRepository.saveConnection(it)
             currentId = it.id
             initConnection = it
         }
+    }
+
+    /**
+     * Save temporally connection
+     */
+    private fun saveTemporal() {
+        createCifsConnection()?.let {
+            cifsRepository.saveConnectionTemporal(it)
+        }
+    }
+
+    /**
+     * Clear temporally connection
+     */
+    fun clearTemporal() {
+        cifsRepository.clearConnectionTemporal()
     }
 
     private fun delete() {
@@ -120,6 +139,18 @@ class EditViewModel @ViewModelInject constructor(
     }
 
     /**
+     * Select Directory Click
+     */
+    fun onClickSelectDirectory() {
+        launch {
+            saveTemporal()
+            val uri = CifsConnection.getProviderUri(host.value, folder.value)
+            _navigationEvent.value = Nav.SelectDirectory(uri)
+        }
+    }
+
+
+    /**
      * Delete Click
      */
     fun onClickDelete() {
@@ -145,6 +176,7 @@ class EditViewModel @ViewModelInject constructor(
 
     sealed class Nav {
         data class Back(val changed: Boolean = false) : Nav()
+        data class  SelectDirectory(val uri: String) : Nav()
         data class CheckConnectionResult(val result: Boolean): Nav()
     }
 

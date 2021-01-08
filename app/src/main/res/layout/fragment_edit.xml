@@ -197,6 +197,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@null"
                     android:importantForAutofill="no"
+                    android:onClick="@{ () -> viewModel.onClickSelectDirectory() }"
                     android:src="@drawable/ic_folder" />
 
             </TableRow>
@@ -255,8 +256,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
-                    android:layout_weight="1"
                     android:layout_span="3"
+                    android:layout_weight="1"
                     android:gravity="center"
                     android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
                     android:text="@string/edit_check_connection_button"

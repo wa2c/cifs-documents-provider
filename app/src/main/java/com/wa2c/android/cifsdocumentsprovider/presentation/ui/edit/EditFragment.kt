@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.content.DialogInterface
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -43,6 +42,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     /** Select Directory Picker */
     private val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         logD(uri)
+        viewModel.clearTemporal()
         if (uri == null) return@registerForActivityResult
 
         val directory = Uri.decode(uri.toString().substringAfter(CifsConnection.getProviderUri(viewModel.host.value, null), "")).trim('/')
@@ -73,26 +73,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         binding.let {
             it.viewModel = viewModel
-            it.editDirectorySearchButton.setOnClickListener {
-                directoryLauncher.launch(Uri.parse(CifsConnection.getProviderUri(binding.editHostEditText.text, binding.editDirectoryEditText.text)))
-            }
         }
 
         viewModel.let {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
             it.initialize(args.cifsConnection)
-        }
-
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        logD(requestCode)
-        data?.data?.let {
-            requireContext().contentResolver.takePersistableUriPermission(
-                it,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
         }
 
     }
@@ -147,6 +132,10 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 } else {
                     findNavController().popBackStack(R.id.editFragment, true)
                 }
+            }
+            is EditViewModel.Nav.SelectDirectory -> {
+                // Select directory
+                directoryLauncher.launch(Uri.parse(event.uri))
             }
             is EditViewModel.Nav.CheckConnectionResult -> {
                 // Connection check
