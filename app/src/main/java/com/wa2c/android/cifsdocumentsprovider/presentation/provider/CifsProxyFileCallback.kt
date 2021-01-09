@@ -19,6 +19,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
+import android.view.Display
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
@@ -33,13 +34,13 @@ import kotlin.math.min
  */
 class CifsProxyFileCallback(
     private val smbFile: SmbFile,
-    private val mode: String
+    private val mode: AccessMode
 ) : ProxyFileDescriptorCallback() {
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
         runBlocking { withContext(Dispatchers.IO) {
-            smbFile.openRandomAccess(mode).also {
+            smbFile.openRandomAccess(mode.smbMode).also {
                 isAccessOpened = true
             }
         } }

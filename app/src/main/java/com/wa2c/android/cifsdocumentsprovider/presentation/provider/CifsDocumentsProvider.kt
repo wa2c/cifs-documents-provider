@@ -1,12 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 
 import android.content.Context
-import android.content.pm.ProviderInfo
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
-import android.net.Uri
 import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
@@ -53,7 +51,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
                 add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
                 add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
-                add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD)
+                add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or DocumentsContract.Root.FLAG_SUPPORTS_CREATE)
                 add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
                 add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, Int.MAX_VALUE)
                 add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
@@ -138,7 +136,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
         return (providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager).openProxyFileDescriptor(
             ParcelFileDescriptor.parseMode(mode),
-            CifsProxyFileCallback(file, mode),
+            CifsProxyFileCallback(file, AccessMode.fromSafMode(mode)),
             Handler(thread.looper)
         )
     }
@@ -149,8 +147,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
         displayName: String
     ): String? {
         val documentId = Paths.get(parentDocumentId, displayName).toString()
-        val isCreated = runBlocking { cifsRepository.createCifsFile(getCifsFileUri(documentId)) }
-        return if (isCreated) documentId else null
+        val cifsFile = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+            // Directory
+            runBlocking { cifsRepository.createCifsDirectory(getCifsDirectoryUri(documentId)) }
+        } else {
+            // File
+            runBlocking { cifsRepository.createCifsFile(getCifsFileUri(documentId)) }
+        }
+        return cifsFile?.getDocumentId()
     }
 
     override fun deleteDocument(documentId: String?) {
@@ -158,6 +162,27 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking { cifsRepository.deleteCifsFile(getCifsFileUri(it)) }
         }
     }
+
+//    override fun renameDocument(documentId: String?, displayName: String?): String {
+//        return super.renameDocument(documentId, displayName)
+//    }
+//
+//    override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String {
+//        return super.copyDocument(sourceDocumentId, targetParentDocumentId)
+//    }
+//
+//    override fun moveDocument(
+//        sourceDocumentId: String?,
+//        sourceParentDocumentId: String?,
+//        targetParentDocumentId: String?
+//    ): String {
+//        return super.moveDocument(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)
+//    }
+//
+//    override fun removeDocument(documentId: String?, parentDocumentId: String?) {
+//        super.removeDocument(documentId, parentDocumentId)
+//    }
+
 
     override fun shutdown() {
         handlerThread?.let {
@@ -197,7 +222,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
-                    row.add(DocumentsContract.Document.COLUMN_FLAGS, 0)
+                    row.add(DocumentsContract.Document.COLUMN_FLAGS,
+                        DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                                DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_REMOVE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+                    )
                 }
                 else -> {
                     // File
@@ -206,7 +239,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, getMimeType(file.name))
-                    row.add(DocumentsContract.Document.COLUMN_FLAGS,0)
+                    row.add(DocumentsContract.Document.COLUMN_FLAGS,
+                        DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_COPY or
+                                DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_REMOVE or
+                                DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+                    )
                 }
             }
         }

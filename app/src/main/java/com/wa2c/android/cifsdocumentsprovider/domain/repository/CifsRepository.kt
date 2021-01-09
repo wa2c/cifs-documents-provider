@@ -122,6 +122,7 @@ class CifsRepository @Inject constructor(
                         it.toCifsFile()
                     } catch (e: Exception) {
                         logW(e)
+                        smbFileCache.remove(it.url)
                         null
                     }
                 } ?: emptyList()
@@ -129,14 +130,36 @@ class CifsRepository @Inject constructor(
     }
 
     /**
+     * Create new directory
+     */
+    suspend fun createCifsDirectory(uri: String): CifsFile? {
+        return withContext(Dispatchers.IO) {
+            try {
+                getSmbFile(uri)?.let {
+                    it.mkdir()
+                    it.toCifsFile()
+                }
+            } catch (e: Exception) {
+                smbFileCache.remove(uri)
+                throw e
+            }
+        }
+    }
+
+    /**
      * Create new file.
      */
-    suspend fun createCifsFile(uri: String): Boolean {
+    suspend fun createCifsFile(uri: String): CifsFile? {
         return withContext(Dispatchers.IO) {
-            getSmbFile(uri)?.let {
-                it.createNewFile()
-                true
-            } ?: false
+            try {
+                getSmbFile(uri)?.let {
+                    it.createNewFile()
+                    it.toCifsFile()
+                }
+            } catch (e: Exception) {
+                smbFileCache.remove(uri)
+                throw e
+            }
         }
     }
 
@@ -145,10 +168,15 @@ class CifsRepository @Inject constructor(
      */
     suspend fun deleteCifsFile(uri: String): Boolean {
         return withContext(Dispatchers.IO) {
-            getSmbFile(uri)?.let {
-                it.delete()
-                true
-            } ?: false
+            try {
+                getSmbFile(uri)?.let {
+                    it.delete()
+                    true
+                } ?: false
+            } catch (e: Exception) {
+                smbFileCache.remove(uri)
+                throw e
+            }
         }
     }
 
@@ -180,6 +208,9 @@ class CifsRepository @Inject constructor(
         }
     }
 
+    /**
+     * Get SMB file
+     */
     suspend fun getSmbFile(uri: String): SmbFile? {
         return smbFileCache[uri] ?: withContext(Dispatchers.IO) {
             val uriHost = try {
