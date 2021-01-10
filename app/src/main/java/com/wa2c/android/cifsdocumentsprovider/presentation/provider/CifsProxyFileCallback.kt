@@ -19,7 +19,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
-import android.view.Display
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile

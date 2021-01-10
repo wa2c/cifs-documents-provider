@@ -69,7 +69,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 documentId?.let {
                     val uri = getCifsUri(it)
-                    val file = cifsRepository.getCifsFile(uri) ?: return@let
+                    val file = cifsRepository.getFile(uri) ?: return@let
                     includeFile(cursor, file)
                 }
             }
@@ -87,7 +87,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 cifsRepository.loadConnectionTemporal().ifEmpty { cifsRepository.loadConnection() }.forEach { connection ->
                     try {
-                        val file = cifsRepository.getCifsFile(connection) ?: return@forEach
+                        val file = cifsRepository.getFile(connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
                     } catch (e: Exception) {
                         logE(e)
@@ -97,7 +97,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         } else {
             runBlocking {
                 val uri = getCifsDirectoryUri(parentDocumentId!!)
-                cifsRepository.getCifsFileChildren(uri).forEach { file ->
+                cifsRepository.getFileChildren(uri).forEach { file ->
                     try {
                         includeFile(cursor, file)
                     } catch (e: Exception) {
@@ -115,6 +115,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return child.indexOf(parent) == 0
     }
 
+    override fun getDocumentType(documentId: String?): String? {
+        return getMimeType(documentId)
+    }
+
     override fun openDocumentThumbnail(
         documentId: String?,
         sizeHint: Point?,
@@ -129,7 +133,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
         val uri = documentId?.let { getCifsFileUri(it) } ?: return null
-        val file = runBlocking { cifsRepository.getSmbFile(uri) } ?: return null
+        val file = runBlocking {
+            cifsRepository.getSmbFile(uri)
+        } ?: return null
 
         val thread = HandlerThread(this.javaClass.simpleName).also { it.start() }
         handlerThread = thread
@@ -147,42 +153,58 @@ class CifsDocumentsProvider : DocumentsProvider() {
         displayName: String
     ): String? {
         val documentId = Paths.get(parentDocumentId, displayName).toString()
-        val cifsFile = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-            // Directory
-            runBlocking { cifsRepository.createCifsDirectory(getCifsDirectoryUri(documentId)) }
+        val uri = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+            getCifsDirectoryUri(documentId)
         } else {
-            // File
-            runBlocking { cifsRepository.createCifsFile(getCifsFileUri(documentId)) }
+            getCifsFileUri(documentId)
+        }
+        val cifsFile = runBlocking {
+            cifsRepository.createFile(uri)
         }
         return cifsFile?.getDocumentId()
     }
 
     override fun deleteDocument(documentId: String?) {
         documentId?.let {
-            runBlocking { cifsRepository.deleteCifsFile(getCifsFileUri(it)) }
+            runBlocking {
+                cifsRepository.deleteFile(getCifsUri(it))
+            }
+        } ?: let {
+            throw OperationCanceledException()
         }
     }
 
-//    override fun renameDocument(documentId: String?, displayName: String?): String {
-//        return super.renameDocument(documentId, displayName)
-//    }
-//
-//    override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String {
-//        return super.copyDocument(sourceDocumentId, targetParentDocumentId)
-//    }
-//
-//    override fun moveDocument(
-//        sourceDocumentId: String?,
-//        sourceParentDocumentId: String?,
-//        targetParentDocumentId: String?
-//    ): String {
-//        return super.moveDocument(sourceDocumentId, sourceParentDocumentId, targetParentDocumentId)
-//    }
-//
-//    override fun removeDocument(documentId: String?, parentDocumentId: String?) {
-//        super.removeDocument(documentId, parentDocumentId)
-//    }
+    override fun renameDocument(documentId: String?, displayName: String?): String? {
+        if (documentId == null || displayName == null) return null
+        val targetFile = runBlocking {
+            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)
+        }
+        return targetFile?.getDocumentId()
+    }
 
+    override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String? {
+        if (sourceDocumentId == null || targetParentDocumentId == null) return null
+        val targetFile = runBlocking {
+            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
+        }
+        return targetFile?.getDocumentId()
+    }
+
+    override fun moveDocument(
+        sourceDocumentId: String?,
+        sourceParentDocumentId: String?,
+        targetParentDocumentId: String?
+    ): String? {
+        if (sourceDocumentId == null || targetParentDocumentId == null) return null
+        val targetFile = runBlocking {
+            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
+        }
+        return targetFile?.getDocumentId()
+    }
+
+    override fun removeDocument(documentId: String?, parentDocumentId: String?) {
+        deleteDocument(documentId)
+    }
 
     override fun shutdown() {
         handlerThread?.let {
@@ -224,6 +246,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
                         DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
+                                DocumentsContract.Document.FLAG_DIR_PREFERS_LAST_MODIFIED or
                                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_COPY or
                                 DocumentsContract.Document.FLAG_SUPPORTS_MOVE or

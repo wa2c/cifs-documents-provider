@@ -90,6 +90,18 @@ class CifsRepository @Inject constructor(
     }
 
     /**
+     * Get connection from URI
+     */
+    private fun getConnection(uri: String): CifsConnection? {
+        val uriHost = try {
+            Uri.parse(uri).host
+        } catch (e: Exception) {
+            return null
+        }
+        return _connections.firstOrNull { it.host == uriHost }
+    }
+
+    /**
      * Delete connection
      */
     fun deleteConnection(id: String) {
@@ -100,21 +112,21 @@ class CifsRepository @Inject constructor(
     /**
      * Get CIFS File from connection.`
      */
-    suspend fun getCifsFile(connection: CifsConnection): CifsFile? {
-        return cifsFileCache.get(connection) ?: getRootFile(connection)?.toCifsFile()
+    suspend fun getFile(connection: CifsConnection): CifsFile? {
+        return cifsFileCache.get(connection) ?: getSmbFile(connection)?.toCifsFile()
     }
 
     /**
      * Get CIFS File from uri.
      */
-    suspend fun getCifsFile(uri: String): CifsFile? {
+    suspend fun getFile(uri: String): CifsFile? {
         return  cifsFileCache.get(uri) ?: getSmbFile(uri)?.toCifsFile()
     }
 
     /**
      * Get children CIFS files from uri.
      */
-    suspend fun getCifsFileChildren(uri: String): List<CifsFile> {
+    suspend fun getFileChildren(uri: String): List<CifsFile> {
         return withContext(Dispatchers.IO) {
                 getSmbFile(uri)?.listFiles()?.mapNotNull {
                     try {
@@ -130,30 +142,17 @@ class CifsRepository @Inject constructor(
     }
 
     /**
-     * Create new directory
-     */
-    suspend fun createCifsDirectory(uri: String): CifsFile? {
-        return withContext(Dispatchers.IO) {
-            try {
-                getSmbFile(uri)?.let {
-                    it.mkdir()
-                    it.toCifsFile()
-                }
-            } catch (e: Exception) {
-                smbFileCache.remove(uri)
-                throw e
-            }
-        }
-    }
-
-    /**
      * Create new file.
      */
-    suspend fun createCifsFile(uri: String): CifsFile? {
+    suspend fun createFile(uri: String): CifsFile? {
         return withContext(Dispatchers.IO) {
             try {
                 getSmbFile(uri)?.let {
-                    it.createNewFile()
+                    if (uri.isDirectoryUri) {
+                        it.mkdir()
+                    } else {
+                        it.createNewFile()
+                    }
                     it.toCifsFile()
                 }
             } catch (e: Exception) {
@@ -166,7 +165,7 @@ class CifsRepository @Inject constructor(
     /**
      * Delete a file.
      */
-    suspend fun deleteCifsFile(uri: String): Boolean {
+    suspend fun deleteFile(uri: String): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 getSmbFile(uri)?.let {
@@ -174,8 +173,79 @@ class CifsRepository @Inject constructor(
                     true
                 } ?: false
             } catch (e: Exception) {
-                smbFileCache.remove(uri)
                 throw e
+            } finally {
+                smbFileCache.remove(uri)
+            }
+        }
+    }
+
+    /**
+     * Rename file
+     */
+    suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
+        return withContext(Dispatchers.IO) {
+            val targetUri = if (sourceUri.isDirectoryUri) {
+                sourceUri.trimEnd('/').replaceAfterLast('/', newName) + '/'
+            } else {
+                sourceUri.replaceAfterLast('/', newName)
+            }
+            try {
+                val source = getSmbFile(sourceUri) ?: return@withContext null
+                val target = getSmbFile(targetUri) ?: return@withContext null
+                source.renameTo(target)
+                target.toCifsFile()
+            } catch (e: Exception) {
+                smbFileCache.remove(targetUri)
+                throw e
+            } finally {
+                smbFileCache.remove(sourceUri)
+            }
+        }
+    }
+
+    /**
+     * Copy file
+     */
+    suspend fun copyFile(sourceUri: String, targetUri: String): CifsFile? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val source = getSmbFile(sourceUri) ?: return@withContext null
+                val target = getSmbFile(targetUri) ?: return@withContext null
+                source.copyTo(target)
+                target.toCifsFile()
+            } catch (e: Exception) {
+                smbFileCache.remove(targetUri)
+                throw e
+            } finally {
+                smbFileCache.remove(sourceUri)
+            }
+        }
+    }
+
+    /**
+     * Move file
+     */
+    suspend fun moveFile(sourceUri: String, targetUri: String): CifsFile? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val sourceConnection = getConnection(sourceUri) ?: return@withContext null
+                val targetConnection = getConnection(targetUri) ?: return@withContext null
+                if (sourceConnection == targetConnection) {
+                    // Same connection
+                    Uri.parse(targetUri).lastPathSegment?.let { renameFile(sourceUri, it) }
+                } else {
+                    // Different connection
+                    copyFile(sourceUri, targetUri)?.also {
+                        deleteFile(sourceUri)
+                    }
+
+                }
+            } catch (e: Exception) {
+                smbFileCache.remove(targetUri)
+                throw e
+            } finally {
+                smbFileCache.remove(sourceUri)
             }
         }
     }
@@ -195,7 +265,10 @@ class CifsRepository @Inject constructor(
         }
     }
 
-    suspend fun getRootFile(connection: CifsConnection): SmbFile? {
+    /**
+     * Get root SMB file
+     */
+    suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
                 cifsClient.getFile(connection.rootUri, getCifsContext(connection)).also {
@@ -213,12 +286,7 @@ class CifsRepository @Inject constructor(
      */
     suspend fun getSmbFile(uri: String): SmbFile? {
         return smbFileCache[uri] ?: withContext(Dispatchers.IO) {
-            val uriHost = try {
-                Uri.parse(uri).host
-            } catch (e: Exception) {
-                return@withContext null
-            }
-            _connections.firstOrNull { it.host == uriHost }?.let {
+            getConnection(uri)?.let {
                 cifsClient.getFile(uri, getCifsContext(it)).also { file ->
                     smbFileCache.put(uri, file)
                 }
@@ -238,12 +306,18 @@ class CifsRepository @Inject constructor(
                 uri = Uri.parse(urlText),
                 size = length(),
                 lastModified = lastModified,
-                isDirectory = urlText.lastOrNull() == '/'
+                isDirectory = urlText.isDirectoryUri
             ).let {
                 cifsFileCache.put(urlText, it)
                 it
             }
         }
     }
+
+    /**
+     * True if directory URI
+     */
+    private val String.isDirectoryUri: Boolean
+        get() = this.endsWith('/')
 
 }

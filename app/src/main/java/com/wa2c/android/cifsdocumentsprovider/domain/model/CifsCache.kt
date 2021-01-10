@@ -11,11 +11,11 @@ import java.io.Serializable
 class CifsContextCache: LruCache<CifsConnection, CIFSContext>(10)
 
 /**
- * SMB File cache
- */
-class SmbFileCache: LruCache<Serializable, SmbFile>(100)
-
-/**
  * CIFS File cache
  */
 class CifsFileCache: LruCache<Serializable, CifsFile>(100)
+
+/**
+ * SMB File cache
+ */
+class SmbFileCache: LruCache<Serializable, SmbFile>(100)
