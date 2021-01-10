@@ -69,10 +69,9 @@ class CifsProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         try {
-            val maxSize = (data.size - offset).toInt().also { if (it <= 0) return 0 }
             access.seek(offset)
             access.write(data, 0, size)
-            return min(size, maxSize)
+            return size
         } catch (e: IOException) {
             throwErrnoException(e)
         }

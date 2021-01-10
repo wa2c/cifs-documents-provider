@@ -51,10 +51,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
                 add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
                 add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
-                add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or DocumentsContract.Root.FLAG_SUPPORTS_CREATE)
                 add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
                 add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, Int.MAX_VALUE)
                 add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
+                add(DocumentsContract.Root.COLUMN_FLAGS,
+                    DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
+                            DocumentsContract.Root.FLAG_SUPPORTS_CREATE
+                )
             }
         }
     }
@@ -115,7 +118,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return child.indexOf(parent) == 0
     }
 
-    override fun getDocumentType(documentId: String?): String? {
+    override fun getDocumentType(documentId: String?): String {
         return getMimeType(documentId)
     }
 
