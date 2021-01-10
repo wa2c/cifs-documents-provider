@@ -6,7 +6,7 @@ import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.nio.file.Paths
 import java.util.*

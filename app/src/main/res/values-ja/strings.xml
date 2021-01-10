@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CIFS Documents Provider</string>
+    <string name="app_summary">共有フォルダにアクセスします。</string>
+
+    <!-- Main Screen -->
+
+    <!-- Edit Screen -->
+    <string name="edit_title">接続情報</string>
+    <string name="edit_name_title">識別名</string>
+    <string name="edit_name_hint">未入力の場合はホスト</string>
+    <string name="edit_domain_title">ドメイン</string>
+    <string name="edit_domain_hint">必要に応じて入力</string>
+    <string name="edit_host_title">ホスト</string>
+    <string name="edit_host_hint">IPアドレス/ホスト名</string>
+    <string name="edit_folder_title">フォルダ</string>
+    <string name="edit_folder_hint">未入力の場合は/</string>
+    <string name="edit_user_title">ユーザ名</string>
+    <string name="edit_user_hint">匿名の場合は無効</string>
+    <string name="edit_password_title">パスワード</string>
+    <string name="edit_password_hint">匿名の場合は無効</string>
+    <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_option_title">オプション</string>
+    <string name="edit_extension_label">保存時に拡張子を付与</string>
+
+    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_provider_uri_title">共有URI</string>
+    <string name="edit_check_connection_button">接続確認</string>
+    <string name="edit_select_directory_ng_message">%1$s のディレクトリから選択してください。</string>
+    <string name="edit_check_connection_ok_message">サーバへの接続に成功しました</string>
+    <string name="edit_check_connection_ng_message">サーバへの接続に失敗しました</string>
+    <string name="edit_save_button">保存</string>
+    <string name="edit_delete_button">削除</string>
+    <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
+    <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
+
+    <!-- DocumentsProvider -->
+    <string name="provider_error_message">エラーが発生しました</string>
+
+</resources>

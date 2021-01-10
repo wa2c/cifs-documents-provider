@@ -1,43 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CIFS Documents Provider</string>
-    <string name="app_summary">共有フォルダ</string>
+    <string name="app_summary">Access the shared folder.</string>
 
     <!-- Main Screen -->
 
-
     <!-- Edit Screen -->
-    <string name="edit_title">接続情報</string>
-    <string name="edit_name_title">識別名</string>
-    <string name="edit_name_hint">未入力の場合はホスト</string>
-    <string name="edit_domain_title">ドメイン</string>
-    <string name="edit_domain_hint">(オプション)</string>
-    <string name="edit_host_title">ホスト</string>
-    <string name="edit_host_hint">IPアドレス/ホスト名</string>
-    <string name="edit_folder_title">フォルダ</string>
-    <string name="edit_folder_hint">未入力の場合は/</string>
-    <string name="edit_user_title">ユーザ名</string>
-    <string name="edit_user_hint">(匿名の場合は無効)</string>
-    <string name="edit_password_title">パスワード</string>
-    <string name="edit_password_hint">(匿名の場合は無効)</string>
-    <string name="edit_anonymous_label">匿名</string>
-    <string name="edit_option_title">オプション</string>
-    <string name="edit_extension_label">保存時に拡張子を付与</string>
+    <string name="edit_title">Connection</string>
+    <string name="edit_name_title">Name</string>
+    <string name="edit_name_hint">Host name if empty</string>
+    <string name="edit_domain_title">Domain</string>
+    <string name="edit_domain_hint">Input as needed</string>
+    <string name="edit_host_title">Host</string>
+    <string name="edit_host_hint">IP Address / Host</string>
+    <string name="edit_folder_title">Folder</string>
+    <string name="edit_folder_hint">\'/\' if empty</string>
+    <string name="edit_user_title">User</string>
+    <string name="edit_user_hint">Invalid if anonymous</string>
+    <string name="edit_password_title">Password</string>
+    <string name="edit_password_hint">Invalid if anonymous</string>
+    <string name="edit_anonymous_label">Anonymous</string>
+    <string name="edit_option_title">Option</string>
+    <string name="edit_extension_label">Add extension when saving</string>
 
-    <string name="edit_connection_uri_title">接続URI</string>
-    <string name="edit_provider_uri_title">共有URI</string>
-    <string name="edit_check_connection_button">接続確認</string>
-    <string name="edit_check_picker_button">起動確認</string>
-    <string name="edit_select_directory_ng_message">%1$s のディレクトリから選択してください。</string>
-    <string name="edit_check_connection_ok_message">サーバへの接続に成功しました</string>
-    <string name="edit_check_connection_ng_message">サーバへの接続に失敗しました</string>
-    <string name="edit_save_button">保存</string>
-    <string name="edit_cancel_button">戻る</string>
-    <string name="edit_delete_button">削除</string>
-    <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
-    <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
+    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_provider_uri_title">Shared URI</string>
+    <string name="edit_check_connection_button">Check connection</string>
+    <string name="edit_select_directory_ng_message">Select from %1$s directory.</string>
+    <string name="edit_check_connection_ok_message">Connection successful.</string>
+    <string name="edit_check_connection_ng_message">Connection failed.</string>
+    <string name="edit_save_button">Save</string>
+    <string name="edit_delete_button">Delete</string>
+    <string name="edit_back_confirmation_message">Discard your changes?</string>
+    <string name="edit_delete_confirmation_message">Delete this settings?</string>
 
     <!-- DocumentsProvider -->
-    <string name="provider_error_message">エラーが発生しました</string>
-
+    <string name="provider_error_message">An error was occurred.</string>
 
 </resources>

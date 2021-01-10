@@ -228,6 +228,21 @@
 
             <TableRow
                 android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="8dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_span="3"
+                    android:layout_weight="1"
+                    android:background="@color/divider" />
+
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <TextView
@@ -273,20 +288,33 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
+                android:layout_marginVertical="8dp">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_span="3"
+                    android:layout_weight="1"
+                    android:background="@color/divider" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <Button
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="8dp"
                     android:layout_span="3"
                     android:layout_weight="1"
                     android:gravity="center"
                     android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
                     android:text="@string/edit_check_connection_button"
                     app:icon="@drawable/ic_check"
-                    app:iconGravity="textStart" />
+                    app:iconGravity="textStart"
+                    app:iconPadding="16dp" />
 
             </TableRow>
 
