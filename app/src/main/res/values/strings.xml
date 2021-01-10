@@ -19,9 +19,10 @@
     <string name="edit_user_hint">(匿名の場合は無効)</string>
     <string name="edit_password_title">パスワード</string>
     <string name="edit_password_hint">(匿名の場合は無効)</string>
-    <string name="edit_version_title">バージョン</string>
-    <string name="edit_version_hint">バージョン</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_option_title">オプション</string>
+    <string name="edit_extension_label">保存時に拡張子を付与</string>
+
     <string name="edit_connection_uri_title">接続URI</string>
     <string name="edit_provider_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>

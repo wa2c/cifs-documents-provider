@@ -25,7 +25,8 @@ data class CifsConnection(
     val folder: String?,
     val user: String?,
     val password: String?,
-    val anonymous: Boolean
+    val anonymous: Boolean?,
+    val extension: Boolean?
 ): Parcelable, Serializable {
 
     /** RootURI (smb://) */
@@ -54,7 +55,8 @@ data class CifsConnection(
                 folder = null,
                 user = null,
                 password = null,
-                anonymous = false
+                anonymous = false,
+                extension = false
             )
         }
 
@@ -84,7 +86,8 @@ fun CifsConnection.toData(): CifsSetting {
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
-        anonymous = this.anonymous
+        anonymous = this.anonymous,
+        extension = this.extension
     )
 }
 
@@ -100,7 +103,8 @@ fun CifsSetting.toModel(): CifsConnection {
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
-        anonymous = this.anonymous
+        anonymous = this.anonymous,
+        extension = this.extension
     )
 }
 

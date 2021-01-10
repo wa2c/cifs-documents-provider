@@ -32,6 +32,7 @@ class EditViewModel @ViewModelInject constructor(
     var user = MutableLiveData<String?>()
     var password = MutableLiveData<String?>()
     var anonymous = MutableLiveData<Boolean?>()
+    var extension = MutableLiveData<Boolean?>()
 
     val connectionUri = MediatorLiveData<String>().apply {
         fun post() { postValue(CifsConnection.getConnectionUri(host.value, folder.value)) }
@@ -101,6 +102,7 @@ class EditViewModel @ViewModelInject constructor(
         user.value = connection?.user
         password.value = connection?.password
         anonymous.value = connection?.anonymous ?: false
+        extension.value = connection?.extension ?: false
     }
 
     /**
@@ -116,7 +118,8 @@ class EditViewModel @ViewModelInject constructor(
             folder = folder.value?.ifEmpty { null },
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
-            anonymous = isAnonymous
+            anonymous = isAnonymous,
+            extension = extension.value ?: false
         )
     }
 

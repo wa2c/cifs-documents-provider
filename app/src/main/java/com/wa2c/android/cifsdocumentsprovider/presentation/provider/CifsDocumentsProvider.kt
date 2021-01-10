@@ -9,9 +9,9 @@ import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
-import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
@@ -88,7 +88,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
-                cifsRepository.loadConnectionTemporal().ifEmpty { cifsRepository.loadConnection() }.forEach { connection ->
+                cifsRepository.loadConnection().forEach { connection ->
                     try {
                         val file = cifsRepository.getFile(connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
@@ -119,7 +119,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun getDocumentType(documentId: String?): String {
-        return getMimeType(documentId)
+        return documentId.mimeType
     }
 
     override fun openDocumentThumbnail(
@@ -162,7 +162,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             getCifsFileUri(documentId)
         }
         val cifsFile = runBlocking {
-            cifsRepository.createFile(uri)
+            cifsRepository.createFile(uri, mimeType)
         }
         return cifsFile?.getDocumentId()
     }
@@ -264,7 +264,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
-                    row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, getMimeType(file.name))
+                    row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, file.name.mimeType)
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
                         DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
@@ -290,12 +290,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     private fun getCifsUri(documentId: String): String {
         return "smb://${documentId}"
-    }
-
-    private fun getMimeType(fileName: String?): String {
-        val extension = fileName?.substringAfterLast('.', "")
-        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-        return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
     }
 
     private fun Array<String>?.toRootProjection(): Array<String> {

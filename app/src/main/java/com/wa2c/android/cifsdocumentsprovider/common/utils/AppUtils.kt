@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
+import android.webkit.MimeTypeMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,3 +34,13 @@ class MainCoroutineScope: CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 }
+
+/**
+ * Get mime type
+ */
+val String?.mimeType: String
+    get() = run {
+        val extension = this?.substringAfterLast('.', "") ?: ""
+        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
+    }

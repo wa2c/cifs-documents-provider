@@ -14,5 +14,6 @@ data class CifsSetting(
     val folder: String?,
     val user: String?,
     val password: String?,
-    val anonymous: Boolean
+    val anonymous: Boolean?,
+    val extension: Boolean?
 )

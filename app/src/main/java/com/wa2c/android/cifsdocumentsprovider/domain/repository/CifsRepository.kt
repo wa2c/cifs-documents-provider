@@ -1,8 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
+import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
@@ -19,11 +21,6 @@ class CifsRepository @Inject constructor(
     private val cifsClient: CifsClient,
     private val appPreferences: AppPreferences
 ) {
-    /** CIFS Connection buffer */
-    private val _connections: MutableList<CifsConnection> by lazy {
-        appPreferences.cifsSettings.map { it.toModel() }.toMutableList()
-    }
-
     /** CIFS Context cache */
     private val contextCache = CifsContextCache()
     /** SMB File cache */
@@ -46,7 +43,7 @@ class CifsRepository @Inject constructor(
      * Load connection
      */
     fun loadConnection(): List<CifsConnection>  {
-        return appPreferences.cifsSettings.let { list ->
+        return appPreferences.cifsSettingsTemporal.ifEmpty { appPreferences.cifsSettings }.let { list ->
             list.map { data -> data.toModel() }
         }
     }
@@ -55,25 +52,16 @@ class CifsRepository @Inject constructor(
      * Save connection
      */
     fun saveConnection(connection: CifsConnection) {
-        _connections.indexOfFirst { it.id == connection.id }.let { index ->
+        val connections = loadConnection().toMutableList()
+        connections.indexOfFirst { it.id == connection.id }.let { index ->
             if (index >= 0) {
-                _connections[index] = connection
+                connections[index] = connection
             } else {
-                _connections.add(connection)
+                connections.add(connection)
             }
         }
-        appPreferences.cifsSettings = _connections.map { it.toData() }
+        appPreferences.cifsSettings = connections.map { it.toData() }
     }
-
-    /**
-     * Load connection temporal
-     */
-    fun loadConnectionTemporal(): List<CifsConnection>  {
-        return appPreferences.cifsSettingsTemporal.let { list ->
-            list.map { data -> data.toModel() }
-        }
-    }
-
 
     /**
      * Save connection temporal
@@ -98,15 +86,16 @@ class CifsRepository @Inject constructor(
         } catch (e: Exception) {
             return null
         }
-        return _connections.firstOrNull { it.host == uriHost }
+        return loadConnection().firstOrNull { it.host == uriHost }
     }
 
     /**
      * Delete connection
      */
     fun deleteConnection(id: String) {
-        _connections.removeIf { it.id == id }
-        appPreferences.cifsSettings = _connections.map { it.toData() }
+        val connections = loadConnection().toMutableList()
+        connections.removeIf { it.id == id }
+        appPreferences.cifsSettings = connections.map { it.toData() }
     }
 
     /**
@@ -144,19 +133,35 @@ class CifsRepository @Inject constructor(
     /**
      * Create new file.
      */
-    suspend fun createFile(uri: String): CifsFile? {
+    suspend fun createFile(uri: String, mimeType: String?): CifsFile? {
         return withContext(Dispatchers.IO) {
+            val createUri = if (!uri.isDirectoryUri && getConnection(uri)?.extension == true) {
+                val uriMimeType = uri.mimeType
+                if (mimeType == uriMimeType) {
+                    uri
+                } else {
+                    // Add extension
+                    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+                    if (ext.isNullOrEmpty()) uri
+                    else "$uri.$ext"
+                }
+            } else {
+                uri
+            }
+
             try {
-                getSmbFile(uri)?.let {
-                    if (uri.isDirectoryUri) {
+                getSmbFile(createUri)?.let {
+                    if (createUri.isDirectoryUri) {
+                        // Directory
                         it.mkdir()
                     } else {
+                        // File
                         it.createNewFile()
                     }
                     it.toCifsFile()
                 }
             } catch (e: Exception) {
-                smbFileCache.remove(uri)
+                smbFileCache.remove(createUri)
                 throw e
             }
         }
