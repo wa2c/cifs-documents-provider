@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "632605022915",
+    "project_id": "cifs-documents-provider",
+    "storage_bucket": "cifs-documents-provider.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632605022915:android:1741aed82a7fadbc02e076",
+        "android_client_info": {
+          "package_name": "com.wa2c.android.cifsdocumentsprovider"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "632605022915-or1si1bufuktbqkg9efevmht744ho7j0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgm37P9H-aCvOxD5dPd1zxo4oqZWvdwDk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "632605022915-or1si1bufuktbqkg9efevmht744ho7j0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
