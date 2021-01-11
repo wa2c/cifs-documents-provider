@@ -64,14 +64,14 @@ class CifsRepository @Inject constructor(
     }
 
     /**
-     * Save connection temporal
+     * Save temporary connection
      */
     fun saveConnectionTemporal(connection: CifsConnection) {
         appPreferences.cifsSettingsTemporal = listOf(connection.toData())
     }
 
     /**
-     * Clear connection tempral
+     * Clear temporary connection
      */
     fun clearConnectionTemporal() {
         appPreferences.cifsSettingsTemporal = emptyList()

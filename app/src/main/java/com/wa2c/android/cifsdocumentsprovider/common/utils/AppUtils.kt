@@ -29,7 +29,7 @@ fun <K, V, T : MutableMap<K, V>> T.renew(m: Map<K, V>): T {
  * Main Coroutine Scope
  */
 class MainCoroutineScope: CoroutineScope {
-    val job = Job()
+    private val job = Job()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job

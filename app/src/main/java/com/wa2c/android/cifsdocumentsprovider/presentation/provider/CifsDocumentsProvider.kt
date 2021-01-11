@@ -200,7 +200,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): String? {
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
         val targetFile = runBlocking {
-            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
+            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
         }
         return targetFile?.getDocumentId()
     }

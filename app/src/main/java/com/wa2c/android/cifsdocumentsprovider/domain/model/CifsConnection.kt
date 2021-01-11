@@ -108,8 +108,6 @@ fun CifsSetting.toModel(): CifsConnection {
     )
 }
 
-private const val KEY = ""
-
 private const val AES = "AES"
 
 /**
