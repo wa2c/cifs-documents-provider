@@ -25,6 +25,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "K", "\"com.wa2c.android\"")
+
+        archivesBaseName = "CIFSDocumentsProvider-${versionName}"
     }
 
     buildTypes {
@@ -43,6 +45,29 @@ android {
 
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+
+    // output file
+    applicationVariants.all { variant ->
+        if (variant.buildType.name == "release") {
+            def newName = "CIFSDocumentsProvider ${defaultConfig.versionName}"
+            variant.outputs.all {
+                // filename
+                outputFileName = "${newName}.aab"
+                // mapping
+                variant.assembleProvider.get().doLast {
+                    if ( variant.mappingFile != null && variant.mappingFile.exists() ) {
+                        copy {
+                            from variant.mappingFile
+                            into outputFile.parent
+                            rename { String fileName ->
+                                "${newName} mapping.txt"
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
