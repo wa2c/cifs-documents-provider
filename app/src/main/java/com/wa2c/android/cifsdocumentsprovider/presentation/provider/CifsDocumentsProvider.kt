@@ -9,9 +9,11 @@ import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import com.wa2c.android.cifsdocumentsprovider.AppModule
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
@@ -27,12 +29,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Context */
     private val providerContext: Context by lazy { context!! }
-
+    /** App Preferences */
     private val appPreferences: AppPreferences by lazy { AppPreferences(providerContext) }
+    /** Storage Manager */
+    private val storageManager: StorageManager by lazy { AppModule.provideStorageManager(providerContext) }
 
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
-        CifsRepository(CifsClient(), appPreferences)
+        CifsRepository(CifsClient(), appPreferences, storageManager)
     }
 
     /** Handler thread */
@@ -136,18 +140,12 @@ class CifsDocumentsProvider : DocumentsProvider() {
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
         val uri = documentId?.let { getCifsFileUri(it) } ?: return null
-        val file = runBlocking {
-            cifsRepository.getSmbFile(uri)
-        } ?: return null
-
-        val thread = HandlerThread(this.javaClass.simpleName).also { it.start() }
-        handlerThread = thread
-
-        return (providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager).openProxyFileDescriptor(
-            ParcelFileDescriptor.parseMode(mode),
-            CifsProxyFileCallback(file, AccessMode.fromSafMode(mode)),
-            Handler(thread.looper)
-        )
+        val accessMode = AccessMode.fromSafMode(mode)
+        val thread = HandlerThread(this.javaClass.simpleName).also {
+            it.start()
+            handlerThread = it
+        }
+        return runBlocking { cifsRepository.getFileDescriptor(uri, accessMode, thread) }
     }
 
     override fun createDocument(

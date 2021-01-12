@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.provider
+package com.wa2c.android.cifsdocumentsprovider.common.values
 
 /**
  * Access Mode

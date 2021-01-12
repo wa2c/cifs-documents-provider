@@ -1,10 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.ParcelFileDescriptor
+import android.os.storage.StorageManager
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
@@ -19,7 +24,8 @@ import javax.inject.Singleton
 @Singleton
 class CifsRepository @Inject constructor(
     private val cifsClient: CifsClient,
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val storageManager: StorageManager
 ) {
     /** CIFS Context cache */
     private val contextCache = CifsContextCache()
@@ -27,6 +33,12 @@ class CifsRepository @Inject constructor(
     private val smbFileCache = SmbFileCache()
     /** CIFS File cache */
     private val cifsFileCache = CifsFileCache()
+
+    /**
+     * True if directory URI
+     */
+    private val String.isDirectoryUri: Boolean
+        get() = this.endsWith('/')
 
     /**
      * Get CIFS Context
@@ -273,7 +285,7 @@ class CifsRepository @Inject constructor(
     /**
      * Get root SMB file
      */
-    suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
+    private suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
                 cifsClient.getFile(connection.rootUri, getCifsContext(connection)).also {
@@ -289,7 +301,7 @@ class CifsRepository @Inject constructor(
     /**
      * Get SMB file
      */
-    suspend fun getSmbFile(uri: String): SmbFile? {
+    private suspend fun getSmbFile(uri: String): SmbFile? {
         return smbFileCache[uri] ?: withContext(Dispatchers.IO) {
             getConnection(uri)?.let {
                 cifsClient.getFile(uri, getCifsContext(it)).also { file ->
@@ -320,9 +332,18 @@ class CifsRepository @Inject constructor(
     }
 
     /**
-     * True if directory URI
+     * Get ParcelFileDescriptor
      */
-    private val String.isDirectoryUri: Boolean
-        get() = this.endsWith('/')
+    suspend fun getFileDescriptor(uri: String, mode: AccessMode, thread: HandlerThread): ParcelFileDescriptor? {
+        return withContext(Dispatchers.IO) {
+            getSmbFile(uri)?.let { file ->
+                storageManager.openProxyFileDescriptor(
+                    ParcelFileDescriptor.parseMode(mode.safMode),
+                    CifsProxyFileCallback(file, mode),
+                    Handler(thread.looper)
+                )
+            }
+        }
+    }
 
 }
