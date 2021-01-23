@@ -22,8 +22,8 @@ class EditViewModel @ViewModelInject constructor(
     private val cifsRepository: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<Nav>()
-    val navigationEvent: LiveData<Nav> = _navigationEvent
+    private val _navigationEvent = LiveEvent<EditNav>()
+    val navigationEvent: LiveData<EditNav> = _navigationEvent
 
     var name = MutableLiveData<String?>()
     var domain = MutableLiveData<String?>()
@@ -136,9 +136,9 @@ class EditViewModel @ViewModelInject constructor(
                     if (!isConnected) throw IOException()
                 }
             }.onSuccess {
-                _navigationEvent.value = Nav.CheckConnectionResult(true)
+                _navigationEvent.value = EditNav.CheckConnectionResult(true)
             }.onFailure {
-                _navigationEvent.value = Nav.CheckConnectionResult(false)
+                _navigationEvent.value = EditNav.CheckConnectionResult(false)
             }
         }
     }
@@ -156,9 +156,9 @@ class EditViewModel @ViewModelInject constructor(
                     CifsConnection.getProviderUri(host.value, folder.value)
                 }
             }.onSuccess {
-                _navigationEvent.value = Nav.SelectDirectory(it)
+                _navigationEvent.value = EditNav.SelectDirectory(it)
             }.onFailure {
-                _navigationEvent.value = Nav.CheckConnectionResult(false)
+                _navigationEvent.value = EditNav.CheckConnectionResult(false)
             }
         }
     }
@@ -170,7 +170,7 @@ class EditViewModel @ViewModelInject constructor(
     fun onClickDelete() {
         launch {
             delete()
-            _navigationEvent.value = Nav.Back()
+            _navigationEvent.value = EditNav.Back()
         }
     }
 
@@ -182,9 +182,9 @@ class EditViewModel @ViewModelInject constructor(
             runCatching {
                 save()
             }.onSuccess {
-                _navigationEvent.value = Nav.SaveResult(true)
+                _navigationEvent.value = EditNav.SaveResult(true)
             }.onFailure {
-                _navigationEvent.value = Nav.SaveResult(false)
+                _navigationEvent.value = EditNav.SaveResult(false)
             }
         }
     }
@@ -193,14 +193,7 @@ class EditViewModel @ViewModelInject constructor(
      * Back Click
      */
     fun onClickBack() {
-        _navigationEvent.value = Nav.Back(initConnection == null || initConnection != createCifsConnection())
-    }
-
-    sealed class Nav {
-        data class Back(val changed: Boolean = false) : Nav()
-        data class SelectDirectory(val uri: String) : Nav()
-        data class CheckConnectionResult(val result: Boolean): Nav()
-        data class SaveResult(val result: Boolean): Nav()
+        _navigationEvent.value = EditNav.Back(initConnection == null || initConnection != createCifsConnection())
     }
 
     companion object {

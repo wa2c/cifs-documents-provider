@@ -4,6 +4,9 @@
     <string name="app_summary">Access the shared folder.</string>
 
     <!-- Main Screen -->
+    <string name="main_open_file">Open</string>
+    <string name="main_open_file_ng_message">Add any connection.</string>
+    <string name="main_open_file_result_ng_message">Select from added shared folders.</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">Connection</string>

@@ -113,9 +113,9 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun onNavigate(event: EditViewModel.Nav) {
+    private fun onNavigate(event: EditNav) {
         when (event) {
-            is EditViewModel.Nav.Back -> {
+            is EditNav.Back -> {
                 if (event.changed) {
                     navigateSafe(
                         MessageDialogDirections.actionGlobalMessageDialog(
@@ -133,18 +133,18 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                     findNavController().popBackStack(R.id.editFragment, true)
                 }
             }
-            is EditViewModel.Nav.SelectDirectory -> {
+            is EditNav.SelectDirectory -> {
                 // Select directory
                 directoryLauncher.launch(Uri.parse(event.uri))
             }
-            is EditViewModel.Nav.CheckConnectionResult -> {
+            is EditNav.CheckConnectionResult -> {
                 // Connection check
                 val message =
                     if (event.result) getString(R.string.edit_check_connection_ok_message)
                     else getString(R.string.edit_check_connection_ng_message)
                 toast(message)
             }
-            is EditViewModel.Nav.SaveResult -> {
+            is EditNav.SaveResult -> {
                 if (event.result) {
                     findNavController().popBackStack(R.id.editFragment, true)
                 } else {

@@ -40,7 +40,7 @@ class MainCoroutineScope: CoroutineScope {
  */
 val String?.mimeType: String
     get() = run {
-        val extension = this?.substringAfterLast('.', "") ?: ""
+        val extension = this?.substringAfterLast('.', "") ?: "*/*"
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
     }

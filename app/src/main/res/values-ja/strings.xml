@@ -4,6 +4,9 @@
     <string name="app_summary">共有フォルダにアクセスします。</string>
 
     <!-- Main Screen -->
+    <string name="main_open_file">開く</string>
+    <string name="main_open_file_ng_message">接続情報を登録してください。</string>
+    <string name="main_open_file_result_ng_message">登録済みの共有フォルダから選択してください。</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">接続情報</string>

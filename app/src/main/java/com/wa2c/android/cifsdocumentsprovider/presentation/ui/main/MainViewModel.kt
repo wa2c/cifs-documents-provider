@@ -17,8 +17,8 @@ class MainViewModel @ViewModelInject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<Nav>()
-    val navigationEvent: LiveData<Nav> = _navigationEvent
+    private val _navigationEvent = LiveEvent<MainNav>()
+    val navigationEvent: LiveData<MainNav> = _navigationEvent
 
     private val _cifsConnection: MutableLiveData<List<CifsConnection>> = MutableLiveData()
     val cifsConnections: LiveData<List<CifsConnection>> = _cifsConnection
@@ -28,11 +28,11 @@ class MainViewModel @ViewModelInject constructor(
     }
 
     fun onClickItem(connection: CifsConnection?) {
-        _navigationEvent.value = Nav.Edit(connection)
+        _navigationEvent.value = MainNav.Edit(connection)
     }
 
-    sealed class Nav {
-        data class Edit(val connection: CifsConnection?): Nav()
+    fun onClickOpenFile() {
+        _navigationEvent.value = MainNav.OpenFile(!cifsRepository.loadConnection().isEmpty())
     }
 
 }
