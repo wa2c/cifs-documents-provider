@@ -271,10 +271,14 @@ class CifsRepository @Inject constructor(
     /**
      * Check setting connectivity.
      */
-    suspend fun checkConnection(connection: CifsConnection): Boolean {
+    suspend fun checkConnection(connection: CifsConnection, checkFolder: Boolean = true): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).exists()
+                if (checkFolder) {
+                    cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).exists()
+                } else {
+                    cifsClient.getFile(connection.rootUri, getCifsContext(connection)).exists()
+                }
             } catch (e: Exception) {
                 logW(e)
                 false

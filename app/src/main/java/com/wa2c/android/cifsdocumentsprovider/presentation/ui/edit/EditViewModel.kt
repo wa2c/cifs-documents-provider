@@ -67,6 +67,8 @@ class EditViewModel @ViewModelInject constructor(
             cifsRepository.saveConnection(it)
             currentId = it.id
             initConnection = it
+        } ?: run {
+            throw IOException()
         }
     }
 
@@ -146,9 +148,18 @@ class EditViewModel @ViewModelInject constructor(
      */
     fun onClickSelectDirectory() {
         launch {
-            saveTemporal()
-            val uri = CifsConnection.getProviderUri(host.value, folder.value)
-            _navigationEvent.value = Nav.SelectDirectory(uri)
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    val isConnected = createCifsConnection()?.let { cifsRepository.checkConnection(it, false) } ?: false
+                    if (!isConnected) throw IOException()
+                    saveTemporal()
+                    CifsConnection.getProviderUri(host.value, folder.value)
+                }
+            }.onSuccess {
+                _navigationEvent.value = Nav.SelectDirectory(it)
+            }.onFailure {
+                _navigationEvent.value = Nav.CheckConnectionResult(false)
+            }
         }
     }
 
@@ -168,19 +179,28 @@ class EditViewModel @ViewModelInject constructor(
      */
     fun onClickAccept() {
         launch {
-            save()
-            _navigationEvent.value = Nav.Back()
+            runCatching {
+                save()
+            }.onSuccess {
+                _navigationEvent.value = Nav.SaveResult(true)
+            }.onFailure {
+                _navigationEvent.value = Nav.SaveResult(false)
+            }
         }
     }
 
+    /**
+     * Back Click
+     */
     fun onClickBack() {
-        _navigationEvent.value = Nav.Back(initConnection != createCifsConnection())
+        _navigationEvent.value = Nav.Back(initConnection == null || initConnection != createCifsConnection())
     }
 
     sealed class Nav {
         data class Back(val changed: Boolean = false) : Nav()
-        data class  SelectDirectory(val uri: String) : Nav()
+        data class SelectDirectory(val uri: String) : Nav()
         data class CheckConnectionResult(val result: Boolean): Nav()
+        data class SaveResult(val result: Boolean): Nav()
     }
 
     companion object {
