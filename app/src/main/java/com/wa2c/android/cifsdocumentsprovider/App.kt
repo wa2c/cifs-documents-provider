@@ -18,8 +18,6 @@ class App: Application() {
             Timber.plant(Timber.DebugTree())
         } else {
             Timber.plant(CrashlyticsTree())
-
         }
-
     }
 }
