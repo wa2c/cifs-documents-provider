@@ -31,7 +31,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     /** View Model */
     private val viewModel by viewModels<MainViewModel>()
     /** Binding */
-    private val binding: FragmentMainBinding by viewBinding()
+    private val binding: FragmentMainBinding? by viewBinding()
 
     /** Select Directory Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -75,7 +75,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             it.setDisplayShowTitleEnabled(true)
         }
 
-        binding.let {
+        binding?.let {
             it.viewModel = viewModel
             it.cifsList.addItemDecoration(
                 DividerItemDecoration(
@@ -126,7 +126,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     }
 
     private fun onLoadConnection(list: List<CifsConnection>) {
-        binding.cifsList.adapter = CifsListAdapter(viewModel, list)
+        binding?.cifsList?.adapter = CifsListAdapter(viewModel, list)
     }
 
 }

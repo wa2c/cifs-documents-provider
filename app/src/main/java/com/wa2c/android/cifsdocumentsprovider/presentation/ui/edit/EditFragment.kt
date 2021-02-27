@@ -35,7 +35,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     /** View Model */
     private val viewModel by viewModels<EditViewModel>()
     /** Binding */
-    private val binding: FragmentEditBinding by viewBinding()
+    private val binding: FragmentEditBinding? by viewBinding()
 
     private val args: EditFragmentArgs by navArgs()
 
@@ -50,7 +50,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             val message = getString(R.string.edit_select_directory_ng_message, viewModel.name.value)
             toast(message)
         } else {
-            binding.editDirectoryEditText.setText(directory)
+            binding?.editDirectoryEditText?.setText(directory)
         }
     }
 
@@ -72,7 +72,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         })
 
         binding.let {
-            it.viewModel = viewModel
+            it?.viewModel = viewModel
         }
 
         viewModel.let {
