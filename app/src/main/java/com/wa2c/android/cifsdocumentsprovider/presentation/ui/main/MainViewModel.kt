@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
-import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,12 +7,15 @@ import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 
 /**
  * Main Screen ViewModel
  */
-class MainViewModel @ViewModelInject constructor(
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
