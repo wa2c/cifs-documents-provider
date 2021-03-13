@@ -64,24 +64,24 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
 
     // Kotlin
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutine_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutine}"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
 
     // Lifecycle
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:${versions.lifecycle}"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.lifecycle}"
 
     // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:$navigation_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$navigation_version"
+    implementation "androidx.navigation:navigation-fragment-ktx:${versions.navigation}"
+    implementation "androidx.navigation:navigation-ui-ktx:${versions.navigation}"
 
     // Dagger
-    implementation "com.google.dagger:hilt-android:$dagger_hilt_version"
-    kapt "com.google.dagger:hilt-android-compiler:$dagger_hilt_version"
-    implementation "androidx.hilt:hilt-lifecycle-viewmodel:$dagger_hilt_view_model_version"
-    kapt "androidx.hilt:hilt-compiler:$dagger_hilt_view_model_version"
+    implementation "com.google.dagger:hilt-android:${versions.dagger_hilt}"
+    kapt "com.google.dagger:hilt-android-compiler:${versions.dagger_hilt}"
+    implementation "androidx.hilt:hilt-lifecycle-viewmodel:${versions.dagger_hilt_view_model}"
+    kapt "androidx.hilt:hilt-compiler:${versions.dagger_hilt_view_model}"
 
     // LiveEvent
     implementation "com.github.hadilq.liveevent:liveevent:1.2.0"
