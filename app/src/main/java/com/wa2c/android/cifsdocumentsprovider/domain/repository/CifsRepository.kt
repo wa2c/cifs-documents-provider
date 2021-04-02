@@ -292,7 +292,7 @@ class CifsRepository @Inject constructor(
     private suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.rootUri, getCifsContext(connection)).also {
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).also {
                     smbFileCache.put(connection, it)
                 }
             } catch (e: Exception) {

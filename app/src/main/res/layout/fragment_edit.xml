@@ -103,6 +103,34 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="0"
                     android:gravity="center_vertical|end"
+                    android:text="@string/edit_port_title" />
+
+                <EditText
+                    android:id="@+id/edit_port_edit_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:layout_weight="1"
+                    android:maxLength="5"
+                    android:inputType="number"
+                    android:hint="@string/edit_port_hint"
+                    android:importantForAutofill="no"
+                    android:text="@={viewModel.port}" />
+
+            </TableRow>
+
+
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="0"
+                    android:gravity="center_vertical|end"
                     android:text="@string/edit_user_title" />
 
                 <EditText

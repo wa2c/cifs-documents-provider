@@ -11,6 +11,7 @@ data class CifsSetting(
     val name: String,
     val domain: String?,
     val host: String,
+    val port: Int? = null, // Initialize for old version
     val folder: String?,
     val user: String?,
     val password: String?,

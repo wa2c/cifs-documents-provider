@@ -22,6 +22,7 @@ data class CifsConnection(
     val name: String,
     val domain: String?,
     val host: String,
+    val port: String?,
     val folder: String?,
     val user: String?,
     val password: String?,
@@ -31,11 +32,11 @@ data class CifsConnection(
 
     /** RootURI (smb://) */
     val rootUri: String
-        get() = getConnectionUri(host, null)
+        get() = getConnectionUri(host, port, null)
 
     /** Connection URI (smb://) */
     val connectionUri: String
-        get() = getConnectionUri(host, folder)
+        get() = getConnectionUri(host, port, folder)
 
     companion object {
 
@@ -52,6 +53,7 @@ data class CifsConnection(
                 name = "",
                 domain = null,
                 host = "",
+                port = null,
                 folder = null,
                 user = null,
                 password = null,
@@ -60,14 +62,18 @@ data class CifsConnection(
             )
         }
 
-        fun getConnectionUri(host: CharSequence?, folder: CharSequence?): String {
-            return if (host.isNullOrEmpty()) ""
-            else "smb://" + Paths.get( host.toString(), folder?.toString() ?: "").toString() + "/"
+        fun getConnectionUri(host: String?, port: String?, folder: String?): String {
+            return host?.let { "smb://" + getConnectionPath(it, port?.toIntOrNull(), folder, true) } ?: ""
         }
 
-        fun getProviderUri(host: CharSequence?, folder: CharSequence?): String {
+        fun getConnectionPath(host: String, port: Int?, folder: String?, isDirectory: Boolean): String {
+            val authority = host + if (port == null || port <= 0) "" else ":$port"
+            return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+        }
+
+        fun getProviderUri(host: String?, folder: String?): String {
             return if (host.isNullOrEmpty()) ""
-            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host.toString(), folder?.toString() ?: "").toString() + "/")
+            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host.toString(), folder ?: "").toString() + "/")
         }
 
     }
@@ -83,6 +89,7 @@ fun CifsConnection.toData(): CifsSetting {
         name = this.name,
         domain = this.domain,
         host = this.host,
+        port = this.port?.toIntOrNull(),
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
@@ -100,6 +107,7 @@ fun CifsSetting.toModel(): CifsConnection {
         name = this.name,
         domain = this.domain,
         host = this.host,
+        port = this.port?.toString(),
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },

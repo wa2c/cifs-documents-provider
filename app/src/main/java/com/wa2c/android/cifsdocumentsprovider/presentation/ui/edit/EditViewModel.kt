@@ -30,6 +30,7 @@ class EditViewModel @Inject constructor(
     var name = MutableLiveData<String?>()
     var domain = MutableLiveData<String?>()
     var host = MutableLiveData<String?>()
+    var port = MutableLiveData<String?>()
     var folder = MutableLiveData<String?>()
     var user = MutableLiveData<String?>()
     var password = MutableLiveData<String?>()
@@ -37,8 +38,9 @@ class EditViewModel @Inject constructor(
     var extension = MutableLiveData<Boolean?>()
 
     val connectionUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getConnectionUri(host.value, folder.value)) }
+        fun post() { postValue(CifsConnection.getConnectionUri(host.value, port.value, folder.value)) }
         addSource(host) { post() }
+        addSource(port) { post() }
         addSource(folder) { post() }
     }
 
@@ -102,6 +104,7 @@ class EditViewModel @Inject constructor(
         name.value = connection?.name
         domain.value = connection?.domain
         host.value = connection?.host
+        port.value = connection?.port
         folder.value = connection?.folder
         user.value = connection?.user
         password.value = connection?.password
@@ -119,6 +122,7 @@ class EditViewModel @Inject constructor(
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
+            port = port.value?.ifEmpty { null },
             folder = folder.value?.ifEmpty { null },
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },

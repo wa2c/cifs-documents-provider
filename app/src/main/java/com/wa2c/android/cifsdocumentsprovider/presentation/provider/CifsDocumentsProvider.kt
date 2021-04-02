@@ -17,6 +17,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import kotlinx.coroutines.runBlocking
@@ -310,7 +311,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
      * Get Document ID from CIFS file
      */
     private fun CifsFile.getDocumentId(): String {
-        return Paths.get(this.server, this.uri.path).toString() + if (this.isDirectory) "/" else ""
+        return CifsConnection.getConnectionPath(this.server, this.uri.port, this.uri.path, this.isDirectory)
     }
 
     /**
