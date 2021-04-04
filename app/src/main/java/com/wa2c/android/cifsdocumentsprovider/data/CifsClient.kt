@@ -27,6 +27,7 @@ class CifsClient @Inject constructor() {
             setProperty("jcifs.smb.client.maxVersion", "SMB300")
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
             setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
+            setProperty("jcifs.smb.client.dfs.disabled", true.toString())
         }
 
         return  CIFSContextWrapper(BaseContext(PropertyConfiguration(property))
