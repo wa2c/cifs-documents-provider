@@ -9,6 +9,7 @@ CIFS Documents Provider
 
 * [Google Play](https://play.google.com/store/apps/details?id=com.wa2c.android.cifsdocumentsprovider)
 * [Source Code (GitHub)](https://github.com/wa2c/cifs-documents-provider)
+* [Manual](https://github.com/wa2c/cifs-documents-provider/wiki)
 
 ## Licence
 
