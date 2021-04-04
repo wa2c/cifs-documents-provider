@@ -115,7 +115,7 @@ class CifsRepository @Inject constructor(
      * Get CIFS File from connection.`
      */
     suspend fun getFile(connection: CifsConnection): CifsFile? {
-        return cifsFileCache.get(connection) ?: getSmbFile(connection)?.toCifsFile()
+        return cifsFileCache.get(connection) ?: getSmbFile(connection)?.toCifsFile(true)
     }
 
     /**
@@ -320,17 +320,19 @@ class CifsRepository @Inject constructor(
 
     /**
      * Convert SmbFile to CifsFile
+     * @param isTop True if top ( connection )
      */
-    private suspend fun SmbFile.toCifsFile(): CifsFile {
+    private suspend fun SmbFile.toCifsFile(isTop: Boolean = false): CifsFile {
         val urlText = url.toString()
         return cifsFileCache.get(urlText) ?: withContext(Dispatchers.IO) {
             CifsFile(
                 name = name.trim('/'),
                 server = server,
                 uri = Uri.parse(urlText),
-                size = length(),
-                lastModified = lastModified,
-                isDirectory = urlText.isDirectoryUri
+                size = if (isTop) 0 else length(),
+                lastModified = if (isTop) 0 else lastModified,
+                isDirectory = if (isTop) true else urlText.isDirectoryUri,
+                isTop = isTop
             ).let {
                 cifsFileCache.put(urlText, it)
                 it

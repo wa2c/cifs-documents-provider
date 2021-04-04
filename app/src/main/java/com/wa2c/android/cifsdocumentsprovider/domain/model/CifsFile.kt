@@ -11,5 +11,6 @@ data class CifsFile(
     val uri: Uri,
     val size: Long = 0,
     val lastModified: Long = 0,
-    val isDirectory: Boolean
+    val isDirectory: Boolean,
+    val isTop: Boolean
 )
