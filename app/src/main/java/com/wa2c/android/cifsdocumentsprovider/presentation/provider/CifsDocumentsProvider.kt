@@ -228,7 +228,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     private fun includeFile(cursor: MatrixCursor, file: CifsFile?, name: String? = null) {
         cursor.newRow().let { row ->
-            row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file?.getDocumentId() ?: ERROR_DOCUMENT_ID)
             when {
                 file == null -> {
                     // Error

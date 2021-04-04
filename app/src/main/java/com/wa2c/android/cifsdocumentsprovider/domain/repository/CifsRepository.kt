@@ -6,6 +6,7 @@ import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -275,8 +276,10 @@ class CifsRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 if (checkFolder) {
+                    logD("Connection check: ${connection.connectionUri}")
                     cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).exists()
                 } else {
+                    logD("Connection check: ${connection.rootUri}")
                     cifsClient.getFile(connection.rootUri, getCifsContext(connection)).exists()
                 }
             } catch (e: Exception) {

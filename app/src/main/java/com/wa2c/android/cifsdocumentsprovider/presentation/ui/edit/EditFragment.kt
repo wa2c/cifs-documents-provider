@@ -42,7 +42,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     /** Select Directory Picker */
     private val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         logD(uri)
-        viewModel.clearTemporal()
+        viewModel.clearSelectDirectoryConnection()
         if (uri == null) return@registerForActivityResult
 
         val directory = Uri.decode(uri.toString().substringAfter(CifsConnection.getProviderUri(viewModel.host.value, null), "")).trim('/')
