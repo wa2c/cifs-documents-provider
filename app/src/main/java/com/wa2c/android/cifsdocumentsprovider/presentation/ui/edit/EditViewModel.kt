@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -31,11 +32,12 @@ class EditViewModel @Inject constructor(
     var domain = MutableLiveData<String?>()
     var host = MutableLiveData<String?>()
     var port = MutableLiveData<String?>()
+    var enableDfs = MutableLiveData<Boolean>()
     var folder = MutableLiveData<String?>()
     var user = MutableLiveData<String?>()
     var password = MutableLiveData<String?>()
-    var anonymous = MutableLiveData<Boolean?>()
-    var extension = MutableLiveData<Boolean?>()
+    var anonymous = MutableLiveData<Boolean>()
+    var extension = MutableLiveData<Boolean>()
 
     val connectionUri = MediatorLiveData<String>().apply {
         fun post() { postValue(CifsConnection.getConnectionUri(host.value, port.value, folder.value)) }
@@ -106,6 +108,7 @@ class EditViewModel @Inject constructor(
         domain.value = connection?.domain
         host.value = connection?.host
         port.value = connection?.port
+        enableDfs.value = connection?.enableDfs ?: false
         folder.value = connection?.folder
         user.value = connection?.user
         password.value = connection?.password
@@ -119,11 +122,12 @@ class EditViewModel @Inject constructor(
     private fun createCifsConnection(): CifsConnection? {
         val isAnonymous = anonymous.value ?: false
         return CifsConnection(
-            id = if (isNew) CifsConnection.newId() else currentId,
+            id = if (isNew) UUID.randomUUID().toString() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
             port = port.value?.ifEmpty { null },
+            enableDfs = enableDfs.value ?: false,
             folder = folder.value?.ifEmpty { null },
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },

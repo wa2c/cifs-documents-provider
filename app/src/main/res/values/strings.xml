@@ -17,7 +17,8 @@
     <string name="edit_host_title">Host</string>
     <string name="edit_host_hint">IP Address / Host</string>
     <string name="edit_port_title">Port</string>
-    <string name="edit_port_hint">445 if empty</string>
+    <string name="edit_port_hint">Default if empty</string>
+    <string name="edit_enable_dfs_label">Enable DFS (Distributed File System)</string>
     <string name="edit_folder_title">Folder</string>
     <string name="edit_folder_hint">\'/\' if empty</string>
     <string name="edit_user_title">User</string>

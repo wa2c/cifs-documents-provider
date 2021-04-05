@@ -17,7 +17,8 @@
     <string name="edit_host_title">ホスト</string>
     <string name="edit_host_hint">IPアドレス/ホスト名</string>
     <string name="edit_port_title">ポート</string>
-    <string name="edit_port_hint">未入力の場合は445</string>
+    <string name="edit_port_hint">未入力の場合は標準ポート</string>
+    <string name="edit_enable_dfs_label">DFS(Distributed File System)利用</string>
     <string name="edit_folder_title">フォルダ</string>
     <string name="edit_folder_hint">未入力の場合は/</string>
     <string name="edit_user_title">ユーザ名</string>

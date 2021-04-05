@@ -23,11 +23,12 @@ data class CifsConnection(
     val domain: String?,
     val host: String,
     val port: String?,
+    val enableDfs: Boolean,
     val folder: String?,
     val user: String?,
     val password: String?,
-    val anonymous: Boolean?,
-    val extension: Boolean?
+    val anonymous: Boolean,
+    val extension: Boolean,
 ): Parcelable, Serializable {
 
     /** RootURI (smb://) */
@@ -39,28 +40,6 @@ data class CifsConnection(
         get() = getConnectionUri(host, port, folder)
 
     companion object {
-
-        fun newId(): String {
-            return UUID.randomUUID().toString()
-        }
-
-        /**
-         * Create new data
-         */
-        fun new(): CifsConnection {
-            return CifsConnection(
-                id = newId(),
-                name = "",
-                domain = null,
-                host = "",
-                port = null,
-                folder = null,
-                user = null,
-                password = null,
-                anonymous = false,
-                extension = false
-            )
-        }
 
         fun getConnectionUri(host: String?, port: String?, folder: String?): String {
             return host?.let { "smb://" + getConnectionPath(it, port?.toIntOrNull(), folder, true) } ?: ""
@@ -90,11 +69,12 @@ fun CifsConnection.toData(): CifsSetting {
         domain = this.domain,
         host = this.host,
         port = this.port?.toIntOrNull(),
+        enableDfs = this.enableDfs,
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous,
-        extension = this.extension
+        extension = this.extension,
     )
 }
 
@@ -108,11 +88,12 @@ fun CifsSetting.toModel(): CifsConnection {
         domain = this.domain,
         host = this.host,
         port = this.port?.toString(),
+        enableDfs = this.enableDfs ?: false,
         folder = this.folder,
         user = this.user,
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
-        anonymous = this.anonymous,
-        extension = this.extension
+        anonymous = this.anonymous ?: false,
+        extension = this.extension ?: false
     )
 }
 

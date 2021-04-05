@@ -46,8 +46,10 @@ class CifsRepository @Inject constructor(
      */
     private suspend fun getCifsContext(connection: CifsConnection): CIFSContext {
         return contextCache[connection] ?: withContext(Dispatchers.IO) {
-            cifsClient.getConnection(connection.user, connection.password, connection.domain).also {
-                contextCache.put(connection, it)
+            connection.let { con ->
+                cifsClient.getConnection(con.user, con.password, con.domain, con.enableDfs).also {
+                    contextCache.put(connection, it)
+                }
             }
         }
     }

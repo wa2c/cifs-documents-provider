@@ -9,12 +9,13 @@ import kotlinx.serialization.Serializable
 data class CifsSetting(
     val id: String,
     val name: String,
-    val domain: String?,
+    val domain: String? = null,
     val host: String,
-    val port: Int? = null, // Initialize for old version
-    val folder: String?,
-    val user: String?,
-    val password: String?,
-    val anonymous: Boolean?,
-    val extension: Boolean?
+    val port: Int? = null,
+    val enableDfs: Boolean? = null,
+    val folder: String? = null,
+    val user: String? = null,
+    val password: String? = null,
+    val anonymous: Boolean? = null,
+    val extension: Boolean? = null,
 )

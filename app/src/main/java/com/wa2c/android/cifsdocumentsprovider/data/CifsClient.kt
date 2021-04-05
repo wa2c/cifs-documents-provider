@@ -21,13 +21,13 @@ class CifsClient @Inject constructor() {
     /**
      * Get auth by user. Anonymous if user and password are empty.
      */
-    fun getConnection(user: String? = null, password: String? = null, domain: String? = null): CIFSContext {
+    fun getConnection(user: String? = null, password: String? = null, domain: String? = null, enableDfs: Boolean): CIFSContext {
         val property = Properties().apply {
             setProperty("jcifs.smb.client.minVersion", "SMB210")
             setProperty("jcifs.smb.client.maxVersion", "SMB300")
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
             setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
-            setProperty("jcifs.smb.client.dfs.disabled", true.toString())
+            setProperty("jcifs.smb.client.dfs.disabled", (!enableDfs).toString())
         }
 
         return  CIFSContextWrapper(BaseContext(PropertyConfiguration(property))
