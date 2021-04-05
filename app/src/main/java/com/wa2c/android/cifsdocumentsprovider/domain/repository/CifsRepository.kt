@@ -279,10 +279,12 @@ class CifsRepository @Inject constructor(
             try {
                 if (checkFolder) {
                     logD("Connection check: ${connection.connectionUri}")
-                    cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).exists()
+                    cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
+                    true
                 } else {
                     logD("Connection check: ${connection.rootUri}")
-                    cifsClient.getFile(connection.rootUri, getCifsContext(connection)).exists()
+                    cifsClient.getFile(connection.rootUri, getCifsContext(connection)).list()
+                    true
                 }
             } catch (e: Exception) {
                 logW(e)
