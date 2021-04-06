@@ -95,13 +95,8 @@ class CifsRepository @Inject constructor(
     /**
      * Get connection from URI
      */
-    private fun getConnection(uri: String): CifsConnection? {
-        val uriHost = try {
-            Uri.parse(uri).host
-        } catch (e: Exception) {
-            return null
-        }
-        return loadConnection().firstOrNull { it.host == uriHost }
+    private fun getConnection(uriText: String): CifsConnection? {
+        return loadConnection().firstOrNull { uriText.indexOf(it.connectionUri) == 0 }
     }
 
     /**

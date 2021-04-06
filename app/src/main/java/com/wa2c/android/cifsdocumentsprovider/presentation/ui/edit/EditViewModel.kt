@@ -47,7 +47,7 @@ class EditViewModel @Inject constructor(
     }
 
     val providerUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getProviderUri(host.value, folder.value)) }
+        fun post() { postValue(CifsConnection.getProviderUri(host.value, port.value, folder.value)) }
         addSource(host) { post() }
         addSource(folder) { post() }
     }
@@ -164,7 +164,7 @@ class EditViewModel @Inject constructor(
                     val isConnected = createCifsConnection()?.let { cifsRepository.checkConnection(it, false) } ?: false
                     if (!isConnected) throw IOException()
                     saveSelectDirectoryConnection()
-                    CifsConnection.getProviderUri(host.value, folder.value)
+                    CifsConnection.getProviderUri(host.value, port.value, folder.value)
                 }
             }.onSuccess {
                 _navigationEvent.value = EditNav.SelectDirectory(it)

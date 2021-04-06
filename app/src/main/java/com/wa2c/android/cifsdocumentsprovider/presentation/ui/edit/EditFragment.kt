@@ -45,7 +45,8 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         viewModel.clearSelectDirectoryConnection()
         if (uri == null) return@registerForActivityResult
 
-        val directory = Uri.decode(uri.toString().substringAfter(CifsConnection.getProviderUri(viewModel.host.value, null), "")).trim('/')
+        val providerUri = CifsConnection.getProviderUri(viewModel.host.value, viewModel.port.value, null)
+        val directory = Uri.decode(uri.toString().substringAfter(providerUri, "")).trim('/')
         if (directory.isEmpty()) {
             val message = getString(R.string.edit_select_directory_ng_message, viewModel.name.value)
             toast(message)

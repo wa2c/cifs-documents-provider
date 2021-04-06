@@ -41,22 +41,31 @@ data class CifsConnection(
 
     companion object {
 
-        fun getConnectionUri(host: String?, port: String?, folder: String?): String {
-            return host?.let { "smb://" + getConnectionPath(it, port?.toIntOrNull(), folder, true) } ?: ""
-        }
-
-        fun getConnectionPath(host: String, port: Int?, folder: String?, isDirectory: Boolean): String {
+        /**
+         * Get document ID ( authority[:port]/[path] )
+         */
+        fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boolean): String? {
+            if (host.isNullOrBlank()) return null
             val authority = host + if (port == null || port <= 0) "" else ":$port"
             return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
         }
 
-        fun getProviderUri(host: String?, folder: String?): String {
-            return if (host.isNullOrEmpty()) ""
-            else "content://$URI_AUTHORITY/tree/" + Uri.encode(Paths.get( host.toString(), folder ?: "").toString() + "/")
+        /**
+         * Get connection URI ( smb://documentId )
+         */
+        fun getConnectionUri(host: String?, port: String?, folder: String?): String {
+            val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
+            return "smb://$documentId"
         }
 
+        /**
+         * Get provider URI ( content://applicationId/tree/encodedDocumentId )
+         */
+        fun getProviderUri(host: String?, port: String?, folder: String?): String {
+            val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
+            return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
+        }
     }
-
 }
 
 /**
