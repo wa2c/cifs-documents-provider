@@ -84,16 +84,6 @@ class EditViewModel @Inject constructor(
     }
 
     /**
-     * Save temporally connection
-     */
-    private fun saveSelectDirectoryConnection() {
-        createCifsConnection()?.let {
-            // remove folder to select all directories
-            cifsRepository.saveConnectionTemporal(it.copy(name = it.host, folder = null))
-        }
-    }
-
-    /**
      * Clear temporally connection
      */
     fun clearSelectDirectoryConnection() {
@@ -166,9 +156,11 @@ class EditViewModel @Inject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val isConnected = createCifsConnection()?.let { cifsRepository.checkConnection(it, false) } ?: false
+                    // Create temporal connection
+                    val con = createCifsConnection()?.let { it.copy(name = it.host, folder = null) } ?: throw IOException()
+                    val isConnected = con.let { cifsRepository.checkConnection(it, true) }
                     if (!isConnected) throw IOException()
-                    saveSelectDirectoryConnection()
+                    cifsRepository.saveConnectionTemporal(con)
                     CifsConnection.getProviderUri(host.value, port.value, folder.value)
                 }
             }.onSuccess {

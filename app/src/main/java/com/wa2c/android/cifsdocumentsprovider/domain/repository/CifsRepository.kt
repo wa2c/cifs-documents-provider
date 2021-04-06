@@ -16,6 +16,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
 import jcifs.smb.SmbFile
+import jcifs.util.transport.ConnectionTimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -269,21 +270,19 @@ class CifsRepository @Inject constructor(
     /**
      * Check setting connectivity.
      */
-    suspend fun checkConnection(connection: CifsConnection, checkFolder: Boolean = true): Boolean {
+    suspend fun checkConnection(connection: CifsConnection, ignoreTimeout: Boolean = false): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                if (checkFolder) {
-                    logD("Connection check: ${connection.connectionUri}")
-                    cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
-                    true
-                } else {
-                    logD("Connection check: ${connection.rootUri}")
-                    cifsClient.getFile(connection.rootUri, getCifsContext(connection)).list()
-                    true
-                }
+                logD("Connection check: ${connection.connectionUri}")
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
+                true
             } catch (e: Exception) {
                 logW(e)
-                false
+                if (e.cause is ConnectionTimeoutException) {
+                    ignoreTimeout
+                } else {
+                    false
+                }
             }
         }
     }

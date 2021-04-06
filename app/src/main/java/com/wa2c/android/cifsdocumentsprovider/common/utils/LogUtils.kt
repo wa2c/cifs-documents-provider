@@ -9,7 +9,10 @@ fun logD(message: Any?, vararg args: Any?) = Timber.asTree().d(message.toString(
 /** Log an info message */
 fun logI(message: Any?, vararg args: Any?) = Timber.asTree().i(message.toString(), *args)
 /** Log a warning message */
-fun logW(message: Any?, vararg args: Any?) = Timber.asTree().w(message.toString(), *args)
+fun logW(message: Any?, vararg args: Any?) = run {
+    if (message is Throwable) { Timber.asTree().w(message) }
+    Timber.asTree().w(message.toString(), *args)
+}
 /** Log an error message */
 fun logE(message: Any?, vararg args: Any?) = run {
     if (message is Throwable) { Timber.asTree().e(message) }
