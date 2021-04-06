@@ -5,6 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.hadilq.liveevent.LiveEvent
+import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
@@ -69,10 +70,14 @@ class EditViewModel @Inject constructor(
      * Save connection
      */
     private fun save() {
-        createCifsConnection()?.let {
-            cifsRepository.saveConnection(it)
-            currentId = it.id
-            initConnection = it
+        createCifsConnection()?.let { con ->
+            if (cifsRepository.loadConnection().filter { it.id != con.id }.any { it.connectionUri == con.connectionUri }) {
+                // Duplicate URI
+                throw IllegalArgumentException()
+            }
+            cifsRepository.saveConnection(con)
+            currentId = con.id
+            initConnection = con
         } ?: run {
             throw IOException()
         }
@@ -193,9 +198,15 @@ class EditViewModel @Inject constructor(
             runCatching {
                 save()
             }.onSuccess {
-                _navigationEvent.value = EditNav.SaveResult(true)
+                _navigationEvent.value = EditNav.SaveResult(null)
             }.onFailure {
-                _navigationEvent.value = EditNav.SaveResult(false)
+                if (it is IllegalArgumentException) {
+                    // URI duplicated
+                    _navigationEvent.value = EditNav.SaveResult(R.string.edit_save_duplicate_message)
+                } else {
+                    // Host empty
+                    _navigationEvent.value = EditNav.SaveResult(R.string.edit_save_ng_message)
+                }
             }
         }
     }

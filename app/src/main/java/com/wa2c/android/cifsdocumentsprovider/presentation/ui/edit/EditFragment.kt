@@ -146,10 +146,10 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 toast(message)
             }
             is EditNav.SaveResult -> {
-                if (event.result) {
+                if (event.messageId == null) {
                     findNavController().popBackStack(R.id.editFragment, true)
                 } else {
-                    toast(R.string.edit_save_ng_message)
+                    toast(event.messageId)
                 }
             }
         }

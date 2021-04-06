@@ -36,6 +36,7 @@
     <string name="edit_check_connection_ok_message">サーバへの接続に成功しました。</string>
     <string name="edit_check_connection_ng_message">サーバへの接続に失敗しました。</string>
     <string name="edit_save_ng_message">ホストを入力してください。</string>
+    <string name="edit_save_duplicate_message">URIが重複しています。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_delete_button">削除</string>
     <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
