@@ -29,6 +29,9 @@ class EditViewModel @Inject constructor(
     private val _navigationEvent = LiveEvent<EditNav>()
     val navigationEvent: LiveData<EditNav> = _navigationEvent
 
+    private val _isBusy = MutableLiveData<Boolean>(false)
+    val isBusy: LiveData<Boolean> = _isBusy
+
     var name = MutableLiveData<String?>()
     var domain = MutableLiveData<String?>()
     var host = MutableLiveData<String?>()
@@ -135,6 +138,7 @@ class EditViewModel @Inject constructor(
      * Check connection
      */
     fun onClickCheckConnection() {
+        _isBusy.value = true
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
@@ -143,8 +147,10 @@ class EditViewModel @Inject constructor(
                 }
             }.onSuccess {
                 _navigationEvent.value = EditNav.CheckConnectionResult(true)
+                _isBusy.value = false
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
+                _isBusy.value = false
             }
         }
     }
@@ -153,6 +159,7 @@ class EditViewModel @Inject constructor(
      * Select Directory Click
      */
     fun onClickSelectDirectory() {
+        _isBusy.value = true
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
@@ -165,8 +172,10 @@ class EditViewModel @Inject constructor(
                 }
             }.onSuccess {
                 _navigationEvent.value = EditNav.SelectDirectory(it)
+                _isBusy.value = false
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
+                _isBusy.value = false
             }
         }
     }
@@ -186,11 +195,13 @@ class EditViewModel @Inject constructor(
      * Save Click
      */
     fun onClickAccept() {
+        _isBusy.value = true
         launch {
             runCatching {
                 save()
             }.onSuccess {
                 _navigationEvent.value = EditNav.SaveResult(null)
+                _isBusy.value = false
             }.onFailure {
                 if (it is IllegalArgumentException) {
                     // URI duplicated
@@ -199,6 +210,7 @@ class EditViewModel @Inject constructor(
                     // Host empty
                     _navigationEvent.value = EditNav.SaveResult(R.string.edit_save_ng_message)
                 }
+                _isBusy.value = false
             }
         }
     }

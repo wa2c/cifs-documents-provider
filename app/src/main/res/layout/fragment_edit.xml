@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -9,382 +10,407 @@
             type="com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditViewModel" />
     </data>
 
-    <ScrollView
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TableLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:layout_height="match_parent">
 
-            <TableRow
+            <TableLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:padding="16dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_name_title" />
-
-                <EditText
-                    android:id="@+id/edit_name_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:hint="@string/edit_name_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="text"
-                    android:text="@={viewModel.name}" />
+                    android:layout_height="wrap_content">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_name_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                    <EditText
+                        android:id="@+id/edit_name_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:hint="@string/edit_name_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:text="@={viewModel.name}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_domain_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_domain_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:hint="@string/edit_domain_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textEmailAddress"
-                    android:text="@={viewModel.domain}" />
+                    android:layout_height="wrap_content">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_domain_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <EditText
+                        android:id="@+id/edit_domain_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:hint="@string/edit_domain_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textEmailAddress"
+                        android:text="@={viewModel.domain}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_host_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_host_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:hint="@string/edit_host_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textEmailAddress"
-                    android:text="@={viewModel.host}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_host_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <EditText
+                        android:id="@+id/edit_host_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:hint="@string/edit_host_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textEmailAddress"
+                        android:text="@={viewModel.host}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_port_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_port_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:maxLength="5"
-                    android:inputType="number"
-                    android:hint="@string/edit_port_hint"
-                    android:importantForAutofill="no"
-                    android:text="@={viewModel.port}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_port_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <EditText
+                        android:id="@+id/edit_port_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:hint="@string/edit_port_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="number"
+                        android:maxLength="5"
+                        android:text="@={viewModel.port}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@null" />
+                </TableRow>
 
-                <CheckBox
-                    android:id="@+id/edit_enable_dfs_check_box"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:checked="@={viewModel.enableDfs}"
-                    android:text="@string/edit_enable_dfs_label" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@null" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <CheckBox
+                        android:id="@+id/edit_enable_dfs_check_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.enableDfs}"
+                        android:text="@string/edit_enable_dfs_label" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_user_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_user_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:enabled="@{!viewModel.anonymous}"
-                    android:hint="@string/edit_user_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textEmailAddress"
-                    android:text="@={viewModel.user}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_user_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <EditText
+                        android:id="@+id/edit_user_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:enabled="@{!viewModel.anonymous}"
+                        android:hint="@string/edit_user_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textEmailAddress"
+                        android:text="@={viewModel.user}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_password_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_password_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:enabled="@{!viewModel.anonymous}"
-                    android:hint="@string/edit_password_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textPassword"
-                    android:text="@={viewModel.password}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_password_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <EditText
+                        android:id="@+id/edit_password_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:enabled="@{!viewModel.anonymous}"
+                        android:hint="@string/edit_password_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textPassword"
+                        android:text="@={viewModel.password}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@null" />
+                </TableRow>
 
-                <CheckBox
-                    android:id="@+id/edit_anonymous_check_box"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:checked="@={viewModel.anonymous}"
-                    android:text="@string/edit_anonymous_label" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@null" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <CheckBox
+                        android:id="@+id/edit_anonymous_check_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.anonymous}"
+                        android:text="@string/edit_anonymous_label" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_folder_title" />
+                </TableRow>
 
-                <EditText
-                    android:id="@+id/edit_directory_edit_text"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:hint="@string/edit_folder_hint"
-                    android:importantForAutofill="no"
-                    android:inputType="textEmailAddress"
-                    android:text="@={viewModel.folder}" />
+                    android:layout_height="match_parent">
 
-                <ImageButton
-                    android:id="@+id/edit_directory_search_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:contentDescription="@null"
-                    android:importantForAutofill="no"
-                    android:onClick="@{ () -> viewModel.onClickSelectDirectory() }"
-                    android:src="@drawable/ic_folder" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_folder_title" />
 
-            </TableRow>
+                    <EditText
+                        android:id="@+id/edit_directory_edit_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:hint="@string/edit_folder_hint"
+                        android:importantForAutofill="no"
+                        android:inputType="textEmailAddress"
+                        android:text="@={viewModel.folder}" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <ImageButton
+                        android:id="@+id/edit_directory_search_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@null"
+                        android:importantForAutofill="no"
+                        android:onClick="@{ () -> viewModel.onClickSelectDirectory() }"
+                        android:src="@drawable/ic_folder" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_option_title" />
+                </TableRow>
 
-                <CheckBox
-                    android:id="@+id/edit_extension_check_box"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:checked="@={viewModel.extension}"
-                    android:text="@string/edit_extension_label" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_option_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginVertical="8dp">
+                    <CheckBox
+                        android:id="@+id/edit_extension_check_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.extension}"
+                        android:text="@string/edit_extension_label" />
 
-                <View
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_span="3"
-                    android:layout_weight="1"
-                    android:background="@color/divider" />
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="8dp">
 
-            </TableRow>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_span="3"
+                        android:layout_weight="1"
+                        android:background="@color/divider" />
+
+                </TableRow>
 
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_connection_uri_title" />
-
-                <TextView
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:padding="4dp"
-                    android:text="@={viewModel.connectionUri}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_connection_uri_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:padding="4dp"
+                        android:text="@={viewModel.connectionUri}" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_weight="0"
-                    android:gravity="center_vertical|end"
-                    android:text="@string/edit_provider_uri_title" />
+                </TableRow>
 
-                <TextView
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:layout_weight="1"
-                    android:padding="4dp"
-                    android:text="@={viewModel.providerUri}" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:text="@string/edit_provider_uri_title" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginVertical="8dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:padding="4dp"
+                        android:text="@={viewModel.providerUri}" />
 
-                <View
+                </TableRow>
+
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_span="3"
-                    android:layout_weight="1"
-                    android:background="@color/divider" />
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="8dp">
 
-            </TableRow>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_span="3"
+                        android:layout_weight="1"
+                        android:background="@color/divider" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                </TableRow>
 
-                <Button
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                <TableRow
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_span="3"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
-                    android:text="@string/edit_check_connection_button"
-                    app:icon="@drawable/ic_check"
-                    app:iconGravity="textStart"
-                    app:iconPadding="16dp" />
+                    android:layout_height="match_parent">
 
-            </TableRow>
+                    <Button
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="3"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
+                        android:text="@string/edit_check_connection_button"
+                        app:icon="@drawable/ic_check"
+                        app:iconGravity="textStart"
+                        app:iconPadding="16dp" />
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
+                </TableRow>
 
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_span="3"
-                    android:layout_weight="1"
-                    android:onClick="@{ () -> viewModel.onClickAccept() }"
-                    android:text="@string/edit_save_button"
-                    app:icon="@drawable/ic_save"
-                    app:iconGravity="textStart" />
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="16dp">
 
-            </TableRow>
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_span="3"
+                        android:layout_weight="1"
+                        android:onClick="@{ () -> viewModel.onClickAccept() }"
+                        android:text="@string/edit_save_button"
+                        app:icon="@drawable/ic_save"
+                        app:iconGravity="textStart" />
 
-        </TableLayout>
+                </TableRow>
 
-    </ScrollView>
+            </TableLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#60000000"
+            android:clickable="true"
+            android:elevation="8dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:visible="@{ viewModel.isBusy }"
+            tools:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/edit_progress_bar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
 </layout>
