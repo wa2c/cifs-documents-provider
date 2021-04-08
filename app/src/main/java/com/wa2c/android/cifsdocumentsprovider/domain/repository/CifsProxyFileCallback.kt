@@ -23,10 +23,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.io.IOException
+import kotlin.coroutines.CoroutineContext
 
 /**
  * CIFS Proxy File Callback
@@ -34,15 +36,18 @@ import java.io.IOException
 class CifsProxyFileCallback(
     private val smbFile: SmbFile,
     private val mode: AccessMode
-) : ProxyFileDescriptorCallback() {
+) : ProxyFileDescriptorCallback(), CoroutineScope {
+
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + job
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
         runBlocking {
-            withContext(Dispatchers.IO) {
-                smbFile.openRandomAccess(mode.smbMode).also {
-                    isAccessOpened = true
-                }
+            smbFile.openRandomAccess(mode.smbMode).also {
+                isAccessOpened = true
             }
         }
     }
@@ -50,11 +55,7 @@ class CifsProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
         try {
-            return runBlocking {
-                withContext(Dispatchers.IO) {
-                    access.length()
-                }
-            }
+            return runBlocking { access.length() }
         } catch (e: IOException) {
             throwErrnoException(e)
         }
@@ -65,10 +66,8 @@ class CifsProxyFileCallback(
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         try {
             return runBlocking {
-                withContext(Dispatchers.IO) {
-                    access.seek(offset)
-                    access.read(data, 0, size)
-                }
+                access.seek(offset)
+                access.read(data, 0, size)
             }
         } catch (e: IOException) {
             throwErrnoException(e)
@@ -80,11 +79,9 @@ class CifsProxyFileCallback(
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         try {
             return runBlocking {
-                withContext(Dispatchers.IO) {
-                    access.seek(offset)
-                    access.write(data, 0, size)
-                    size
-                }
+                access.seek(offset)
+                access.write(data, 0, size)
+                size
             }
         } catch (e: IOException) {
             throwErrnoException(e)
@@ -101,6 +98,7 @@ class CifsProxyFileCallback(
         try {
             if (isAccessOpened) access.close()
             smbFile.close()
+            job.complete()
         } catch (e: IOException) {
             throwErrnoException(e)
         }
