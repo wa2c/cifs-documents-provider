@@ -34,7 +34,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun onClickOpenFile() {
-        _navigationEvent.value = MainNav.OpenFile(!cifsRepository.loadConnection().isEmpty())
+        _navigationEvent.value = MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty())
     }
 
 }
