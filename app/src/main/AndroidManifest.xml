@@ -13,10 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <meta-data
-            android:name="google_analytics_adid_collection_enabled"
-            android:value="false" />
-
         <activity
             android:name=".presentation.ui.MainActivity"
             android:windowSoftInputMode="adjustPan">

@@ -103,7 +103,6 @@ class CifsProxyFileCallback(
             throwErrnoException(e)
         }
     }
-
     @Throws(ErrnoException::class)
     private fun throwErrnoException(e: IOException) {
         logE(e)

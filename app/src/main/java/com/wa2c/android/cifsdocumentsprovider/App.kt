@@ -16,8 +16,6 @@ class App: Application() {
         // Set logger
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
-        } else {
-            Timber.plant(CrashlyticsTree())
         }
     }
 }
