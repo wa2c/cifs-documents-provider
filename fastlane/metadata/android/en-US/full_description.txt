@@ -1,0 +1,32 @@
+<strong>CIFS Documents Provider</strong> is an Android app to provide access to shared folder by SMB/CIFS.
+
+<strong><font color="#339933">[Feature]</font></strong>
+
+* Allows access to Windows shared folders. (SMB2,SMB3)
+* Provides access to Windows shared folders via Storage Access Framework (SAF).
+* Read, write, and directory access in shared folders from external applications by using SAF.
+* File sharing from shared folder.
+* Multiple connection settings can be saved.
+
+<strong><font color="#339933">[Objective]</font></strong>
+
+* File reading in shared folders.
+* Playing music, videos, and images in shared folders.
+* Managing shared folders.
+
+<strong><font color="#339933">[How to use]</font></strong>
+
+See the following page. (Japanese)
+https://github.com/wa2c/cifs-documents-provider/wiki/Manual-ja
+
+<strong><font color="#339933">[Source]</font></strong>
+
+GitHub
+https://github.com/wa2c/cifs-documents-provider
+
+<strong><font color="#339933">[Issue]</font></strong>
+
+GitHub Issue
+https://github.com/wa2c/cifs-documents-provider/issues
+
+Please post here if you have bug reports, Future requests, or other information.
