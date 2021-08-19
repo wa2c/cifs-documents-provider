@@ -24,19 +24,6 @@
             android:layout_height="wrap_content"
             tools:text="Summary" />
 
-        <ImageView
-            android:id="@+id/cifs_list_item_add"
-            style="@android:style/TextAppearance.Material.Large"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_gravity="center"
-            android:contentDescription="@null"
-            android:drawablePadding="8dp"
-            android:gravity="center"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_add"
-            tools:visibility="visible" />
-
     </LinearLayout>
 
 </layout>

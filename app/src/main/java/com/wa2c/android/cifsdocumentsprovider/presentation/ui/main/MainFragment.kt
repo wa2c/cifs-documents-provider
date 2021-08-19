@@ -88,6 +88,9 @@ class MainFragment: Fragment(R.layout.fragment_main) {
                     DividerItemDecoration.VERTICAL
                 )
             )
+            bind.cifsAddButton.setOnClickListener {
+                viewModel.onClickItem(null)
+            }
 
             ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
                 override fun onMove(

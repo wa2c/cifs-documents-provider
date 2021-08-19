@@ -31,25 +31,17 @@ class CifsListAdapter(
         val binding = holder.itemView.tag as LayoutCifsItemBinding
         val item = itemList.getOrNull(position)
         if (item != null) {
-            binding.cifsListItemAdd.visibility = View.GONE
             binding.cifsListItemTitle.visibility = View.VISIBLE
             binding.cifsListItemSummary.visibility = View.VISIBLE
 
             binding.cifsListItemTitle.text = item.name
             binding.cifsListItemSummary.text = item.connectionUri
-        } else {
-            binding.cifsListItemAdd.visibility = View.VISIBLE
-            binding.cifsListItemTitle.visibility = View.GONE
-            binding.cifsListItemSummary.visibility = View.GONE
-
-            binding.cifsListItemTitle.text = null
-            binding.cifsListItemSummary.text = null
         }
         binding.root.setOnClickListener { viewModel.onClickItem(item) }
     }
 
     override fun getItemCount(): Int {
-        return itemList.count() + 1 // item count + add button
+        return itemList.count()
     }
 
     fun setData(list: List<CifsConnection>) {
