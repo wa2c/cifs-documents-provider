@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.utils.renew
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutCifsItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 
@@ -13,9 +14,10 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
  * CIFS List item.
  */
 class CifsListAdapter(
-    private val viewModel: MainViewModel,
-    private val itemList: List<CifsConnection>
+    private val viewModel: MainViewModel
 ):  RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val itemList = viewModel.cifsConnections.value?.toMutableList() ?: mutableListOf()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return (DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.layout_cifs_item, parent,false) as LayoutCifsItemBinding).let {
@@ -48,6 +50,10 @@ class CifsListAdapter(
 
     override fun getItemCount(): Int {
         return itemList.count() + 1 // item count + add button
+    }
+
+    fun setData(list: List<CifsConnection>) {
+        itemList.renew(list)
     }
 
 }

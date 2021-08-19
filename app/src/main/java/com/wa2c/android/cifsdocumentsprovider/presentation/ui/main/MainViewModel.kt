@@ -37,4 +37,8 @@ class MainViewModel @Inject constructor(
         _navigationEvent.value = MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty())
     }
 
+    fun onItemMove(fromPosition: Int, toPosition: Int) {
+        cifsRepository.moveConnection(fromPosition, toPosition)
+    }
+
 }

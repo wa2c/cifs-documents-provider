@@ -110,6 +110,18 @@ class CifsRepository @Inject constructor(
     }
 
     /**
+     * Move connections order
+     */
+    fun moveConnection(fromPosition: Int, toPosition: Int) {
+        appPreferences.cifsSettings.let {
+            val list = appPreferences.cifsSettings.toMutableList()
+            list.add(toPosition, list.removeAt(fromPosition))
+            appPreferences.cifsSettings = list
+            contextCache.evictAll()
+        }
+    }
+
+    /**
      * Get CIFS File from connection.`
      */
     suspend fun getFile(connection: CifsConnection): CifsFile? {
