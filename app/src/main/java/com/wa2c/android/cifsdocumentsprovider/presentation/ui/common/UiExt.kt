@@ -52,6 +52,10 @@ fun Fragment.navigateSafe(directions: NavDirections) {
     }
 }
 
+fun Fragment.navigateBack() {
+    findNavController().popBackStack()
+}
+
 @BindingAdapter("visible")
 fun View.isVisible(isVisible: Boolean) {
     visibility = if (isVisible) View.VISIBLE else View.GONE

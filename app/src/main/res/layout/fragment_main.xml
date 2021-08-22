@@ -28,11 +28,11 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:contentDescription="@null"
+            android:onClick="@{ () -> viewModel.onClickAddItem() }"
             android:src="@drawable/ic_add"
             app:backgroundTint="@color/accent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

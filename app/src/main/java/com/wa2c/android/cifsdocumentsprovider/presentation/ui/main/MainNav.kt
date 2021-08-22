@@ -5,4 +5,5 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 sealed class MainNav {
     data class Edit(val connection: CifsConnection?): MainNav()
     data class OpenFile(val isSuccess: Boolean) : MainNav()
+    object AddItem : MainNav()
 }

@@ -41,6 +41,8 @@ data class CifsConnection(
 
     companion object {
 
+        const val NEW_ID =""
+
         /**
          * Get document ID ( authority[:port]/[path] )
          */
@@ -103,6 +105,22 @@ fun CifsSetting.toModel(): CifsConnection {
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous ?: false,
         extension = this.extension ?: false
+    )
+}
+
+fun HostData.toConnection(): CifsConnection {
+    return CifsConnection(
+        id = CifsConnection.NEW_ID,
+        name = this.hostName,
+        domain = null,
+        host = this.ipAddress,
+        port = null,
+        enableDfs = false,
+        folder = null,
+        user = null,
+        password = null,
+        anonymous = false,
+        extension = false
     )
 }
 

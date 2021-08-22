@@ -42,6 +42,10 @@
     <string name="edit_back_confirmation_message">Discard your changes?</string>
     <string name="edit_delete_confirmation_message">Delete this settings?</string>
 
+    <!-- Host Screen -->
+    <string name="host_title">Host</string>
+    <string name="host_set_manually">Set manually</string>
+
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>
 

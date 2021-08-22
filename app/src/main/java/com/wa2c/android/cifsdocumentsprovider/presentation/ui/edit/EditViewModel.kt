@@ -56,10 +56,10 @@ class EditViewModel @Inject constructor(
         addSource(folder) { post() }
     }
 
-    private var currentId: String = NEW_ID
+    private var currentId: String = CifsConnection.NEW_ID
 
     val isNew: Boolean
-        get() = currentId == NEW_ID
+        get() = currentId == CifsConnection.NEW_ID
 
 
     private var initConnection: CifsConnection? = null
@@ -101,7 +101,7 @@ class EditViewModel @Inject constructor(
      * Deploy connection data.
      */
     private fun deployCifsConnection(connection: CifsConnection?) {
-        currentId = connection?.id ?: NEW_ID
+        currentId = connection?.id ?: CifsConnection.NEW_ID
         name.value = connection?.name
         domain.value = connection?.domain
         host.value = connection?.host
@@ -220,10 +220,6 @@ class EditViewModel @Inject constructor(
      */
     fun onClickBack() {
         _navigationEvent.value = EditNav.Back(initConnection == null || initConnection != createCifsConnection())
-    }
-
-    companion object {
-        private const val NEW_ID: String = ""
     }
 
 }

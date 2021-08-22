@@ -29,14 +29,31 @@ class MainViewModel @Inject constructor(
         _cifsConnection.value = cifsRepository.loadConnection()
     }
 
+    /**
+     * Click item.
+     */
     fun onClickItem(connection: CifsConnection?) {
         _navigationEvent.value = MainNav.Edit(connection)
     }
 
+    /**
+     * Add item.
+     */
+    fun onClickAddItem() {
+        _navigationEvent.value = MainNav.AddItem
+    }
+
+    /***
+     * Click share button.
+     */
     fun onClickOpenFile() {
         _navigationEvent.value = MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty())
     }
 
+
+    /**
+     * Move item.
+     */
     fun onItemMove(fromPosition: Int, toPosition: Int) {
         cifsRepository.moveConnection(fromPosition, toPosition)
     }

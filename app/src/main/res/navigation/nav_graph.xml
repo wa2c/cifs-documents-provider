@@ -1,60 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
 
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.main.MainFragment"
-        android:label="MainFragment">
+        android:label="MainFragment"
+        tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_editFragment"
             app:destination="@id/editFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_hostFragment"
+            app:destination="@id/hostFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/editFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditFragment"
-        android:label="EditFragment" >
+        android:label="EditFragment"
+        tools:layout="@layout/fragment_edit">
         <argument
             android:name="cifsConnection"
+            android:defaultValue="@null"
             app:argType="com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="index"
-            app:argType="integer"
-            android:defaultValue="-1" />
+            android:defaultValue="-1"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_editFragment_to_hostFragment"
+            app:destination="@id/hostFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/hostFragment"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment"
+        android:label="HostFragment"
+        tools:layout="@layout/fragment_host" >
+        <argument
+            android:name="cifsConnection"
+            android:defaultValue="@null"
+            app:argType="com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_hostFragment_to_editFragment"
+            app:destination="@id/editFragment"
+            app:popUpTo="@id/mainFragment"
+            />
     </fragment>
 
     <dialog
         android:id="@+id/messageDialog"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialog"
-        android:label="MessageDialog" >
+        android:label="MessageDialog">
         <argument
             android:name="message"
             app:argType="string" />
         <argument
             android:name="title"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="positiveText"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="neutralText"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
         <argument
             android:name="negativeButton"
+            android:defaultValue="@null"
             app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
+            app:nullable="true" />
     </dialog>
 
     <action

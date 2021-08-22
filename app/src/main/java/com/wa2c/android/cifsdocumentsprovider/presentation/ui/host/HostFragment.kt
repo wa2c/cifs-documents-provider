@@ -1,0 +1,101 @@
+package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
+
+import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
+import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentHostBinding
+import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
+import com.wa2c.android.cifsdocumentsprovider.domain.model.toConnection
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import dagger.hilt.android.AndroidEntryPoint
+
+
+/**
+ * Main Screen
+ */
+@AndroidEntryPoint
+class HostFragment: Fragment(R.layout.fragment_host) {
+
+    /** View Model */
+    private val viewModel by viewModels<HostViewModel>()
+    /** Binding */
+    private val binding: FragmentHostBinding? by viewBinding()
+    /** List adapter */
+    private val adapter: HostListAdapter by lazy { HostListAdapter(viewModel) }
+    /** Arguments */
+    private val args: HostFragmentArgs by navArgs()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setHasOptionsMenu(true)
+        (activity as? AppCompatActivity)?.supportActionBar?.let {
+            it.setIcon(null)
+            it.setTitle(R.string.host_title)
+            it.setDisplayShowHomeEnabled(false)
+            it.setDisplayHomeAsUpEnabled(true)
+            it.setDisplayShowTitleEnabled(true)
+        }
+
+        binding?.let { bind ->
+            bind.viewModel = viewModel
+            bind.hostList.adapter = adapter
+        }
+
+        viewModel.let {
+            it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
+            it.hostData.observe(viewLifecycleOwner, ::onHostFound)
+        }
+
+        startDiscovery()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                navigateBack()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+
+    private fun startDiscovery() {
+        adapter.clearData()
+        viewModel.discovery()
+    }
+
+    private fun onNavigate(event: HostNav) {
+        when (event) {
+            is HostNav.SelectItem -> {
+                val host = event.host
+                if (host != null) {
+                    // Selected
+                    val connection = args.cifsConnection?.copy(host = host.ipAddress) ?: host.toConnection()
+                    HostFragmentDirections.actionHostFragmentToEditFragment(connection)
+                } else {
+                    // Set manually
+                    HostFragmentDirections.actionHostFragmentToEditFragment(null)
+                }.let {
+                    navigateSafe(it)
+                }
+            }
+        }
+    }
+
+    private fun onHostFound(data: HostData?) {
+        logD("onHostFound: data=$data")
+        data?.let { adapter.addData(it) } ?: let {
+            //todo finish
+        }
+    }
+}
