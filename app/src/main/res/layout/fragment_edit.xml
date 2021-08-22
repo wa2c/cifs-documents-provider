@@ -89,12 +89,20 @@
                         android:id="@+id/edit_host_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_span="2"
                         android:layout_weight="1"
                         android:hint="@string/edit_host_hint"
                         android:importantForAutofill="no"
                         android:inputType="textEmailAddress"
                         android:text="@={viewModel.host}" />
+
+                    <ImageButton
+                        android:id="@+id/edit_host_select_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:contentDescription="@null"
+                        android:importantForAutofill="no"
+                        android:onClick="@{ () -> viewModel.onClickSearchHost() }"
+                        android:src="@drawable/ic_search" />
 
                 </TableRow>
 
@@ -238,7 +246,6 @@
                         android:id="@+id/edit_directory_edit_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_span="2"
                         android:layout_weight="1"
                         android:hint="@string/edit_folder_hint"
                         android:importantForAutofill="no"

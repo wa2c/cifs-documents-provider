@@ -73,7 +73,7 @@ class EditViewModel @Inject constructor(
      * Save connection
      */
     private fun save() {
-        createCifsConnection()?.let { con ->
+        createCifsConnection(isNew)?.let { con ->
             if (cifsRepository.loadConnection().filter { it.id != con.id }.any { it.connectionUri == con.connectionUri }) {
                 // Duplicate URI
                 throw IllegalArgumentException()
@@ -117,10 +117,10 @@ class EditViewModel @Inject constructor(
     /**
      * Create connection data
      */
-    private fun createCifsConnection(): CifsConnection? {
+    private fun createCifsConnection(generateId: Boolean): CifsConnection? {
         val isAnonymous = anonymous.value ?: false
         return CifsConnection(
-            id = if (isNew) UUID.randomUUID().toString() else currentId,
+            id = if (generateId) UUID.randomUUID().toString() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
@@ -142,7 +142,7 @@ class EditViewModel @Inject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    val isConnected = createCifsConnection()?.let { cifsRepository.checkConnection(it) } ?: false
+                    val isConnected = createCifsConnection(false)?.let { cifsRepository.checkConnection(it) } ?: false
                     if (!isConnected) throw IOException()
                 }
             }.onSuccess {
@@ -155,6 +155,10 @@ class EditViewModel @Inject constructor(
         }
     }
 
+    fun onClickSearchHost() {
+        _navigationEvent.value = EditNav.SearchHost(createCifsConnection(false))
+    }
+
     /**
      * Select Directory Click
      */
@@ -164,7 +168,7 @@ class EditViewModel @Inject constructor(
             runCatching {
                 withContext(Dispatchers.IO) {
                     // Create temporal connection
-                    val con = createCifsConnection()?.let { it.copy(name = it.host, folder = null) } ?: throw IOException()
+                    val con = createCifsConnection(false)?.let { it.copy(name = it.host, folder = null) } ?: throw IOException()
                     val isConnected = con.let { cifsRepository.checkConnection(it, true) }
                     if (!isConnected) throw IOException()
                     cifsRepository.saveConnectionTemporal(con)
@@ -219,7 +223,7 @@ class EditViewModel @Inject constructor(
      * Back Click
      */
     fun onClickBack() {
-        _navigationEvent.value = EditNav.Back(initConnection == null || initConnection != createCifsConnection())
+        _navigationEvent.value = EditNav.Back(initConnection == null || initConnection != createCifsConnection(false))
     }
 
 }

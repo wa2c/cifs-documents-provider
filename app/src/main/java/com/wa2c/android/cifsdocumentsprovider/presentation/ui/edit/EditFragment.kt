@@ -134,6 +134,10 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                     findNavController().popBackStack(R.id.editFragment, true)
                 }
             }
+            is EditNav.SearchHost -> {
+                // Search host
+                navigateSafe(EditFragmentDirections.actionEditFragmentToHostFragment(event.connection))
+            }
             is EditNav.SelectDirectory -> {
                 // Select directory
                 directoryLauncher.launch(Uri.parse(event.uri))

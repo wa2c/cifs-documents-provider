@@ -31,7 +31,6 @@ class HostRepository @Inject constructor(
                     HostData(
                         ipAddress = device?.ip ?: return,
                         hostName = device.hostname ?: return,
-                        macAddress = device.mac ?: return
                     ).let {
                         _hostFlow.tryEmit(it)
                     }

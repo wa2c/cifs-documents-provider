@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import androidx.core.view.isVisible
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
@@ -57,8 +58,8 @@ fun Fragment.navigateBack() {
 }
 
 @BindingAdapter("visible")
-fun View.isVisible(isVisible: Boolean) {
-    visibility = if (isVisible) View.VISIBLE else View.GONE
+fun View.isVisible(visible: Boolean) {
+    this.isVisible = visible
 }
 
 
