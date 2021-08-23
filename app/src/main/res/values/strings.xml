@@ -45,6 +45,9 @@
     <!-- Host Screen -->
     <string name="host_title">Host</string>
     <string name="host_set_manually">Set manually</string>
+    <string name="host_select_confirmation_message">Input selected data to edit form.</string>
+    <string name="host_select_host_name">Host Name</string>
+    <string name="host_select_ip_address">IP Address</string>
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>

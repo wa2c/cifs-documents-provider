@@ -31,6 +31,9 @@ data class CifsConnection(
     val extension: Boolean,
 ): Parcelable, Serializable {
 
+    /** True if new item. */
+    val isNew: Boolean = (id == NEW_ID)
+
     /** RootURI (smb://) */
     val rootUri: String
         get() = getConnectionUri(host, port, null)
@@ -108,12 +111,16 @@ fun CifsSetting.toModel(): CifsConnection {
     )
 }
 
-fun HostData.toConnection(): CifsConnection {
+/**
+ * Convert host data to connection data.
+ */
+fun HostData.toConnection(useHostName: Boolean): CifsConnection {
+    val h = if (useHostName) this.hostName else this.ipAddress
     return CifsConnection(
         id = CifsConnection.NEW_ID,
-        name = this.hostName,
+        name = h,
         domain = null,
-        host = this.ipAddress,
+        host = h,
         port = null,
         enableDfs = false,
         folder = null,

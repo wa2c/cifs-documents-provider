@@ -77,7 +77,7 @@
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="negativeButton"
+            android:name="negativeText"
             android:defaultValue="@null"
             app:argType="string"
             app:nullable="true" />

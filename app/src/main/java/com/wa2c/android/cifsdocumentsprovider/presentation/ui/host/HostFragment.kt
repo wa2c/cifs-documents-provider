@@ -1,11 +1,13 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -15,6 +17,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.toConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -77,21 +81,60 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     private fun onNavigate(event: HostNav) {
         when (event) {
             is HostNav.SelectItem -> {
-                val host = event.host
-                if (host != null) {
-                    // Selected
-                    val connection = args.cifsConnection?.copy(host = host.ipAddress) ?: host.toConnection()
-                    HostFragmentDirections.actionHostFragmentToEditFragment(connection)
-                } else {
-                    // Set manually
-                    HostFragmentDirections.actionHostFragmentToEditFragment(null)
-                }.let {
-                    navigateSafe(it)
-                }
+                confirmInputData(event.host)
             }
         }
     }
 
+    /**
+     * Confirm input data
+     */
+    private fun confirmInputData(host: HostData?) {
+        if (host != null) {
+            // Item selected
+            if (host.hostName == host.ipAddress) {
+                openEdit(host)
+            } else {
+                navigateSafe(
+                    MessageDialogDirections.actionGlobalMessageDialog(
+                        message = getString(R.string.host_select_confirmation_message),
+                        positiveText = getString(R.string.host_select_host_name),
+                        negativeText = getString(R.string.host_select_ip_address),
+                        neutralText = getString(android.R.string.cancel),
+                    )
+                )
+                setDialogResult { result ->
+                    findNavController().navigateUp()
+                    if (result == DialogInterface.BUTTON_POSITIVE) {
+                        // Use Host Name
+                        openEdit(host, true)
+                    } else if  (result == DialogInterface.BUTTON_NEGATIVE) {
+                        // Use IP Address
+                        openEdit(host, false)
+                    }
+                }
+                return
+            }
+        } else {
+            // Set manually
+            openEdit(null)
+        }
+    }
+
+    /**
+     * Open Edit Screen
+     */
+    private fun openEdit(host: HostData?, useHostName: Boolean = true) {
+        val connection = host?.let {
+            val h = if (useHostName) host.hostName else host.ipAddress
+            args.cifsConnection?.copy(host = h) ?: it.toConnection(useHostName)
+        }
+        navigateSafe(HostFragmentDirections.actionHostFragmentToEditFragment(connection))
+    }
+
+    /**
+     * Host found
+     */
     private fun onHostFound(data: HostData?) {
         logD("onHostFound: data=$data")
         data?.let { adapter.addData(it) } ?: let {

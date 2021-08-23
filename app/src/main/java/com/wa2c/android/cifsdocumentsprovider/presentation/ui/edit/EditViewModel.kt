@@ -65,7 +65,7 @@ class EditViewModel @Inject constructor(
     private var initConnection: CifsConnection? = null
 
     fun initialize(connection: CifsConnection?) {
-        initConnection = connection
+        initConnection = if (connection == null || connection.isNew) null else connection
         deployCifsConnection(connection)
     }
 

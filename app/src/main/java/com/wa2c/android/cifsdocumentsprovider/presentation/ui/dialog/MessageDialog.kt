@@ -33,8 +33,8 @@ class MessageDialog: DialogFragment() {
             }
 
             // Negative button
-            if (!args.negativeButton.isNullOrEmpty()) {
-                setNegativeButton(args.negativeButton) { _, _ ->
+            if (!args.negativeText.isNullOrEmpty()) {
+                setNegativeButton(args.negativeText) { _, _ ->
                     val result = Bundle().apply {
                         putInt(DIALOG_RESULT_INDEX, DialogInterface.BUTTON_NEGATIVE)
                     }
