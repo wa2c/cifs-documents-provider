@@ -2,6 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +22,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
-
 
 /**
  * Main Screen
@@ -62,10 +63,19 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         startDiscovery()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_host, menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
                 navigateBack()
+                return true
+            }
+            R.id.host_menu_reload -> {
+                startDiscovery()
                 return true
             }
         }
@@ -104,7 +114,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
                     )
                 )
                 setDialogResult { result ->
-                    findNavController().navigateUp()
+                    findNavController().navigateUp() // Close dialog
                     if (result == DialogInterface.BUTTON_POSITIVE) {
                         // Use Host Name
                         openEdit(host, true)

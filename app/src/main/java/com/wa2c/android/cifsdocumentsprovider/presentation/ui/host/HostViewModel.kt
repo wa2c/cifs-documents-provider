@@ -29,8 +29,8 @@ class HostViewModel @Inject constructor(
 
     fun discovery() {
         launch {
+            hostRepository.stopDiscovery()
             hostRepository.startDiscovery()
-
         }
     }
 

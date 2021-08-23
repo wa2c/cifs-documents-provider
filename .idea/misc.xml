@@ -9,12 +9,15 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/drawable/ic_launcher_foreground.xml" value="0.22314814814814815" />
+        <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/drawable/ic_reload.xml" value="0.21354166666666666" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/activity_main.xml" value="0.24114583333333334" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/fragment_edit.xml" value="0.2640625" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/fragment_host.xml" value="0.2390625" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/fragment_main.xml" value="0.16666666666666666" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/layout_cifs_item.xml" value="0.24114583333333334" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/layout_host_item.xml" value="0.2259963768115942" />
+        <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/layout/layout_host_reload.xml" value="0.19739583333333333" />
+        <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/menu/menu_edit.xml" value="0.19739583333333333" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/menu/menu_host.xml" value="0.23802083333333332" />
         <entry key="..\:/Develop/Android/AndroidstudioProjects/CIFSDocumentsProvider/app/src/main/res/menu/menu_main.xml" value="0.22604166666666667" />
       </map>

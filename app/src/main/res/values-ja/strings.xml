@@ -48,6 +48,8 @@
     <string name="host_select_confirmation_message">選択項目をフォームに入力します。</string>
     <string name="host_select_host_name">ホスト名</string>
     <string name="host_select_ip_address">IPアドレス</string>
+    <string name="host_reload_button">リロード</string>
+
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">エラーが発生しました</string>

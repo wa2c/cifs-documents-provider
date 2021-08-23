@@ -48,8 +48,8 @@ class HostListAdapter(
      * Clear data
      */
     fun clearData() {
-        itemList.clear()
         notifyItemRangeRemoved(0, itemList.size)
+        itemList.clear()
     }
 
 
