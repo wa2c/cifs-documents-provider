@@ -5,8 +5,8 @@ import com.stealthcopter.networktools.subnet.Device
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,8 +17,8 @@ import javax.inject.Singleton
 @Singleton
 class HostRepository @Inject constructor(
 ) {
-    private val _hostFlow = MutableSharedFlow<HostData?>(1)
-    val hostFlow: SharedFlow<HostData?> = _hostFlow
+    private val _hostFlow = MutableStateFlow<HostData?>(null)
+    val hostFlow: StateFlow<HostData?> = _hostFlow
 
     /**
      * Start discovery

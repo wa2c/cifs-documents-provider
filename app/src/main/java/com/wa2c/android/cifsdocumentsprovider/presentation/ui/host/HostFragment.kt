@@ -6,6 +6,8 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -22,6 +24,10 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
+import android.view.animation.RotateAnimation
+import androidx.core.view.children
+import androidx.core.view.isVisible
+
 
 /**
  * Main Screen
@@ -37,6 +43,8 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     private val adapter: HostListAdapter by lazy { HostListAdapter(viewModel) }
     /** Arguments */
     private val args: HostFragmentArgs by navArgs()
+    /** Reload menu button */
+    private lateinit var reloadMenuButton: MenuItem
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -53,6 +61,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         binding?.let { bind ->
             bind.viewModel = viewModel
             bind.hostList.adapter = adapter
+            bind.hostSetManuallyContainer.isVisible = (args.cifsConnection == null)
         }
 
         viewModel.let {
@@ -66,6 +75,11 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_host, menu)
+        reloadMenuButton = menu.children.first()
+
+        viewModel.isLoading.observe(viewLifecycleOwner) {
+            if (it) startLoadingAnimation() else stopLoadingAnimation()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -82,13 +96,49 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        stopLoadingAnimation()
+    }
 
+    /**
+     * Start discovery
+     */
     private fun startDiscovery() {
         adapter.clearData()
         viewModel.discovery()
     }
 
+    /**
+     * Start loading animation
+     */
+    private fun startLoadingAnimation() {
+        stopLoadingAnimation()
+        reloadMenuButton.let { item ->
+            item.setActionView(R.layout.layout_host_menu_item_reload)
+            item.actionView.animation = RotateAnimation(
+                0.0f, 360.0f,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+            ).apply {
+                duration = 1000
+                repeatCount = Animation.INFINITE
+                interpolator = LinearInterpolator()
+            }
+        }
+    }
+
+    /**
+     * Stop loading animation.
+     */
+    private fun stopLoadingAnimation() {
+        reloadMenuButton.actionView?.animation?.cancel()
+        reloadMenuButton.actionView = null
+    }
+
+
     private fun onNavigate(event: HostNav) {
+        logD("onNavigate: event=$event")
         when (event) {
             is HostNav.SelectItem -> {
                 confirmInputData(event.host)
@@ -145,10 +195,8 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     /**
      * Host found
      */
-    private fun onHostFound(data: HostData?) {
+    private fun onHostFound(data: HostData) {
         logD("onHostFound: data=$data")
-        data?.let { adapter.addData(it) } ?: let {
-            //todo finish
-        }
+        adapter.addData(data)
     }
 }
