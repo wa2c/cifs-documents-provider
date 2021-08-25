@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.content.DialogInterface
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -10,10 +11,12 @@ import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.google.android.material.button.MaterialButton
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
@@ -159,4 +162,31 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         }
     }
 
+}
+
+
+/**
+ * Check connection result
+ */
+@BindingAdapter("checkResult")
+fun MaterialButton.setCheckResult(result: Boolean?) {
+    if (tag == null) {
+        // Backup
+        tag = iconTint
+    }
+
+    when(result) {
+        true -> {
+            setIconResource(R.drawable.ic_check_ok)
+            setIconTintResource(R.color.ic_check_ok)
+        }
+        false -> {
+            setIconResource(R.drawable.ic_check_ng)
+            setIconTintResource(R.color.ic_check_ng)
+        }
+        else -> {
+            setIconResource(R.drawable.ic_check)
+            iconTint = tag as? ColorStateList
+        }
+    }
 }

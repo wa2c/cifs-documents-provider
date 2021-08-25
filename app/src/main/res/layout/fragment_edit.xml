@@ -102,7 +102,9 @@
                         android:contentDescription="@null"
                         android:importantForAutofill="no"
                         android:onClick="@{ () -> viewModel.onClickSearchHost() }"
-                        android:src="@drawable/ic_search" />
+                        android:src="@drawable/ic_search"
+                        app:backgroundTint="@color/primary"
+                        app:tint="?attr/colorOnPrimary" />
 
                 </TableRow>
 
@@ -259,7 +261,9 @@
                         android:contentDescription="@null"
                         android:importantForAutofill="no"
                         android:onClick="@{ () -> viewModel.onClickSelectDirectory() }"
-                        android:src="@drawable/ic_folder" />
+                        android:src="@drawable/ic_folder"
+                        app:backgroundTint="@color/primary"
+                        app:tint="?attr/colorOnPrimary" />
 
                 </TableRow>
 
@@ -363,7 +367,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -372,6 +376,7 @@
                         android:gravity="center"
                         android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
                         android:text="@string/edit_check_connection_button"
+                        app:checkResult="@{ viewModel.checkConnection }"
                         app:icon="@drawable/ic_check"
                         app:iconGravity="textStart"
                         app:iconPadding="16dp" />
@@ -383,7 +388,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginTop="16dp">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_span="3"

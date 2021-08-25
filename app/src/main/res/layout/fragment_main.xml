@@ -29,7 +29,8 @@
             android:layout_margin="16dp"
             android:contentDescription="@null"
             android:onClick="@{ () -> viewModel.onClickAddItem() }"
-            android:src="@drawable/ic_add"
+            android:src="@drawable/ic_add_directory"
+            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="@color/accent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />

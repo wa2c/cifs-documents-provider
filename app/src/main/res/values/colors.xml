@@ -7,4 +7,8 @@
     <color name="divider">#BDBDBD</color>
 
     <color name="ic_launcher_background">@color/primary</color>
+
+    <color name="ic_check_ok">#30C030</color>
+    <color name="ic_check_ng">#C03030</color>
+
 </resources>

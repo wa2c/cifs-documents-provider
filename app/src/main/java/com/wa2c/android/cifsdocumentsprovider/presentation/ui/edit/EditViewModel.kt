@@ -56,6 +56,19 @@ class EditViewModel @Inject constructor(
         addSource(folder) { post() }
     }
 
+    private val _checkConnection = MutableLiveData<Boolean?>(null)
+    val checkConnection = MediatorLiveData<Boolean?>().apply {
+        addSource(_checkConnection) { postValue(it) }
+        addSource(domain) { postValue(null) }
+        addSource(host) { postValue(null) }
+        addSource(port) { postValue(null) }
+        addSource(enableDfs) { postValue(null) }
+        addSource(folder) { postValue(null) }
+        addSource(user) { postValue(null) }
+        addSource(password) { postValue(null) }
+        addSource(anonymous) { postValue(null) }
+    }
+
     private var currentId: String = CifsConnection.NEW_ID
 
     val isNew: Boolean
@@ -148,9 +161,11 @@ class EditViewModel @Inject constructor(
             }.onSuccess {
                 _navigationEvent.value = EditNav.CheckConnectionResult(true)
                 _isBusy.value = false
+                _checkConnection.value = true
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
                 _isBusy.value = false
+                _checkConnection.value = false
             }
         }
     }
@@ -177,9 +192,11 @@ class EditViewModel @Inject constructor(
             }.onSuccess {
                 _navigationEvent.value = EditNav.SelectDirectory(it)
                 _isBusy.value = false
+                _checkConnection.value = true
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
                 _isBusy.value = false
+                _checkConnection.value = false
             }
         }
     }
