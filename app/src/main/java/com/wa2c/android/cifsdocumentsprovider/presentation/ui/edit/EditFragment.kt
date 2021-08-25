@@ -11,6 +11,7 @@ import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.doOnNextLayout
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -45,7 +46,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     /** Select Directory Picker */
     private val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         logD(uri)
-        viewModel.clearSelectDirectoryConnection()
+        binding?.root?.doOnNextLayout { viewModel.setDirectoryResult(uri) }
         if (uri == null) return@registerForActivityResult
 
         val providerUri = CifsConnection.getProviderUri(viewModel.host.value, viewModel.port.value, null)

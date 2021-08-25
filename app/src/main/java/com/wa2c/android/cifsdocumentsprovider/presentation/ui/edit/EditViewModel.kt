@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -100,12 +101,8 @@ class EditViewModel @Inject constructor(
     }
 
     /**
-     * Clear temporally connection
+     * Delete connection
      */
-    fun clearSelectDirectoryConnection() {
-        cifsRepository.clearConnectionTemporal()
-    }
-
     private fun delete() {
         cifsRepository.deleteConnection(currentId)
     }
@@ -192,7 +189,6 @@ class EditViewModel @Inject constructor(
             }.onSuccess {
                 _navigationEvent.value = EditNav.SelectDirectory(it)
                 _isBusy.value = false
-                _checkConnection.value = true
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
                 _isBusy.value = false
@@ -201,6 +197,13 @@ class EditViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Set directory connection result.
+     */
+    fun setDirectoryResult(uri: Uri?) {
+        cifsRepository.clearConnectionTemporal()
+        _checkConnection.value = (uri != null)
+    }
 
     /**
      * Delete Click
