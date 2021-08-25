@@ -54,10 +54,8 @@ class HostViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        launch {
-            _isLoading.value = false
-            hostRepository.stopDiscovery()
-        }
+        _isLoading.value = false
+        hostRepository.stopDiscovery()
     }
 
 

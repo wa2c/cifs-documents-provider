@@ -47,11 +47,9 @@ class HostRepository @Inject constructor(
     /**
      * Stop discovery
      */
-    suspend fun stopDiscovery() {
-        withContext(Dispatchers.IO) {
-            SubnetDevices.fromLocalAddress().cancel()
-            _hostFlow.tryEmit(null)
-        }
+    fun stopDiscovery() {
+        SubnetDevices.fromLocalAddress().cancel()
+        _hostFlow.tryEmit(null)
     }
 
 }
