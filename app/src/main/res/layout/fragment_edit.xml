@@ -32,6 +32,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
+                        android:labelFor="@id/edit_domain_edit_text"
                         android:gravity="center_vertical|end"
                         android:text="@string/edit_name_title" />
 
@@ -57,6 +58,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
+                        android:labelFor="@id/edit_domain_edit_text"
                         android:gravity="center_vertical|end"
                         android:text="@string/edit_domain_title" />
 
@@ -82,6 +84,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
+                        android:labelFor="@id/edit_host_edit_text"
                         android:gravity="center_vertical|end"
                         android:text="@string/edit_host_title" />
 
@@ -117,6 +120,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
+                        android:labelFor="@id/edit_port_edit_text"
                         android:gravity="center_vertical|end"
                         android:text="@string/edit_port_title" />
 
@@ -167,6 +171,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_user_edit_text"
                         android:text="@string/edit_user_title" />
 
                     <EditText
@@ -175,9 +180,9 @@
                         android:layout_height="wrap_content"
                         android:layout_span="2"
                         android:layout_weight="1"
+                        android:autofillHints="username"
                         android:enabled="@{!viewModel.anonymous}"
                         android:hint="@string/edit_user_hint"
-                        android:importantForAutofill="no"
                         android:inputType="textEmailAddress"
                         android:text="@={viewModel.user}" />
 
@@ -193,6 +198,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_password_edit_text"
                         android:text="@string/edit_password_title" />
 
                     <EditText
@@ -201,9 +207,9 @@
                         android:layout_height="wrap_content"
                         android:layout_span="2"
                         android:layout_weight="1"
+                        android:autofillHints="password"
                         android:enabled="@{!viewModel.anonymous}"
                         android:hint="@string/edit_password_hint"
-                        android:importantForAutofill="no"
                         android:inputType="textPassword"
                         android:text="@={viewModel.password}" />
 
@@ -242,6 +248,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_directory_edit_text"
                         android:text="@string/edit_folder_title" />
 
                     <EditText
