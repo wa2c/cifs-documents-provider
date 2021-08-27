@@ -6,6 +6,7 @@ import androidx.lifecycle.asLiveData
 import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.HostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +34,8 @@ class HostViewModel @Inject constructor(
         if (it == null) _isLoading.value = false
     }.filterNotNull().asLiveData()
 
+    val sortType: HostSortType get() = hostRepository.sortType
+
     fun discovery() {
         launch {
             _isLoading.value = true
@@ -51,6 +54,9 @@ class HostViewModel @Inject constructor(
         _navigationEvent.value = HostNav.SelectItem(null)
     }
 
+    fun onClickSort(sortType: HostSortType) {
+        hostRepository.sortType = sortType
+    }
 
     override fun onCleared() {
         super.onCleared()

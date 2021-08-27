@@ -48,7 +48,14 @@
     <string name="host_select_confirmation_message">Input selected data to edit form.</string>
     <string name="host_select_host_name">Host Name</string>
     <string name="host_select_ip_address">IP Address</string>
+    <string name="host_sort_button">Sort</string>
     <string name="host_reload_button">Reload</string>
+    <string name="host_sort_type_detection_ascend">Detection (Ascend)</string>
+    <string name="host_sort_type_detection_descend">Detection (Descend)</string>
+    <string name="host_sort_type_host_name_ascend">Host Name (Ascend)</string>
+    <string name="host_sort_type_host_name_descend">Host Name (Descend)</string>
+    <string name="host_sort_type_ip_address_ascend">IP Address (Ascend)</string>
+    <string name="host_sort_type_ip_address_descend">IP Address (Descend)</string>
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>

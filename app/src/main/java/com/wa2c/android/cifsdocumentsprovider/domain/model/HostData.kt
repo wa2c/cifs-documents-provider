@@ -8,4 +8,11 @@ data class HostData(
     val hostName: String,
     /** IP Address */
     val ipAddress: String,
-)
+    /** Detection Time */
+    val detectionTime: Long,
+) {
+
+    val hasHostName: Boolean
+        get() = ipAddress != hostName
+
+}

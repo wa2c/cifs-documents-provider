@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -61,10 +62,21 @@ class AppPreferences @Inject constructor(
             }
         }
 
+    /**
+     * Host sort type
+     */
+    var hostSortType: HostSortType
+        get() {
+            return HostSortType.findByValueOrDefault(preferences.getInt(PREFKEY_HOST_SORT_TYPE, -1))
+        }
+        set(value) {
+            preferences.edit { putInt(PREFKEY_HOST_SORT_TYPE, value.intValue) }
+        }
 
     companion object {
         private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"
         private const val PREFKEY_CIFS_SETTINGS_TEMPORAL = "prefkey_cifs_settings_temporal"
+        private const val PREFKEY_HOST_SORT_TYPE = "prefkey_host_sort_type"
     }
 
 }

@@ -25,8 +25,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDial
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
 import android.view.animation.RotateAnimation
-import androidx.core.view.children
 import androidx.core.view.isVisible
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 
 
 /**
@@ -75,8 +75,19 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_host, menu)
-        reloadMenuButton = menu.children.first()
+    }
 
+    override fun onPrepareOptionsMenu(menu: Menu) {
+        super.onPrepareOptionsMenu(menu)
+        // Sort
+        menu.findItem(viewModel.sortType.menuId)?.let {
+            it.isChecked = true
+        } ?: let {
+            menu.findItem(HostSortType.DetectionAscend.menuId).isChecked = true
+        }
+
+        // Reload
+        reloadMenuButton = menu.findItem(R.id.host_menu_reload)
         viewModel.isLoading.observe(viewLifecycleOwner) {
             if (it) startLoadingAnimation() else stopLoadingAnimation()
         }
@@ -92,6 +103,9 @@ class HostFragment: Fragment(R.layout.fragment_host) {
                 startDiscovery()
                 return true
             }
+            else -> {
+                selectSort(item)
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -99,6 +113,16 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     override fun onDestroy() {
         super.onDestroy()
         stopLoadingAnimation()
+    }
+
+    /**
+     * Select sort
+     */
+    private fun selectSort(item: MenuItem) {
+        val sortType = HostSortType.values().firstOrNull { it.menuId == item.itemId } ?: return
+        viewModel.onClickSort(sortType)
+        adapter.sort()
+        item.isChecked = true
     }
 
     /**

@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 import com.stealthcopter.networktools.SubnetDevices
 import com.stealthcopter.networktools.subnet.Device
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,9 +18,15 @@ import javax.inject.Singleton
  */
 @Singleton
 class HostRepository @Inject constructor(
+    val preferences: AppPreferences
 ) {
     private val _hostFlow = MutableStateFlow<HostData?>(null)
     val hostFlow: StateFlow<HostData?> = _hostFlow
+
+    /** Sort type */
+    var sortType: HostSortType
+        get() = preferences.hostSortType
+        set(value) { preferences.hostSortType = value }
 
     /**
      * Start discovery
@@ -31,6 +39,7 @@ class HostRepository @Inject constructor(
                     HostData(
                         ipAddress = device?.ip ?: return,
                         hostName = device.hostname ?: return,
+                        detectionTime = System.currentTimeMillis(),
                     ).let {
                         _hostFlow.tryEmit(it)
                     }
