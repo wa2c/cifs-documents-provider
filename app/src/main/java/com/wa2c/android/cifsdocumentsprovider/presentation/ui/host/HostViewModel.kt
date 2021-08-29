@@ -28,7 +28,7 @@ class HostViewModel @Inject constructor(
     val navigationEvent: LiveData<HostNav> = _navigationEvent
 
     private val _isLoading =  LiveEvent<Boolean>()
-    val isLoading: LiveEvent<Boolean> = _isLoading
+    val isLoading: LiveData<Boolean> = _isLoading
 
     val hostData: LiveData<HostData> = hostRepository.hostFlow.onEach {
         if (it == null) _isLoading.value = false

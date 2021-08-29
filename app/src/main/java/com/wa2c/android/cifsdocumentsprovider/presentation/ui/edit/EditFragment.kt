@@ -9,24 +9,22 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.doOnNextLayout
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.wa2c.android.cifsdocumentsprovider.R
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -40,24 +38,8 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private val viewModel by viewModels<EditViewModel>()
     /** Binding */
     private val binding: FragmentEditBinding? by viewBinding()
-
+    /** Arguments */
     private val args: EditFragmentArgs by navArgs()
-
-    /** Select Directory Picker */
-    private val directoryLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        logD(uri)
-        binding?.root?.doOnNextLayout { viewModel.setDirectoryResult(uri) }
-        if (uri == null) return@registerForActivityResult
-
-        val providerUri = CifsConnection.getProviderUri(viewModel.host.value, viewModel.port.value, null)
-        val directory = Uri.decode(uri.toString().substringAfter(providerUri, "")).trim('/')
-        if (directory.isEmpty()) {
-            val message = getString(R.string.edit_select_directory_ng_message, viewModel.name.value)
-            toast(message)
-        } else {
-            binding?.editDirectoryEditText?.setText(directory)
-        }
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -144,7 +126,12 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             }
             is EditNav.SelectDirectory -> {
                 // Select directory
-                directoryLauncher.launch(Uri.parse(event.uri))
+                setFragmentResultListener(FolderFragment.REQUEST_KEY_FOLDER) { _, bundle ->
+                    bundle.getParcelable<Uri>(FolderFragment.RESULT_KEY_FOLDER_URI)?.let { uri ->
+                        viewModel.setDirectoryResult(uri.path)
+                    }
+                }
+                navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connectin))
             }
             is EditNav.CheckConnectionResult -> {
                 // Connection check
@@ -164,7 +151,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     }
 
 }
-
 
 /**
  * Check connection result

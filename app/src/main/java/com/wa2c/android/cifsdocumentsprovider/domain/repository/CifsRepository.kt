@@ -136,20 +136,38 @@ class CifsRepository @Inject constructor(
     }
 
     /**
+     * Get CIFS File from uri.
+     */
+    suspend fun getFile(connection: CifsConnection, uri: String): CifsFile? {
+        return  cifsFileCache.get(uri) ?: getSmbFile(connection, uri)?.toCifsFile()
+    }
+
+    /**
      * Get children CIFS files from uri.
      */
     suspend fun getFileChildren(uri: String): List<CifsFile> {
         return withContext(Dispatchers.IO) {
-                getSmbFile(uri)?.listFiles()?.mapNotNull {
-                    try {
-                        smbFileCache.get(it.url) ?: smbFileCache.put(it.url, it)
-                        it.toCifsFile()
-                    } catch (e: Exception) {
-                        logW(e)
-                        smbFileCache.remove(it.url)
-                        null
-                    }
-                } ?: emptyList()
+            getConnection(uri)?.let {
+                getFileChildren(it, uri)
+            } ?: emptyList()
+        }
+    }
+
+    /**
+     * Get children CIFS files from uri.
+     */
+    suspend fun getFileChildren(connection: CifsConnection, uri: String = connection.connectionUri): List<CifsFile> {
+        return withContext(Dispatchers.IO) {
+            getSmbFile(connection, uri)?.listFiles()?.mapNotNull {
+                try {
+                    smbFileCache.get(it.url) ?: smbFileCache.put(it.url, it)
+                    it.toCifsFile()
+                } catch (e: Exception) {
+                    logW(e)
+                    smbFileCache.remove(it.url)
+                    null
+                }
+            } ?: emptyList()
         }
     }
 
@@ -320,10 +338,22 @@ class CifsRepository @Inject constructor(
      */
     private suspend fun getSmbFile(uri: String): SmbFile? {
         return smbFileCache[uri] ?: withContext(Dispatchers.IO) {
-            getConnection(uri)?.let {
-                cifsClient.getFile(uri, getCifsContext(it)).also { file ->
+            getConnection(uri)?.let { getSmbFile(it, uri) }
+        }
+    }
+
+    /**
+     * Get SMB file
+     */
+    private suspend fun getSmbFile(connection: CifsConnection, uri: String): SmbFile? {
+        return withContext(Dispatchers.IO) {
+            try {
+                cifsClient.getFile(uri, getCifsContext(connection)).also { file ->
                     smbFileCache.put(uri, file)
                 }
+            } catch (e: Exception) {
+                logE(e)
+                null
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -59,16 +58,16 @@ class EditViewModel @Inject constructor(
 
     private val _checkConnection = MutableLiveData<Boolean?>(null)
     val checkConnection = MediatorLiveData<Boolean?>().apply {
-        addSource(_checkConnection) { postValue(it) }
-        addSource(domain) { postValue(null) }
-        addSource(host) { postValue(null) }
-        addSource(port) { postValue(null) }
-        addSource(enableDfs) { postValue(null) }
-        addSource(folder) { postValue(null) }
-        addSource(user) { postValue(null) }
-        addSource(password) { postValue(null) }
-        addSource(anonymous) { postValue(null) }
-    }
+        addSource(_checkConnection) { postValue(it) } // delay
+        addSource(domain) { value = null }
+        addSource(host) { value = null  }
+        addSource(port) { value = null  }
+        addSource(enableDfs) { value = null  }
+        addSource(folder) { value = null }
+        addSource(user) { value = null  }
+        addSource(password) { value = null  }
+        addSource(anonymous) { value = null  }
+    } as LiveData<Boolean?>
 
     private var currentId: String = CifsConnection.NEW_ID
 
@@ -172,19 +171,27 @@ class EditViewModel @Inject constructor(
     }
 
     /**
-     * Select Directory Click
+     * Select Folder Click
      */
-    fun onClickSelectDirectory() {
+    fun onClickSelectFolder() {
         _isBusy.value = true
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    // Create temporal connection
-                    val con = createCifsConnection(false)?.let { it.copy(name = it.host, folder = null) } ?: throw IOException()
-                    val isConnected = con.let { cifsRepository.checkConnection(it, true) }
-                    if (!isConnected) throw IOException()
-                    cifsRepository.saveConnectionTemporal(con)
-                    CifsConnection.getProviderUri(host.value, port.value, folder.value)
+                    val connection = createCifsConnection(false) ?: throw IOException()
+
+                    // use target directory
+                    cifsRepository.checkConnection(connection, true).let { isConnected ->
+                        _checkConnection.postValue(isConnected) // set target folder access check result
+                        if (isConnected) return@withContext connection // return if succeeded access
+                    }
+
+                    // use root directory
+                    val rootConnection = connection.copy(folder = null)
+                    cifsRepository.checkConnection(rootConnection, true).let { isConnected ->
+                        if (!isConnected) throw IOException()
+                        rootConnection
+                    }
                 }
             }.onSuccess {
                 _navigationEvent.value = EditNav.SelectDirectory(it)
@@ -192,7 +199,6 @@ class EditViewModel @Inject constructor(
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
                 _isBusy.value = false
-                _checkConnection.value = false
             }
         }
     }
@@ -200,9 +206,10 @@ class EditViewModel @Inject constructor(
     /**
      * Set directory connection result.
      */
-    fun setDirectoryResult(uri: Uri?) {
+    fun setDirectoryResult(path: String?) {
         cifsRepository.clearConnectionTemporal()
-        _checkConnection.value = (uri != null)
+        folder.value = path
+        _checkConnection.value = (path != null)
     }
 
     /**

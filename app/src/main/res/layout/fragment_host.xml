@@ -29,7 +29,7 @@
             android:background="@color/divider"
             app:layout_constraintBottom_toTopOf="@id/host_set_manually_container" />
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <LinearLayout
             android:id="@+id/host_set_manually_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,7 +45,7 @@
                 android:onClick="@{ () -> viewModel.onClickSetManually() }"
                 android:text="@string/host_set_manually" />
 
-        </androidx.appcompat.widget.LinearLayoutCompat>
+        </LinearLayout>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

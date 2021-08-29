@@ -35,13 +35,16 @@
         <action
             android:id="@+id/action_editFragment_to_hostFragment"
             app:destination="@id/hostFragment" />
+        <action
+            android:id="@+id/action_editFragment_to_folderFragment"
+            app:destination="@id/folderFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/hostFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment"
         android:label="HostFragment"
-        tools:layout="@layout/fragment_host" >
+        tools:layout="@layout/fragment_host">
         <argument
             android:name="cifsConnection"
             android:defaultValue="@null"
@@ -50,8 +53,17 @@
         <action
             android:id="@+id/action_hostFragment_to_editFragment"
             app:destination="@id/editFragment"
-            app:popUpTo="@id/mainFragment"
-            />
+            app:popUpTo="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/folderFragment"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment"
+        android:label="FolderFragment"
+        tools:layout="@layout/fragment_folder">
+        <argument
+            android:name="cifsConnection"
+            app:argType="com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection" />
     </fragment>
 
     <dialog

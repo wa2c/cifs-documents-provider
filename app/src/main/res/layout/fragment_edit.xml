@@ -267,7 +267,7 @@
                         android:layout_height="wrap_content"
                         android:contentDescription="@null"
                         android:importantForAutofill="no"
-                        android:onClick="@{ () -> viewModel.onClickSelectDirectory() }"
+                        android:onClick="@{ () -> viewModel.onClickSelectFolder() }"
                         android:src="@drawable/ic_folder"
                         app:backgroundTint="@color/primary"
                         app:tint="?attr/colorOnPrimary" />
@@ -411,24 +411,14 @@
 
         </ScrollView>
 
-        <LinearLayout
+
+        <include
+            layout="@layout/layout_view_progress"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#60000000"
-            android:clickable="true"
-            android:elevation="8dp"
-            android:gravity="center"
-            android:orientation="vertical"
-            app:visible="@{ viewModel.isBusy }"
-            tools:visibility="gone">
-
-            <ProgressBar
-                android:id="@+id/edit_progress_bar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
+            app:isBusy="@{ viewModel.isBusy }"
+            tools:visibility="gone"
+            />
 
     </FrameLayout>
 

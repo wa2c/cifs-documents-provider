@@ -57,6 +57,11 @@
     <string name="host_sort_type_ip_address_ascend">IPアドレス (昇順)</string>
     <string name="host_sort_type_ip_address_descend">IPアドレス (降順)</string>
 
+    <!-- Folder Screen -->
+    <string name="folder_title">フォルダ</string>
+    <string name="folder_set">フォルダ設定</string>
+    <string name="folder_list_empty">サブフォルダはありません</string>
+
     <!-- DocumentsProvider -->
     <string name="provider_error_message">エラーが発生しました</string>
 

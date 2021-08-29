@@ -6,27 +6,22 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.LinearInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentHostBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.toConnection
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
-import android.view.animation.RotateAnimation
-import androidx.core.view.isVisible
-import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 
 
 /**
@@ -83,13 +78,14 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         menu.findItem(viewModel.sortType.menuId)?.let {
             it.isChecked = true
         } ?: let {
-            menu.findItem(HostSortType.DetectionAscend.menuId).isChecked = true
+            menu.findItem(HostSortType.DEFAULT.menuId).isChecked = true
         }
 
         // Reload
-        reloadMenuButton = menu.findItem(R.id.host_menu_reload)
-        viewModel.isLoading.observe(viewLifecycleOwner) {
-            if (it) startLoadingAnimation() else stopLoadingAnimation()
+        reloadMenuButton = menu.findItem(R.id.host_menu_reload).also { item ->
+            viewModel.isLoading.observe(viewLifecycleOwner) {
+                if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
+            }
         }
     }
 
@@ -112,7 +108,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
 
     override fun onDestroy() {
         super.onDestroy()
-        stopLoadingAnimation()
+        reloadMenuButton.stopLoadingAnimation()
     }
 
     /**
@@ -132,34 +128,6 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         adapter.clearData()
         viewModel.discovery()
     }
-
-    /**
-     * Start loading animation
-     */
-    private fun startLoadingAnimation() {
-        stopLoadingAnimation()
-        reloadMenuButton.let { item ->
-            item.setActionView(R.layout.layout_host_menu_item_reload)
-            item.actionView.animation = RotateAnimation(
-                0.0f, 360.0f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f
-            ).apply {
-                duration = 1000
-                repeatCount = Animation.INFINITE
-                interpolator = LinearInterpolator()
-            }
-        }
-    }
-
-    /**
-     * Stop loading animation.
-     */
-    private fun stopLoadingAnimation() {
-        reloadMenuButton.actionView?.animation?.cancel()
-        reloadMenuButton.actionView = null
-    }
-
 
     private fun onNavigate(event: HostNav) {
         logD("onNavigate: event=$event")

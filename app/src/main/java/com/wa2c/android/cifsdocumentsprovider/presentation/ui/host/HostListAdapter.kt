@@ -9,7 +9,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutHostItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import java.util.*
-import kotlin.Comparator
 
 /**
  * Host List item.
@@ -86,8 +85,8 @@ class HostListAdapter(
             return when (viewModel.sortType) {
                 HostSortType.DetectionAscend -> p0.detectionTime.compareTo(p1.detectionTime)
                 HostSortType.DetectionDescend -> p1.detectionTime.compareTo(p0.detectionTime)
-                HostSortType.HostNameAscend -> compareHostName(p0, p1)
-                HostSortType.HostNameDescend -> compareHostName(p1, p0)
+                HostSortType.HostNameAscend -> compareHostName(p0, p1, true)
+                HostSortType.HostNameDescend -> compareHostName(p0, p1, false)
                 HostSortType.IpAddressAscend -> compareIpAddress(p0, p1)
                 HostSortType.IpAddressDescend -> compareIpAddress(p1, p0)
             }
@@ -96,15 +95,16 @@ class HostListAdapter(
         /**
          * Compare host name.
          */
-        private fun compareHostName(p0: HostData, p1: HostData): Int {
+        private fun compareHostName(p0: HostData, p1: HostData, isAscend: Boolean): Int {
+            val ascend = if (isAscend) 1 else -1
             return if (p0.hasHostName && p1.hasHostName) {
-                p0.hostName.compareTo(p1.hostName)
+                p0.hostName.compareTo(p1.hostName) * ascend
             } else if (p0.hasHostName) {
                 -1
             } else if (p1.hasHostName) {
                 1
             } else {
-                compareIpAddress(p0, p1)
+                compareIpAddress(p0, p1) * ascend
             }
         }
 

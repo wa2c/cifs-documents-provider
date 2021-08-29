@@ -57,6 +57,11 @@
     <string name="host_sort_type_ip_address_ascend">IP Address (Ascend)</string>
     <string name="host_sort_type_ip_address_descend">IP Address (Descend)</string>
 
+    <!-- Folder Screen -->
+    <string name="folder_title">Folder</string>
+    <string name="folder_set">Set Folder</string>
+    <string name="folder_list_empty">No sub folders</string>
+
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>
 
