@@ -29,7 +29,7 @@ class EditViewModel @Inject constructor(
     private val _navigationEvent = LiveEvent<EditNav>()
     val navigationEvent: LiveData<EditNav> = _navigationEvent
 
-    private val _isBusy = MutableLiveData<Boolean>(false)
+    private val _isBusy = MutableLiveData(false)
     val isBusy: LiveData<Boolean> = _isBusy
 
     var name = MutableLiveData<String?>()
@@ -207,7 +207,6 @@ class EditViewModel @Inject constructor(
      * Set directory connection result.
      */
     fun setDirectoryResult(path: String?) {
-        cifsRepository.clearConnectionTemporal()
         folder.value = path
         _checkConnection.value = (path != null)
     }

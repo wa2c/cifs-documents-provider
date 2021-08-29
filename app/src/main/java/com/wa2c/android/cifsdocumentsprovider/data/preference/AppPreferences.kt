@@ -20,7 +20,7 @@ class AppPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
-    private val preferences: SharedPreferences = context.getSharedPreferences("App", Context.MODE_PRIVATE)
+    private val preferences: SharedPreferences = getPreferences(context)
 
     /**
      * CIFS settings
@@ -43,26 +43,6 @@ class AppPreferences @Inject constructor(
         }
 
     /**
-     * CIFS settings temporal
-     */
-    var cifsSettingsTemporal: List<CifsSetting>
-        get() {
-            return try {
-                Json.decodeFromString(preferences.getString(PREFKEY_CIFS_SETTINGS_TEMPORAL, "{}")!!)
-            } catch(e: Exception) {
-                logE(e)
-                emptyList()
-            }
-        }
-        set(value) {
-            try {
-                preferences.edit { putString(PREFKEY_CIFS_SETTINGS_TEMPORAL, Json.encodeToString(value)) }
-            } catch (e: Exception) {
-                logE(e)
-            }
-        }
-
-    /**
      * Host sort type
      */
     var hostSortType: HostSortType
@@ -75,8 +55,12 @@ class AppPreferences @Inject constructor(
 
     companion object {
         private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"
-        private const val PREFKEY_CIFS_SETTINGS_TEMPORAL = "prefkey_cifs_settings_temporal"
         private const val PREFKEY_HOST_SORT_TYPE = "prefkey_host_sort_type"
+
+        fun getPreferences(context: Context): SharedPreferences {
+            return context.getSharedPreferences("App", Context.MODE_PRIVATE)
+        }
+
     }
 
 }

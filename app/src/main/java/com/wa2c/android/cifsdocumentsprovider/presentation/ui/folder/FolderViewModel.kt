@@ -43,10 +43,9 @@ class FolderViewModel @Inject constructor(
         cifsConnection = connection
         _isLoading.value = true
         launch {
-            _isLoading.value = true
             val file = cifsRepository.getFile(connection) ?: return@launch
             _currentFile.value = file
-            onSelectFolder(file)
+            loadList(file)
         }
     }
 
@@ -56,11 +55,12 @@ class FolderViewModel @Inject constructor(
     fun onUpFolder(): Boolean {
         if (currentFile.value?.isRoot == true) return false
 
+        if (_isLoading.value == true) return true
         _isLoading.value = true
         launch {
             val uri = currentFile.value?.parentUri ?: return@launch
             val file = cifsRepository.getFile(cifsConnection, uri.toString()) ?: return@launch
-            onSelectFolder(file)
+            loadList(file)
         }
         return true
     }
@@ -69,19 +69,27 @@ class FolderViewModel @Inject constructor(
      * On select folder
      */
     fun onSelectFolder(file: CifsFile) {
+        if (_isLoading.value == true) return
         _isLoading.value = true
         launch {
-            runCatching {
-                cifsRepository.getFileChildren(cifsConnection, file.uri.toString())
-            }.onSuccess { list ->
-                _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { it.name }))
-                _currentFile.value = file
-                _isLoading.value = false
-            }.onFailure {
-                _fileList.value = emptyList()
-                _currentFile.value = file
-                _isLoading.value = false
-            }
+            loadList(file)
+        }
+    }
+
+    /**
+     * Load list
+     */
+    private suspend fun loadList(file: CifsFile) {
+        runCatching {
+            cifsRepository.getFileChildren(cifsConnection, file.uri.toString())
+        }.onSuccess { list ->
+            _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { it.name }))
+            _currentFile.value = file
+            _isLoading.value = false
+        }.onFailure {
+            _fileList.value = emptyList()
+            _currentFile.value = file
+            _isLoading.value = false
         }
     }
 
@@ -102,7 +110,6 @@ class FolderViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        cifsRepository.clearConnectionTemporal()
         _isLoading.value = false
     }
 

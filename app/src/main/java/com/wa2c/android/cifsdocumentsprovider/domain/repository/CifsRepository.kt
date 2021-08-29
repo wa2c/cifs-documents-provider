@@ -59,9 +59,7 @@ class CifsRepository @Inject constructor(
      * Load connection
      */
     fun loadConnection(): List<CifsConnection>  {
-        return appPreferences.cifsSettingsTemporal.ifEmpty { appPreferences.cifsSettings }.let { list ->
-            list.map { data -> data.toModel() }
-        }
+        return appPreferences.cifsSettings.map { data -> data.toModel() }
     }
 
     /**
@@ -77,20 +75,6 @@ class CifsRepository @Inject constructor(
             }
         }
         appPreferences.cifsSettings = connections.map { it.toData() }
-    }
-
-    /**
-     * Save temporary connection
-     */
-    fun saveConnectionTemporal(connection: CifsConnection) {
-        appPreferences.cifsSettingsTemporal = listOf(connection.toData())
-    }
-
-    /**
-     * Clear temporary connection
-     */
-    fun clearConnectionTemporal() {
-        appPreferences.cifsSettingsTemporal = emptyList()
     }
 
     /**
