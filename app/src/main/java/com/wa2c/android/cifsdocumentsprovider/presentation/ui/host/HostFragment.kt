@@ -7,8 +7,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -16,13 +18,12 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentHostBinding
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.toConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
-
 
 /**
  * Main Screen
@@ -38,6 +39,8 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     private val adapter: HostListAdapter by lazy { HostListAdapter(viewModel) }
     /** Arguments */
     private val args: HostFragmentArgs by navArgs()
+    /** True if is initializing */
+    private val isInit: Boolean get() = (args.cifsConnection == null)
     /** Reload menu button */
     private lateinit var reloadMenuButton: MenuItem
 
@@ -56,7 +59,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         binding?.let { bind ->
             bind.viewModel = viewModel
             bind.hostList.adapter = adapter
-            bind.hostSetManuallyContainer.isVisible = (args.cifsConnection == null)
+            bind.hostSetManuallyContainer.isVisible = isInit
         }
 
         viewModel.let {
@@ -145,7 +148,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         if (host != null) {
             // Item selected
             if (host.hostName == host.ipAddress) {
-                openEdit(host)
+                openEdit(host.hostName)
             } else {
                 navigateSafe(
                     MessageDialogDirections.actionGlobalMessageDialog(
@@ -159,10 +162,10 @@ class HostFragment: Fragment(R.layout.fragment_host) {
                     findNavController().navigateUp() // Close dialog
                     if (result == DialogInterface.BUTTON_POSITIVE) {
                         // Use Host Name
-                        openEdit(host, true)
+                        openEdit(host.hostName)
                     } else if  (result == DialogInterface.BUTTON_NEGATIVE) {
                         // Use IP Address
-                        openEdit(host, false)
+                        openEdit(host.ipAddress)
                     }
                 }
                 return
@@ -176,12 +179,19 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     /**
      * Open Edit Screen
      */
-    private fun openEdit(host: HostData?, useHostName: Boolean = true) {
-        val connection = host?.let {
-            val h = if (useHostName) host.hostName else host.ipAddress
-            args.cifsConnection?.copy(host = h) ?: it.toConnection(useHostName)
+    private fun openEdit(hostText: String?) {
+        if (isInit) {
+            // from Main
+            val connection = hostText?.let { CifsConnection.createFromHost(it) }
+            navigateSafe(HostFragmentDirections.actionHostFragmentToEditFragment(connection))
+        } else {
+            // from Edit
+            setFragmentResult(
+                REQUEST_KEY_HOST,
+                bundleOf(RESULT_KEY_HOST_TEXT to hostText)
+            )
+            navigateBack()
         }
-        navigateSafe(HostFragmentDirections.actionHostFragmentToEditFragment(connection))
     }
 
     /**
@@ -190,5 +200,10 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     private fun onHostFound(data: HostData) {
         logD("onHostFound: data=$data")
         adapter.addData(data)
+    }
+
+    companion object {
+        const val REQUEST_KEY_HOST = "REQUEST_KEY_HOST"
+        const val RESULT_KEY_HOST_TEXT = "RESULT_KEY_HOST_TEXT"
     }
 }

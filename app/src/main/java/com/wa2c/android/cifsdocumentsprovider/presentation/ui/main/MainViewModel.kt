@@ -25,7 +25,7 @@ class MainViewModel @Inject constructor(
     private val _cifsConnection: MutableLiveData<List<CifsConnection>> = MutableLiveData()
     val cifsConnections: LiveData<List<CifsConnection>> = _cifsConnection
 
-    fun init() {
+    fun initialize() {
         _cifsConnection.value = cifsRepository.loadConnection()
     }
 
@@ -56,6 +56,7 @@ class MainViewModel @Inject constructor(
      */
     fun onItemMove(fromPosition: Int, toPosition: Int) {
         cifsRepository.moveConnection(fromPosition, toPosition)
+        _cifsConnection.value = cifsRepository.loadConnection()
     }
 
 }

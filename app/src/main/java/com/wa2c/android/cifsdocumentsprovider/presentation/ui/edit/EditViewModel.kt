@@ -69,17 +69,27 @@ class EditViewModel @Inject constructor(
         addSource(anonymous) { value = null  }
     } as LiveData<Boolean?>
 
+    /** Current ID */
     private var currentId: String = CifsConnection.NEW_ID
 
+    /** True if adding new settings */
     val isNew: Boolean
         get() = currentId == CifsConnection.NEW_ID
 
-
+    /** Init connection */
     private var initConnection: CifsConnection? = null
 
+    /** True if initialized */
+    private var initialized: Boolean = false
+
+    /**
+     * Initialize
+     */
     fun initialize(connection: CifsConnection?) {
+        if (initialized) return
         initConnection = if (connection == null || connection.isNew) null else connection
         deployCifsConnection(connection)
+        initialized = true
     }
 
     /**
@@ -167,7 +177,7 @@ class EditViewModel @Inject constructor(
     }
 
     fun onClickSearchHost() {
-        _navigationEvent.value = EditNav.SearchHost(createCifsConnection(false))
+        _navigationEvent.value = EditNav.SelectHost(createCifsConnection(false))
     }
 
     /**
@@ -180,13 +190,13 @@ class EditViewModel @Inject constructor(
                 withContext(Dispatchers.IO) {
                     val connection = createCifsConnection(false) ?: throw IOException()
 
-                    // use target directory
+                    // use target folder
                     cifsRepository.checkConnection(connection, true).let { isConnected ->
                         _checkConnection.postValue(isConnected) // set target folder access check result
                         if (isConnected) return@withContext connection // return if succeeded access
                     }
 
-                    // use root directory
+                    // use root folder
                     val rootConnection = connection.copy(folder = null)
                     cifsRepository.checkConnection(rootConnection, true).let { isConnected ->
                         if (!isConnected) throw IOException()
@@ -194,7 +204,7 @@ class EditViewModel @Inject constructor(
                     }
                 }
             }.onSuccess {
-                _navigationEvent.value = EditNav.SelectDirectory(it)
+                _navigationEvent.value = EditNav.SelectFolder(it)
                 _isBusy.value = false
             }.onFailure {
                 _navigationEvent.value = EditNav.CheckConnectionResult(false)
@@ -204,9 +214,16 @@ class EditViewModel @Inject constructor(
     }
 
     /**
-     * Set directory connection result.
+     * Set host result.
      */
-    fun setDirectoryResult(path: String?) {
+    fun setHostResult(hostText: String?) {
+        host.value = hostText
+    }
+
+    /**
+     * Set folder result.
+     */
+    fun setFolderResult(path: String?) {
         folder.value = path
         _checkConnection.value = (path != null)
     }

@@ -12,10 +12,18 @@
         tools:layout="@layout/fragment_main">
         <action
             android:id="@+id/action_mainFragment_to_editFragment"
-            app:destination="@id/editFragment" />
+            app:destination="@id/editFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
         <action
             android:id="@+id/action_mainFragment_to_hostFragment"
-            app:destination="@id/hostFragment" />
+            app:destination="@id/hostFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -34,10 +42,18 @@
             app:argType="integer" />
         <action
             android:id="@+id/action_editFragment_to_hostFragment"
-            app:destination="@id/hostFragment" />
+            app:destination="@id/hostFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
         <action
             android:id="@+id/action_editFragment_to_folderFragment"
-            app:destination="@id/folderFragment" />
+            app:destination="@id/folderFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right" />
     </fragment>
 
     <fragment
@@ -53,6 +69,10 @@
         <action
             android:id="@+id/action_hostFragment_to_editFragment"
             app:destination="@id/editFragment"
+            app:enterAnim="@anim/slide_in_from_right"
+            app:exitAnim="@anim/slide_out_to_left"
+            app:popEnterAnim="@anim/slide_in_from_left"
+            app:popExitAnim="@anim/slide_out_to_right"
             app:popUpTo="@id/mainFragment" />
     </fragment>
 

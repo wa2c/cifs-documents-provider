@@ -35,9 +35,9 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     /** Binding */
     private val binding: FragmentMainBinding? by viewBinding()
     /** List adapter */
-    private val adapter: CifsListAdapter by lazy { CifsListAdapter(viewModel) }
+    private val adapter: MainListAdapter by lazy { MainListAdapter(viewModel) }
 
-    /** Select Directory Picker */
+    /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         logD(uris)
         if (!uris.all { it.authority == URI_AUTHORITY }) {
@@ -98,7 +98,6 @@ class MainFragment: Fragment(R.layout.fragment_main) {
                     val fromPosition = viewHolder.adapterPosition
                     val toPosition = target.adapterPosition
                     viewModel.onItemMove(fromPosition, toPosition)
-                    bind.cifsList.adapter?.notifyItemMoved(fromPosition, toPosition)
                     return true
                 }
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
@@ -109,7 +108,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         viewModel.let {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
             it.cifsConnections.observe(viewLifecycleOwner, ::onLoadConnection)
-            it.init()
+            it.initialize()
         }
     }
 
@@ -149,7 +148,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     }
 
     private fun onLoadConnection(list: List<CifsConnection>) {
-        adapter.setData(list)
+        adapter.submitList(list)
     }
 
 }

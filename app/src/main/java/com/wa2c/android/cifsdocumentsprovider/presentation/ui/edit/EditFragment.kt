@@ -19,12 +19,14 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -104,6 +106,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         when (event) {
             is EditNav.Back -> {
                 if (event.changed) {
+                    setDialogResult { result ->
+                        if (result == DialogInterface.BUTTON_POSITIVE) {
+                            findNavController().popBackStack(R.id.editFragment, true)
+                        }
+                    }
                     navigateSafe(
                         MessageDialogDirections.actionGlobalMessageDialog(
                             message = getString(R.string.edit_back_confirmation_message),
@@ -111,27 +118,27 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                             neutralText = getString(android.R.string.cancel)
                         )
                     )
-                    setDialogResult { result ->
-                        if (result == DialogInterface.BUTTON_POSITIVE) {
-                            findNavController().popBackStack(R.id.editFragment, true)
-                        }
-                    }
                 } else {
-                    findNavController().popBackStack(R.id.editFragment, true)
+                    navigateBack(R.id.editFragment, true)
                 }
             }
-            is EditNav.SearchHost -> {
-                // Search host
+            is EditNav.SelectHost -> {
+                // Select host
+                setFragmentResultListener(HostFragment.REQUEST_KEY_HOST) { _, bundle ->
+                    bundle.getString(HostFragment.RESULT_KEY_HOST_TEXT)?.let { hostText ->
+                        viewModel.setHostResult(hostText)
+                    }
+                }
                 navigateSafe(EditFragmentDirections.actionEditFragmentToHostFragment(event.connection))
             }
-            is EditNav.SelectDirectory -> {
-                // Select directory
+            is EditNav.SelectFolder -> {
+                // Select folder
                 setFragmentResultListener(FolderFragment.REQUEST_KEY_FOLDER) { _, bundle ->
                     bundle.getParcelable<Uri>(FolderFragment.RESULT_KEY_FOLDER_URI)?.let { uri ->
-                        viewModel.setDirectoryResult(uri.path)
+                        viewModel.setFolderResult(uri.path)
                     }
                 }
-                navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connectin))
+                navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connection))
             }
             is EditNav.CheckConnectionResult -> {
                 // Connection check

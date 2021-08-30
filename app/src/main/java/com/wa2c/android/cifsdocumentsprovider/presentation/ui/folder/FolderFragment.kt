@@ -69,7 +69,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
         viewModel.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
         viewModel.fileList.observe(viewLifecycleOwner, ::onLoadFileList)
         viewModel.currentFile.observe(viewLifecycleOwner, ::onSetCurrentFile)
-        viewModel.init(args.cifsConnection)
+        viewModel.initialize(args.cifsConnection)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -80,7 +80,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         // Reload
-        reloadMenuButton = menu.findItem(R.id.host_menu_reload).also { item ->
+        reloadMenuButton = menu.findItem(R.id.folder_menu_reload).also { item ->
             viewModel.isLoading.observe(viewLifecycleOwner) {
                 if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
             }
@@ -93,7 +93,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
                 navigateBack()
                 return true
             }
-            R.id.host_menu_reload -> {
+            R.id.folder_menu_reload -> {
                 viewModel.reload()
                 return true
             }
@@ -130,7 +130,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
     }
 
     companion object {
-        const val REQUEST_KEY_FOLDER = "RESULT_KEY_FOLDER"
+        const val REQUEST_KEY_FOLDER = "REQUEST_KEY_FOLDER"
         const val RESULT_KEY_FOLDER_URI = "RESULT_KEY_FOLDER_URI"
     }
 

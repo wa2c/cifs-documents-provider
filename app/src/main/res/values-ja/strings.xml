@@ -60,6 +60,7 @@
     <!-- Folder Screen -->
     <string name="folder_title">フォルダ</string>
     <string name="folder_set">フォルダ設定</string>
+    <string name="folder_reload_button">リロード</string>
     <string name="folder_list_empty">サブフォルダはありません</string>
 
     <!-- DocumentsProvider -->

@@ -60,6 +60,7 @@
     <!-- Folder Screen -->
     <string name="folder_title">Folder</string>
     <string name="folder_set">Set Folder</string>
+    <string name="folder_reload_button">Reload</string>
     <string name="folder_list_empty">No sub folders</string>
 
     <!-- DocumentsProvider -->

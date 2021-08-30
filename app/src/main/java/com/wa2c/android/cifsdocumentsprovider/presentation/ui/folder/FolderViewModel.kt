@@ -39,7 +39,7 @@ class FolderViewModel @Inject constructor(
     /**
      * Initialize
      */
-    fun init(connection: CifsConnection) {
+    fun initialize(connection: CifsConnection) {
         cifsConnection = connection
         _isLoading.value = true
         launch {

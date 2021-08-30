@@ -44,7 +44,7 @@ data class CifsConnection(
 
     companion object {
 
-        const val NEW_ID =""
+        const val NEW_ID = ""
 
         /**
          * Get document ID ( authority[:port]/[path] )
@@ -70,6 +70,26 @@ data class CifsConnection(
             val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
             return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
         }
+
+        /**
+         * Create from host
+         */
+        fun createFromHost(hostText: String): CifsConnection {
+            return CifsConnection(
+                id = NEW_ID,
+                name = hostText,
+                domain = null,
+                host = hostText,
+                port = null,
+                enableDfs = false,
+                folder = null,
+                user = null,
+                password = null,
+                anonymous = false,
+                extension = false
+            )
+        }
+
     }
 }
 
@@ -108,26 +128,6 @@ fun CifsSetting.toModel(): CifsConnection {
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous ?: false,
         extension = this.extension ?: false
-    )
-}
-
-/**
- * Convert host data to connection data.
- */
-fun HostData.toConnection(useHostName: Boolean): CifsConnection {
-    val h = if (useHostName) this.hostName else this.ipAddress
-    return CifsConnection(
-        id = CifsConnection.NEW_ID,
-        name = h,
-        domain = null,
-        host = h,
-        port = null,
-        enableDfs = false,
-        folder = null,
-        user = null,
-        password = null,
-        anonymous = false,
-        extension = false
     )
 }
 

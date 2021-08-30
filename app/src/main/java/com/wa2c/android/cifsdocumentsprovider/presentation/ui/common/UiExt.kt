@@ -8,6 +8,7 @@ import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.Toast
+import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
@@ -58,8 +59,12 @@ fun Fragment.navigateSafe(directions: NavDirections) {
     }
 }
 
-fun Fragment.navigateBack() {
-    findNavController().popBackStack()
+fun Fragment.navigateBack(@IdRes destinationId: Int? = null, inclusive: Boolean = false) {
+    if (destinationId == null) {
+        findNavController().popBackStack()
+    } else {
+        findNavController().popBackStack(destinationId, inclusive)
+    }
 }
 
 @BindingAdapter("visible")
