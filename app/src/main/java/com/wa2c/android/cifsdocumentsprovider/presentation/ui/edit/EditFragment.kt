@@ -28,6 +28,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogRe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
+import android.app.Activity
+import android.content.Context
+import android.view.inputmethod.InputMethodManager
 
 
 /**
@@ -68,7 +71,14 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
             it.initialize(args.cifsConnection)
         }
+    }
 
+    override fun onStop() {
+        super.onStop()
+        // Close keyboard
+        view?.let {
+            (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(it.windowToken, 0)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
