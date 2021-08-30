@@ -38,8 +38,8 @@ class HostViewModel @Inject constructor(
 
     fun discovery() {
         launch {
-            _isLoading.value = true
             hostRepository.stopDiscovery()
+            _isLoading.value = true
             hostRepository.startDiscovery()
         }
     }

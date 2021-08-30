@@ -11,7 +11,7 @@ import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutFolderItemBindin
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 
 /**
- * Folder List item.
+ * Folder list adapter.
  */
 class FolderListAdapter(
     private val viewModel: FolderViewModel

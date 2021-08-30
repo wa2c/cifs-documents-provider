@@ -14,7 +14,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 
 /**
- * Main List item.
+ * Main list adapter.
  */
 class MainListAdapter(
     private val viewModel: MainViewModel

@@ -11,7 +11,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import java.util.*
 
 /**
- * Host List item.
+ * Host list adapter.
  */
 class HostListAdapter(
     private val viewModel: HostViewModel
@@ -65,8 +65,9 @@ class HostListAdapter(
      * Clear data
      */
     fun clearData() {
-        notifyItemRangeRemoved(0, itemList.size)
+        val beforeSize = itemList.size
         itemList.clear()
+        notifyItemRangeRemoved(0, beforeSize)
     }
 
     /**

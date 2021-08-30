@@ -7,8 +7,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,10 +18,10 @@ import javax.inject.Singleton
  */
 @Singleton
 class HostRepository @Inject constructor(
-    val preferences: AppPreferences
+    private val preferences: AppPreferences
 ) {
-    private val _hostFlow = MutableStateFlow<HostData?>(null)
-    val hostFlow: StateFlow<HostData?> = _hostFlow
+    private val _hostFlow: MutableSharedFlow<HostData?> = MutableSharedFlow(0, 20, BufferOverflow.SUSPEND)
+    val hostFlow: MutableSharedFlow<HostData?> = _hostFlow
 
     /** Sort type */
     var sortType: HostSortType
@@ -35,7 +35,7 @@ class HostRepository @Inject constructor(
         withContext(Dispatchers.IO) {
             SubnetDevices.fromLocalAddress().findDevices(object : SubnetDevices.OnSubnetDeviceFound {
                 override fun onDeviceFound(device: Device?) {
-                    logD("onDeviceFound: ${device?.ip}")
+                    logD("onDeviceFound: ${device?.hostname} / ${device?.ip}")
                     HostData(
                         ipAddress = device?.ip ?: return,
                         hostName = device.hostname ?: return,
