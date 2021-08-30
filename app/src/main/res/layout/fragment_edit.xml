@@ -107,7 +107,7 @@
                         android:onClick="@{ () -> viewModel.onClickSearchHost() }"
                         android:src="@drawable/ic_search"
                         app:backgroundTint="@color/primary"
-                        app:tint="?attr/colorOnPrimary" />
+                        app:tint="?attr/colorControlNormal" />
 
                 </TableRow>
 
@@ -270,7 +270,7 @@
                         android:onClick="@{ () -> viewModel.onClickSelectFolder() }"
                         android:src="@drawable/ic_folder"
                         app:backgroundTint="@color/primary"
-                        app:tint="?attr/colorOnPrimary" />
+                        app:tint="?attr/colorControlNormal" />
 
                 </TableRow>
 

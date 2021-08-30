@@ -30,10 +30,11 @@
             android:contentDescription="@null"
             android:onClick="@{ () -> viewModel.onClickAddItem() }"
             android:src="@drawable/ic_add_folder"
-            app:tint="?attr/colorOnPrimary"
             app:backgroundTint="@color/accent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:maxImageSize="32dp"
+            app:tint="?attr/colorOnPrimary" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
