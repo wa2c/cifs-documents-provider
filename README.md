@@ -5,16 +5,27 @@ CIFS Documents Provider
 
 **CIFS Documents Provider** is an Android app to provide access to shared folder by SMB/CIFS.
 
-## Site
+## App Store
 
-* [F-Droid](https://f-droid.org/packages/com.wa2c.android.cifsdocumentsprovider/)
 * [Google Play](https://play.google.com/store/apps/details?id=com.wa2c.android.cifsdocumentsprovider)
-* [Source Code (GitHub)](https://github.com/wa2c/cifs-documents-provider)
-* [Manual](https://github.com/wa2c/cifs-documents-provider/wiki)
+* [F-Droid](https://f-droid.org/packages/com.wa2c.android.cifsdocumentsprovider/)
+* [Amazon Appstore](https://www.amazon.com/gp/product/B09D4264PB) 
+
+## Download
+
+* [APK](https://www.wa2c.com/android/apk/CIFSDocumentsProvider/)
+
+## Source Code
+
+* [GitHub](https://github.com/wa2c/cifs-documents-provider)
+
+## Guide
+
+* [Wiki](https://github.com/wa2c/cifs-documents-provider/wiki)
 
 ## Licence
 
-[MIT](https://github.com/wa2c/medoly-twitter-plugin/blob/master/LICENSE)
+Copyright &copy; 2020 wa2c [MIT License](https://github.com/wa2c/cifs-documents-provider/blob/main/LICENSE)
 
 ## Author
 
