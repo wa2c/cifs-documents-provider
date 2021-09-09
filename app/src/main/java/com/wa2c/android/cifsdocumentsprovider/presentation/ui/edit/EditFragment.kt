@@ -31,6 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import android.app.Activity
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
+import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 
 
 /**
@@ -145,7 +146,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 // Select folder
                 setFragmentResultListener(FolderFragment.REQUEST_KEY_FOLDER) { _, bundle ->
                     bundle.getParcelable<Uri>(FolderFragment.RESULT_KEY_FOLDER_URI)?.let { uri ->
-                        viewModel.setFolderResult(uri.path)
+                        viewModel.setFolderResult(uri.pathFragment)
                     }
                 }
                 navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connection))

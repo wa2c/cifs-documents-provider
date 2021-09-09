@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.AppModule
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
@@ -310,7 +311,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
      * Get Document ID from CIFS file
      */
     private fun CifsFile.getDocumentId(): String {
-        return CifsConnection.getDocumentId(this.server, this.uri.port, this.uri.path, this.isDirectory) ?: ""
+        return CifsConnection.getDocumentId(this.server, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
     }
 
     /**

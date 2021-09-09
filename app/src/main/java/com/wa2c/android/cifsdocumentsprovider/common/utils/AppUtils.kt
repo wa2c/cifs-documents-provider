@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
+import android.net.Uri
 import android.webkit.MimeTypeMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -43,4 +44,14 @@ val String?.mimeType: String
         val extension = this?.substringAfterLast('.', "") ?: "*/*"
         val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
+    }
+
+/**
+ * Get path and fragment (scheme://host/[xxx/yyy#zzz])
+ */
+val Uri?.pathFragment: String
+    get() = run {
+        val uriText = toString()
+        val pathIndex = uriText.indexOf('/', 6) + 1
+        return uriText.substring(pathIndex)
     }
