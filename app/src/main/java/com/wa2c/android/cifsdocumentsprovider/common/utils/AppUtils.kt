@@ -49,9 +49,10 @@ val String?.mimeType: String
 /**
  * Get path and fragment (scheme://host/[xxx/yyy#zzz])
  */
-val Uri?.pathFragment: String
+val Uri.pathFragment: String
     get() = run {
+        val startIndex = scheme?.let { "$it://".length } ?: 0
         val uriText = toString()
-        val pathIndex = uriText.indexOf('/', 6) + 1
+        val pathIndex = uriText.indexOf('/', startIndex) + 1
         return uriText.substring(pathIndex)
     }
