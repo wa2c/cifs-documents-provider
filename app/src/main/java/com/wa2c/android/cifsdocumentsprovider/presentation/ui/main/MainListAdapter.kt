@@ -8,10 +8,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.R
-import com.wa2c.android.cifsdocumentsprovider.common.utils.renew
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutCifsItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 
 /**
  * Main list adapter.

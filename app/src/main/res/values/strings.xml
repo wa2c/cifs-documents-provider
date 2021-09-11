@@ -32,7 +32,6 @@
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>
     <string name="edit_check_connection_button">Check connection</string>
-    <string name="edit_select_directory_ng_message">Select from %1$s directory.</string>
     <string name="edit_check_connection_ok_message">Connection successful.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
     <string name="edit_save_ng_message">Input the host.</string>

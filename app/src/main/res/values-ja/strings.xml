@@ -32,7 +32,6 @@
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>
-    <string name="edit_select_directory_ng_message">%1$s のディレクトリから選択してください。</string>
     <string name="edit_check_connection_ok_message">サーバへの接続に成功しました。</string>
     <string name="edit_check_connection_ng_message">サーバへの接続に失敗しました。</string>
     <string name="edit_save_ng_message">ホストを入力してください。</string>

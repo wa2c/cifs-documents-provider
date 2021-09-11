@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import android.content.Context
 import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.net.Uri
@@ -8,6 +9,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.BindingAdapter
@@ -18,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
@@ -28,10 +31,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogRe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
-import android.app.Activity
-import android.content.Context
-import android.view.inputmethod.InputMethodManager
-import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 
 
 /**
