@@ -32,8 +32,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
-                        android:labelFor="@id/edit_domain_edit_text"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_domain_edit_text"
                         android:text="@string/edit_name_title" />
 
                     <EditText
@@ -58,8 +58,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
-                        android:labelFor="@id/edit_domain_edit_text"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_domain_edit_text"
                         android:text="@string/edit_domain_title" />
 
                     <EditText
@@ -84,8 +84,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
-                        android:labelFor="@id/edit_host_edit_text"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_host_edit_text"
                         android:text="@string/edit_host_title" />
 
                     <EditText
@@ -107,7 +107,7 @@
                         android:onClick="@{ () -> viewModel.onClickSearchHost() }"
                         android:src="@drawable/ic_search"
                         app:backgroundTint="@color/primary"
-                        app:tint="?attr/colorControlNormal" />
+                        app:tint="?attr/colorOnPrimary" />
 
                 </TableRow>
 
@@ -120,8 +120,8 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
-                        android:labelFor="@id/edit_port_edit_text"
                         android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_port_edit_text"
                         android:text="@string/edit_port_title" />
 
                     <EditText
@@ -270,7 +270,7 @@
                         android:onClick="@{ () -> viewModel.onClickSelectFolder() }"
                         android:src="@drawable/ic_folder"
                         app:backgroundTint="@color/primary"
-                        app:tint="?attr/colorControlNormal" />
+                        app:tint="?attr/colorOnPrimary" />
 
                 </TableRow>
 
@@ -417,8 +417,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:isBusy="@{ viewModel.isBusy }"
-            tools:visibility="gone"
-            />
+            tools:visibility="gone" />
 
     </FrameLayout>
 
