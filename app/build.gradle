@@ -73,8 +73,6 @@ dependencies {
     // Dagger
     implementation "com.google.dagger:hilt-android:${versions.dagger_hilt}"
     kapt "com.google.dagger:hilt-android-compiler:${versions.dagger_hilt}"
-    implementation "androidx.hilt:hilt-lifecycle-viewmodel:${versions.dagger_hilt_view_model}"
-    kapt "androidx.hilt:hilt-compiler:${versions.dagger_hilt_view_model}"
 
     // LiveEvent
     implementation "com.github.hadilq.liveevent:liveevent:1.2.0"

@@ -7,7 +7,6 @@ buildscript {
             'lifecycle': '2.3.1',
             'navigation': '2.3.5',
             'dagger_hilt': '2.38.1',
-            'dagger_hilt_view_model': '1.0.0-alpha03',
     ]
 
     repositories {
