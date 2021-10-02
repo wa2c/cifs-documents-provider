@@ -330,7 +330,9 @@
                         android:layout_span="2"
                         android:layout_weight="1"
                         android:padding="4dp"
-                        android:text="@={viewModel.connectionUri}" />
+                        android:text="@={viewModel.connectionUri}"
+                        android:textIsSelectable="true"
+                        tools:text="smb://example/direcotory/file.txt" />
 
                 </TableRow>
 
@@ -352,7 +354,9 @@
                         android:layout_span="2"
                         android:layout_weight="1"
                         android:padding="4dp"
-                        android:text="@={viewModel.providerUri}" />
+                        android:text="@={viewModel.providerUri}"
+                        android:textIsSelectable="true"
+                        tools:text="content://com.wa2c.android.cifsdocumentsprovider.documents/tree/directory/file" />
 
                 </TableRow>
 
