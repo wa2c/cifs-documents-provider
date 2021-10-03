@@ -38,9 +38,14 @@ class HostViewModel @Inject constructor(
 
     fun discovery() {
         launch {
-            hostRepository.stopDiscovery()
-            _isLoading.value = true
-            hostRepository.startDiscovery()
+            runCatching {
+                hostRepository.stopDiscovery()
+                _isLoading.value = true
+                hostRepository.startDiscovery()
+            }.onFailure {
+                _navigationEvent.value = HostNav.NetworkError
+                _isLoading.value = false
+            }
         }
     }
 
@@ -60,8 +65,12 @@ class HostViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        runCatching {
+            hostRepository.stopDiscovery()
+        }.onFailure {
+            _navigationEvent.value = HostNav.NetworkError
+        }
         _isLoading.value = false
-        hostRepository.stopDiscovery()
     }
 
 

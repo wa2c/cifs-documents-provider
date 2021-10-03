@@ -55,6 +55,7 @@
     <string name="host_sort_type_host_name_descend">Host Name (Descend)</string>
     <string name="host_sort_type_ip_address_ascend">IP Address (Ascend)</string>
     <string name="host_sort_type_ip_address_descend">IP Address (Descend)</string>
+    <string name="host_error_network">@string/provider_error_message</string>
 
     <!-- Folder Screen -->
     <string name="folder_title">Folder</string>

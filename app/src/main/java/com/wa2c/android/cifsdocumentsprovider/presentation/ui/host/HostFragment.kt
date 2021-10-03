@@ -138,6 +138,9 @@ class HostFragment: Fragment(R.layout.fragment_host) {
             is HostNav.SelectItem -> {
                 confirmInputData(event.host)
             }
+            is HostNav.NetworkError -> {
+                toast(R.string.host_error_network)
+            }
         }
     }
 

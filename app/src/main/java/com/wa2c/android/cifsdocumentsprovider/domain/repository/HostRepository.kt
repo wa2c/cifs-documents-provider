@@ -33,23 +33,29 @@ class HostRepository @Inject constructor(
      */
     suspend fun startDiscovery() {
         withContext(Dispatchers.IO) {
-            SubnetDevices.fromLocalAddress().findDevices(object : SubnetDevices.OnSubnetDeviceFound {
-                override fun onDeviceFound(device: Device?) {
-                    logD("onDeviceFound: ${device?.hostname} / ${device?.ip}")
-                    HostData(
-                        ipAddress = device?.ip ?: return,
-                        hostName = device.hostname ?: return,
-                        detectionTime = System.currentTimeMillis(),
-                    ).let {
-                        _hostFlow.tryEmit(it)
-                    }
-                }
+            try {
+                SubnetDevices.fromLocalAddress()
+                    .findDevices(object : SubnetDevices.OnSubnetDeviceFound {
+                        override fun onDeviceFound(device: Device?) {
+                            logD("onDeviceFound: ${device?.hostname} / ${device?.ip}")
+                            HostData(
+                                ipAddress = device?.ip ?: return,
+                                hostName = device.hostname ?: return,
+                                detectionTime = System.currentTimeMillis(),
+                            ).let {
+                                _hostFlow.tryEmit(it)
+                            }
+                        }
 
-                override fun onFinished(devicesFound: ArrayList<Device>?) {
-                    logD("onFinished: devicesFound=$devicesFound")
-                    _hostFlow.tryEmit(null)
-                }
-            })
+                        override fun onFinished(devicesFound: ArrayList<Device>?) {
+                            logD("onFinished: devicesFound=$devicesFound")
+                            _hostFlow.tryEmit(null)
+                        }
+                    })
+            } catch (e: Exception) {
+                _hostFlow.tryEmit(null)
+                throw e
+            }
         }
     }
 
@@ -57,8 +63,11 @@ class HostRepository @Inject constructor(
      * Stop discovery
      */
     fun stopDiscovery() {
-        SubnetDevices.fromLocalAddress().cancel()
-        _hostFlow.tryEmit(null)
+        try {
+            SubnetDevices.fromLocalAddress().cancel()
+        } finally {
+            _hostFlow.tryEmit(null)
+        }
     }
 
 }
