@@ -40,10 +40,6 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         logD(uris)
-        if (!uris.all { it.authority == URI_AUTHORITY }) {
-            toast(R.string.main_open_file_result_ng_message)
-            return@registerForActivityResult
-        }
 
         if (uris == null || uris.isEmpty()) {
             return@registerForActivityResult
