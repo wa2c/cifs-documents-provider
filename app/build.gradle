@@ -49,18 +49,18 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
     implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.activity:activity-ktx:1.3.1'
+    implementation 'androidx.activity:activity-ktx:1.4.0'
     implementation 'androidx.fragment:fragment-ktx:1.3.6'
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${versions.kotlin}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutine}"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.coroutine}"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.0.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
 
     // Lifecycle
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:${versions.lifecycle}"
@@ -76,12 +76,17 @@ dependencies {
 
     // LiveEvent
     implementation "com.github.hadilq.liveevent:liveevent:1.2.0"
+
+//    implementation 'org.apache.tika:tika-core:2.1.0'
+//    implementation 'se.llbit:chunky-core:1.4.5'
+    implementation 'com.ibm.sbt:com.ibm.commons:1.1.12.20161007-1200'
+
     // jcifs-ng
     implementation 'eu.agno3.jcifs:jcifs-ng:2.1.5'
     // Android Network Tools
     implementation 'com.github.stealthcopter:AndroidNetworkTools:0.4.5.3'
     // Timber
-    implementation 'com.jakewharton.timber:timber:4.7.1'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
 
     // Test
     testImplementation 'junit:junit:4.13.1'
