@@ -22,7 +22,10 @@ import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferWriter
+import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
+import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -50,6 +53,15 @@ class CifsProxyFileCallback(
             }
         }
     }
+    private val writer: BackgroundBufferWriter by lazy {
+        runBlocking {
+            BackgroundBufferWriter(smbFile.length()) {
+                smbFile.openOutputStream(false, SmbFile.FILE_SHARE_WRITE)
+            }
+        }
+    }
+
+
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
@@ -73,11 +85,14 @@ class CifsProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-//        try {
-//            return access.readBuffer(offset, size, data)
-//        } catch (e: IOException) {
-//            throwErrnoException(e)
-//        }
+        try {
+            if (mode != AccessMode.W) {
+                throw SmbException()
+            }
+            return writer.writeBuffer(offset, size, data)
+        } catch (e: IOException) {
+            throwErrnoException(e)
+        }
         return 0
     }
 
@@ -89,6 +104,7 @@ class CifsProxyFileCallback(
     override fun onRelease() {
         try {
             reader.cancelLoading()
+            writer.cancelBuffering()
             smbFile.close()
             job.complete()
         } catch (e: IOException) {
