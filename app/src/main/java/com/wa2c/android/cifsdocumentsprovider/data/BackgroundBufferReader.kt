@@ -54,14 +54,14 @@ class BackgroundBufferReader(
     /** Current data buffer */
     private var currentDataBuffer: DataBuffer? = null
     /** Buffer loading job. */
-    private var loadingJob: Job? = null
+    private var bufferingJob: Job? = null
 
     /**
      * Read buffer.
      */
     fun readBuffer(position: Long, size: Int, data: ByteArray): Int {
-        if (loadingJob == null) {
-            startBufferLoading(position)
+        if (bufferingJob == null) {
+            startBufferingJob(position)
         }
 
         var dataOffset = 0
@@ -76,7 +76,7 @@ class BackgroundBufferReader(
             val bufferRemain = c.getRemainSize(bufferPosition)
             val bufferOffset = c.getPositionOffset(bufferPosition)
             if (bufferOffset < 0) {
-                startBufferLoading(bufferPosition)
+                startBufferingJob(bufferPosition)
                 continue
             }
 
@@ -107,17 +107,17 @@ class BackgroundBufferReader(
     }
 
     /**
-     * Start buffer loading.
+     * Start buffering.
      */
-    private fun startBufferLoading(startPosition: Long) {
+    private fun startBufferingJob(startPosition: Long) {
         logD("startBufferLoading=$startPosition")
         cancelLoading()
-        loadingJob = launch (Dispatchers.IO) {
+        bufferingJob = launch (Dispatchers.IO) {
             try {
                 var currentPosition = startPosition
                 while (isActive) {
                     val remain = dataSize - currentPosition
-                    if (remain <= 0) break
+                    if (dataSize > 0 && remain <= 0) break
 
                     if (remain > bufferSize) {
                         // Read buffer
@@ -135,7 +135,7 @@ class BackgroundBufferReader(
             } catch (e: Exception) {
                 logE(e)
             }
-            loadingJob = null
+            bufferingJob = null
         }
     }
 
@@ -170,8 +170,8 @@ class BackgroundBufferReader(
      */
     fun cancelLoading() {
         logD("cancelLoading")
-        loadingJob?.cancel()
-        loadingJob = null
+        bufferingJob?.cancel()
+        bufferingJob = null
         currentDataBuffer = null
         dataBufferQueue.forEach { it.cancel() }
         dataBufferQueue.clear()
@@ -199,7 +199,7 @@ class BackgroundBufferReader(
         fun getPositionOffset(p: Long): Int {
             return when {
                 p < position -> -1
-                p >= endPosition -> -1
+                p > endPosition -> -1
                 else -> (p - position).toInt()
             }
         }
@@ -212,7 +212,7 @@ class BackgroundBufferReader(
         fun getRemainSize(p: Long): Int {
             return when {
                 p < position -> -1
-                p >= endPosition -> -1
+                p > endPosition -> -1
                 else -> (endPosition - p).toInt()
             }
         }
