@@ -77,9 +77,8 @@ dependencies {
     // LiveEvent
     implementation "com.github.hadilq.liveevent:liveevent:1.2.0"
 
-//    implementation 'org.apache.tika:tika-core:2.1.0'
-//    implementation 'se.llbit:chunky-core:1.4.5'
-    implementation 'com.ibm.sbt:com.ibm.commons:1.1.12.20161007-1200'
+    // WorkManager
+    implementation "androidx.work:work-runtime-ktx:2.7.0"
 
     // jcifs-ng
     implementation 'eu.agno3.jcifs:jcifs-ng:2.1.5'

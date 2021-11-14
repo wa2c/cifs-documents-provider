@@ -26,10 +26,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferWriter
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
@@ -39,44 +36,42 @@ import kotlin.coroutines.CoroutineContext
 class CifsProxyFileCallback(
     private val smbFile: SmbFile,
     private val mode: AccessMode
-) : ProxyFileDescriptorCallback(), CoroutineScope {
+) : ProxyFileDescriptorCallback() {
 
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
-
-    private val reader: BackgroundBufferReader by lazy {
+    /**
+     * File size
+     */
+    private val fileSeize: Long by lazy {
         runBlocking {
-            BackgroundBufferReader(smbFile.length()) {
-                smbFile.openInputStream(SmbFile.FILE_SHARE_READ)
-            }
-        }
-    }
-    private val writer: BackgroundBufferWriter by lazy {
-        runBlocking {
-            BackgroundBufferWriter(smbFile.length()) {
-                smbFile.openOutputStream(false, SmbFile.FILE_SHARE_WRITE)
+            try {
+                runBlocking { smbFile.length() }
+            } catch (e: IOException) {
+                throwErrnoException(e)
+                0
             }
         }
     }
 
 
+    private var reader: BackgroundBufferReader? = null
+
+    private var writer: BackgroundBufferWriter? = null
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        try {
-            return runBlocking { smbFile.length() }
-        } catch (e: IOException) {
-            throwErrnoException(e)
-        }
-        return 0
+        return fileSeize
     }
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         try {
-            return reader.readBuffer(offset, size, data)
+            writer?.cancelBuffering()
+            val r = reader ?: BackgroundBufferReader(fileSeize) {
+                smbFile.openInputStream(SmbFile.FILE_SHARE_READ)
+            }.also {
+                reader = it
+            }
+            return r.readBuffer(offset, size, data)
         } catch (e: IOException) {
             throwErrnoException(e)
         }
@@ -87,9 +82,17 @@ class CifsProxyFileCallback(
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         try {
             if (mode != AccessMode.W) {
-                throw SmbException()
+                throw SmbException("Writing is not permitted")
             }
-            return writer.writeBuffer(offset, size, data)
+
+            reader?.cancelLoading()
+            val w = writer ?: BackgroundBufferWriter(fileSeize) {
+                smbFile.openOutputStream(false, SmbFile.FILE_SHARE_WRITE)
+            }.also {
+                writer = it
+            }
+
+            return w.writeBuffer(offset, size, data)
         } catch (e: IOException) {
             throwErrnoException(e)
         }
@@ -103,10 +106,9 @@ class CifsProxyFileCallback(
 
     override fun onRelease() {
         try {
-            reader.cancelLoading()
-            writer.cancelBuffering()
+            reader?.cancelLoading()
+            writer?.cancelBuffering()
             smbFile.close()
-            job.complete()
         } catch (e: IOException) {
             throwErrnoException(e)
         }

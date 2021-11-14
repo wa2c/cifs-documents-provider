@@ -57,7 +57,8 @@ class BackgroundBufferWriter(
     /** Buffer loading job. */
     private var writingJob: Job? = null
 
-    private var outputStream: BufferedOutputStream? = null
+    //private var outputStream: BufferedOutputStream? = null
+    private var outputStream: OutputStream? = null
 
     private var streamPosition = 0L
 
@@ -66,7 +67,7 @@ class BackgroundBufferWriter(
             closeStream()
         }
 
-        return (outputStream ?: newOutputStream.invoke().buffered(bufferSize).also {
+        return (outputStream ?: newOutputStream.invoke().also {
             outputStream = it
             streamPosition = 0
         }).let { stream ->

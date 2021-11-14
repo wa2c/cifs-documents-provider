@@ -33,7 +33,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * BackgroundBufferReader
  */
-class BackgroundBufferReader(
+class BackgroundBufferReader (
     /** Data Size */
     private val dataSize: Long,
     /** Buffer unit size */
