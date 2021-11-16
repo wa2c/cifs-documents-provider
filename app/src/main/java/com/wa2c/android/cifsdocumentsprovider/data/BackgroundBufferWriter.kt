@@ -25,8 +25,11 @@ package com.wa2c.android.cifsdocumentsprovider.data
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import kotlinx.coroutines.*
-import java.io.BufferedOutputStream
+import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import java.io.OutputStream
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.coroutines.CoroutineContext
@@ -38,7 +41,7 @@ class BackgroundBufferWriter(
     /** Data Size */
     private val dataSize: Long,
     /** Buffer unit size */
-    private val bufferSize: Int = 1024 * 1024,
+    private val bufferSize: Int = BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = 5,
     /** New InputStream */
@@ -73,10 +76,6 @@ class BackgroundBufferWriter(
         }).let { stream ->
             stream.write(data, 0, size)
             streamPosition += size
-            // End of data
-//            if (streamPosition >= dataSize) {
-//                closeStream()
-//            }
             size
         }
     }
@@ -116,7 +115,7 @@ class BackgroundBufferWriter(
         /** Data length */
         val length: Int = 0,
         /** Data buffer */
-        val data: ByteArray = ByteArray(1024 * 1024),
+        val data: ByteArray = ByteArray(BUFFER_SIZE),
     ) {
         /** Data absolute end position */
         val endPosition = position + length

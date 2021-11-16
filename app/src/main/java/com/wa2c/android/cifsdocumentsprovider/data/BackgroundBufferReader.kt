@@ -25,6 +25,7 @@ package com.wa2c.android.cifsdocumentsprovider.data
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
 import java.io.InputStream
 import java.util.concurrent.ArrayBlockingQueue
@@ -37,7 +38,7 @@ class BackgroundBufferReader (
     /** Data Size */
     private val dataSize: Long,
     /** Buffer unit size */
-    private val bufferSize: Int = 1024 * 1024,
+    private val bufferSize: Int = BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = 5,
     /** New InputStream */
@@ -186,7 +187,7 @@ class BackgroundBufferReader (
         /** Data length */
         val length: Int = 0,
         /** Data buffer */
-        val data: ByteArray = ByteArray(1024 * 1024),
+        val data: ByteArray = ByteArray(BUFFER_SIZE),
     ) {
         /** Data absolute end position */
         val endPosition = position + length

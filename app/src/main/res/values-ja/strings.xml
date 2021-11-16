@@ -65,4 +65,7 @@
     <!-- DocumentsProvider -->
     <string name="provider_error_message">エラーが発生しました</string>
 
+    <!-- SendWorker -->
+    <string name="notification_channel_name_transfer">データ転送</string>
+
 </resources>

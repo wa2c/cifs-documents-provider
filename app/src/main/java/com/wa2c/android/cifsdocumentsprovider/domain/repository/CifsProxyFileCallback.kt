@@ -25,10 +25,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferReader
 import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferWriter
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
-import jcifs.smb.SmbRandomAccessFile
-import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import kotlin.coroutines.CoroutineContext
 
 /**
  * CIFS Proxy File Callback

@@ -65,4 +65,7 @@
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>
 
+    <!-- SendWorker -->
+    <string name="notification_channel_name_transfer">Data Transfer</string>
+
 </resources>
