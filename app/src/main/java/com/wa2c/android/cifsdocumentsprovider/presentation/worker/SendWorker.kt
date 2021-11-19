@@ -32,7 +32,7 @@ class SendWorker(val context: Context, parameters: WorkerParameters) : Coroutine
         .setContentText("")
         .setProgress(100, 0, false)
         .setSmallIcon(R.drawable.ic_launcher_foreground)
-        .addAction(android.R.drawable.ic_delete, context.getString(android.R.string.cancel), WorkManager.getInstance(applicationContext).createCancelPendingIntent(id))
+        .addAction(R.drawable.ic_close, context.getString(android.R.string.cancel), WorkManager.getInstance(applicationContext).createCancelPendingIntent(id))
 
     override suspend fun doWork(): Result {
         val inputUri = inputData.getString(KEY_INPUT_URI)?.toUri() ?: return Result.failure()

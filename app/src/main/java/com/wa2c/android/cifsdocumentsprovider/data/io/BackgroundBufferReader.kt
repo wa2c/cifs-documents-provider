@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.io
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -112,7 +112,7 @@ class BackgroundBufferReader (
      */
     private fun startBufferingJob(startPosition: Long) {
         logD("startBufferLoading=$startPosition")
-        cancelLoading()
+        reset()
         bufferingJob = launch (Dispatchers.IO) {
             try {
                 var currentPosition = startPosition
@@ -167,9 +167,9 @@ class BackgroundBufferReader (
     }
 
     /**
-     * Cancel loading
+     * Reset
      */
-    fun cancelLoading() {
+    fun reset() {
         logD("cancelLoading")
         bufferingJob?.cancel()
         bufferingJob = null
@@ -179,44 +179,10 @@ class BackgroundBufferReader (
     }
 
     /**
-     * Data buffer
+     * Release
      */
-    private class DataBuffer(
-        /** Data absolute start position */
-        val position: Long = 0,
-        /** Data length */
-        val length: Int = 0,
-        /** Data buffer */
-        val data: ByteArray = ByteArray(BUFFER_SIZE),
-    ) {
-        /** Data absolute end position */
-        val endPosition = position + length
-
-        /**
-         * Get offset with pointer and position. -1 if not in data.
-         * @param p Absolute position of stream
-         * @return Offset with start position and p
-         */
-        fun getPositionOffset(p: Long): Int {
-            return when {
-                p < position -> -1
-                p > endPosition -> -1
-                else -> (p - position).toInt()
-            }
-        }
-
-        /**
-         * Get remain size from pointer. -1 if not in data.
-         * @param p Absolute position of stream
-         * @return Offset with p and end position
-         */
-        fun getRemainSize(p: Long): Int {
-            return when {
-                p < position -> -1
-                p > endPosition -> -1
-                else -> (endPosition - p).toInt()
-            }
-        }
+    fun release() {
+        reset()
     }
 
 }

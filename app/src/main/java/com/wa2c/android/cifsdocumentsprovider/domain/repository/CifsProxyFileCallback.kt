@@ -21,8 +21,8 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.BackgroundBufferWriter
+import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.runBlocking
@@ -63,7 +63,7 @@ class CifsProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         try {
-            writer?.cancelBuffering()
+            writer?.reset()
             val r = reader ?: BackgroundBufferReader(fileSeize) {
                 smbFile.openInputStream(SmbFile.FILE_SHARE_READ)
             }.also {
@@ -83,8 +83,8 @@ class CifsProxyFileCallback(
                 throw SmbException("Writing is not permitted")
             }
 
-            reader?.cancelLoading()
-            val w = writer ?: BackgroundBufferWriter(fileSeize) {
+            reader?.reset()
+            val w = writer ?: BackgroundBufferWriter() {
                 smbFile.openOutputStream(false, SmbFile.FILE_SHARE_WRITE)
             }.also {
                 writer = it
@@ -104,8 +104,8 @@ class CifsProxyFileCallback(
 
     override fun onRelease() {
         try {
-            reader?.cancelLoading()
-            writer?.cancelBuffering()
+            reader?.release()
+            writer?.release()
             smbFile.close()
         } catch (e: IOException) {
             throwErrnoException(e)
