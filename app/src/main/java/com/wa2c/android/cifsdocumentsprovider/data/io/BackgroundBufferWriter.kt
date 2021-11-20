@@ -27,8 +27,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
-import java.io.BufferedOutputStream
-import java.io.InputStream
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -39,9 +37,9 @@ import kotlin.coroutines.CoroutineContext
  */
 class BackgroundBufferWriter(
     /** Buffer unit size */
-    private val bufferSize: Int = BUFFER_SIZE,
+    private val bufferSize: Int = BUFFER_SIZE * 2,
     /** Buffer queue capacity  */
-    private val queueCapacity: Int = 10,
+    private val queueCapacity: Int = 5,
     /** New InputStream */
     private val newOutputStream: () -> OutputStream
 ): CoroutineScope {
@@ -52,47 +50,64 @@ class BackgroundBufferWriter(
         get() = Dispatchers.IO + job
 
     /** Data buffer queue */
-    private val dataBufferQueue = ArrayBlockingQueue<DataBuffer>(queueCapacity)
+    private val dataBufferQueue = ArrayBlockingQueue<WriteDataBuffer>(queueCapacity)
 
     private var writingTask: Deferred<Unit>? = null
+
+    private var currentBuffer: WriteDataBuffer? = null
 
     private var streamPosition = 0L
 
     fun writeBuffer(position: Long, size: Int, data: ByteArray): Int {
         if (writingTask == null || position != streamPosition) {
-            writeAsync(position)
+            startBackgroundCycle(position)
         }
-        dataBufferQueue.put(DataBuffer(position, size,  data.copyOf()))
+
+        if (size > bufferSize) {
+            currentBuffer?.let {
+                dataBufferQueue.put(it)
+                currentBuffer = null
+            }
+            dataBufferQueue.put(WriteDataBuffer(position, ByteBuffer.wrap(data)))
+        } else {
+            currentBuffer?.let { buffer ->
+                if (buffer.data.remaining() >= size) {
+                    buffer.data.put(data, 0, size)
+                } else {
+                    dataBufferQueue.put(buffer)
+                    currentBuffer = WriteDataBuffer(position, ByteBuffer.allocate(bufferSize)).also {
+                        it.data.put(data, 0, size)
+                    }
+                }
+            } ?: let {
+                currentBuffer = WriteDataBuffer(position, ByteBuffer.allocate(bufferSize)).also {
+                    it.data.put(data, 0, size)
+                }
+            }
+        }
+
         streamPosition += size
         return size
     }
 
     /**
-     * Read from Samba file.
+     * Start background writing
      */
-    private fun writeAsync(startPosition: Long) {
-        logD("startBufferingJob=$startPosition")
+    private fun startBackgroundCycle(startPosition: Long) {
+        logD("startBackgroundCycle=$startPosition")
         reset()
         writingTask = async (Dispatchers.IO) {
             try {
                 newOutputStream.invoke().use { output ->
-                    var byteBuffer = ByteBuffer.allocate(bufferSize)
                     while (isActive) {
                         val dataBuffer = dataBufferQueue.take()
-                        if (dataBuffer == DataBuffer.emptyDataBuffer) {
-                            output.write(byteBuffer.array(), 0, byteBuffer.position())
-                            output.flush()
-                            logD("writing task finished")
+                        if (dataBuffer.isEndOfData) {
+                            logD("End of Data")
+                            output.write(dataBuffer.data.array(), 0, dataBuffer.length)
                             return@use
-                        } else if (bufferSize < dataBuffer.length) {
-                            output.write(dataBuffer.data, 0, dataBuffer.length)
-                        } else if (byteBuffer.remaining() >= dataBuffer.length) {
-                            byteBuffer.put(dataBuffer.data, 0, dataBuffer.length)
                         } else {
-                            logD("■■■■■ dataBufferQueue.size = ${dataBufferQueue.size}")
-                            output.write(byteBuffer.array(), 0, byteBuffer.position())
-                            byteBuffer = ByteBuffer.allocate(bufferSize)
-                            byteBuffer.put(dataBuffer.data, 0, dataBuffer.length)
+                            logD("dataBufferQueue.size=${dataBufferQueue.size}")
+                            output.write(dataBuffer.data.array(), 0, dataBuffer.length)
                         }
                     }
                 }
@@ -109,9 +124,11 @@ class BackgroundBufferWriter(
         logD("reset")
         if (writingTask != null) {
             runBlocking {
-                dataBufferQueue.put(DataBuffer.emptyDataBuffer)
+                currentBuffer?.let { dataBufferQueue.put(currentBuffer) }
+                dataBufferQueue.put(WriteDataBuffer.endOfData)
                 writingTask?.await()
             }
+            logD("writingTask completed")
         }
         writingTask?.cancel()
         writingTask = null
@@ -122,9 +139,31 @@ class BackgroundBufferWriter(
      */
     fun release() {
         logD("release")
-//        dataBufferQueue.put(DataBuffer.emptyDataBuffer)
-//        runBlocking { writingTask?.await() }
         reset()
     }
+
+
+    /**
+    * Data buffer
+    */
+    data class WriteDataBuffer(
+        /** Data absolute start position */
+        val position: Long = 0,
+        /** Data buffer */
+        val data: ByteBuffer = ByteBuffer.allocate(0),
+    ) {
+        val length: Int
+            get() = data.position()
+
+        val isEndOfData: Boolean
+            get() = position == -1L
+
+        companion object {
+            /** End Data Flag */
+            val endOfData = WriteDataBuffer(-1)
+        }
+    }
+
+
 
 }

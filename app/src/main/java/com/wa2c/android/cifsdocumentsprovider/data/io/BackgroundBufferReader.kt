@@ -62,7 +62,7 @@ class BackgroundBufferReader (
      */
     fun readBuffer(position: Long, size: Int, data: ByteArray): Int {
         if (bufferingJob == null) {
-            startBufferingJob(position)
+            startBackgroundCycle(position)
         }
 
         var dataOffset = 0
@@ -77,7 +77,7 @@ class BackgroundBufferReader (
             val bufferRemain = c.getRemainSize(bufferPosition)
             val bufferOffset = c.getPositionOffset(bufferPosition)
             if (bufferOffset < 0) {
-                startBufferingJob(bufferPosition)
+                startBackgroundCycle(bufferPosition)
                 continue
             }
 
@@ -108,10 +108,10 @@ class BackgroundBufferReader (
     }
 
     /**
-     * Start buffering.
+     * Start background reading.
      */
-    private fun startBufferingJob(startPosition: Long) {
-        logD("startBufferLoading=$startPosition")
+    private fun startBackgroundCycle(startPosition: Long) {
+        logD("startBackgroundCycle=$startPosition")
         reset()
         bufferingJob = launch (Dispatchers.IO) {
             try {
@@ -185,4 +185,44 @@ class BackgroundBufferReader (
         reset()
     }
 
+    /**
+     * Data buffer
+     */
+    class DataBuffer(
+        /** Data absolute start position */
+        val position: Long = 0,
+        /** Data length */
+        val length: Int = 0,
+        /** Data buffer */
+        val data: ByteArray = ByteArray(BUFFER_SIZE),
+    ) {
+        /** Data absolute end position */
+        val endPosition = position + length
+
+        /**
+         * Get offset with pointer and position. -1 if not in data.
+         * @param p Absolute position of stream
+         * @return Offset with start position and p
+         */
+        fun getPositionOffset(p: Long): Int {
+            return when {
+                p < position -> -1
+                p > endPosition -> -1
+                else -> (p - position).toInt()
+            }
+        }
+
+        /**
+         * Get remain size from pointer. -1 if not in data.
+         * @param p Absolute position of stream
+         * @return Offset with p and end position
+         */
+        fun getRemainSize(p: Long): Int {
+            return when {
+                p < position -> -1
+                p > endPosition -> -1
+                else -> (endPosition - p).toInt()
+            }
+        }
+    }
 }
