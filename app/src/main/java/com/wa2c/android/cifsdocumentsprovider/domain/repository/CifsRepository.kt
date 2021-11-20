@@ -12,6 +12,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext

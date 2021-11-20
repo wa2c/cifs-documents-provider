@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.wa2c.android.cifsdocumentsprovider.domain.repository
+package com.wa2c.android.cifsdocumentsprovider.data.io
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
+import java.io.RandomAccessFile
 
 /**
  * CIFS Proxy File Callback
@@ -84,7 +83,7 @@ class CifsProxyFileCallback(
             }
 
             reader?.reset()
-            val w = writer ?: BackgroundBufferWriter() {
+            val w = writer ?: BackgroundBufferWriter {
                 smbFile.openOutputStream(false, SmbFile.FILE_SHARE_WRITE)
             }.also {
                 writer = it

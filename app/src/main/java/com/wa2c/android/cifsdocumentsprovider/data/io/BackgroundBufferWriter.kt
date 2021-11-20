@@ -37,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class BackgroundBufferWriter(
     /** Buffer unit size */
-    private val bufferSize: Int = BUFFER_SIZE * 2,
+    private val bufferSize: Int = BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = 5,
     /** New InputStream */
