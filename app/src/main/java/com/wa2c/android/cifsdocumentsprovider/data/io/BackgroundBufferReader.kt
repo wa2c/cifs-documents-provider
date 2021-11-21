@@ -27,7 +27,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
-import java.io.InputStream
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.coroutines.CoroutineContext
 
@@ -41,8 +40,8 @@ class BackgroundBufferReader (
     private val bufferSize: Int = BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = 5,
-    /** New InputStream */
-    private val newInputStream: () -> InputStream
+    /** Background reading */
+    private val readBackgroundAsync: (start: Long, array: ByteArray, off: Int, len: Int) -> Int
 ): CoroutineScope {
 
     private val job = Job()
@@ -133,35 +132,26 @@ class BackgroundBufferReader (
                         break
                     }
                 }
-            } catch (e: Exception) {
-                logE(e)
+            } finally {
+                bufferingJob = null
             }
-            bufferingJob = null
         }
     }
 
     /**
      * Read from Samba file.
      */
-    private fun readAsync(position: Long, buffSize: Int): Deferred<DataBuffer?> {
+    private fun readAsync(position: Long, buffSize: Int): Deferred<DataBuffer> {
         return async (Dispatchers.IO) {
-            try {
-                newInputStream.invoke().use {
-                    it.skip(position)
-                    val data = ByteArray(buffSize)
-                    val size = it.read(data, 0, buffSize)
-                    val remain = buffSize - size
+            val data = ByteArray(buffSize)
+            val size = readBackgroundAsync(position, data, 0, buffSize)
+            val remain = buffSize - size
 
-                    if (size > 0 && remain > 0) {
-                        val subSize = it.read(data, size, remain)
-                        DataBuffer(position, size + subSize, data)
-                    } else {
-                        DataBuffer(position, size, data)
-                    }
-                }
-            } catch (e: Exception) {
-                logE(e)
-                null
+            if (size > 0 && remain > 0) {
+                val subSize = readBackgroundAsync(position + size, data, size, remain)
+                DataBuffer(position, size + subSize, data)
+            } else {
+                DataBuffer(position, size, data)
             }
         }
     }
@@ -170,7 +160,7 @@ class BackgroundBufferReader (
      * Reset
      */
     fun reset() {
-        logD("cancelLoading")
+        logD("reset")
         bufferingJob?.cancel()
         bufferingJob = null
         currentDataBuffer = null

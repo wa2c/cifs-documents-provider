@@ -26,6 +26,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.io
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
+import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.*
 import java.io.OutputStream
 import java.nio.ByteBuffer
@@ -40,8 +41,8 @@ class BackgroundBufferWriter(
     private val bufferSize: Int = BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = 5,
-    /** New InputStream */
-    private val newOutputStream: () -> OutputStream
+    /** Background writing */
+    private val writeBackground: (start: Long, array: ByteArray, off: Int, len: Int) -> Unit
 ): CoroutineScope {
 
     private val job = Job()
@@ -59,8 +60,16 @@ class BackgroundBufferWriter(
     private var streamPosition = 0L
 
     fun writeBuffer(position: Long, size: Int, data: ByteArray): Int {
-        if (writingTask == null || position != streamPosition) {
-            startBackgroundCycle(position)
+        if (writingTask == null) {
+            startBackgroundCycle()
+        }
+
+        // Different position
+        currentBuffer?.let {
+            if (it.endPosition != position) {
+                dataBufferQueue.put(it)
+                currentBuffer = null
+            }
         }
 
         if (size > bufferSize) {
@@ -93,26 +102,22 @@ class BackgroundBufferWriter(
     /**
      * Start background writing
      */
-    private fun startBackgroundCycle(startPosition: Long) {
-        logD("startBackgroundCycle=$startPosition")
+    private fun startBackgroundCycle() {
         reset()
         writingTask = async (Dispatchers.IO) {
             try {
-                newOutputStream.invoke().use { output ->
-                    while (isActive) {
-                        val dataBuffer = dataBufferQueue.take()
-                        if (dataBuffer.isEndOfData) {
-                            logD("End of Data")
-                            output.write(dataBuffer.data.array(), 0, dataBuffer.length)
-                            return@use
-                        } else {
-                            logD("dataBufferQueue.size=${dataBufferQueue.size}")
-                            output.write(dataBuffer.data.array(), 0, dataBuffer.length)
-                        }
+                while (isActive) {
+                    val dataBuffer = dataBufferQueue.take()
+                    if (dataBuffer.isEndOfData) {
+                        logD("End of Data")
+                        break
+                    } else {
+                        logD("dataBufferQueue.size=${dataBufferQueue.size}")
+                        writeBackground(dataBuffer.position, dataBuffer.data.array(), 0, dataBuffer.length)
                     }
                 }
-            } catch (e: Exception) {
-                logE(e)
+            } finally {
+                writingTask = null
             }
         }
     }
@@ -124,13 +129,15 @@ class BackgroundBufferWriter(
         logD("reset")
         if (writingTask != null) {
             runBlocking {
-                currentBuffer?.let { dataBufferQueue.put(currentBuffer) }
+                currentBuffer?.let {
+                    currentBuffer = null
+                    dataBufferQueue.put(it)
+                }
                 dataBufferQueue.put(WriteDataBuffer.endOfData)
                 writingTask?.await()
             }
             logD("writingTask completed")
         }
-        writingTask?.cancel()
         writingTask = null
     }
 
@@ -152,9 +159,15 @@ class BackgroundBufferWriter(
         /** Data buffer */
         val data: ByteBuffer = ByteBuffer.allocate(0),
     ) {
+        /** Data length */
         val length: Int
             get() = data.position()
 
+        /** End position */
+        val endPosition: Long
+            get() = position + length
+
+        /** True if this is end of data. */
         val isEndOfData: Boolean
             get() = position == -1L
 
