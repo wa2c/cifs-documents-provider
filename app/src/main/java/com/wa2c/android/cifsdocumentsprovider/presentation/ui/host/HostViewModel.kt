@@ -17,11 +17,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * Main Screen ViewModel
+ * Host Screen ViewModel
  */
 @HiltViewModel
 class HostViewModel @Inject constructor(
-    private val hostRepository: HostRepository
+    private val hostRepository: HostRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = LiveEvent<HostNav>()

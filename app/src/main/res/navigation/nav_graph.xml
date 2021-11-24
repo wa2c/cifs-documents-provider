@@ -115,6 +115,15 @@
             app:nullable="true" />
     </dialog>
 
+    <fragment
+        android:id="@+id/sendFragment"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragment"
+        android:label="SendFragment" >
+        <argument
+            android:name="inputUris"
+            app:argType="android.net.Uri[]" />
+    </fragment>
+
     <action
         android:id="@+id/action_global_messageDialog"
         app:destination="@id/messageDialog" />

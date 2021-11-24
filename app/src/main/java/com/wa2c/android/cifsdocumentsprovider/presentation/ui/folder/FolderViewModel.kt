@@ -14,7 +14,7 @@ import java.util.*
 import javax.inject.Inject
 
 /**
- * Main Screen ViewModel
+ * Folder Screen ViewModel
  */
 @HiltViewModel
 class FolderViewModel @Inject constructor(

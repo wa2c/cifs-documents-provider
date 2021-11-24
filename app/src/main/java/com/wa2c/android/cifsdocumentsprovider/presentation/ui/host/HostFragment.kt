@@ -26,7 +26,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogRe
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Screen
+ * Host Screen
  */
 @AndroidEntryPoint
 class HostFragment: Fragment(R.layout.fragment_host) {

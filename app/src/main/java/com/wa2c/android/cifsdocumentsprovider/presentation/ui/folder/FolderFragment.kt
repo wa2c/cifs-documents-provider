@@ -25,7 +25,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * Main Screen
+ * Folder Screen
  */
 @AndroidEntryPoint
 class FolderFragment: Fragment(R.layout.fragment_folder) {
