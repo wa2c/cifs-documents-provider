@@ -1,8 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
-import android.content.Context
-import android.text.format.DateUtils
-import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -12,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutSendItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData.Companion.getSummaryText
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isVisible
 
 /**
@@ -41,34 +38,10 @@ class SendListAdapter(
         binding.sendListItemTitle.text = item.name
         binding.sendListItemSummary.text = item.getSummaryText(binding.root.context)
         binding.sendListItemProgress.progress = item.progress
-        binding.sendListItemProgress.isVisible(item.inProgress)
+        binding.sendListItemProgress.isVisible(item.state.inProgress)
         binding.sendListItemIcon.setOnClickListener { viewModel.onClickCancel(item) }
     }
 
-    /**
-     * Summary Text
-     */
-    private fun SendData.getSummaryText(context: Context): String {
-        // 10% [10MB/100MB] (1MB/s)
-        return when (state) {
-            SendDataState.PROGRESS -> {
-                val sendSize = " (${Formatter.formatShortFileSize(context, progressSize)}/${Formatter.formatShortFileSize(context, size)})"
-                val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)}"
-                "$progress% $sendSize $sendSpeed"
-            }
-            SendDataState.FAILURE -> {
-                "Failure"
-            }
-            SendDataState.SUCCESS -> {
-                "Success"
-            }
-            SendDataState.CANCEL -> {
-                "Cancel"
-            }
-            SendDataState.READY -> {
-                "Ready"
-            }
-        }
-    }
+
 
 }

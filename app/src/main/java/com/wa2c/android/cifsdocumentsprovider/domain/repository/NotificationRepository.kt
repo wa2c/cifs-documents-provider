@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -6,40 +6,50 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData.Companion.getSummaryText
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Notification
- */
 @Singleton
-class Notifier @Inject constructor(
-    @ApplicationContext private val context: Context
+class NotificationRepository @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val notificationManager: NotificationManager,
 ) {
-    /** Notification Manager */
-    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     /** Notification Builder */
     private val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(context, CHANNEL_ID_SEND)
         .setContentTitle("")
         .setContentText("")
         .setAutoCancel(false)
-        .setProgress(100, 0, false)
+        .setProgress(0, 0, false)
         .setSmallIcon(R.drawable.ic_launcher_foreground)
 
     /**
      * Update notification progress
      */
-    fun updateProgress(title: String, text: String, progress: Int) {
+    fun updateProgress(sendData: SendData, countCurrent: Int, countAll: Int) {
         createChannel()
-        notificationBuilder.setContentTitle(title)
-        notificationBuilder.setContentText(text)
-        notificationBuilder.setProgress(100, progress, false)
+        notificationBuilder.setContentTitle(sendData.name)
+        notificationBuilder.setContentText(sendData.getSummaryText(context))
+        notificationBuilder.setSubText("[$countCurrent/$countAll]")
+        notificationBuilder.setProgress(100, sendData.progress, false)
         val notification = notificationBuilder.build().also {
             it.flags = it.flags or Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
         }
         notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Finish
+     */
+    fun finish() {
+        notificationBuilder.setContentTitle("完了しました")
+        notificationBuilder.setContentText("")
+        notificationBuilder.setSubText("[1/1]")
+        notificationBuilder.setProgress(0, 0, false)
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
     /**

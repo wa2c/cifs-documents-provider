@@ -1,6 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
+import android.content.Context
 import android.net.Uri
+import android.text.format.DateUtils
+import android.text.format.Formatter
+import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 
 /**
  * Send Data
@@ -38,25 +42,33 @@ data class SendData(
     val bps: Long
         get() = (elapsedTime / 1000).let { if (it > 0) { progressSize / it } else { 0 } }
 
-    val inProgress: Boolean
-        get() = state == SendDataState.PROGRESS
+    companion object {
 
-    val inCompleted: Boolean
-        get() = state == SendDataState.SUCCESS || state == SendDataState.FAILURE || state == SendDataState.CANCEL
-}
+        /**
+         * Summary Text
+         * ex. 10% [10MB/100MB] (1MB/s)
+         */
+        fun SendData.getSummaryText(context: Context): String {
+            return when (state) {
+                SendDataState.PROGRESS -> {
+                    val sendSize = " (${Formatter.formatShortFileSize(context, progressSize)}/${Formatter.formatShortFileSize(context, size)})"
+                    val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)})"
+                    "$progress% $sendSize $sendSpeed"
+                }
+                SendDataState.FAILURE -> {
+                    "Failure" // FIXME
+                }
+                SendDataState.SUCCESS -> {
+                    "Success" // FIXME
+                }
+                SendDataState.CANCEL -> {
+                    "Cancel" // FIXME
+                }
+                SendDataState.READY -> {
+                    "Ready" // FIXME
+                }
+            }
+        }
 
-/**
- * Send data state.
- */
-enum class SendDataState {
-    /** In ready */
-    READY,
-    /** In progress */
-    PROGRESS,
-    /** Succeeded */
-    SUCCESS,
-    /** Failed */
-    FAILURE,
-    /** Canceled */
-    CANCEL
+    }
 }

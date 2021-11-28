@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
+import android.app.NotificationManager
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,14 +9,15 @@ import androidx.lifecycle.asLiveData
 import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.NotificationRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -24,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SendViewModel @Inject constructor(
     private val sendRepository: SendRepository,
+    private val notificationRepository: NotificationRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = LiveEvent<SendNav>()
@@ -32,24 +35,45 @@ class SendViewModel @Inject constructor(
     private val _sendDataList = MutableLiveData<List<SendData>>(mutableListOf())
     val sendDataList: LiveData<List<SendData>> = _sendDataList
 
-    val processData: LiveData<SendData?> = sendRepository.sendFlow.asLiveData()
+    val processData: LiveData<SendData?> = sendRepository.sendFlow.onEach { sendData ->
+        sendData ?: return@onEach
+        val list = sendDataList.value?.ifEmpty { null } ?: return@onEach
+        val countCurrent = list.count { it.state.isCompleted } + 1
+        val countAll = list.size
+        notificationRepository.updateProgress(sendData, countCurrent, countAll)
+    }.asLiveData()
+
+    /** Send job */
+    private var sendJob: Job? = null
 
     /**
      * Send multiple URI
      */
     fun sendMultiple(sourceUris: List<Uri>, targetUri: Uri) {
         launch {
-            val list = sendRepository.getSendData(sourceUris, targetUri)
-            _sendDataList.value = list
-            list.forEach { sendData ->
-                try {
-                    sendRepository.send(sendData)
-                } catch (e: IOException) {
-                    logE(e)
-                }
-            }
+            val inputList = sendRepository.getSendData(sourceUris, targetUri)
+            val currentList = _sendDataList.value ?: emptyList()
+            _sendDataList.value = currentList + inputList
+            startSendJob()
         }
     }
+
+    /**
+     * Start send job
+     */
+    private fun startSendJob() {
+        if (sendJob != null) return
+        sendJob = launch {
+            while (true) {
+                val list = _sendDataList.value?.ifEmpty { null } ?: break
+                val sendData = list.firstOrNull { it.state.isReady } ?: break
+                sendRepository.send(sendData)
+            }
+            notificationRepository.finish()
+            sendJob = null
+        }
+    }
+
 
     fun onClickCancel(data: SendData) {
         logD("onClickCancel")
@@ -61,7 +85,7 @@ class SendViewModel @Inject constructor(
     fun onClickCancelAll() {
         logD("onClickCancelAll")
         _sendDataList.value
-            ?.filter { it.state == SendDataState.READY || it.state == SendDataState.PROGRESS }
+            ?.filter { !it.state.isCompleted }
             ?.forEach { it.state = SendDataState.CANCEL }
     }
 

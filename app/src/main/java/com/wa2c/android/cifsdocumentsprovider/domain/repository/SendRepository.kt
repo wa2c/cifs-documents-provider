@@ -2,13 +2,13 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.data.io.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -22,8 +22,11 @@ class SendRepository @Inject constructor(
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 20, BufferOverflow.SUSPEND)
-    val sendFlow: SharedFlow<SendData?> = _sendFlow
+    val sendFlow: Flow<SendData?> = _sendFlow
 
+    /**
+     * Get send data list.
+     */
     suspend fun getSendData(sourceUris: List<Uri>, targetUri: Uri): List<SendData> {
         return withContext(Dispatchers.IO) {
             sourceUris.mapNotNull { uri ->
@@ -41,10 +44,13 @@ class SendRepository @Inject constructor(
         }
     }
 
+    /**
+     * Send a data.
+     */
     suspend fun send(sendData: SendData) {
          runCatching {
             withContext(Dispatchers.IO) {
-                if (sendData.state != SendDataState.READY) return@withContext false
+                if (!sendData.state.isReady) return@withContext false
                 sendData.state = SendDataState.PROGRESS
 
                 var previousTime = 0L
@@ -58,7 +64,7 @@ class SendRepository @Inject constructor(
 
                 sendData.startTime = System.currentTimeMillis()
                 dataSender.sendFile(sendData.sourceUri, targetUri) { progressSize ->
-                    if (!sendData.inProgress) return@sendFile false
+                    if (!sendData.state.inProgress) return@sendFile false
                     val currentTime = System.currentTimeMillis()
                     if (currentTime >= previousTime + NOTIFY_CYCLE) {
                         sendData.progressSize = progressSize
@@ -71,7 +77,7 @@ class SendRepository @Inject constructor(
         }.onSuccess {
              if (it) {
                  sendData.state = SendDataState.SUCCESS
-             } else if (!sendData.inCompleted) {
+             } else if (!sendData.state.isCompleted) {
                  sendData.state = SendDataState.FAILURE
              }
             _sendFlow.tryEmit(sendData)
