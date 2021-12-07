@@ -48,14 +48,17 @@ class SendRepository @Inject constructor(
      * Send a data.
      */
     suspend fun send(sendData: SendData) {
-         runCatching {
+        runCatching {
             withContext(Dispatchers.IO) {
-                if (!sendData.state.isReady) return@withContext false
+                if (!sendData.state.isReady) return@withContext sendData.state
                 sendData.state = SendDataState.PROGRESS
 
                 var previousTime = 0L
                 val targetUri = dataSender.getDocumentFile(sendData.targetUri)?.let {
                     if (it.isDirectory) {
+                        if (it.findFile(sendData.name)?.exists() == true) {
+                            return@withContext SendDataState.OVERWRITE
+                        }
                         it.createFile(sendData.mimeType, sendData.name)?.uri
                     } else {
                         it.uri
@@ -64,22 +67,23 @@ class SendRepository @Inject constructor(
 
                 sendData.startTime = System.currentTimeMillis()
                 dataSender.sendFile(sendData.sourceUri, targetUri) { progressSize ->
-                    if (!sendData.state.inProgress) return@sendFile false
+                    if (!sendData.state.inProgress) {
+                        return@sendFile sendData.state
+                    }
+                    if (!isActive) {
+                        return@sendFile SendDataState.FAILURE
+                    }
                     val currentTime = System.currentTimeMillis()
                     if (currentTime >= previousTime + NOTIFY_CYCLE) {
                         sendData.progressSize = progressSize
                         _sendFlow.tryEmit(sendData)
                         previousTime = currentTime
                     }
-                    return@sendFile isActive
+                    return@sendFile SendDataState.PROGRESS
                 }
             }
         }.onSuccess {
-             if (it) {
-                 sendData.state = SendDataState.SUCCESS
-             } else if (!sendData.state.isCompleted) {
-                 sendData.state = SendDataState.FAILURE
-             }
+            sendData.state = it
             _sendFlow.tryEmit(sendData)
         }.onFailure {
             logE(it)

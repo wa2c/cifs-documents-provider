@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -39,9 +40,23 @@ class SendListAdapter(
         binding.sendListItemSummary.text = item.getSummaryText(binding.root.context)
         binding.sendListItemProgress.progress = item.progress
         binding.sendListItemProgress.isVisible(item.state.inProgress)
-        binding.sendListItemIcon.setOnClickListener { viewModel.onClickCancel(item) }
+        binding.root.let { root ->
+            root.setOnClickListener {
+                PopupMenu(root.context, root).also {
+                    val cancel = if (!item.state.isCompleted)  it.menu.add(R.string.send_action_cancel)  else null
+                    val retry = if (item.state.isRetryable) it.menu.add(R.string.send_action_retry) else null
+                    val remove = it.menu.add(R.string.send_action_remove)
+                    it.setOnMenuItemClickListener { menuItem ->
+                        when (menuItem) {
+                            cancel -> { viewModel.onClickCancel(item) }
+                            retry -> { viewModel.onClickRetry(item) }
+                            remove -> { viewModel.onClickRemove(item) }
+                        }
+                        true
+                    }
+                }.show()
+            }
+        }
     }
-
-
 
 }

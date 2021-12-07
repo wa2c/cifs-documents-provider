@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
-import android.app.NotificationManager
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -35,7 +34,7 @@ class SendViewModel @Inject constructor(
     private val _sendDataList = MutableLiveData<List<SendData>>(mutableListOf())
     val sendDataList: LiveData<List<SendData>> = _sendDataList
 
-    val processData: LiveData<SendData?> = sendRepository.sendFlow.onEach { sendData ->
+    val sendData: LiveData<SendData?> = sendRepository.sendFlow.onEach { sendData ->
         sendData ?: return@onEach
         val list = sendDataList.value?.ifEmpty { null } ?: return@onEach
         val countCurrent = list.count { it.state.isCompleted } + 1
@@ -69,9 +68,15 @@ class SendViewModel @Inject constructor(
                 val sendData = list.firstOrNull { it.state.isReady } ?: break
                 sendRepository.send(sendData)
             }
-            notificationRepository.finish()
+            notificationRepository.complete()
             sendJob = null
         }
+    }
+
+    fun finishSending() {
+        _sendDataList.value = emptyList()
+        sendJob?.cancel()
+        notificationRepository.close()
     }
 
 
@@ -79,6 +84,21 @@ class SendViewModel @Inject constructor(
         logD("onClickCancel")
         _sendDataList.value?.firstOrNull { it.id == data.id }?.let {
             it.state = SendDataState.CANCEL
+        }
+    }
+
+    fun onClickRetry(data: SendData) {
+        logD("onClickCancel")
+        _sendDataList.value?.firstOrNull { it.id == data.id }?.let {
+            it.state = SendDataState.READY
+        }
+    }
+
+    fun onClickRemove(data: SendData) {
+        logD("onClickCancel")
+        _sendDataList.value?.toMutableList()?.let {
+            it.remove(data)
+            _sendDataList.value = it
         }
     }
 

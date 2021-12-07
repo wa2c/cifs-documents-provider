@@ -62,10 +62,21 @@
     <string name="folder_reload_button">リロード</string>
     <string name="folder_list_empty">サブフォルダはありません</string>
 
+    <!-- Send Screen -->
+    <string name="send_action_cancel">キャンセル</string>
+    <string name="send_action_retry">再試行</string>
+    <string name="send_action_remove">削除</string>
+    <string name="send_state_ready">待機</string>
+    <string name="send_state_overwrite">ファイルが存在します</string>
+    <string name="send_state_success">完了しました</string>
+    <string name="send_state_failure">失敗しました</string>
+    <string name="send_state_cancel">キャンセルしました</string>
+
     <!-- DocumentsProvider -->
     <string name="provider_error_message">エラーが発生しました</string>
 
-    <!-- SendWorker -->
-    <string name="notification_channel_name_transfer">データ転送</string>
+    <!-- Notification -->
+    <string name="notification_channel_name_send">データ送信</string>
+    <string name="notification_title_send_completed">完了しました</string>
 
 </resources>

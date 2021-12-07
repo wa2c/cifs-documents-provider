@@ -46,7 +46,7 @@ data class SendData(
 
         /**
          * Summary Text
-         * ex. 10% [10MB/100MB] (1MB/s)
+         * ex. 10% [10MB/100MB] 1MB/s (1:00)
          */
         fun SendData.getSummaryText(context: Context): String {
             return when (state) {
@@ -55,17 +55,8 @@ data class SendData(
                     val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)})"
                     "$progress% $sendSize $sendSpeed"
                 }
-                SendDataState.FAILURE -> {
-                    "Failure" // FIXME
-                }
-                SendDataState.SUCCESS -> {
-                    "Success" // FIXME
-                }
-                SendDataState.CANCEL -> {
-                    "Cancel" // FIXME
-                }
-                SendDataState.READY -> {
-                    "Ready" // FIXME
+                else -> {
+                    context.getString(state.labelRes)
                 }
             }
         }

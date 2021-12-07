@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -22,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class SendFragment: Fragment(R.layout.fragment_send) {
 
     /** View Model */
-    private val viewModel by viewModels<SendViewModel>()
+    private val viewModel by activityViewModels<SendViewModel>()
     /** Binding */
     private val binding: FragmentSendBinding? by viewBinding()
     /** List adapter */
@@ -65,7 +65,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
 
         // Disable back key
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner) {
-            activity?.moveTaskToBack(true)
+            activity?.finish()
         }
 
         setHasOptionsMenu(true)
@@ -83,35 +83,30 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             bind.sendList.itemAnimator = null
         }
 
-        viewModel.let { model ->
-            model.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-            model.sendDataList.observe(viewLifecycleOwner) { list ->
+        viewModel.let { vm ->
+            vm.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
+            vm.sendDataList.observe(viewLifecycleOwner) { list ->
                 adapter.submitList(list)
             }
-            model.processData.observe(viewLifecycleOwner) { data ->
-                val index = model.sendDataList.value?.indexOfLast { it.id == data?.id }
+            vm.sendData.observe(viewLifecycleOwner) { data ->
+                val index = vm.sendDataList.value?.indexOfLast { it.id == data?.id }
                 if (index == null || index < 0) return@observe
                 adapter.notifyItemChanged(index)
             }
         }
 
-        if (viewModel.sendDataList.value.isNullOrEmpty()) {
-            val uris = args.inputUris
-            when {
-                uris.size == 1 -> {
-                    // Single
-                    val uri = uris.first()
-                    val file = DocumentFile.fromSingleUri(requireContext(), uri)
-                    singleUriLauncher.launch(file?.name ?: uri.lastPathSegment)
-                }
-                uris.size > 1 -> {
-                    // Multiple
-                    multipleUriLauncher.launch(args.inputUris.first())
-                }
-                else -> {
-                    // Invalid
-                    activity?.finishAffinity()
-                }
+
+        val uris = args.inputUris
+        when {
+            uris.size == 1 -> {
+                // Single
+                val uri = uris.first()
+                val file = DocumentFile.fromSingleUri(requireContext(), uri)
+                singleUriLauncher.launch(file?.name ?: uri.lastPathSegment)
+            }
+            uris.size > 1 -> {
+                // Multiple
+                multipleUriLauncher.launch(args.inputUris.first())
             }
         }
     }

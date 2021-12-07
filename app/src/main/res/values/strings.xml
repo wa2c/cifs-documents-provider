@@ -62,10 +62,21 @@
     <string name="folder_reload_button">Reload</string>
     <string name="folder_list_empty">No sub folders</string>
 
+    <!-- Send Screen -->
+    <string name="send_action_cancel">Cancel</string>
+    <string name="send_action_retry">Retry</string>
+    <string name="send_action_remove">Remove</string>
+    <string name="send_state_ready">Ready</string>
+    <string name="send_state_overwrite">File exists</string>
+    <string name="send_state_success">Success</string>
+    <string name="send_state_failure">Failure</string>
+    <string name="send_state_cancel">Cancelled</string>
+
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>
 
-    <!-- SendWorker -->
-    <string name="notification_channel_name_transfer">Data Transfer</string>
+    <!-- Notification -->
+    <string name="notification_channel_name_send">Data Transfer</string>
+    <string name="notification_title_send_completed">Completed</string>
 
 </resources>
