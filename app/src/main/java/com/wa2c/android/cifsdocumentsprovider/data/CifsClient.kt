@@ -31,7 +31,7 @@ class CifsClient @Inject constructor() {
         }
 
         return  CIFSContextWrapper(BaseContext(PropertyConfiguration(property))
-            .withCredentials(NtlmPasswordAuthenticator(domain, user, password)))
+            .withCredentials(NtlmPasswordAuthenticator(domain, user, password, null)))
     }
 
     /**
