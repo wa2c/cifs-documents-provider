@@ -6,6 +6,7 @@
     <!-- Main Screen -->
     <string name="main_open_file">Open</string>
     <string name="main_open_file_ng_message">Add any connection.</string>
+    <string name="cifs_add_a11y">Add</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">Connection</string>
@@ -15,11 +16,13 @@
     <string name="edit_domain_hint">Input as needed</string>
     <string name="edit_host_title">Host</string>
     <string name="edit_host_hint">IP Address / Host</string>
+    <string name="edit_host_select_a11y">Browse</string>
     <string name="edit_port_title">Port</string>
     <string name="edit_port_hint">Default if empty</string>
     <string name="edit_enable_dfs_label">Enable DFS (Distributed File System)</string>
     <string name="edit_folder_title">Folder</string>
     <string name="edit_folder_hint">\'/\' if empty</string>
+    <string name="edit_directory_search_a11y">Browse</string>
     <string name="edit_user_title">User</string>
     <string name="edit_user_hint">Invalid if anonymous</string>
     <string name="edit_password_title">Password</string>
