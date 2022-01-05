@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CIFS Documents Provider</string>
+    <string name="app_summary">Prístup k zdieľaným súborom a priečinkom.</string>
+
+    <!-- Main Screen -->
+    <string name="main_open_file">Otvoriť</string>
+    <string name="main_open_file_ng_message">Pridajte pripojenie.</string>
+
+    <!-- Edit Screen -->
+    <string name="edit_title">Pripojenie</string>
+    <string name="edit_name_title">Názov</string>
+    <string name="edit_name_hint">Použije sa názov hostiteľa, ak nevyplníte</string>
+    <string name="edit_domain_title">Doména</string>
+    <string name="edit_domain_hint">Zadajte podľa potreby</string>
+    <string name="edit_host_title">Hostiteľ</string>
+    <string name="edit_host_hint">Adresa IP / Názov servera</string>
+    <string name="edit_port_title">Port</string>
+    <string name="edit_port_hint">Predvolený, ak nevyplníte</string>
+    <string name="edit_enable_dfs_label">Povoliť DFS (distribuovaný systém súborov)</string>
+    <string name="edit_folder_title">Cesta</string>
+    <string name="edit_folder_hint">\'/\' ak nevyplníte</string>
+    <string name="edit_user_title">Meno používateľa</string>
+    <string name="edit_user_hint">Neplatí pre anonymné prihlásenie</string>
+    <string name="edit_password_title">Heslo</string>
+    <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
+    <string name="edit_anonymous_label">Anonymné prihlásenie</string>
+    <string name="edit_option_title">Možnosti</string>
+    <string name="edit_extension_label">Pridať príponu pri ukladaní súborov</string>
+
+    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_provider_uri_title">Shared URI</string>
+    <string name="edit_check_connection_button">Overiť pripojenie</string>
+    <string name="edit_check_connection_ok_message">Pripojenie úspešné.</string>
+    <string name="edit_check_connection_ng_message">Pripojenie zlyhalo.</string>
+    <string name="edit_save_ng_message">Zadajte názov hostiteľa.</string>
+    <string name="edit_save_duplicate_message">Duplicitná URI.</string>
+    <string name="edit_save_button">Uložiť</string>
+    <string name="edit_delete_button">Zmazať</string>
+    <string name="edit_back_confirmation_message">Zahodiť zmeny?</string>
+    <string name="edit_delete_confirmation_message">Naozaj vymazať toto pripojenie?</string>
+
+    <!-- Host Screen -->
+    <string name="host_title">Hostiteľ</string>
+    <string name="host_set_manually">Nastaviť ručne</string>
+    <string name="host_select_confirmation_message">Input selected data to edit form.</string>
+    <string name="host_select_host_name">Názov hostiteľa</string>
+    <string name="host_select_ip_address">Adresa IP</string>
+    <string name="host_sort_button">Zoradiť</string>
+    <string name="host_reload_button">Obnoviť</string>
+    <string name="host_sort_type_detection_ascend">Zistenia (Od najstaršieho)</string>
+    <string name="host_sort_type_detection_descend">Zistenia (Od najnovšieho)</string>
+    <string name="host_sort_type_host_name_ascend">Názvu hostiteľa (Od A po Z)</string>
+    <string name="host_sort_type_host_name_descend">Názvu hostiteľa (Od Z po A)</string>
+    <string name="host_sort_type_ip_address_ascend">Adresy IP (Od najnižších)</string>
+    <string name="host_sort_type_ip_address_descend">Adresy IP (Od najvyšších)</string>
+    <string name="host_error_network">@string/provider_error_message</string>
+
+    <!-- Folder Screen -->
+    <string name="folder_title">Priečinok</string>
+    <string name="folder_set">Nastaviť priečinok</string>
+    <string name="folder_reload_button">Obnoviť</string>
+    <string name="folder_list_empty">Žiadne podpriečinky</string>
+
+    <!-- Send Screen -->
+    <string name="send_action_cancel">Zrušiť</string>
+    <string name="send_action_retry">Skúsiť znovu</string>
+    <string name="send_action_remove">Odstrániť</string>
+    <string name="send_state_ready">Pripravené</string>
+    <string name="send_state_overwrite">Súbor existuje</string>
+    <string name="send_state_success">Hotovo</string>
+    <string name="send_state_failure">Chyba</string>
+    <string name="send_state_cancel">Prerušené</string>
+
+    <!-- DocumentsProvider -->
+    <string name="provider_error_message">Vyskytla sa chyba.</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_name_send">Prenos súborov</string>
+    <string name="notification_title_send_completed">Dokončené</string>
+
+</resources>
