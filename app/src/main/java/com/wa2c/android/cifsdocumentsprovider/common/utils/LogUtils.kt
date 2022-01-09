@@ -2,19 +2,28 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 
 import timber.log.Timber
 
-/** Log a verbose message */
-fun logV(message: Any?, vararg args: Any?) = Timber.asTree().v(message.toString(), *args)
-/** Log a debug message */
-fun logD(message: Any?, vararg args: Any?) = Timber.asTree().d(message.toString(), *args)
-/** Log an info message */
-fun logI(message: Any?, vararg args: Any?) = Timber.asTree().i(message.toString(), *args)
-/** Log a warning message */
-fun logW(message: Any?, vararg args: Any?) = run {
-    if (message is Throwable) { Timber.asTree().w(message) }
-    Timber.asTree().w(message.toString(), *args)
+/** Output the verbose message */
+fun logV(obj: Any?, vararg args: Any?) = run {
+    if (obj is Throwable) { Timber.asTree().v(obj) }
+    Timber.asTree().v(obj.toString(), *args)
 }
-/** Log an error message */
-fun logE(message: Any?, vararg args: Any?) = run {
-    if (message is Throwable) { Timber.asTree().e(message) }
-    Timber.asTree().e(message.toString(), *args)
+/** Output the debug message */
+fun logD(obj: Any?, vararg args: Any?) = run {
+    if (obj is Throwable) { Timber.asTree().d(obj) }
+    Timber.asTree().d(obj.toString(), *args)
+}
+/** Output the info message */
+fun logI(obj: Any?, vararg args: Any?) = run {
+    if (obj is Throwable) { Timber.asTree().i(obj) }
+    Timber.asTree().i(obj.toString(), *args)
+}
+/** Output the warning message */
+fun logW(obj: Any?, vararg args: Any?) = run {
+    if (obj is Throwable) { Timber.asTree().w(obj) }
+    Timber.asTree().w(obj.toString(), *args)
+}
+/** Output the error message */
+fun logE(obj: Any?, vararg args: Any?) = run {
+    if (obj is Throwable) { Timber.asTree().e(obj) }
+    Timber.asTree().e(obj.toString(), *args)
 }
