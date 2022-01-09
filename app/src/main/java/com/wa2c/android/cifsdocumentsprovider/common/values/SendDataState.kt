@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.wa2c.android.cifsdocumentsprovider.R
 

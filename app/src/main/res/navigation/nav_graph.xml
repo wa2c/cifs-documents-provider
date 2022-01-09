@@ -86,35 +86,6 @@
             app:argType="com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection" />
     </fragment>
 
-    <dialog
-        android:id="@+id/messageDialog"
-        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialog"
-        android:label="MessageDialog">
-        <argument
-            android:name="message"
-            app:argType="string" />
-        <argument
-            android:name="title"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="positiveText"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="neutralText"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="negativeText"
-            android:defaultValue="@null"
-            app:argType="string"
-            app:nullable="true" />
-    </dialog>
-
     <fragment
         android:id="@+id/sendFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragment"
@@ -123,9 +94,5 @@
             android:name="inputUris"
             app:argType="android.net.Uri[]" />
     </fragment>
-
-    <action
-        android:id="@+id/action_global_messageDialog"
-        app:destination="@id/messageDialog" />
 
 </navigation>

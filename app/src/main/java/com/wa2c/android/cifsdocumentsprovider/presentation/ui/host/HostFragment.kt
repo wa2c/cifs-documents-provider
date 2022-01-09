@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -12,9 +11,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
@@ -22,8 +21,6 @@ import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentHostBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -155,24 +152,12 @@ class HostFragment: Fragment(R.layout.fragment_host) {
             if (host.hostName == host.ipAddress) {
                 openEdit(host.hostName)
             } else {
-                navigateSafe(
-                    MessageDialogDirections.actionGlobalMessageDialog(
-                        message = getString(R.string.host_select_confirmation_message),
-                        positiveText = getString(R.string.host_select_host_name),
-                        negativeText = getString(R.string.host_select_ip_address),
-                        neutralText = getString(android.R.string.cancel),
-                    )
-                )
-                setDialogResult { result ->
-                    findNavController().navigateUp() // Close dialog
-                    if (result == DialogInterface.BUTTON_POSITIVE) {
-                        // Use Host Name
-                        openEdit(host.hostName)
-                    } else if  (result == DialogInterface.BUTTON_NEGATIVE) {
-                        // Use IP Address
-                        openEdit(host.ipAddress)
-                    }
-                }
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage(R.string.host_select_confirmation_message)
+                    .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
+                    .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
+                    .setNeutralButton(R.string.dialog_close, null)
+                    .show()
                 return
             }
         } else {

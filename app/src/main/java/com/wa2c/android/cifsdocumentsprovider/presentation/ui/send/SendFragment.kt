@@ -1,6 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSendBinding
@@ -66,13 +70,13 @@ class SendFragment: Fragment(R.layout.fragment_send) {
 
         // Disable back key
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner) {
-            activity?.finish()
+            confirmClose()
         }
 
         setHasOptionsMenu(true)
         (activity as? AppCompatActivity)?.supportActionBar?.let {
             it.setIcon(null)
-            it.setTitle(R.string.host_title)
+            it.setTitle(R.string.send_title)
             it.setDisplayShowHomeEnabled(false)
             it.setDisplayHomeAsUpEnabled(false)
             it.setDisplayShowTitleEnabled(true)
@@ -113,9 +117,36 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         }
     }
 
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_send, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.send_menu_close -> {
+                confirmClose()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    /**
+     * Confirm closing.
+     */
+    private fun confirmClose() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setMessage(R.string.send_exit_confirmation_message)
+            .setPositiveButton(R.string.dialog_accept) { _, _ -> activity?.finishAffinity() }
+            .setNeutralButton(R.string.dialog_close, null)
+            .show()
+    }
+
     private fun onNavigate(event: SendNav) {
         logD("onNavigate: event=$event")
         when (event) {
+
             is SendNav.Cancel -> {
 
             }

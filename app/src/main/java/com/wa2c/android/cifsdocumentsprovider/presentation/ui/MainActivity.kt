@@ -68,8 +68,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         sendViewModel.finishSending()
+        super.onDestroy()
     }
 
 }

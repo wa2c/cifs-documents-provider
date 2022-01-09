@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.content.Context
-import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
@@ -26,8 +26,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBac
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.MessageDialogDirections
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.dialog.setDialogResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,18 +93,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 return true
             }
             R.id.edit_menu_delete -> {
-                navigateSafe(
-                    MessageDialogDirections.actionGlobalMessageDialog(
-                        message = getString(R.string.edit_delete_confirmation_message),
-                        positiveText = getString(android.R.string.ok),
-                        neutralText = getString(android.R.string.cancel)
-                    )
-                )
-                setDialogResult { result ->
-                    if (result == DialogInterface.BUTTON_POSITIVE) {
-                        viewModel.onClickDelete()
-                    }
-                }
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage(R.string.edit_delete_confirmation_message)
+                    .setPositiveButton(R.string.dialog_accept) { _, _ -> viewModel.onClickDelete() }
+                    .setNeutralButton(R.string.dialog_close, null)
+                    .show()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -116,18 +107,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         when (event) {
             is EditNav.Back -> {
                 if (event.changed) {
-                    setDialogResult { result ->
-                        if (result == DialogInterface.BUTTON_POSITIVE) {
-                            findNavController().popBackStack(R.id.editFragment, true)
-                        }
-                    }
-                    navigateSafe(
-                        MessageDialogDirections.actionGlobalMessageDialog(
-                            message = getString(R.string.edit_back_confirmation_message),
-                            positiveText = getString(android.R.string.ok),
-                            neutralText = getString(android.R.string.cancel)
-                        )
-                    )
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setMessage(R.string.edit_back_confirmation_message)
+                        .setPositiveButton(R.string.dialog_accept) { _, _ -> navigateBack(R.id.editFragment, true) }
+                        .setNeutralButton(R.string.dialog_close, null)
+                        .show()
                 } else {
                     navigateBack(R.id.editFragment, true)
                 }

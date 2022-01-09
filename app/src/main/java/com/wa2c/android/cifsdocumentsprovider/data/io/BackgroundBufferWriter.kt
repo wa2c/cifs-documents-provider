@@ -24,11 +24,8 @@
 package com.wa2c.android.cifsdocumentsprovider.data.io
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
-import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.*
-import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.coroutines.CoroutineContext

@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">CIFS Documents Provider</string>
     <string name="app_summary">Access the shared folder.</string>
+    <string name="dialog_accept">OK</string>
+    <string name="dialog_close">Close</string>
 
     <!-- Main Screen -->
     <string name="main_open_file">Open</string>
@@ -63,6 +65,8 @@
     <string name="folder_list_empty">No sub folders</string>
 
     <!-- Send Screen -->
+    <string name="send_title">File Transfer</string>
+    <string name="send_close_button">Close</string>
     <string name="send_action_cancel">Cancel</string>
     <string name="send_action_retry">Retry</string>
     <string name="send_action_remove">Remove</string>
@@ -71,6 +75,7 @@
     <string name="send_state_success">Success</string>
     <string name="send_state_failure">Failure</string>
     <string name="send_state_cancel">Cancelled</string>
+    <string name="send_exit_confirmation_message">Cancel all transfers and exit the app.</string>
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>
