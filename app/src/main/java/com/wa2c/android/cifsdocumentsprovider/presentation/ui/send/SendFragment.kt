@@ -9,6 +9,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSendBinding
@@ -81,6 +82,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             bind.viewModel = viewModel
             bind.sendList.adapter = adapter
             bind.sendList.itemAnimator = null
+            bind.sendList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         }
 
         viewModel.let { vm ->

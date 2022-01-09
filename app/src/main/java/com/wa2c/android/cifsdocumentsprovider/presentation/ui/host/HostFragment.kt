@@ -14,6 +14,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
@@ -59,6 +60,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         binding?.let { bind ->
             bind.viewModel = viewModel
             bind.hostList.adapter = adapter
+            bind.hostList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
             bind.hostSetManuallyContainer.isVisible = isInit
         }
 

@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentFolderBinding
@@ -64,6 +65,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
         binding?.let { bind ->
             bind.viewModel = viewModel
             bind.folderList.adapter = adapter
+            bind.folderList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         }
 
         viewModel.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
