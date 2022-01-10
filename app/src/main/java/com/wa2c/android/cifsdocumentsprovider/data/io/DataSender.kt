@@ -43,10 +43,8 @@ class DataSender @Inject constructor(
                     if (length <= 0) break // End of Data
                     output.write(buffer, 0, length)
                     progressSize += length
-
                     if (!updateProgress(progressSize)) return false
                 }
-                output.flush()
             }
         }
         return true

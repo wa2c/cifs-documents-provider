@@ -21,6 +21,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
 
@@ -41,9 +42,19 @@ class CifsDocumentsProvider : DocumentsProvider() {
         CifsRepository(CifsClient(), appPreferences, storageManager)
     }
 
-    /** Handler thread */
-    private var handlerThread: HandlerThread? = null
+    /** File handler */
+    private val fileHandler: Handler = HandlerThread(this.javaClass.simpleName)
+            .apply { start() }
+            .let { Handler(it.looper) }
 
+    /**
+     * Run on fileHandler
+     */
+    private fun <T> runOnFileHandler(function: suspend () -> T): T {
+        return runBlocking(fileHandler.asCoroutineDispatcher()) {
+            function()
+        }
+    }
 
     override fun onCreate(): Boolean {
         return true
@@ -141,13 +152,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
-        val uri = documentId?.let { getCifsFileUri(it) } ?: return null
-        val accessMode = AccessMode.fromSafMode(mode)
-        val thread = HandlerThread(this.javaClass.simpleName).also {
-            it.start()
-            handlerThread = it
+        return runOnFileHandler {
+            val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
+            val accessMode = AccessMode.fromSafMode(mode)
+            cifsRepository.getFileDescriptor(uri, accessMode, fileHandler)
         }
-        return runBlocking { cifsRepository.getFileDescriptor(uri, accessMode, thread) }
     }
 
     override fun createDocument(
@@ -155,42 +164,36 @@ class CifsDocumentsProvider : DocumentsProvider() {
         mimeType: String?,
         displayName: String
     ): String? {
-        val documentId = Paths.get(parentDocumentId, displayName).toString()
-        val uri = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-            getCifsDirectoryUri(documentId)
-        } else {
-            getCifsFileUri(documentId)
+        return runOnFileHandler {
+            val documentId = Paths.get(parentDocumentId, displayName).toString()
+            val uri = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+                getCifsDirectoryUri(documentId)
+            } else {
+                getCifsFileUri(documentId)
+            }
+            cifsRepository.createFile(uri, mimeType)?.getDocumentId()
         }
-        val cifsFile = runBlocking {
-            cifsRepository.createFile(uri, mimeType)
-        }
-        return cifsFile?.getDocumentId()
     }
 
     override fun deleteDocument(documentId: String?) {
-        documentId?.let {
-            runBlocking {
-                cifsRepository.deleteFile(getCifsUri(it))
-            }
-        } ?: let {
-            throw OperationCanceledException()
+        if (documentId == null) throw OperationCanceledException()
+        runOnFileHandler {
+             cifsRepository.deleteFile(getCifsUri(documentId))
         }
     }
 
     override fun renameDocument(documentId: String?, displayName: String?): String? {
         if (documentId == null || displayName == null) return null
-        val targetFile = runBlocking {
-            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)
+        return runOnFileHandler {
+            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)?.getDocumentId()
         }
-        return targetFile?.getDocumentId()
     }
 
     override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String? {
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
-        val targetFile = runBlocking {
-            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
+       return runOnFileHandler {
+            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.getDocumentId()
         }
-        return targetFile?.getDocumentId()
     }
 
     override fun moveDocument(
@@ -199,10 +202,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         targetParentDocumentId: String?
     ): String? {
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
-        val targetFile = runBlocking {
-            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))
+        return runOnFileHandler {
+            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.getDocumentId()
         }
-        return targetFile?.getDocumentId()
     }
 
     override fun removeDocument(documentId: String?, parentDocumentId: String?) {
@@ -210,10 +212,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun shutdown() {
-        handlerThread?.let {
-            it.quit()
-            handlerThread = null
-        }
+        fileHandler.looper.quit()
     }
 
     private fun includeRoot(cursor: MatrixCursor) {

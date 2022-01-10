@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import android.os.Handler
-import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.webkit.MimeTypeMap
@@ -270,7 +269,6 @@ class CifsRepository @Inject constructor(
                     copyFile(sourceUri, targetUri)?.also {
                         deleteFile(sourceUri)
                     }
-
                 }
             } catch (e: Exception) {
                 smbFileCache.remove(targetUri)
@@ -368,13 +366,13 @@ class CifsRepository @Inject constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    suspend fun getFileDescriptor(uri: String, mode: AccessMode, thread: HandlerThread): ParcelFileDescriptor? {
+    suspend fun getFileDescriptor(uri: String, mode: AccessMode, handler: Handler): ParcelFileDescriptor? {
         return withContext(Dispatchers.IO) {
             getSmbFile(uri)?.let { file ->
                 storageManager.openProxyFileDescriptor(
                     ParcelFileDescriptor.parseMode(mode.safMode),
                     CifsProxyFileCallback(file, mode),
-                    Handler(thread.looper)
+                    handler
                 )
             }
         }

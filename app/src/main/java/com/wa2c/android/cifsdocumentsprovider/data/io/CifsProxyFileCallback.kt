@@ -50,7 +50,6 @@ class CifsProxyFileCallback(
         }
     }
 
-
     private var reader: BackgroundBufferReader? = null
 
     private var writer: BackgroundBufferWriter? = null
@@ -61,7 +60,7 @@ class CifsProxyFileCallback(
         writer?.let {
             outputAccess?.close()
             outputAccess = null
-            it.release()
+            it.close()
             writer = null
             logD("Writer released")
         }
@@ -80,7 +79,7 @@ class CifsProxyFileCallback(
 
     private fun getWriter(): BackgroundBufferWriter {
         reader?.let {
-            it.release()
+            it.close()
             reader = null
             logD("Reader released")
         }
@@ -112,7 +111,6 @@ class CifsProxyFileCallback(
         return 0
     }
 
-
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         try {
@@ -129,16 +127,19 @@ class CifsProxyFileCallback(
         // Nothing to do
     }
 
+    @Throws(ErrnoException::class)
     override fun onRelease() {
+        logD("onRelease")
         try {
-            reader?.release()
-            writer?.release()
+            reader?.close()
+            writer?.close()
             outputAccess?.close()
             smbFile.close()
         } catch (e: IOException) {
             throwErrnoException(e)
         }
     }
+
     @Throws(ErrnoException::class)
     private fun throwErrnoException(e: IOException) {
         logE(e)

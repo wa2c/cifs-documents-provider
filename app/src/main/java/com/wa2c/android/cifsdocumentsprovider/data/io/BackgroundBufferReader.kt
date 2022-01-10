@@ -113,7 +113,7 @@ class BackgroundBufferReader (
     private fun startBackgroundCycle(startStreamPosition: Long) {
         logD("startBackgroundCycle=$startStreamPosition")
 
-        reset()
+        close()
         bufferingJob = launch (Dispatchers.IO) {
             try {
                 var currentStreamPosition = startStreamPosition
@@ -168,20 +168,13 @@ class BackgroundBufferReader (
     /**
      * Reset
      */
-    private fun reset() {
-        logD("reset")
+    fun close() {
+        logD("close")
         bufferingJob?.cancel()
         bufferingJob = null
         currentDataBuffer = null
         dataBufferQueue.forEach { it.cancel() }
         dataBufferQueue.clear()
-    }
-
-    /**
-     * Release
-     */
-    fun release() {
-        reset()
     }
 
     /**

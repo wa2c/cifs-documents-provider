@@ -100,7 +100,8 @@ class BackgroundBufferWriter(
      * Start background writing
      */
     private fun startBackgroundCycle() {
-        reset()
+        logD("startBackgroundCycle")
+        close()
         writingTask = async (Dispatchers.IO) {
             try {
                 while (isActive) {
@@ -122,8 +123,8 @@ class BackgroundBufferWriter(
     /**
      * Reset
      */
-    fun reset() {
-        logD("reset")
+    fun close() {
+        logD("close")
         if (writingTask != null) {
             runBlocking {
                 currentBuffer?.let {
@@ -137,15 +138,6 @@ class BackgroundBufferWriter(
         }
         writingTask = null
     }
-
-    /**
-     * Release
-     */
-    fun release() {
-        logD("release")
-        reset()
-    }
-
 
     /**
     * Data buffer

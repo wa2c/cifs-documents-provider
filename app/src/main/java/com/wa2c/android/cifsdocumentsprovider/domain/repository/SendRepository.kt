@@ -1,12 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.data.io.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
@@ -95,8 +95,12 @@ class SendRepository @Inject constructor(
             }
 
             // Delete if failure
-            if (sendData.state == SendDataState.FAILURE) {
-                targetFile.delete()
+            if (sendData.state.isIncomplete) {
+                try {
+                    targetFile.delete()
+                } catch (e: Exception) {
+                    logE(e)
+                }
             }
 
             sendData.state
