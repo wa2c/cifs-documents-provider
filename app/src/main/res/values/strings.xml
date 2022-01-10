@@ -76,6 +76,7 @@
     <string name="send_state_failure">Failure</string>
     <string name="send_state_cancel">Cancelled</string>
     <string name="send_exit_confirmation_message">Cancel all transfers and exit the app.</string>
+    <string name="send_overwrite_confirmation_message">Overwrite %1$d files.</string>
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">An error was occurred.</string>

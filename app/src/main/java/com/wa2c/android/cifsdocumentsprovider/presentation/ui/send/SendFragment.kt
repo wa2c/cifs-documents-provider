@@ -95,12 +95,15 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                 adapter.submitList(list)
             }
             vm.sendData.collectIn(viewLifecycleOwner) { data ->
-                val index = vm.sendDataList.value.indexOfLast { it.id == data?.id }
+                val index = vm.sendDataList.value.indexOfLast { it == data }
+                if (index < 0) return@collectIn
+                adapter.notifyItemChanged(index)
+            }
+            vm.updateIndex.collectIn(viewLifecycleOwner) { index ->
                 if (index < 0) return@collectIn
                 adapter.notifyItemChanged(index)
             }
         }
-
 
         val uris = args.inputUris
         when {
@@ -138,7 +141,9 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     private fun confirmClose() {
         MaterialAlertDialogBuilder(requireContext())
             .setMessage(R.string.send_exit_confirmation_message)
-            .setPositiveButton(R.string.dialog_accept) { _, _ -> activity?.finishAffinity() }
+            .setPositiveButton(R.string.dialog_accept) { _, _ ->
+                activity?.finishAffinity()
+            }
             .setNeutralButton(R.string.dialog_close, null)
             .show()
     }
@@ -146,12 +151,14 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     private fun onNavigate(event: SendNav) {
         logD("onNavigate: event=$event")
         when (event) {
-
-            is SendNav.Cancel -> {
-
-            }
-            is SendNav.NetworkError -> {
-
+            is SendNav.ConfirmOverwrite -> {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage(getString(R.string.send_overwrite_confirmation_message, event.overwriteIdSet.size))
+                    .setPositiveButton(R.string.dialog_accept) { _, _ ->
+                        viewModel.updateToReady(event.overwriteIdSet)
+                    }
+                    .setNeutralButton(R.string.dialog_close, null)
+                    .show()
             }
         }
     }

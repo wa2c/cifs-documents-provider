@@ -76,6 +76,7 @@
     <string name="send_state_cancel">キャンセルしました</string>
     <string name="send_close_button">閉じる</string>
     <string name="send_exit_confirmation_message">すべての転送を中断してアプリを終了します。</string>
+    <string name="send_overwrite_confirmation_message">%1$d件のファイルを上書きします。</string>
 
     <!-- DocumentsProvider -->
     <string name="provider_error_message">エラーが発生しました</string>

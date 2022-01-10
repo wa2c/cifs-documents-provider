@@ -28,6 +28,7 @@ enum class SendDataState(
 
     val inProgress: Boolean
         get() = this == PROGRESS
+
     val isCancelable: Boolean
         get() = this == READY || this == PROGRESS
 

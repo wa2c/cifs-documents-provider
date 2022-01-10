@@ -38,10 +38,27 @@ class SendRepository @Inject constructor(
                         file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
                         file.uri,
                         targetUri,
-                    )
+                    ).also {
+                        if (existsTarget(it)) {
+                            it.state = SendDataState.OVERWRITE
+                        }
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * True if target exists.
+     */
+    private fun existsTarget(sendData: SendData): Boolean {
+        return dataSender.getDocumentFile(sendData.targetUri)?.let {
+            if (it.isDirectory) {
+                it.findFile(sendData.name)?.exists() == true
+            } else {
+                it.exists()
+            }
+        } ?: false
     }
 
     /**
@@ -55,10 +72,12 @@ class SendRepository @Inject constructor(
             var previousTime = 0L
             val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
                 if (it.isDirectory) {
-                    if (it.findFile(sendData.name)?.exists() == true) {
-                        return@withContext SendDataState.OVERWRITE
+                    val file = it.findFile(sendData.name)
+                    if (file?.exists() == true) {
+                        file
+                    } else {
+                        it.createFile(sendData.mimeType, sendData.name)
                     }
-                    it.createFile(sendData.mimeType, sendData.name)
                 } else {
                     it
                 }
@@ -94,7 +113,7 @@ class SendRepository @Inject constructor(
                 else -> sendData.state
             }
 
-            // Delete if failure
+            // Delete if incomplete
             if (sendData.state.isIncomplete) {
                 try {
                     targetFile.delete()

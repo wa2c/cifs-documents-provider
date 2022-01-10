@@ -44,6 +44,10 @@ class SendViewModel @Inject constructor(
         notificationRepository.updateProgress(data, count, countAll)
     }
 
+    private val _updateIndex = MutableSharedFlow<Int>(extraBufferCapacity = 20)
+    val updateIndex: Flow<Int> = _updateIndex
+
+
     /** Send job */
     private var sendJob: Job? = null
 
@@ -54,7 +58,13 @@ class SendViewModel @Inject constructor(
         launch {
             val inputList = sendRepository.getSendData(sourceUris, targetUri)
             _sendDataList.value = sendDataList.value + inputList
-            startSendJob()
+
+            val existsDataSet = inputList.filter { it.state == SendDataState.OVERWRITE }.toSet()
+            if (existsDataSet.isEmpty()) {
+                startSendJob()
+            } else {
+                _navigationEvent.emit(SendNav.ConfirmOverwrite(existsDataSet))
+            }
         }
     }
 
@@ -82,41 +92,63 @@ class SendViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Finish
+     */
     fun finishSending() {
         _sendDataList.value = emptyList()
         sendJob?.cancel()
         notificationRepository.close()
     }
 
-
-    fun onClickCancel(data: SendData) {
-        logD("onClickCancel")
-        _sendDataList.value.firstOrNull { it.id == data.id }?.let {
-            it.state = SendDataState.CANCEL
+    /**
+     * Update data state
+     */
+    private fun updateState(index: Int, state: SendDataState) {
+        _sendDataList.value.getOrNull(index)?.let {
+            it.state = state
+            _updateIndex.tryEmit(index)
         }
     }
 
-    fun onClickRetry(data: SendData) {
+    /**
+     * Update state to READY
+     */
+    fun updateToReady(dataSet: Set<SendData>) {
         logD("onClickCancel")
-        _sendDataList.value.firstOrNull { it.id == data.id }?.let {
-            it.state = SendDataState.READY
+        dataSet.forEachIndexed { index, sendData ->
+            sendData.state = SendDataState.READY
+            _updateIndex.tryEmit(index)
         }
+        startSendJob()
     }
 
-    fun onClickRemove(data: SendData) {
+    fun onClickCancel(index: Int) {
+        logD("onClickCancel")
+        updateState(index, SendDataState.CANCEL)
+        startSendJob()
+    }
+
+    fun onClickRetry(index: Int) {
+        logD("onClickCancel")
+        updateState(index, SendDataState.READY)
+        startSendJob()
+    }
+
+    fun onClickRemove(index: Int) {
         logD("onClickCancel")
         _sendDataList.value.toMutableList().let {
-            it.remove(data)
-            _sendDataList.value = it
+            it.removeAt(index)
+            _sendDataList.value = it // reload
         }
     }
 
     fun onClickCancelAll() {
         logD("onClickCancelAll")
-        _sendDataList.value
-            .filter { it.state.isCancelable }
-            .forEach { it.state = SendDataState.CANCEL }
-        _sendDataList.value = _sendDataList.value // reload
+        _sendDataList.value.filter { it.state.isCancelable }.forEachIndexed { index, sendData ->
+            sendData.state = SendDataState.CANCEL
+            _updateIndex.tryEmit(index)
+        }
     }
 
 }

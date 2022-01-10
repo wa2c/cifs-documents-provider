@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isInvisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -11,7 +12,6 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutSendItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData.Companion.getSummaryText
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isVisible
 
 /**
  * Send list adapter.
@@ -39,7 +39,7 @@ class SendListAdapter(
         binding.sendListItemTitle.text = item.name
         binding.sendListItemSummary.text = item.getSummaryText(binding.root.context)
         binding.sendListItemProgress.progress = item.progress
-        binding.sendListItemProgress.isVisible(item.state.inProgress)
+        binding.sendListItemProgress.isInvisible = !item.state.inProgress
         binding.root.let { root ->
             root.setOnClickListener {
                 PopupMenu(root.context, root).also {
@@ -48,9 +48,9 @@ class SendListAdapter(
                     val remove = it.menu.add(R.string.send_action_remove)
                     it.setOnMenuItemClickListener { menuItem ->
                         when (menuItem) {
-                            cancel -> { viewModel.onClickCancel(item) }
-                            retry -> { viewModel.onClickRetry(item) }
-                            remove -> { viewModel.onClickRemove(item) }
+                            cancel -> { viewModel.onClickCancel(position) }
+                            retry -> { viewModel.onClickRetry(position) }
+                            remove -> { viewModel.onClickRemove(position) }
                         }
                         true
                     }
