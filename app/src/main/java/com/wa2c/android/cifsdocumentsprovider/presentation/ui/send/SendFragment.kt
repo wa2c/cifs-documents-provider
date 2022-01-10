@@ -93,15 +93,18 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             vm.navigationEvent.collectIn(viewLifecycleOwner, ::onNavigate)
             vm.sendDataList.collectIn(viewLifecycleOwner) { list ->
                 adapter.submitList(list)
+                updateCancelButton()
             }
             vm.sendData.collectIn(viewLifecycleOwner) { data ->
                 val index = vm.sendDataList.value.indexOfLast { it == data }
                 if (index < 0) return@collectIn
                 adapter.notifyItemChanged(index)
+                updateCancelButton()
             }
             vm.updateIndex.collectIn(viewLifecycleOwner) { index ->
                 if (index < 0) return@collectIn
                 adapter.notifyItemChanged(index)
+                updateCancelButton()
             }
         }
 
@@ -146,6 +149,10 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             }
             .setNeutralButton(R.string.dialog_close, null)
             .show()
+    }
+
+    private fun updateCancelButton() {
+        binding?.sendCancelButton?.isEnabled = viewModel.sendDataList.value.any { it.state.inProgress }
     }
 
     private fun onNavigate(event: SendNav) {
