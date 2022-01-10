@@ -43,7 +43,7 @@ class SendListAdapter(
         binding.root.let { root ->
             root.setOnClickListener {
                 PopupMenu(root.context, root).also {
-                    val cancel = if (!item.state.isCompleted)  it.menu.add(R.string.send_action_cancel)  else null
+                    val cancel = if (item.state.isCancelable)  it.menu.add(R.string.send_action_cancel)  else null
                     val retry = if (item.state.isRetryable) it.menu.add(R.string.send_action_retry) else null
                     val remove = it.menu.add(R.string.send_action_remove)
                     it.setOnMenuItemClickListener { menuItem ->

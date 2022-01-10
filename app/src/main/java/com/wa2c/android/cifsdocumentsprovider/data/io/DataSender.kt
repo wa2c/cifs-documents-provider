@@ -5,7 +5,6 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,24 +32,23 @@ class DataSender @Inject constructor(
         sourceUri: Uri,
         targetUri: Uri,
         bufferSize: Int = BUFFER_SIZE,
-        updateProgress: (progressSize: Long) -> SendDataState
-    ): SendDataState {
+        updateProgress: (progressSize: Long) -> Boolean
+    ): Boolean {
         val buffer = ByteArray(bufferSize)
         var progressSize = 0L
-        (context.contentResolver.openInputStream(sourceUri) ?: return SendDataState.FAILURE).use { input ->
-            (context.contentResolver.openOutputStream(targetUri) ?: return SendDataState.FAILURE).use { output ->
+        (context.contentResolver.openInputStream(sourceUri) ?: return false).use { input ->
+            (context.contentResolver.openOutputStream(targetUri) ?: return false).use { output ->
                 while (true) {
                     val length = input.read(buffer)
                     if (length <= 0) break // End of Data
                     output.write(buffer, 0, length)
                     progressSize += length
 
-                    val state = updateProgress(progressSize)
-                    if (state != SendDataState.PROGRESS) return state
+                    if (!updateProgress(progressSize)) return false
                 }
                 output.flush()
             }
         }
-        return SendDataState.SUCCESS
+        return true
     }
 }

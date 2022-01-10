@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -19,6 +20,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSendBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 
 /**
  * Send Screen
@@ -90,13 +92,13 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         }
 
         viewModel.let { vm ->
-            vm.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-            vm.sendDataList.observe(viewLifecycleOwner) { list ->
+            vm.navigationEvent.collectIn(viewLifecycleOwner, ::onNavigate)
+            vm.sendDataList.collectIn(viewLifecycleOwner) { list ->
                 adapter.submitList(list)
             }
-            vm.sendData.observe(viewLifecycleOwner) { data ->
-                val index = vm.sendDataList.value?.indexOfLast { it.id == data?.id }
-                if (index == null || index < 0) return@observe
+            vm.sendData.collectIn(viewLifecycleOwner) { data ->
+                val index = vm.sendDataList.value.indexOfLast { it.id == data?.id }
+                if (index < 0) return@collectIn
                 adapter.notifyItemChanged(index)
             }
         }

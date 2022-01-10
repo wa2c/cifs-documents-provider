@@ -17,9 +17,15 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.wa2c.android.cifsdocumentsprovider.R
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -42,6 +48,20 @@ fun <T : ViewDataBinding> Fragment.viewBinding(): ReadOnlyProperty<Fragment, T?>
             return DataBindingUtil.bind<T>(view)?.also {
                 it.lifecycleOwner = thisRef.viewLifecycleOwner
             }
+        }
+    }
+}
+
+/**
+ * Collect flow
+ */
+fun <T> Flow<T>.collectIn(
+    lifecycleOwner: LifecycleOwner,
+    observer: (T) -> Unit,
+) {
+    lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            this@collectIn.collect { observer(it) }
         }
     }
 }

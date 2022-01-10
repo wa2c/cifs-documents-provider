@@ -1,12 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.data.io.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
@@ -21,7 +21,7 @@ class SendRepository @Inject constructor(
     private val dataSender: DataSender
 ) {
 
-    private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 20, BufferOverflow.SUSPEND)
+    private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 1, BufferOverflow.DROP_OLDEST)
     val sendFlow: Flow<SendData?> = _sendFlow
 
     /**
@@ -47,48 +47,59 @@ class SendRepository @Inject constructor(
     /**
      * Send a data.
      */
-    suspend fun send(sendData: SendData) {
-        runCatching {
-            withContext(Dispatchers.IO) {
-                if (!sendData.state.isReady) return@withContext sendData.state
-                sendData.state = SendDataState.PROGRESS
+    suspend fun send(sendData: SendData): SendDataState {
+        return withContext(Dispatchers.IO) {
+            if (!sendData.state.isReady) return@withContext sendData.state
+            sendData.state = SendDataState.PROGRESS
 
-                var previousTime = 0L
-                val targetUri = dataSender.getDocumentFile(sendData.targetUri)?.let {
-                    if (it.isDirectory) {
-                        if (it.findFile(sendData.name)?.exists() == true) {
-                            return@withContext SendDataState.OVERWRITE
-                        }
-                        it.createFile(sendData.mimeType, sendData.name)?.uri
-                    } else {
-                        it.uri
+            var previousTime = 0L
+            val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
+                if (it.isDirectory) {
+                    if (it.findFile(sendData.name)?.exists() == true) {
+                        return@withContext SendDataState.OVERWRITE
                     }
-                } ?: throw IOException()
-
-                sendData.startTime = System.currentTimeMillis()
-                dataSender.sendFile(sendData.sourceUri, targetUri) { progressSize ->
-                    if (!sendData.state.inProgress) {
-                        return@sendFile sendData.state
-                    }
-                    if (!isActive) {
-                        return@sendFile SendDataState.FAILURE
-                    }
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime >= previousTime + NOTIFY_CYCLE) {
-                        sendData.progressSize = progressSize
-                        _sendFlow.tryEmit(sendData)
-                        previousTime = currentTime
-                    }
-                    return@sendFile SendDataState.PROGRESS
+                    it.createFile(sendData.mimeType, sendData.name)
+                } else {
+                    it
                 }
+            } ?: throw IOException()
+
+            sendData.startTime = System.currentTimeMillis()
+            val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
+                if (!sendData.state.inProgress) {
+                    return@sendFile false
+                }
+                if (!isActive) {
+                    sendData.state = SendDataState.FAILURE
+                    return@sendFile false
+                }
+                val currentTime = System.currentTimeMillis()
+                if (currentTime >= previousTime + NOTIFY_CYCLE) {
+                    sendData.progressSize = progressSize
+                    _sendFlow.tryEmit(sendData)
+                    previousTime = currentTime
+                }
+                return@sendFile true
             }
-        }.onSuccess {
-            sendData.state = it
-            _sendFlow.tryEmit(sendData)
-        }.onFailure {
-            logE(it)
-            sendData.state = SendDataState.FAILURE
-            _sendFlow.tryEmit(sendData)
+
+            if (isSuccess) {
+                SendDataState.SUCCESS
+            } else if (sendData.state == SendDataState.PROGRESS) {
+                SendDataState.FAILURE
+            }
+
+            sendData.state = when {
+                isSuccess -> SendDataState.SUCCESS
+                sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
+                else -> sendData.state
+            }
+
+            // Delete if failure
+            if (sendData.state == SendDataState.FAILURE) {
+                targetFile.delete()
+            }
+
+            sendData.state
         }
     }
 
