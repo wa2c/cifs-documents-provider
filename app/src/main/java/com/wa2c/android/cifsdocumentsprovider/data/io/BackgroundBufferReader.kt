@@ -25,7 +25,6 @@ package com.wa2c.android.cifsdocumentsprovider.data.io
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.concurrent.ArrayBlockingQueue
@@ -39,9 +38,9 @@ class BackgroundBufferReader (
     /** Whole data Size */
     private val streamSize: Long,
     /** Buffer unit size */
-    private val bufferSize: Int = BUFFER_SIZE,
+    private val bufferSize: Int = DEFAULT_BUFFER_SIZE,
     /** Buffer queue capacity  */
-    private val queueCapacity: Int = 5,
+    private val queueCapacity: Int = DEFAULT_CAPACITY,
     /** Background reading */
     private val readBackgroundAsync: (start: Long, array: ByteArray, off: Int, len: Int) -> Int
 ): CoroutineScope, Closeable {
@@ -58,7 +57,7 @@ class BackgroundBufferReader (
     /** Current data buffer */
     private var currentDataBuffer: DataBuffer? = null
 
-    /** Current readingCycleTask start position */
+    /** Reset readingCycleTask position */
     private var resetCyclePosition:  Long = 0
         @Synchronized get
         @Synchronized set
@@ -67,7 +66,7 @@ class BackgroundBufferReader (
      * Reading cycle task
      */
     private val readingCycleTask = launch(Dispatchers.IO) {
-        logD("[CYCLE] Start: streamSize=$streamSize, bufferSize=$bufferSize")
+        logD("[CYCLE] Begin: streamSize=$streamSize, bufferSize=$bufferSize")
         var startPosition = 0L
         var currentCyclePosition = 0L
 
@@ -102,6 +101,8 @@ class BackgroundBufferReader (
                 logE(e)
             }
         }
+
+        logD("[CYCLE] End: startPosition=$startPosition, currentCyclePosition=$currentCyclePosition")
     }
 
     /**
@@ -111,7 +112,6 @@ class BackgroundBufferReader (
      */
     private fun readAsync(streamPosition: Long, readSize: Int): Deferred<DataBuffer> {
         return async (Dispatchers.IO) {
-            logD("[readAsync] start")
             val data = ByteArray(readSize)
             val size = readBackgroundAsync(streamPosition, data, 0, readSize)
             val remain = readSize - size
@@ -121,9 +121,6 @@ class BackgroundBufferReader (
                 DataBuffer(streamPosition, size + subSize, data)
             } else {
                 DataBuffer(streamPosition, size, data)
-            }.also {
-                logD("[readAsync] end")
-
             }
         }
     }
@@ -136,7 +133,7 @@ class BackgroundBufferReader (
      * @param readData For saving reading data.
      */
     fun readBuffer(readPosition: Long, readSize: Int, readData: ByteArray): Int {
-        logD("readPosition=$readPosition, readSize=$readSize")
+        // logD("readPosition=$readPosition, readSize=$readSize")
         if (readData.isEmpty()) return 0
         val maxSize: Int = min(readSize, readData.size).let {
             if (readPosition + it > streamSize) {
@@ -148,12 +145,12 @@ class BackgroundBufferReader (
 
         var readOffset = 0
         while (true) {
+            val streamPosition = readPosition + readOffset
             val c = getNextDataBuffer() ?: let {
-                resetCycle(readPosition)
+                resetCycle(streamPosition)
                 getNextDataBuffer()
             } ?: return 0
 
-            val streamPosition = readPosition + readOffset
             val bufferRemainSize = c.getRemainSize(streamPosition)
             val bufferOffset = c.getPositionOffset(streamPosition)
             if (bufferRemainSize < 0 || bufferOffset < 0) {
@@ -228,11 +225,11 @@ class BackgroundBufferReader (
      */
     class DataBuffer(
         /** Data absolute start position */
-        val streamPosition: Long = 0,
+        val streamPosition: Long,
         /** Data length */
-        val length: Int = 0,
+        val length: Int,
         /** Data buffer */
-        val data: ByteArray = ByteArray(BUFFER_SIZE),
+        val data: ByteArray,
     ) {
         /** Data absolute end position */
         val endStreamPosition = streamPosition + length
@@ -260,5 +257,10 @@ class BackgroundBufferReader (
             return if (isIn(p)) (endStreamPosition - p).toInt()
             else -1
         }
+    }
+
+    companion object {
+        private const val DEFAULT_BUFFER_SIZE = 1024 * 1024
+        private const val DEFAULT_CAPACITY = 5
     }
 }

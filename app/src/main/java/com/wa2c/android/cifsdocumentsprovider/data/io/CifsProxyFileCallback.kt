@@ -65,16 +65,15 @@ class CifsProxyFileCallback(
             logD("Writer released")
         }
 
-        return reader
-            ?: BackgroundBufferReader(fileSeize) { start, array, off, len ->
-                smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
-                    access.seek(start)
-                    access.read(array, off, len)
-                }
-            }.also {
-                reader = it
-                logD("Reader created")
+        return reader ?: BackgroundBufferReader(fileSeize) { start, array, off, len ->
+            smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
+                access.seek(start)
+                access.read(array, off, len)
             }
+        }.also {
+            reader = it
+            logD("Reader created")
+        }
     }
 
     private fun getWriter(): BackgroundBufferWriter {
@@ -84,16 +83,15 @@ class CifsProxyFileCallback(
             logD("Reader released")
         }
 
-        return writer
-            ?: BackgroundBufferWriter { start, array, off, len ->
-                (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
-                    access.seek(start)
-                    access.write(array, off, len)
-                }
-            }.also {
-                writer = it
-                logD("Writer created")
+        return writer ?: BackgroundBufferWriter { start, array, off, len ->
+            (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
+                access.seek(start)
+                access.write(array, off, len)
             }
+        }.also {
+            writer = it
+            logD("Writer created")
+        }
     }
 
     @Throws(ErrnoException::class)
