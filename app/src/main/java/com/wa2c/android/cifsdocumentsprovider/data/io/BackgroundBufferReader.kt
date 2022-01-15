@@ -24,10 +24,13 @@
 package com.wa2c.android.cifsdocumentsprovider.data.io
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
+import java.io.Closeable
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.min
 
 /**
  * BackgroundBufferReader
@@ -41,106 +44,62 @@ class BackgroundBufferReader (
     private val queueCapacity: Int = 5,
     /** Background reading */
     private val readBackgroundAsync: (start: Long, array: ByteArray, off: Int, len: Int) -> Int
-): CoroutineScope {
+): CoroutineScope, Closeable {
 
     private val job = Job()
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
 
+    /** Dummy queue item. */
+    private val dummyQueueItem = async { null }
     /** Data buffer queue */
     private val dataBufferQueue = ArrayBlockingQueue<Deferred<DataBuffer?>>(queueCapacity)
     /** Current data buffer */
     private var currentDataBuffer: DataBuffer? = null
-    /** Buffer loading job. */
-    private var bufferingJob: Job? = null
+
+    /** Current readingCycleTask start position */
+    private var resetCyclePosition:  Long = 0
+        @Synchronized get
+        @Synchronized set
 
     /**
-     * Read buffer.
-     * @param streamPosition Absolute data position.
-     * @param readSize Required read data size.
-     * @param readData For saving reading data.
+     * Reading cycle task
      */
-    fun readBuffer(streamPosition: Long, readSize: Int, readData: ByteArray): Int {
-        var readOffset = 0
-        while (true) {
-            // Get current buffer
-            val c = currentDataBuffer ?: let {
-                if (bufferingJob == null && dataBufferQueue.isEmpty()) {
-                    logD("Start cycle: position=$streamPosition")
-                    startBackgroundCycle(streamPosition)
-                }
-                dataBufferQueue.take().let {
-                    runBlocking { try { it.await() } catch (e: Exception) { null } }
-                }
-            }.also { currentDataBuffer = it } ?: continue
+    private val readingCycleTask = launch(Dispatchers.IO) {
+        logD("[CYCLE] Start: streamSize=$streamSize, bufferSize=$bufferSize")
+        var startPosition = 0L
+        var currentCyclePosition = 0L
 
-            val currentStreamPosition = streamPosition + readOffset
-            val bufferRemainSize = c.getRemainSize(currentStreamPosition)
-            val bufferOffset = c.getPositionOffset(currentStreamPosition)
-            if (bufferOffset < 0) {
-                // Position reset
-                logD("Reset position: currentStreamPosition=$currentStreamPosition, bufferRemain=$bufferRemainSize, bufferOffset=$bufferOffset")
-                startBackgroundCycle(currentStreamPosition)
-                continue
-            }
-
-            val readRemainSize = readSize - readOffset
-            if (bufferRemainSize >= readRemainSize) {
-                // In current buffer
-                c.data.copyInto(readData, readOffset, bufferOffset, bufferOffset + readRemainSize)
-                return readSize
-            } else {
-                // End of current buffer
-                val bufferEnd = bufferOffset + bufferRemainSize
-                c.data.copyInto(readData, readOffset, bufferOffset, bufferEnd)
-                currentDataBuffer = null
-                if (c.length < bufferEnd) {
-                    // Read next buffer
-                    readOffset += bufferRemainSize
-                    continue
-                } else {
-                    return readOffset + bufferRemainSize
-                }
-            }
-        }
-    }
-
-    /**
-     * Start background reading.
-     * @param startStreamPosition Start stream position.
-     */
-    private fun startBackgroundCycle(startStreamPosition: Long) {
-        logD("startBackgroundCycle=$startStreamPosition")
-
-        close()
-        bufferingJob = launch (Dispatchers.IO) {
+        while (isActive) {
             try {
-                var currentStreamPosition = startStreamPosition
-                while (isActive) {
-                    val remainStreamSize = streamSize - currentStreamPosition
-                    if (remainStreamSize <= 0) {
-                        logD("Out of range: streamSize=$streamSize, currentPosition=$currentStreamPosition")
-                        break
-                    }
-
-                    // Read buffer
-                    if (remainStreamSize > bufferSize) {
-                        // Read buffer (Normal)
-                        val task = readAsync(currentStreamPosition, bufferSize)
-                        dataBufferQueue.put(task)
-                        currentStreamPosition += bufferSize
-                    } else {
-                        // Read buffer (End of stream)
-                        val task = readAsync(currentStreamPosition, remainStreamSize.toInt())
-                        dataBufferQueue.put(task)
-                        currentStreamPosition += remainStreamSize
-                        logD("End of stream: streamSize=$streamSize, currentPosition=$currentStreamPosition")
-                        break
+                // Check new position
+                resetCyclePosition.let {
+                    if (startPosition != it) {
+                        // Reset position
+                        logD("[CYCLE] Reset: startPosition=$startPosition, currentPosition=$currentCyclePosition")
+                        resetQueue()
+                        startPosition = it
+                        currentCyclePosition = it
                     }
                 }
-            } finally {
-                bufferingJob = null
+
+                // Check size
+                val remainStreamSize = streamSize - currentCyclePosition
+                if (remainStreamSize <= 0) {
+                    logD("[CYCLE] Paused: startPosition=$startPosition, currentPosition=$currentCyclePosition")
+                    dataBufferQueue.put( dummyQueueItem )
+                    continue
+                }
+
+                // Read buffer
+                val readSize = (if (remainStreamSize > bufferSize) bufferSize else remainStreamSize).toInt()
+                logD("[CYCLE] Read: startPosition=$startPosition, currentPosition=$currentCyclePosition, readSize=$readSize")
+                val task = readAsync(currentCyclePosition, readSize)
+                currentCyclePosition += readSize
+                dataBufferQueue.put(task)
+            } catch (e: Exception) {
+                logE(e)
             }
         }
     }
@@ -152,6 +111,7 @@ class BackgroundBufferReader (
      */
     private fun readAsync(streamPosition: Long, readSize: Int): Deferred<DataBuffer> {
         return async (Dispatchers.IO) {
+            logD("[readAsync] start")
             val data = ByteArray(readSize)
             val size = readBackgroundAsync(streamPosition, data, 0, readSize)
             val remain = readSize - size
@@ -161,20 +121,106 @@ class BackgroundBufferReader (
                 DataBuffer(streamPosition, size + subSize, data)
             } else {
                 DataBuffer(streamPosition, size, data)
+            }.also {
+                logD("[readAsync] end")
+
+            }
+        }
+    }
+
+
+    /**
+     * Read buffer.
+     * @param readPosition Absolute data position.
+     * @param readSize Required read data size.
+     * @param readData For saving reading data.
+     */
+    fun readBuffer(readPosition: Long, readSize: Int, readData: ByteArray): Int {
+        logD("readPosition=$readPosition, readSize=$readSize")
+        if (readData.isEmpty()) return 0
+        val maxSize: Int = min(readSize, readData.size).let {
+            if (readPosition + it > streamSize) {
+                (streamSize - readPosition).toInt() // NOTE: readSize may be larger than the file size
+            } else {
+                it
+            }
+        }
+
+        var readOffset = 0
+        while (true) {
+            val c = getNextDataBuffer() ?: let {
+                resetCycle(readPosition)
+                getNextDataBuffer()
+            } ?: return 0
+
+            val streamPosition = readPosition + readOffset
+            val bufferRemainSize = c.getRemainSize(streamPosition)
+            val bufferOffset = c.getPositionOffset(streamPosition)
+            if (bufferRemainSize < 0 || bufferOffset < 0) {
+                // Position reset (not contains)
+                logD("[READ] Reset: streamPosition=$streamPosition, bufferRemainSize=$bufferRemainSize, bufferOffset=$bufferOffset")
+                resetCycle(streamPosition)
+            }
+            val readRemainSize = maxSize - readOffset
+            if (bufferRemainSize >= readRemainSize) {
+                // In current buffer
+                logD("[READ] Read: streamPosition=$streamPosition, bufferRemainSize=$bufferRemainSize, bufferOffset=$bufferOffset")
+                c.data.copyInto(readData, readOffset, bufferOffset, bufferOffset + readRemainSize)
+                return maxSize
+            } else {
+                logD("[READ] Read halfway: streamPosition=$streamPosition, bufferRemainSize=$bufferRemainSize, bufferOffset=$bufferOffset")
+                c.data.copyInto(readData, readOffset, bufferOffset, c.length)
+                currentDataBuffer = null
+                val size = c.length - bufferOffset
+                readOffset += size
             }
         }
     }
 
     /**
-     * Reset
+     * Get next data buffer
      */
-    fun close() {
-        logD("close")
-        bufferingJob?.cancel()
-        bufferingJob = null
+    private fun getNextDataBuffer(): DataBuffer? {
+        if (currentDataBuffer != null) {
+            return currentDataBuffer
+        } else {
+            for (i in 0..queueCapacity) {
+                dataBufferQueue.take()?.takeIf { it != dummyQueueItem }?.let {
+                    runBlocking { try { it.await() } catch (e: Exception) { null } }?.let {
+                        logD("Next buffer: startPosition=${it.streamPosition}, length=${it.length} ")
+                        currentDataBuffer = it
+                        return it
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Reset cycle position
+     */
+    private fun resetCycle(position: Long) {
+        resetCyclePosition = position
         currentDataBuffer = null
+    }
+
+    /**
+     * Reset queue
+     */
+    private fun resetQueue() {
         dataBufferQueue.forEach { it.cancel() }
         dataBufferQueue.clear()
+    }
+
+    /**
+     * Reset
+     */
+    override fun close() {
+        logD("close")
+        readingCycleTask.cancel()
+        resetQueue()
+        currentDataBuffer = null
     }
 
     /**
@@ -182,14 +228,14 @@ class BackgroundBufferReader (
      */
     class DataBuffer(
         /** Data absolute start position */
-        private val streamPosition: Long = 0,
+        val streamPosition: Long = 0,
         /** Data length */
         val length: Int = 0,
         /** Data buffer */
         val data: ByteArray = ByteArray(BUFFER_SIZE),
     ) {
         /** Data absolute end position */
-        private val endStreamPosition = streamPosition + length
+        val endStreamPosition = streamPosition + length
 
         private fun isIn(p: Long): Boolean {
             return p in streamPosition..endStreamPosition
