@@ -36,7 +36,7 @@ class NotificationRepository @Inject constructor(
         .setContentText("")
         .setAutoCancel(false)
         .setProgress(0, 0, false)
-        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setSmallIcon(R.drawable.ic_notification)
         .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_REQUEST_CODE, launchIntent, notificationFlag))
 
     /**
@@ -63,13 +63,6 @@ class NotificationRepository @Inject constructor(
         notificationBuilder.setSubText(null)
         notificationBuilder.setProgress(0, 0, false)
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
-
-    /**
-     * Close
-     */
-    fun close() {
-        notificationManager.cancel(NOTIFICATION_ID)
     }
 
     /**
