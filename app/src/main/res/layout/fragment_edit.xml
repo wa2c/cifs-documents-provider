@@ -33,7 +33,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
-                        android:labelFor="@id/edit_domain_edit_text"
+                        android:labelFor="@id/edit_name_edit_text"
                         android:text="@string/edit_name_title" />
 
                     <EditText
@@ -102,7 +102,7 @@
                         android:id="@+id/edit_host_select_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="@null"
+                        android:contentDescription="@string/edit_host_select_a11y"
                         android:importantForAutofill="no"
                         android:onClick="@{ () -> viewModel.onClickSearchHost() }"
                         android:src="@drawable/ic_search"
@@ -148,6 +148,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
+                        android:importantForAccessibility="no"
                         android:text="@null" />
 
                     <CheckBox
@@ -225,6 +226,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_weight="0"
                         android:gravity="center_vertical|end"
+                        android:importantForAccessibility="no"
                         android:text="@null" />
 
                     <CheckBox
@@ -265,7 +267,7 @@
                         android:id="@+id/edit_directory_search_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:contentDescription="@null"
+                        android:contentDescription="@string/edit_directory_search_a11y"
                         android:importantForAutofill="no"
                         android:onClick="@{ () -> viewModel.onClickSelectFolder() }"
                         android:src="@drawable/ic_folder"
