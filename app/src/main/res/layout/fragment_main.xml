@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
-            android:contentDescription="@string/cifs_add_a11y"
+            android:contentDescription="@string/main_add_connection_a11y"
             android:onClick="@{ () -> viewModel.onClickAddItem() }"
             android:src="@drawable/ic_add_folder"
             app:backgroundTint="@color/accent"
