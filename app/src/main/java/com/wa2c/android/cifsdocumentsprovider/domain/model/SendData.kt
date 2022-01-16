@@ -42,6 +42,13 @@ data class SendData(
     val bps: Long
         get() = (elapsedTime / 1000).let { if (it > 0) { progressSize / it } else { 0 } }
 
+    /**
+     * Cancel
+     */
+    fun cancel() {
+        state = SendDataState.CANCEL
+    }
+
     companion object {
 
         /**

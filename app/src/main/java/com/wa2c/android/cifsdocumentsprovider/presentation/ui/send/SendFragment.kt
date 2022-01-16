@@ -47,7 +47,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             return@registerForActivityResult
         }
 
-        viewModel.sendMultiple(listOf(source), uri)
+        viewModel.sendUri(listOf(source), uri)
     }
 
     /** Multiple URI result launcher */
@@ -62,7 +62,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             return@registerForActivityResult
         }
 
-        viewModel.sendMultiple(source, uri)
+        viewModel.sendUri(source, uri)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -90,7 +90,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         }
 
         viewModel.let { vm ->
-            vm.navigationEvent.collectIn(viewLifecycleOwner, ::onNavigate)
+            vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
             vm.sendDataList.collectIn(viewLifecycleOwner) { list ->
                 adapter.submitList(list)
                 updateCancelButton()

@@ -7,8 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.io.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -22,7 +21,7 @@ class SendRepository @Inject constructor(
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 1, BufferOverflow.DROP_OLDEST)
-    val sendFlow: Flow<SendData?> = _sendFlow
+    val sendFlow: SharedFlow<SendData?> = _sendFlow.onSubscription {  }
 
     /**
      * Get send data list.
@@ -52,11 +51,13 @@ class SendRepository @Inject constructor(
      * True if target exists.
      */
     private fun existsTarget(sendData: SendData): Boolean {
-        return dataSender.getDocumentFile(sendData.targetUri)?.let {
-            if (it.isDirectory) {
-                it.findFile(sendData.name)?.exists() == true
+        return dataSender.getDocumentFile(sendData.targetUri)?.let { target ->
+            if (target.isDirectory) {
+                target.findFile(sendData.name)
             } else {
-                it.exists()
+                target
+            }?.let { file ->
+                file.exists() && file.length() > 0
             }
         } ?: false
     }
@@ -69,7 +70,7 @@ class SendRepository @Inject constructor(
             if (!sendData.state.isReady) return@withContext sendData.state
             sendData.state = SendDataState.PROGRESS
 
-            var previousTime = 0L
+//            var previousTime = 0L
             val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
                 if (it.isDirectory) {
                     val file = it.findFile(sendData.name)
@@ -84,6 +85,7 @@ class SendRepository @Inject constructor(
             } ?: throw IOException()
 
             sendData.startTime = System.currentTimeMillis()
+            _sendFlow.tryEmit(sendData)
             val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
                 if (!sendData.state.inProgress) {
                     return@sendFile false
@@ -92,19 +94,10 @@ class SendRepository @Inject constructor(
                     sendData.state = SendDataState.FAILURE
                     return@sendFile false
                 }
-                val currentTime = System.currentTimeMillis()
-                if (currentTime >= previousTime + NOTIFY_CYCLE) {
-                    sendData.progressSize = progressSize
-                    _sendFlow.tryEmit(sendData)
-                    previousTime = currentTime
-                }
-                return@sendFile true
-            }
 
-            if (isSuccess) {
-                SendDataState.SUCCESS
-            } else if (sendData.state == SendDataState.PROGRESS) {
-                SendDataState.FAILURE
+                sendData.progressSize = progressSize
+                _sendFlow.tryEmit(sendData)
+                return@sendFile true
             }
 
             sendData.state = when {
@@ -122,12 +115,12 @@ class SendRepository @Inject constructor(
                 }
             }
 
+            _sendFlow.tryEmit(sendData)
             sendData.state
         }
     }
 
     companion object {
-        private const val NOTIFY_CYCLE = 1000
         private const val OTHER_MIME_TYPE =  "application/octet-stream"
     }
 

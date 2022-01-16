@@ -10,10 +10,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.NotificationRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -31,30 +29,44 @@ class SendViewModel @Inject constructor(
     private val _sendDataList = MutableStateFlow<List<SendData>>(mutableListOf())
     val sendDataList: StateFlow<List<SendData>> = _sendDataList
 
-    private val _sendData = MutableStateFlow<SendData?>(null)
-    val sendData = channelFlow {
-        launch { sendRepository.sendFlow.collect { send(it) } }
-        launch { _sendData.collect { send(it) } }
-    }.onEach { data ->
-        // Update with notification
-        data ?: return@onEach
-        val list = sendDataList.value.ifEmpty { return@onEach }
-        val count = list.count { !it.state.isFinished } + 1
-        val countAll = list.size
-        notificationRepository.updateProgress(data, count, countAll)
+    private var previousTime = 0L
+    val sendData = sendRepository.sendFlow.distinctUntilChanged { old, new ->
+        if (old == null && new == null) return@distinctUntilChanged false
+        else if (old == null) return@distinctUntilChanged true
+        else if (new == null) return@distinctUntilChanged true
+        if (old.id != new.id || old.state != new.state) return@distinctUntilChanged true
+
+        val currentTime = System.currentTimeMillis()
+        return@distinctUntilChanged (currentTime >= previousTime + NOTIFY_CYCLE).also {
+            previousTime = currentTime
+        }
     }
 
     private val _updateIndex = MutableSharedFlow<Int>(extraBufferCapacity = 20)
     val updateIndex: Flow<Int> = _updateIndex
 
-
     /** Send job */
     private var sendJob: Job? = null
 
+    init {
+        // Notification update
+        launch {
+            sendRepository.sendFlow.collect { data ->
+                data ?: return@collect
+                val list = sendDataList.value.ifEmpty { return@collect }
+                val count = list.count { it.state.isFinished } + 1
+                val countAll = list.size
+                notificationRepository.updateProgress(data, count, countAll)
+            }
+        }
+    }
+
     /**
-     * Send multiple URI
+     * Send URI
      */
-    fun sendMultiple(sourceUris: List<Uri>, targetUri: Uri) {
+    fun sendUri(sourceUris: List<Uri>, targetUri: Uri) {
+        logD("sendUri")
+
         launch {
             val inputList = sendRepository.getSendData(sourceUris, targetUri)
             _sendDataList.value = sendDataList.value + inputList
@@ -72,33 +84,26 @@ class SendViewModel @Inject constructor(
      * Start send job
      */
     private fun startSendJob() {
-        if (sendJob != null) return
+        logD("startSendJob")
+        if (sendJob != null && sendJob?.isActive == true) return
+        _sendDataList.value = sendDataList.value // reset state
+
         sendJob = launch {
-            while (true) {
+            while (isActive) {
                 val sendData = sendDataList.value.firstOrNull { it.state.isReady } ?: break
                 runCatching {
+                    logD("sendJob Start: uri=${sendData.sourceUri}")
                     sendRepository.send(sendData)
                 }.onSuccess {
-                    sendData.state = it
-                    _sendData.value = sendData
+                    logD("sendJob Success: state=${sendData.state}, uri=${sendData.sourceUri}")
                 }.onFailure {
+                    logD("sendJob Failure: state=${sendData.state}, uri=${sendData.sourceUri}, state=${sendData.state}")
                     logE(it)
-                    sendData.state = SendDataState.FAILURE
-                    _sendData.value = sendData
                 }
             }
             notificationRepository.complete()
             sendJob = null
         }
-    }
-
-    /**
-     * Finish
-     */
-    fun finishSending() {
-        _sendDataList.value = emptyList()
-        sendJob?.cancel()
-        notificationRepository.close()
     }
 
     /**
@@ -146,9 +151,31 @@ class SendViewModel @Inject constructor(
     fun onClickCancelAll() {
         logD("onClickCancelAll")
         _sendDataList.value.filter { it.state.isCancelable }.forEachIndexed { index, sendData ->
-            sendData.state = SendDataState.CANCEL
+            sendData.cancel()
             _updateIndex.tryEmit(index)
         }
+    }
+
+    /**
+     * Finish
+     */
+    private fun finishSending() {
+        logD("finishSending")
+        _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
+        runBlocking {
+            sendJob?.cancel()
+        }
+        _sendDataList.value = emptyList()
+        notificationRepository.cancel()
+    }
+
+    override fun onCleared() {
+        finishSending()
+        super.onCleared()
+    }
+
+    companion object {
+        private const val NOTIFY_CYCLE = 500
     }
 
 }

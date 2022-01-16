@@ -160,7 +160,7 @@ class BackgroundBufferWriter(
     }
 
     companion object {
-        private const val DEFAULT_BUFFER_SIZE = 1024 * 1024 * 2
+        private const val DEFAULT_BUFFER_SIZE = 1024 * 1024
         private const val DEFAULT_CAPACITY = 5
     }
 

@@ -57,10 +57,11 @@ fun <T : ViewDataBinding> Fragment.viewBinding(): ReadOnlyProperty<Fragment, T?>
  */
 fun <T> Flow<T>.collectIn(
     lifecycleOwner: LifecycleOwner,
-    observer: (T) -> Unit,
+    state: Lifecycle.State = Lifecycle.State.STARTED,
+    observer: (T) -> Unit = { },
 ) {
     lifecycleOwner.lifecycleScope.launch {
-        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        lifecycleOwner.repeatOnLifecycle(state) {
             this@collectIn.collect { observer(it) }
         }
     }
