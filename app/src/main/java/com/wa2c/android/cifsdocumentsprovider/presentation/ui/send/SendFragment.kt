@@ -152,7 +152,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     }
 
     private fun updateCancelButton() {
-        binding?.sendCancelButton?.isEnabled = viewModel.sendDataList.value.any { it.state.inProgress }
+        binding?.sendCancelButton?.isEnabled = viewModel.sendDataList.value.any { it.state.isCancelable }
     }
 
     private fun onNavigate(event: SendNav) {

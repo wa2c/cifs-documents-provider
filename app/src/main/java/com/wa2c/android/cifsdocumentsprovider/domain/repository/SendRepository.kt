@@ -21,7 +21,7 @@ class SendRepository @Inject constructor(
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 1, BufferOverflow.DROP_OLDEST)
-    val sendFlow: SharedFlow<SendData?> = _sendFlow.onSubscription {  }
+    val sendFlow: SharedFlow<SendData?> = _sendFlow
 
     /**
      * Get send data list.
@@ -70,7 +70,6 @@ class SendRepository @Inject constructor(
             if (!sendData.state.isReady) return@withContext sendData.state
             sendData.state = SendDataState.PROGRESS
 
-//            var previousTime = 0L
             val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
                 if (it.isDirectory) {
                     val file = it.findFile(sendData.name)

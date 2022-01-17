@@ -31,16 +31,21 @@ class SendViewModel @Inject constructor(
 
     private var previousTime = 0L
     val sendData = sendRepository.sendFlow.distinctUntilChanged { old, new ->
-        if (old == null && new == null) return@distinctUntilChanged false
-        else if (old == null) return@distinctUntilChanged true
-        else if (new == null) return@distinctUntilChanged true
-        if (old.id != new.id || old.state != new.state) return@distinctUntilChanged true
+        // NOTE: true = not change, false = change
+        if (old == null && new == null) return@distinctUntilChanged true
+        else if (old == null) return@distinctUntilChanged false
+        else if (new == null) return@distinctUntilChanged false
+        if (old.id != new.id || old.state != new.state) return@distinctUntilChanged false
 
         val currentTime = System.currentTimeMillis()
-        return@distinctUntilChanged (currentTime >= previousTime + NOTIFY_CYCLE).also {
+        val change = (currentTime >= previousTime + NOTIFY_CYCLE || new.progress >= 100)
+        return@distinctUntilChanged if (change) {
             previousTime = currentTime
+            false
+        } else {
+            true
         }
-    }
+    }.shareIn(this, SharingStarted.Eagerly, 0)
 
     private val _updateIndex = MutableSharedFlow<Int>(extraBufferCapacity = 20)
     val updateIndex: Flow<Int> = _updateIndex
@@ -51,7 +56,7 @@ class SendViewModel @Inject constructor(
     init {
         // Notification update
         launch {
-            sendRepository.sendFlow.collect { data ->
+            sendData.collect { data ->
                 data ?: return@collect
                 val list = sendDataList.value.ifEmpty { return@collect }
                 val count = list.count { it.state.isFinished } + 1
