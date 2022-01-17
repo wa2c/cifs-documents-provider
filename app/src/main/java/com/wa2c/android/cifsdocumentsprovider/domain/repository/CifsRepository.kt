@@ -348,13 +348,14 @@ class CifsRepository @Inject constructor(
     private suspend fun SmbFile.toCifsFile(isTop: Boolean = false): CifsFile {
         val urlText = url.toString()
         return cifsFileCache.get(urlText) ?: withContext(Dispatchers.IO) {
+            val isDir = isTop || urlText.isDirectoryUri || isDirectory
             CifsFile(
                 name = name.trim('/'),
                 server = server,
                 uri = Uri.parse(urlText),
-                size = if (isTop) 0 else length(),
+                size = if (isDir) 0 else length(),
                 lastModified = if (isTop) 0 else lastModified,
-                isDirectory = if (isTop) true else urlText.isDirectoryUri,
+                isDirectory = isDir,
                 isTop = isTop
             ).let {
                 cifsFileCache.put(urlText, it)
