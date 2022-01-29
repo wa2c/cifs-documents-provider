@@ -389,7 +389,7 @@
                         android:gravity="center"
                         android:onClick="@{ () -> viewModel.onClickCheckConnection() }"
                         android:text="@string/edit_check_connection_button"
-                        app:checkResult="@{ viewModel.checkConnection }"
+                        app:checkResult="@{ viewModel.connectionResult }"
                         app:icon="@drawable/ic_check"
                         app:iconGravity="textStart"
                         app:iconPadding="16dp" />

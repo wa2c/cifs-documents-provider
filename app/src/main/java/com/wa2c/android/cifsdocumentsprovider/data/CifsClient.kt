@@ -21,7 +21,13 @@ class CifsClient @Inject constructor() {
     /**
      * Get auth by user. Anonymous if user and password are empty.
      */
-    fun getConnection(user: String? = null, password: String? = null, domain: String? = null, enableDfs: Boolean): CIFSContext {
+    fun getConnection(
+        user: String? = null,
+        password: String? = null,
+        domain: String? = null,
+        anonymous: Boolean,
+        enableDfs: Boolean
+    ): CIFSContext {
         val property = Properties().apply {
             setProperty("jcifs.smb.client.minVersion", "SMB210")
             setProperty("jcifs.smb.client.maxVersion", "SMB300")
@@ -30,8 +36,14 @@ class CifsClient @Inject constructor() {
             setProperty("jcifs.smb.client.dfs.disabled", (!enableDfs).toString())
         }
 
-        return  CIFSContextWrapper(BaseContext(PropertyConfiguration(property))
-            .withCredentials(NtlmPasswordAuthenticator(domain, user, password, null)))
+        val context = BaseContext(PropertyConfiguration(property)).let {
+            when {
+                anonymous -> it.withDefaultCredentials() // Anonymous
+                user.isNullOrEmpty() -> it.withGuestCrendentials() // Guest
+                else -> it.withCredentials(NtlmPasswordAuthenticator(domain, user, password, NtlmPasswordAuthenticator.AuthenticationType.USER))
+            }
+        }
+        return  CIFSContextWrapper(context)
     }
 
     /**

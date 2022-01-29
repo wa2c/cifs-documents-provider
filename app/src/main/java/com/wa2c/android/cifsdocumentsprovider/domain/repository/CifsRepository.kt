@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
+import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
@@ -17,6 +18,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
 import jcifs.smb.SmbFile
 import jcifs.util.transport.ConnectionTimeoutException
+import jcifs.util.transport.TransportException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -48,7 +50,7 @@ class CifsRepository @Inject constructor(
     private suspend fun getCifsContext(connection: CifsConnection): CIFSContext {
         return contextCache[connection] ?: withContext(Dispatchers.IO) {
             connection.let { con ->
-                cifsClient.getConnection(con.user, con.password, con.domain, con.enableDfs).also {
+                cifsClient.getConnection(con.user, con.password, con.domain, con.anonymous, con.enableDfs).also {
                     contextCache.put(connection, it)
                 }
             }
@@ -283,18 +285,21 @@ class CifsRepository @Inject constructor(
     /**
      * Check setting connectivity.
      */
-    suspend fun checkConnection(connection: CifsConnection, ignoreTimeout: Boolean = false): Boolean {
+    suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         return withContext(Dispatchers.IO) {
             try {
                 logD("Connection check: ${connection.connectionUri}")
                 cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
-                true
+                ConnectionResult.SUCCESS
             } catch (e: Exception) {
-                logW(e)
-                if (e.cause is ConnectionTimeoutException) {
-                    ignoreTimeout
+                logE(e)
+                val cause = e.cause
+                if (cause is ConnectionTimeoutException) {
+                    ConnectionResult.FAILURE_TIMEOUT
+                } else if (cause is TransportException && cause.message?.contains("Server does not support SMB2") == true) {
+                    ConnectionResult.FAILURE_PROTOCOL
                 } else {
-                    false
+                    ConnectionResult.FAILURE
                 }
             }
         }

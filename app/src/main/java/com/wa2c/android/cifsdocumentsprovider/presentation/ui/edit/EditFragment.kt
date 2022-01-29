@@ -21,6 +21,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
+import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
@@ -67,6 +68,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         viewModel.let {
             it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
+            it.connectionResult.observe(viewLifecycleOwner, ::onConnect)
             it.initialize(args.cifsConnection)
         }
     }
@@ -134,13 +136,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 }
                 navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connection))
             }
-            is EditNav.CheckConnectionResult -> {
-                // Connection check
-                val message =
-                    if (event.result) getString(R.string.edit_check_connection_ok_message)
-                    else getString(R.string.edit_check_connection_ng_message)
-                toast(message)
-            }
             is EditNav.SaveResult -> {
                 if (event.messageId == null) {
                     findNavController().popBackStack(R.id.editFragment, true)
@@ -151,30 +146,46 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         }
     }
 
+    private fun onConnect(result: ConnectionResult?) {
+        if (result == null) return
+
+        // Connection check
+        val message = when (result) {
+            ConnectionResult.SUCCESS -> getString(R.string.edit_check_connection_ok_message)
+            ConnectionResult.FAILURE_TIMEOUT -> getString(R.string.edit_check_connection_ng_message) // FIXME timeout
+            ConnectionResult.FAILURE_PROTOCOL -> getString(R.string.edit_check_connection_ng_message) // FIXME SMB1
+            else -> getString(R.string.edit_check_connection_ng_message)
+        }
+        toast(message)
+    }
+
 }
 
 /**
  * Check connection result
  */
 @BindingAdapter("checkResult")
-fun MaterialButton.setCheckResult(result: Boolean?) {
+fun MaterialButton.setCheckResult(result: ConnectionResult?) {
     if (tag == null) {
         // Backup
         tag = iconTint
     }
 
     when(result) {
-        true -> {
+        null -> {
+            // Undefined
+            setIconResource(R.drawable.ic_check)
+            iconTint = tag as? ColorStateList
+        }
+        ConnectionResult.SUCCESS -> {
+            // Success
             setIconResource(R.drawable.ic_check_ok)
             setIconTintResource(R.color.ic_check_ok)
         }
-        false -> {
+        else -> {
+            // Failure
             setIconResource(R.drawable.ic_check_ng)
             setIconTintResource(R.color.ic_check_ng)
-        }
-        else -> {
-            setIconResource(R.drawable.ic_check)
-            iconTint = tag as? ColorStateList
         }
     }
 }
