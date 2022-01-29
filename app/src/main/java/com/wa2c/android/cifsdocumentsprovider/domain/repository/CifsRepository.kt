@@ -292,7 +292,7 @@ class CifsRepository @Inject constructor(
                 cifsClient.getFile(connection.connectionUri, getCifsContext(connection, true)).list()
                 ConnectionResult.Success
             } catch (e: Exception) {
-                logE(e)
+                logW(e)
                 val c = getCause(e)
                 if (e is SmbException && e.ntStatus in warningStatus) {
                     // Warning
