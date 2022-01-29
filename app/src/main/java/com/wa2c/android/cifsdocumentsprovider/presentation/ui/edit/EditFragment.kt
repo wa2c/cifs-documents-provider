@@ -151,11 +151,21 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         // Connection check
         val message = when (result) {
-            ConnectionResult.SUCCESS -> getString(R.string.edit_check_connection_ok_message)
-            ConnectionResult.FAILURE_TIMEOUT -> getString(R.string.edit_check_connection_ng_message) // FIXME timeout
-            ConnectionResult.FAILURE_PROTOCOL -> getString(R.string.edit_check_connection_ng_message) // FIXME SMB1
-            else -> getString(R.string.edit_check_connection_ng_message)
+            is ConnectionResult.Success -> {
+                getString(R.string.edit_check_connection_ok_message)
+            }
+            is ConnectionResult.Warning -> {
+                val message = result.cause.message?.substringAfter(": ")
+                getString(R.string.edit_check_connection_wn_message) +
+                        if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
+            }
+            is ConnectionResult.Failure -> {
+                val message = result.cause.message?.substringAfter(": ")
+                getString(R.string.edit_check_connection_ng_message) +
+                        if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
+            }
         }
+
         toast(message)
     }
 
@@ -177,10 +187,15 @@ fun MaterialButton.setCheckResult(result: ConnectionResult?) {
             setIconResource(R.drawable.ic_check)
             iconTint = tag as? ColorStateList
         }
-        ConnectionResult.SUCCESS -> {
+        is ConnectionResult.Success -> {
             // Success
             setIconResource(R.drawable.ic_check_ok)
             setIconTintResource(R.color.ic_check_ok)
+        }
+        is ConnectionResult.Warning -> {
+            // Warning
+            setIconResource(R.drawable.ic_check_wn)
+            setIconTintResource(R.color.ic_check_wn)
         }
         else -> {
             // Failure

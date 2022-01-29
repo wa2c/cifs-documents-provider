@@ -1,8 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
-enum class ConnectionResult {
-    SUCCESS,
-    FAILURE,
-    FAILURE_TIMEOUT,
-    FAILURE_PROTOCOL,
+/**
+ * Server connection result
+ */
+sealed class ConnectionResult {
+    object Success: ConnectionResult()
+    data class Warning(
+        val cause: Throwable = RuntimeException()
+    ): ConnectionResult()
+    data class Failure(
+        val cause: Throwable = RuntimeException()
+    ): ConnectionResult()
 }

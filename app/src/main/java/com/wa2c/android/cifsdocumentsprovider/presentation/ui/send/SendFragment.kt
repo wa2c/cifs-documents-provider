@@ -17,7 +17,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSendBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

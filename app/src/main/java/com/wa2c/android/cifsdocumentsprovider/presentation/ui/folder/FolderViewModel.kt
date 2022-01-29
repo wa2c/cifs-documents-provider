@@ -1,6 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -10,7 +13,6 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 /**
@@ -83,7 +85,7 @@ class FolderViewModel @Inject constructor(
         runCatching {
             cifsRepository.getFileChildren(cifsConnection, file.uri.toString())
         }.onSuccess { list ->
-            _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER, { it.name }))
+            _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
             _currentFile.value = file
             _isLoading.value = false
         }.onFailure {

@@ -16,9 +16,9 @@ import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
+import jcifs.smb.NtStatus
+import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
-import jcifs.util.transport.ConnectionTimeoutException
-import jcifs.util.transport.TransportException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -290,19 +290,28 @@ class CifsRepository @Inject constructor(
             try {
                 logD("Connection check: ${connection.connectionUri}")
                 cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
-                ConnectionResult.SUCCESS
+                ConnectionResult.Success
             } catch (e: Exception) {
                 logE(e)
-                val cause = e.cause
-                if (cause is ConnectionTimeoutException) {
-                    ConnectionResult.FAILURE_TIMEOUT
-                } else if (cause is TransportException && cause.message?.contains("Server does not support SMB2") == true) {
-                    ConnectionResult.FAILURE_PROTOCOL
+                val c = getCause(e)
+                if (e is SmbException && e.ntStatus in warningStatus) {
+                    // Warning
+                    ConnectionResult.Warning(c)
                 } else {
-                    ConnectionResult.FAILURE
+                    // Failure
+                    ConnectionResult.Failure(c)
                 }
             }
         }
+    }
+
+    /**
+     * Get throwable cause.
+     */
+    private fun getCause(throwable: Throwable): Throwable {
+        val c = throwable.cause
+        return if (c == null) return throwable
+        else getCause(c)
     }
 
     /**
@@ -382,6 +391,14 @@ class CifsRepository @Inject constructor(
                 )
             }
         }
+    }
+
+    companion object {
+        /** Warning status */
+        private val warningStatus = arrayOf(
+            NtStatus.NT_STATUS_BAD_NETWORK_NAME, // No root folder
+            NtStatus.NT_STATUS_OBJECT_NAME_NOT_FOUND, // No sub folder
+        )
     }
 
 }

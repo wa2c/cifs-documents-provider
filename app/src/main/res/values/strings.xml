@@ -37,6 +37,7 @@
     <string name="edit_provider_uri_title">Shared URI</string>
     <string name="edit_check_connection_button">Check connection</string>
     <string name="edit_check_connection_ok_message">Connection successful.</string>
+    <string name="edit_check_connection_wn_message">Settings has an error.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
     <string name="edit_save_ng_message">Input the host.</string>
     <string name="edit_save_duplicate_message">URI duplicated.</string>

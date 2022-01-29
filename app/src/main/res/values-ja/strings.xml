@@ -36,8 +36,9 @@
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>
-    <string name="edit_check_connection_ok_message">サーバへの接続に成功しました。</string>
-    <string name="edit_check_connection_ng_message">サーバへの接続に失敗しました。</string>
+    <string name="edit_check_connection_ok_message">接続に成功しました。</string>
+    <string name="edit_check_connection_wn_message">設定にエラーがあります。</string>
+    <string name="edit_check_connection_ng_message">接続に失敗しました。</string>
     <string name="edit_save_ng_message">ホストを入力してください。</string>
     <string name="edit_save_duplicate_message">URIが重複しています。</string>
     <string name="edit_save_button">保存</string>
