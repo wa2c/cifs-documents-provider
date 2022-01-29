@@ -155,12 +155,12 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                 getString(R.string.edit_check_connection_ok_message)
             }
             is ConnectionResult.Warning -> {
-                val message = result.cause.message?.substringAfter(": ")
+                val message = result.cause.localizedMessage?.substringAfter(": ")
                 getString(R.string.edit_check_connection_wn_message) +
                         if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
             }
             is ConnectionResult.Failure -> {
-                val message = result.cause.message?.substringAfter(": ")
+                val message = result.cause.localizedMessage?.substringAfter(": ")
                 getString(R.string.edit_check_connection_ng_message) +
                         if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
             }

@@ -38,9 +38,8 @@ class CifsClient @Inject constructor() {
 
         val context = BaseContext(PropertyConfiguration(property)).let {
             when {
-                anonymous -> it.withDefaultCredentials() // Anonymous
-                user.isNullOrEmpty() -> it.withGuestCrendentials() // Guest
-                else -> it.withCredentials(NtlmPasswordAuthenticator(domain, user, password, NtlmPasswordAuthenticator.AuthenticationType.USER))
+                anonymous -> it.withAnonymousCredentials() // Anonymous
+                else -> it.withCredentials(NtlmPasswordAuthenticator(domain, user, password, null))
             }
         }
         return  CIFSContextWrapper(context)

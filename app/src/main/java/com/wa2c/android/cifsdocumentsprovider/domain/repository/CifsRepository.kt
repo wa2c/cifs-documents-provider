@@ -47,8 +47,8 @@ class CifsRepository @Inject constructor(
     /**
      * Get CIFS Context
      */
-    private suspend fun getCifsContext(connection: CifsConnection): CIFSContext {
-        return contextCache[connection] ?: withContext(Dispatchers.IO) {
+    private suspend fun getCifsContext(connection: CifsConnection, forced: Boolean): CIFSContext {
+        return (if (forced) null else contextCache[connection]) ?: withContext(Dispatchers.IO) {
             connection.let { con ->
                 cifsClient.getConnection(con.user, con.password, con.domain, con.anonymous, con.enableDfs).also {
                     contextCache.put(connection, it)
@@ -289,7 +289,7 @@ class CifsRepository @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 logD("Connection check: ${connection.connectionUri}")
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).list()
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection, true)).list()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logE(e)
@@ -320,7 +320,7 @@ class CifsRepository @Inject constructor(
     private suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection)).also {
+                cifsClient.getFile(connection.connectionUri, getCifsContext(connection, false)).also {
                     smbFileCache.put(connection, it)
                 }
             } catch (e: Exception) {
@@ -345,7 +345,7 @@ class CifsRepository @Inject constructor(
     private suspend fun getSmbFile(connection: CifsConnection, uri: String): SmbFile? {
         return withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(uri, getCifsContext(connection)).also { file ->
+                cifsClient.getFile(uri, getCifsContext(connection, false)).also { file ->
                     smbFileCache.put(uri, file)
                 }
             } catch (e: Exception) {
