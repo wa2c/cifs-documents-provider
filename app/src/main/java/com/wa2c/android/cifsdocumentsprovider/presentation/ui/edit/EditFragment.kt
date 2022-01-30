@@ -9,8 +9,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.widget.TextViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -19,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -149,24 +153,19 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private fun onConnect(result: ConnectionResult?) {
         if (result == null) return
 
-        // Connection check
-        val message = when (result) {
-            is ConnectionResult.Success -> {
-                getString(R.string.edit_check_connection_ok_message)
-            }
-            is ConnectionResult.Warning -> {
-                val message = result.cause.localizedMessage?.substringAfter(": ")
-                getString(R.string.edit_check_connection_wn_message) +
-                        if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
-            }
-            is ConnectionResult.Failure -> {
-                val message = result.cause.localizedMessage?.substringAfter(": ")
-                getString(R.string.edit_check_connection_ng_message) +
-                        if (!message.isNullOrEmpty()) { " [$message]" } else { "" }
-            }
+        // Snack bar
+        binding?.root?.let { root ->
+            Snackbar.make(root, result.getMessage(requireContext()), Snackbar.LENGTH_SHORT).also { bar ->
+                val v = bar.view
+                (v.findViewById(com.google.android.material.R.id.snackbar_text) as? TextView)?.let { textView ->
+                    textView.maxLines = Integer.MAX_VALUE
+                    textView.compoundDrawablePadding = resources.getDimensionPixelSize(R.dimen.snack_bar_icon_padding)
+                    textView.setCompoundDrawablesWithIntrinsicBounds(result.iconRes, 0, 0, 0)
+                    TextViewCompat.setCompoundDrawableTintList(textView, ColorStateList.valueOf(ContextCompat.getColor(requireContext(), result.colorRes)))
+                }
+                //v.setBackgroundColor(android.R.attr.colorPrimary)
+            }.show()
         }
-
-        toast(message)
     }
 
 }
@@ -187,20 +186,9 @@ fun MaterialButton.setCheckResult(result: ConnectionResult?) {
             setIconResource(R.drawable.ic_check)
             iconTint = tag as? ColorStateList
         }
-        is ConnectionResult.Success -> {
-            // Success
-            setIconResource(R.drawable.ic_check_ok)
-            setIconTintResource(R.color.ic_check_ok)
-        }
-        is ConnectionResult.Warning -> {
-            // Warning
-            setIconResource(R.drawable.ic_check_wn)
-            setIconTintResource(R.color.ic_check_wn)
-        }
         else -> {
-            // Failure
-            setIconResource(R.drawable.ic_check_ng)
-            setIconTintResource(R.color.ic_check_ng)
+            setIconResource(result.iconRes)
+            setIconTintResource(result.colorRes)
         }
     }
 }
