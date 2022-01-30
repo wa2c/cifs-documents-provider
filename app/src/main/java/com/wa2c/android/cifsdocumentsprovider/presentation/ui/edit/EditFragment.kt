@@ -163,7 +163,9 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                     textView.setCompoundDrawablesWithIntrinsicBounds(result.iconRes, 0, 0, 0)
                     TextViewCompat.setCompoundDrawableTintList(textView, ColorStateList.valueOf(ContextCompat.getColor(requireContext(), result.colorRes)))
                 }
-                //v.setBackgroundColor(android.R.attr.colorPrimary)
+                v.setOnClickListener {
+                    bar.dismiss()
+                }
             }.show()
         }
     }
