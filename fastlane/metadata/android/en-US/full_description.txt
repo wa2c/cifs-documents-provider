@@ -6,6 +6,7 @@
 * Provides access to Windows shared folders via Storage Access Framework (SAF).
 * Read, write, and directory access in shared folders from external applications by using SAF.
 * File sharing from shared folder.
+* File transfer any files.
 * Multiple connection settings can be saved.
 
 <strong><font color="#339933">[Objective]</font></strong>
