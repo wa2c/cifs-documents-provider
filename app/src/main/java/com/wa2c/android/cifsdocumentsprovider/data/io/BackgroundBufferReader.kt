@@ -157,6 +157,7 @@ class BackgroundBufferReader (
                 // Position reset (not contains)
                 logD("[READ] Reset: streamPosition=$streamPosition, bufferRemainSize=$bufferRemainSize, bufferOffset=$bufferOffset")
                 resetCycle(streamPosition)
+                continue
             }
             val readRemainSize = maxSize - readOffset
             if (bufferRemainSize >= readRemainSize) {
