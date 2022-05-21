@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data.io
+package com.wa2c.android.cifsdocumentsprovider.data
 
 import android.content.Context
 import android.net.Uri

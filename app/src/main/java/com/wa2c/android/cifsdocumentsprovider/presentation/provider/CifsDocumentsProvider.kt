@@ -32,14 +32,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Context */
     private val providerContext: Context by lazy { context!! }
-    /** App Preferences */
-    private val appPreferences: AppPreferences by lazy { AppPreferences(providerContext) }
-    /** Storage Manager */
-    private val storageManager: StorageManager by lazy { AppModule.provideStorageManager(providerContext) }
 
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
-        CifsRepository(CifsClient(), appPreferences, storageManager)
+        CifsRepository(
+            CifsClient(),
+            AppPreferences(providerContext),
+            AppModule.provideStorageManager(providerContext)
+        )
     }
 
     /** File handler */
