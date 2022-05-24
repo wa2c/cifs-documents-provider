@@ -142,14 +142,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
+                    <Space
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="0"
-                        android:gravity="center_vertical|end"
-                        android:importantForAccessibility="no"
-                        android:text="@null" />
+                        android:layout_weight="0" />
 
                     <CheckBox
                         android:id="@+id/edit_enable_dfs_check_box"
@@ -220,14 +217,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
+                    <Space
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_weight="0"
-                        android:gravity="center_vertical|end"
-                        android:importantForAccessibility="no"
-                        android:text="@null" />
+                        android:layout_weight="0" />
 
                     <CheckBox
                         android:id="@+id/edit_anonymous_check_box"
@@ -289,13 +283,34 @@
                         android:text="@string/edit_option_title" />
 
                     <CheckBox
-                        android:id="@+id/edit_extension_check_box"
+                        android:id="@+id/edit_option_safe_transfer_check_box"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1"
+                        android:checked="@={viewModel.safeTransfer}"
+                        android:text="@string/edit_option_safe_transfer_label" />
+
+                </TableRow>
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Space
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0" />
+
+                    <CheckBox
+                        android:id="@+id/edit_option_extension_check_box"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_span="2"
                         android:layout_weight="1"
                         android:checked="@={viewModel.extension}"
-                        android:text="@string/edit_extension_label" />
+                        android:text="@string/edit_option_extension_label" />
 
                 </TableRow>
 

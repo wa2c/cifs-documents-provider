@@ -31,7 +31,8 @@
     <string name="edit_password_hint">匿名の場合は無効</string>
     <string name="edit_anonymous_label">匿名</string>
     <string name="edit_option_title">オプション</string>
-    <string name="edit_extension_label">保存時に拡張子を付与</string>
+    <string name="edit_option_extension_label">保存時に拡張子を付与</string>
+    <string name="edit_option_safe_transfer_label">安全なデータ転送</string>
 
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">共有URI</string>

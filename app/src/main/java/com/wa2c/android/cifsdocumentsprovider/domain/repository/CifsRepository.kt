@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
+import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.*
 import jcifs.CIFSContext
@@ -281,7 +282,6 @@ class CifsRepository @Inject constructor(
         }
     }
 
-
     /**
      * Check setting connectivity.
      */
@@ -383,13 +383,19 @@ class CifsRepository @Inject constructor(
      */
     suspend fun getFileDescriptor(uri: String, mode: AccessMode, handler: Handler): ParcelFileDescriptor? {
         return withContext(Dispatchers.IO) {
-            getSmbFile(uri)?.let { file ->
-                storageManager.openProxyFileDescriptor(
-                    ParcelFileDescriptor.parseMode(mode.safMode),
-                    CifsProxyFileCallback(file, mode),
-                    handler
-                )
+            val connection = getConnection(uri) ?: return@withContext null
+            val file = getSmbFile(uri) ?: return@withContext null
+            val callback = if (connection.safeTransfer) {
+                CifsProxyFileCallbackSafe(file, mode)
+            } else {
+                CifsProxyFileCallback(file, mode)
             }
+
+            storageManager.openProxyFileDescriptor(
+                ParcelFileDescriptor.parseMode(mode.safMode),
+                callback,
+                handler
+            )
         }
     }
 

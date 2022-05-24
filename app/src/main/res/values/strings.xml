@@ -31,7 +31,8 @@
     <string name="edit_password_hint">Invalid if anonymous</string>
     <string name="edit_anonymous_label">Anonymous</string>
     <string name="edit_option_title">Option</string>
-    <string name="edit_extension_label">Add extension when saving</string>
+    <string name="edit_option_extension_label">Add extension when saving</string>
+    <string name="edit_option_safe_transfer_label">Safe data transfer</string>
 
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>

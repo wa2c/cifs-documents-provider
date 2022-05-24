@@ -18,4 +18,5 @@ data class CifsSetting(
     val password: String? = null,
     val anonymous: Boolean? = null,
     val extension: Boolean? = null,
+    val safeTransfer: Boolean? = null,
 )

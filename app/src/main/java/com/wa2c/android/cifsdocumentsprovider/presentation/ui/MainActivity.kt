@@ -56,13 +56,13 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         val navHostFragment = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
         val graph = navHostFragment.navController.navInflater.inflate(R.navigation.nav_graph)
 
-        if (sendUri.isEmpty() && sendViewModel.sendDataList.value.isNullOrEmpty()) {
+        if (sendUri.isEmpty() && sendViewModel.sendDataList.value.isEmpty()) {
             // Normal
-            graph.startDestination = R.id.mainFragment
+            graph.setStartDestination(R.id.mainFragment)
             navHostFragment.navController.graph = graph
         } else {
             // Send
-            graph.startDestination = R.id.sendFragment
+            graph.setStartDestination(R.id.sendFragment)
             navHostFragment.navController.setGraph(graph, SendFragmentArgs(sendUri.toTypedArray()).toBundle())
         }
     }

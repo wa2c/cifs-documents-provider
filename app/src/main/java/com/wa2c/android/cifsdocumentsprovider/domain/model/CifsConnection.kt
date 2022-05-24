@@ -29,6 +29,7 @@ data class CifsConnection(
     val password: String?,
     val anonymous: Boolean,
     val extension: Boolean,
+    val safeTransfer: Boolean,
 ): Parcelable, Serializable {
 
     /** True if new item. */
@@ -86,7 +87,8 @@ data class CifsConnection(
                 user = null,
                 password = null,
                 anonymous = false,
-                extension = false
+                extension = false,
+                safeTransfer = false,
             )
         }
 
@@ -109,6 +111,7 @@ fun CifsConnection.toData(): CifsSetting {
         password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous,
         extension = this.extension,
+        safeTransfer = this.safeTransfer,
     )
 }
 
@@ -127,7 +130,8 @@ fun CifsSetting.toModel(): CifsConnection {
         user = this.user,
         password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
         anonymous = this.anonymous ?: false,
-        extension = this.extension ?: false
+        extension = this.extension ?: false,
+        safeTransfer = this.safeTransfer ?: false,
     )
 }
 

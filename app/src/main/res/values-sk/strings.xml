@@ -31,7 +31,8 @@
     <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_anonymous_label">Anonymné prihlásenie</string>
     <string name="edit_option_title">Možnosti</string>
-    <string name="edit_extension_label">Pridať príponu pri ukladaní súborov</string>
+    <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
+    <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>
 
     <string name="edit_connection_uri_title">SMB URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>
