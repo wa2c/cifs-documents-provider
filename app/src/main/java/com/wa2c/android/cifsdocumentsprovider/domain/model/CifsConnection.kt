@@ -6,6 +6,7 @@ import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
 import java.nio.file.Paths
@@ -33,6 +34,7 @@ data class CifsConnection(
 ): Parcelable, Serializable {
 
     /** True if new item. */
+    @IgnoredOnParcel
     val isNew: Boolean = (id == NEW_ID)
 
     /** Root SMB URI (smb://) */

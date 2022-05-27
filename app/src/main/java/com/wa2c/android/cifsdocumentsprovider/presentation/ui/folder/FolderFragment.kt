@@ -19,10 +19,7 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentFolderBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.startLoadingAnimation
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.stopLoadingAnimation
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -68,9 +65,9 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
             bind.folderList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
         }
 
-        viewModel.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-        viewModel.fileList.observe(viewLifecycleOwner, ::onLoadFileList)
-        viewModel.currentFile.observe(viewLifecycleOwner, ::onSetCurrentFile)
+        viewModel.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+        viewModel.fileList.collectIn(viewLifecycleOwner, observer = ::onLoadFileList)
+        viewModel.currentFile.collectIn(viewLifecycleOwner, observer = ::onSetCurrentFile)
         viewModel.initialize(args.cifsConnection)
     }
 
@@ -83,7 +80,7 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
         super.onPrepareOptionsMenu(menu)
         // Reload
         reloadMenuButton = menu.findItem(R.id.folder_menu_reload).also { item ->
-            viewModel.isLoading.observe(viewLifecycleOwner) {
+            viewModel.isLoading.collectIn(viewLifecycleOwner) {
                 if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
             }
         }
@@ -124,7 +121,8 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
         adapter.submitList(fileList)
     }
 
-    private fun onSetCurrentFile(cifsFile: CifsFile) {
+    private fun onSetCurrentFile(cifsFile: CifsFile?) {
+        cifsFile ?: return
         binding?.folderSetPath?.text = cifsFile.uri.toString()
         binding?.folderSetPathScroll?.doOnNextLayout {
             binding?.folderSetPathScroll?.fullScroll(HorizontalScrollView.FOCUS_RIGHT)

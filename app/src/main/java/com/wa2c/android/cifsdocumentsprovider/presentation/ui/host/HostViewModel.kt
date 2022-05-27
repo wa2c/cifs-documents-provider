@@ -1,9 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
@@ -11,8 +8,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.HostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,15 +20,15 @@ class HostViewModel @Inject constructor(
     private val hostRepository: HostRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<HostNav>()
-    val navigationEvent: LiveData<HostNav> = _navigationEvent
+    private val _navigationEvent = MutableSharedFlow<HostNav>()
+    val navigationEvent: SharedFlow<HostNav> = _navigationEvent
 
-    private val _isLoading =  LiveEvent<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading =  MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    val hostData: LiveData<HostData> = hostRepository.hostFlow.onEach {
+    val hostData: Flow<HostData> = hostRepository.hostFlow.onEach {
         if (it == null) _isLoading.value = false
-    }.filterNotNull().asLiveData()
+    }.mapNotNull { it }
 
     val sortType: HostSortType get() = hostRepository.sortType
 
@@ -43,7 +39,7 @@ class HostViewModel @Inject constructor(
                 _isLoading.value = true
                 hostRepository.startDiscovery()
             }.onFailure {
-                _navigationEvent.value = HostNav.NetworkError
+                _navigationEvent.emit(HostNav.NetworkError)
                 _isLoading.value = false
             }
         }
@@ -51,12 +47,16 @@ class HostViewModel @Inject constructor(
 
     fun onClickItem(item: HostData) {
         logD("onClickItem")
-        _navigationEvent.value = HostNav.SelectItem(item)
+        launch {
+            _navigationEvent.emit(HostNav.SelectItem(item))
+        }
     }
 
     fun onClickSetManually() {
         logD("onClickSetManually")
-        _navigationEvent.value = HostNav.SelectItem(null)
+        launch {
+            _navigationEvent.emit(HostNav.SelectItem(null))
+        }
     }
 
     fun onClickSort(sortType: HostSortType) {
@@ -65,12 +65,14 @@ class HostViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        runCatching {
-            hostRepository.stopDiscovery()
-        }.onFailure {
-            _navigationEvent.value = HostNav.NetworkError
+        launch {
+            runCatching {
+                hostRepository.stopDiscovery()
+            }.onFailure {
+                _navigationEvent.emit(HostNav.NetworkError)
+            }
+            _isLoading.value = false
         }
-        _isLoading.value = false
     }
 
 

@@ -24,7 +24,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.wa2c.android.cifsdocumentsprovider.R
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
@@ -65,6 +66,18 @@ fun <T> Flow<T>.collectIn(
             this@collectIn.collect { observer(it) }
         }
     }
+}
+
+/**
+ * StateFlow map
+ */
+fun <T, K> StateFlow<T>.mapState(
+    viewModelScope: CoroutineScope,
+    transform: (data: T) -> K
+): StateFlow<K> {
+    return map {
+        transform(it)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, transform(this.value))
 }
 
 /**

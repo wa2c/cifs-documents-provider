@@ -1,17 +1,18 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
-import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.mapState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,18 +24,18 @@ class FolderViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<FolderNav>()
-    val navigationEvent: LiveData<FolderNav> = _navigationEvent
+    private val _navigationEvent = MutableSharedFlow<FolderNav>()
+    val navigationEvent: SharedFlow<FolderNav> = _navigationEvent
 
-    private val _isLoading =  LiveEvent<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val _isLoading =  MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _fileList = MutableLiveData<List<CifsFile>>()
-    val fileList: LiveData<List<CifsFile>> = _fileList
-    val isEmpty = fileList.map { it.isEmpty() }
+    private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
+    val fileList: StateFlow<List<CifsFile>> = _fileList
+    val isEmpty: StateFlow<Boolean> = fileList.mapState(this) { it.isEmpty() }
 
-    private val _currentFile = MutableLiveData<CifsFile>()
-    val currentFile: LiveData<CifsFile> = _currentFile
+    private val _currentFile = MutableStateFlow<CifsFile?>(null)
+    val currentFile: StateFlow<CifsFile?> = _currentFile
 
     private lateinit var cifsConnection: CifsConnection
 
@@ -57,7 +58,7 @@ class FolderViewModel @Inject constructor(
     fun onUpFolder(): Boolean {
         if (currentFile.value?.isRoot == true) return false
 
-        if (_isLoading.value == true) return true
+        if (isLoading.value) return true
         _isLoading.value = true
         launch {
             val uri = currentFile.value?.parentUri ?: return@launch
@@ -71,7 +72,7 @@ class FolderViewModel @Inject constructor(
      * On select folder
      */
     fun onSelectFolder(file: CifsFile) {
-        if (_isLoading.value == true) return
+        if (isLoading.value) return
         _isLoading.value = true
         launch {
             loadList(file)
@@ -100,7 +101,9 @@ class FolderViewModel @Inject constructor(
      */
     fun onClickSet() {
         logD("onClickSetManually")
-        _navigationEvent.value = FolderNav.SetFolder(currentFile.value)
+        launch {
+            _navigationEvent.emit(FolderNav.SetFolder(currentFile.value))
+        }
     }
 
     /**

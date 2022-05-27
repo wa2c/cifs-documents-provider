@@ -18,6 +18,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentMainBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
@@ -101,8 +102,8 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         }
 
         viewModel.let {
-            it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-            it.cifsConnections.observe(viewLifecycleOwner, ::onLoadConnection)
+            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+            it.cifsConnections.collectIn(viewLifecycleOwner, observer = ::onLoadConnection)
             it.initialize()
         }
     }

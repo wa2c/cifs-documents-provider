@@ -62,8 +62,8 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         }
 
         viewModel.let {
-            it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-            it.hostData.observe(viewLifecycleOwner, ::onHostFound)
+            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+            it.hostData.collectIn(viewLifecycleOwner, observer = ::onHostFound)
         }
 
         startDiscovery()
@@ -85,7 +85,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
 
         // Reload
         reloadMenuButton = menu.findItem(R.id.host_menu_reload).also { item ->
-            viewModel.isLoading.observe(viewLifecycleOwner) {
+            viewModel.isLoading.collectIn(viewLifecycleOwner) {
                 if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
             }
         }

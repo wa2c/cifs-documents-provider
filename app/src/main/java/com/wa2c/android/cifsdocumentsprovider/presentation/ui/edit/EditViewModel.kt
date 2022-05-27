@@ -1,10 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
+import androidx.lifecycle.*
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -13,6 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -27,49 +24,44 @@ class EditViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<EditNav>()
-    val navigationEvent: LiveData<EditNav> = _navigationEvent
+    private val _navigationEvent = MutableSharedFlow<EditNav>()
+    val navigationEvent: SharedFlow<EditNav> = _navigationEvent
 
-    private val _isBusy = MutableLiveData(false)
-    val isBusy: LiveData<Boolean> = _isBusy
+    private val _isBusy = MutableStateFlow(false)
+    val isBusy: StateFlow<Boolean> = _isBusy
 
-    var name = MutableLiveData<String?>()
-    var domain = MutableLiveData<String?>()
-    var host = MutableLiveData<String?>()
-    var port = MutableLiveData<String?>()
-    var enableDfs = MutableLiveData<Boolean>()
-    var folder = MutableLiveData<String?>()
-    var user = MutableLiveData<String?>()
-    var password = MutableLiveData<String?>()
-    var anonymous = MutableLiveData<Boolean>()
-    var extension = MutableLiveData<Boolean>()
-    var safeTransfer = MutableLiveData<Boolean>()
+    var name = MutableStateFlow<String?>(null)
+    var domain = MutableStateFlow<String?>(null)
+    var host = MutableStateFlow<String?>(null)
+    var port = MutableStateFlow<String?>(null)
+    var enableDfs = MutableStateFlow<Boolean>(false)
+    var folder = MutableStateFlow<String?>(null)
+    var user = MutableStateFlow<String?>(null)
+    var password = MutableStateFlow<String?>(null)
+    var anonymous = MutableStateFlow<Boolean>(false)
+    var extension = MutableStateFlow<Boolean>(false)
+    var safeTransfer = MutableStateFlow<Boolean>(false)
 
-    val connectionUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getSmbUri(host.value, port.value, folder.value)) }
-        addSource(host) { post() }
-        addSource(port) { post() }
-        addSource(folder) { post() }
-    }
+    val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
+        CifsConnection.getSmbUri(host, port, folder)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val providerUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getContentUri(host.value, port.value, folder.value)) }
-        addSource(host) { post() }
-        addSource(folder) { post() }
-    }
+    val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
+        CifsConnection.getContentUri(host, port, folder)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    private val _connectionResult = MutableLiveData<ConnectionResult?>(null)
-    val connectionResult = MediatorLiveData<ConnectionResult?>().apply {
-        addSource(_connectionResult) { postValue(it) } // delay
-        addSource(domain) { value = null }
-        addSource(host) { value = null  }
-        addSource(port) { value = null  }
-        addSource(enableDfs) { value = null  }
-        addSource(folder) { value = null }
-        addSource(user) { value = null  }
-        addSource(password) { value = null  }
-        addSource(anonymous) { value = null  }
-    } as LiveData<ConnectionResult?>
+    private val _connectionResult = MutableStateFlow<ConnectionResult?>(null)
+    val connectionResult = channelFlow<ConnectionResult?> {
+        launch { _connectionResult.collect { send(it) } }
+        launch { domain.collect { send(null) } }
+        launch { host.collect { send(null) } }
+        launch { port.collect { send(null) } }
+        launch { enableDfs.collect { send(null) } }
+        launch { folder.collect { send(null) } }
+        launch { user.collect { send(null) } }
+        launch { password.collect { send(null) } }
+        launch { anonymous.collect { send(null) } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /** Current ID */
     private var currentId: String = CifsConnection.NEW_ID
@@ -140,20 +132,20 @@ class EditViewModel @Inject constructor(
      * Create connection data
      */
     private fun createCifsConnection(generateId: Boolean): CifsConnection? {
-        val isAnonymous = anonymous.value ?: false
+        val isAnonymous = anonymous.value
         return CifsConnection(
             id = if (generateId) UUID.randomUUID().toString() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
             port = port.value?.ifEmpty { null },
-            enableDfs = enableDfs.value ?: false,
+            enableDfs = enableDfs.value,
             folder = folder.value?.ifEmpty { null },
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
             anonymous = isAnonymous,
-            extension = extension.value ?: false,
-            safeTransfer = safeTransfer.value ?: false
+            extension = extension.value,
+            safeTransfer = safeTransfer.value,
         )
     }
 
@@ -175,7 +167,9 @@ class EditViewModel @Inject constructor(
     }
 
     fun onClickSearchHost() {
-        _navigationEvent.value = EditNav.SelectHost(createCifsConnection(false))
+        launch {
+            _navigationEvent.emit(EditNav.SelectHost(createCifsConnection(false)))
+        }
     }
 
     /**
@@ -191,7 +185,7 @@ class EditViewModel @Inject constructor(
                     // use target folder
                     val folderResult = cifsRepository.checkConnection(folderConnection)
                     if (folderResult is ConnectionResult.Success) {
-                        _navigationEvent.postValue(EditNav.SelectFolder(folderConnection))
+                        _navigationEvent.emit(EditNav.SelectFolder(folderConnection))
                         return@withContext folderResult
                     } else if (folderResult is ConnectionResult.Failure) {
                         return@withContext folderResult
@@ -201,7 +195,7 @@ class EditViewModel @Inject constructor(
                     val rootConnection = folderConnection.copy(folder = null)
                     val rootResult = cifsRepository.checkConnection(rootConnection)
                     if (rootResult == ConnectionResult.Success) {
-                        _navigationEvent.postValue(EditNav.SelectFolder(rootConnection))
+                        _navigationEvent.emit(EditNav.SelectFolder(rootConnection))
                         return@withContext folderResult // Show target folder warning
                     }
                     return@withContext rootResult
@@ -234,7 +228,7 @@ class EditViewModel @Inject constructor(
     fun onClickDelete() {
         launch {
             delete()
-            _navigationEvent.value = EditNav.Back()
+            _navigationEvent.emit(EditNav.Back())
         }
     }
 
@@ -247,15 +241,15 @@ class EditViewModel @Inject constructor(
             runCatching {
                 save()
             }.onSuccess {
-                _navigationEvent.value = EditNav.SaveResult(null)
+                _navigationEvent.emit(EditNav.SaveResult(null))
                 _isBusy.value = false
             }.onFailure {
                 if (it is IllegalArgumentException) {
                     // URI duplicated
-                    _navigationEvent.value = EditNav.SaveResult(R.string.edit_save_duplicate_message)
+                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_duplicate_message))
                 } else {
                     // Host empty
-                    _navigationEvent.value = EditNav.SaveResult(R.string.edit_save_ng_message)
+                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_ng_message))
                 }
                 _isBusy.value = false
             }
@@ -266,7 +260,9 @@ class EditViewModel @Inject constructor(
      * Back Click
      */
     fun onClickBack() {
-        _navigationEvent.value = EditNav.Back(initConnection == null || initConnection != createCifsConnection(false))
+        launch {
+            _navigationEvent.emit(EditNav.Back(initConnection == null || initConnection != createCifsConnection(false)))
+        }
     }
 
 }

@@ -24,7 +24,7 @@ class MainListAdapter(
 ) {
 
     init {
-        this.submitList(viewModel.cifsConnections.value?.toMutableList())
+        this.submitList(viewModel.cifsConnections.value.toMutableList())
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

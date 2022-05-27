@@ -1,14 +1,16 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.hadilq.liveevent.LiveEvent
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -19,11 +21,11 @@ class MainViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = LiveEvent<MainNav>()
-    val navigationEvent: LiveData<MainNav> = _navigationEvent
+    private val _navigationEvent = MutableSharedFlow<MainNav>()
+    val navigationEvent: SharedFlow<MainNav> = _navigationEvent
 
-    private val _cifsConnection: MutableLiveData<List<CifsConnection>> = MutableLiveData()
-    val cifsConnections: LiveData<List<CifsConnection>> = _cifsConnection
+    private val _cifsConnection: MutableStateFlow<List<CifsConnection>> = MutableStateFlow(emptyList())
+    val cifsConnections: StateFlow<List<CifsConnection>> = _cifsConnection
 
     fun initialize() {
         _cifsConnection.value = cifsRepository.loadConnection()
@@ -33,21 +35,27 @@ class MainViewModel @Inject constructor(
      * Click item.
      */
     fun onClickItem(connection: CifsConnection?) {
-        _navigationEvent.value = MainNav.Edit(connection)
+        launch {
+            _navigationEvent.emit(MainNav.Edit(connection))
+        }
     }
 
     /**
      * Add item.
      */
     fun onClickAddItem() {
-        _navigationEvent.value = MainNav.AddItem
+        launch {
+            _navigationEvent.emit(MainNav.AddItem)
+        }
     }
 
     /***
      * Click share button.
      */
     fun onClickOpenFile() {
-        _navigationEvent.value = MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty())
+        launch {
+            _navigationEvent.emit(MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty()))
+        }
     }
 
 

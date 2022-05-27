@@ -27,10 +27,7 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateBack
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,8 +68,8 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         }
 
         viewModel.let {
-            it.navigationEvent.observe(viewLifecycleOwner, ::onNavigate)
-            it.connectionResult.observe(viewLifecycleOwner, ::onConnect)
+            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+            it.connectionResult.collectIn(viewLifecycleOwner, observer = ::onConnect)
             it.initialize(args.cifsConnection)
         }
     }
