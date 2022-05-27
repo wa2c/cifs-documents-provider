@@ -4,9 +4,13 @@
     <string name="app_summary">访问共享文件夹</string>
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">关闭</string>
+
+    <!-- Main Screen -->
     <string name="main_open_file">打开</string>
     <string name="main_add_connection_a11y">添加</string>
     <string name="main_open_file_ng_message">请先添加连接</string>
+
+    <!-- Edit Screen -->
     <string name="edit_title">连接</string>
     <string name="edit_name_title">名称</string>
     <string name="edit_name_hint">如果留空则为主机名</string>
@@ -41,7 +45,10 @@
     <string name="edit_delete_confirmation_message">删除此项设置？</string>
     <string name="host_title">主机名</string>
     <string name="host_set_manually">手动设置</string>
-    <string name="edit_extension_label">保存时添加扩展名</string>
+    <string name="edit_option_extension_label">保存时添加扩展名</string>
+    <string name="edit_option_safe_transfer_label">安全的数据传输</string>
+
+    <!-- Host Screen -->
     <string name="host_select_host_name">主机名</string>
     <string name="host_select_ip_address">IP地址</string>
     <string name="host_sort_button">排序</string>
@@ -53,10 +60,14 @@
     <string name="host_sort_type_ip_address_ascend">IP地址（升序）</string>
     <string name="host_sort_type_ip_address_descend">IP地址（降序）</string>
     <string name="host_error_network">\@string/provider_error_message</string>
+
+    <!-- Folder Screen -->
     <string name="folder_title">目录</string>
     <string name="folder_set">目录设置</string>
     <string name="folder_reload_button">重新加载</string>
     <string name="folder_list_empty">不存在子目录</string>
+
+    <!-- Send Screen -->
     <string name="send_title">发送文件</string>
     <string name="send_close_button">关闭</string>
     <string name="send_action_cancel">取消</string>
@@ -69,7 +80,11 @@
     <string name="send_state_cancel">已取消</string>
     <string name="send_exit_confirmation_message">取消所有传输流并退出</string>
     <string name="send_overwrite_confirmation_message">覆盖 %1$d 个文件。</string>
+
+    <!-- DocumentsProvider -->
     <string name="provider_error_message">发生错误。</string>
+
+    <!-- Notification -->
     <string name="notification_channel_name_send">数据传输</string>
     <string name="notification_title_send_completed">成功</string>
     <string name="host_select_confirmation_message">输入所选数据以编辑表单。</string>
