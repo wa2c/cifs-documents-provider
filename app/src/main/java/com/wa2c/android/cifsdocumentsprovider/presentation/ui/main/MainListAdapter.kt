@@ -42,7 +42,7 @@ class MainListAdapter(
             binding.cifsListItemTitle.visibility = View.VISIBLE
             binding.cifsListItemSummary.visibility = View.VISIBLE
             binding.cifsListItemTitle.text = item.name
-            binding.cifsListItemSummary.text = item.connectionUri
+            binding.cifsListItemSummary.text = item.folderSmbUri
         }
         binding.root.setOnClickListener { viewModel.onClickItem(item) }
     }

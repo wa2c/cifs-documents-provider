@@ -46,14 +46,14 @@ class EditViewModel @Inject constructor(
     var safeTransfer = MutableLiveData<Boolean>()
 
     val connectionUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getConnectionUri(host.value, port.value, folder.value)) }
+        fun post() { postValue(CifsConnection.getSmbUri(host.value, port.value, folder.value)) }
         addSource(host) { post() }
         addSource(port) { post() }
         addSource(folder) { post() }
     }
 
     val providerUri = MediatorLiveData<String>().apply {
-        fun post() { postValue(CifsConnection.getProviderUri(host.value, port.value, folder.value)) }
+        fun post() { postValue(CifsConnection.getContentUri(host.value, port.value, folder.value)) }
         addSource(host) { post() }
         addSource(folder) { post() }
     }
@@ -99,7 +99,7 @@ class EditViewModel @Inject constructor(
      */
     private fun save() {
         createCifsConnection(isNew)?.let { con ->
-            if (cifsRepository.loadConnection().filter { it.id != con.id }.any { it.connectionUri == con.connectionUri }) {
+            if (cifsRepository.loadConnection().filter { it.id != con.id }.any { it.folderSmbUri == con.folderSmbUri }) {
                 // Duplicate URI
                 throw IllegalArgumentException()
             }

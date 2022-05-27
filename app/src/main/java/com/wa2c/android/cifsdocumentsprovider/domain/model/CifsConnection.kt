@@ -35,13 +35,13 @@ data class CifsConnection(
     /** True if new item. */
     val isNew: Boolean = (id == NEW_ID)
 
-    /** RootURI (smb://) */
-    val rootUri: String
-        get() = getConnectionUri(host, port, null)
+    /** Root SMB URI (smb://) */
+    val rootSmbUri: String
+        get() = getSmbUri(host, port, null)
 
-    /** Connection URI (smb://) */
-    val connectionUri: String
-        get() = getConnectionUri(host, port, folder)
+    /** Folder SMB URI (smb://) */
+    val folderSmbUri: String
+        get() = getSmbUri(host, port, folder)
 
     companion object {
 
@@ -57,17 +57,17 @@ data class CifsConnection(
         }
 
         /**
-         * Get connection URI ( smb://documentId )
+         * Get SMB URI ( smb://documentId )
          */
-        fun getConnectionUri(host: String?, port: String?, folder: String?): String {
+        fun getSmbUri(host: String?, port: String?, folder: String?): String {
             val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
             return "smb://$documentId"
         }
 
         /**
-         * Get provider URI ( content://applicationId/tree/encodedDocumentId )
+         * Get content URI ( content://applicationId/tree/encodedDocumentId )
          */
-        fun getProviderUri(host: String?, port: String?, folder: String?): String {
+        fun getContentUri(host: String?, port: String?, folder: String?): String {
             val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
             return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
         }

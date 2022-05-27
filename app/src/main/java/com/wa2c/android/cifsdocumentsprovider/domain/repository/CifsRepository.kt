@@ -84,7 +84,7 @@ class CifsRepository @Inject constructor(
      * Get connection from URI
      */
     private fun getConnection(uriText: String): CifsConnection? {
-        return loadConnection().firstOrNull { uriText.indexOf(it.connectionUri) == 0 }
+        return loadConnection().firstOrNull { uriText.indexOf(it.folderSmbUri) == 0 }
     }
 
     /**
@@ -143,7 +143,7 @@ class CifsRepository @Inject constructor(
     /**
      * Get children CIFS files from uri.
      */
-    suspend fun getFileChildren(connection: CifsConnection, uri: String = connection.connectionUri): List<CifsFile> {
+    suspend fun getFileChildren(connection: CifsConnection, uri: String = connection.folderSmbUri): List<CifsFile> {
         return withContext(Dispatchers.IO) {
             getSmbFile(connection, uri)?.listFiles()?.mapNotNull {
                 try {
@@ -288,8 +288,8 @@ class CifsRepository @Inject constructor(
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         return withContext(Dispatchers.IO) {
             try {
-                logD("Connection check: ${connection.connectionUri}")
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection, true)).list()
+                logD("Connection check: ${connection.folderSmbUri}")
+                cifsClient.getFile(connection.folderSmbUri, getCifsContext(connection, true)).list()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -320,7 +320,7 @@ class CifsRepository @Inject constructor(
     private suspend fun getSmbFile(connection: CifsConnection): SmbFile? {
         return smbFileCache[connection] ?:withContext(Dispatchers.IO) {
             try {
-                cifsClient.getFile(connection.connectionUri, getCifsContext(connection, false)).also {
+                cifsClient.getFile(connection.folderSmbUri, getCifsContext(connection, false)).also {
                     smbFileCache.put(connection, it)
                 }
             } catch (e: Exception) {
