@@ -34,11 +34,14 @@ class CifsClient @Inject constructor() {
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
             setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
             setProperty("jcifs.smb.client.dfs.disabled", (!enableDfs).toString())
+            setProperty("jcifs.smb.client.ipcSigningEnforced", (!user.isNullOrEmpty() && !user.equals("guest")).toString())
+            setProperty("jcifs.smb.client.guestUsername", "cifs-documents-provider")
         }
 
         val context = BaseContext(PropertyConfiguration(property)).let {
             when {
                 anonymous -> it.withAnonymousCredentials() // Anonymous
+                user.isNullOrEmpty() -> it.withGuestCrendentials() // Guest if empty username
                 else -> it.withCredentials(NtlmPasswordAuthenticator(domain, user, password, null))
             }
         }
