@@ -69,7 +69,7 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
         viewModel.let {
             it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            it.connectionResult.collectIn(viewLifecycleOwner, observer = ::onConnect)
+            it.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
             it.initialize(args.cifsConnection)
         }
     }

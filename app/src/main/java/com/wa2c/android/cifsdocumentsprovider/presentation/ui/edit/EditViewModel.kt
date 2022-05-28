@@ -50,7 +50,8 @@ class EditViewModel @Inject constructor(
         CifsConnection.getContentUri(host, port, folder)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    private val _connectionResult = MutableStateFlow<ConnectionResult?>(null)
+    private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
+    val connectionResultNotify: SharedFlow<ConnectionResult?> = _connectionResult
     val connectionResult = channelFlow<ConnectionResult?> {
         launch { _connectionResult.collect { send(it) } }
         launch { domain.collect { send(null) } }
@@ -160,7 +161,7 @@ class EditViewModel @Inject constructor(
                     createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
                 }
             }.getOrNull().let {
-                _connectionResult.value = it ?: ConnectionResult.Failure()
+                _connectionResult.emit(it ?: ConnectionResult.Failure())
                 _isBusy.value = false
             }
         }
@@ -201,7 +202,7 @@ class EditViewModel @Inject constructor(
                     return@withContext rootResult
                 }
             }.getOrNull().let {
-                _connectionResult.value = it ?: ConnectionResult.Failure()
+                _connectionResult.emit(it ?: ConnectionResult.Failure())
                 _isBusy.value = false
             }
         }
@@ -218,8 +219,10 @@ class EditViewModel @Inject constructor(
      * Set folder result.
      */
     fun setFolderResult(path: String?) {
-        folder.value = path
-        _connectionResult.value = if (path != null) ConnectionResult.Success else ConnectionResult.Failure()
+        launch {
+            folder.value = path
+            _connectionResult.emit(if (path != null) ConnectionResult.Success else ConnectionResult.Failure())
+        }
     }
 
     /**
