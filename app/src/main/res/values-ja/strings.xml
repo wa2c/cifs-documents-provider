@@ -7,6 +7,7 @@
 
     <!-- Main Screen -->
     <string name="main_open_file">開く</string>
+    <string name="main_open_settings">設定</string>
     <string name="main_open_file_ng_message">接続情報を登録してください。</string>
     <string name="main_add_connection_a11y">追加</string>
 
@@ -67,6 +68,9 @@
     <string name="folder_set">フォルダ設定</string>
     <string name="folder_reload_button">リロード</string>
     <string name="folder_list_empty">サブフォルダはありません</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">設定</string>
 
     <!-- Send Screen -->
     <string name="send_title">ファイル転送</string>

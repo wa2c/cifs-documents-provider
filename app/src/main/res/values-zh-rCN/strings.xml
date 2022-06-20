@@ -7,6 +7,7 @@
 
     <!-- Main Screen -->
     <string name="main_open_file">打开</string>
+    <string name="main_open_settings">设置</string>
     <string name="main_add_connection_a11y">添加</string>
     <string name="main_open_file_ng_message">请先添加连接</string>
 
@@ -66,6 +67,9 @@
     <string name="folder_set">目录设置</string>
     <string name="folder_reload_button">重新加载</string>
     <string name="folder_list_empty">不存在子目录</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">设置</string>
 
     <!-- Send Screen -->
     <string name="send_title">发送文件</string>

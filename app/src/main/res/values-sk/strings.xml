@@ -7,6 +7,7 @@
 
     <!-- Main Screen -->
     <string name="main_open_file">Otvoriť</string>
+    <string name="main_open_settings">Nastavenie</string>
     <string name="main_open_file_ng_message">Pridajte pripojenie.</string>
     <string name="main_add_connection_a11y">Pridať</string>
 
@@ -67,6 +68,9 @@
     <string name="folder_set">Nastaviť priečinok</string>
     <string name="folder_reload_button">Obnoviť</string>
     <string name="folder_list_empty">Žiadne podpriečinky</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Nastavenie</string>
 
     <!-- Send Screen -->
     <string name="send_title">Prenos súborov</string>

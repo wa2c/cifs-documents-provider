@@ -58,6 +58,15 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /***
+     * Click settings button.
+     */
+    fun onClickOpenSettings() {
+        launch {
+            _navigationEvent.emit(MainNav.OpenSettings)
+        }
+    }
+
 
     /**
      * Move item.

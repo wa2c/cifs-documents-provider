@@ -6,7 +6,14 @@
         android:id="@+id/main_menu_open_file"
         android:icon="@drawable/ic_share"
         android:title="@string/main_open_file"
-        app:showAsAction="always"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/main_menu_open_settings"
+        android:icon="@drawable/ic_settings"
+        android:title="@string/main_open_settings"
+        app:showAsAction="ifRoom"
         />
 
 </menu>

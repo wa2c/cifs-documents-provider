@@ -73,7 +73,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
                 add(DocumentsContract.Root.COLUMN_FLAGS,
                     DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
-                            DocumentsContract.Root.FLAG_SUPPORTS_CREATE
+                            DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
+                            if (cifsRepository.useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
                 )
             }
         }

@@ -24,6 +24,9 @@
             app:exitAnim="@anim/slide_out_to_left"
             app:popEnterAnim="@anim/slide_in_from_left"
             app:popExitAnim="@anim/slide_out_to_right" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -87,6 +90,13 @@
     </fragment>
 
     <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings"
+        />
+
+    <fragment
         android:id="@+id/sendFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragment"
         android:label="SendFragment" >
@@ -94,5 +104,6 @@
             android:name="inputUris"
             app:argType="android.net.Uri[]" />
     </fragment>
+
 
 </navigation>

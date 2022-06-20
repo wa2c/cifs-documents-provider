@@ -22,9 +22,7 @@ class AppPreferences @Inject constructor(
 
     private val preferences: SharedPreferences = getPreferences(context)
 
-    /**
-     * CIFS settings
-     */
+    /** CIFS settings */
     var cifsSettings: List<CifsSetting>
         get() {
             return try {
@@ -42,9 +40,7 @@ class AppPreferences @Inject constructor(
             }
         }
 
-    /**
-     * Host sort type
-     */
+    /** Host sort type */
     var hostSortType: HostSortType
         get() {
             return HostSortType.findByValueOrDefault(preferences.getInt(PREFKEY_HOST_SORT_TYPE, -1))
@@ -53,9 +49,15 @@ class AppPreferences @Inject constructor(
             preferences.edit { putInt(PREFKEY_HOST_SORT_TYPE, value.intValue) }
         }
 
+    /** Use as local */
+    var useAsLocal: Boolean
+        get() = preferences.getBoolean(PREFKEY_USE_AS_LOCAL, false)
+        set(value) { preferences.edit { putBoolean(PREFKEY_USE_AS_LOCAL, value) } }
+
     companion object {
         private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"
         private const val PREFKEY_HOST_SORT_TYPE = "prefkey_host_sort_type"
+        private const val PREFKEY_USE_AS_LOCAL = "prefkey_use_as_local"
 
         fun getPreferences(context: Context): SharedPreferences {
             return context.getSharedPreferences("App", Context.MODE_PRIVATE)

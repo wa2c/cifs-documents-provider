@@ -39,6 +39,11 @@ class CifsRepository @Inject constructor(
     /** CIFS File cache */
     private val cifsFileCache = CifsFileCache()
 
+    /** Use as local */
+    var useAsLocal: Boolean
+        get() = appPreferences.useAsLocal
+        set(value) { appPreferences.useAsLocal = value }
+
     /**
      * True if directory URI
      */

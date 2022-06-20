@@ -119,6 +119,9 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             R.id.main_menu_open_file -> {
                 viewModel.onClickOpenFile()
             }
+            R.id.main_menu_open_settings -> {
+                viewModel.onClickOpenSettings()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -139,6 +142,9 @@ class MainFragment: Fragment(R.layout.fragment_main) {
                 } else {
                     toast(R.string.main_open_file_ng_message)
                 }
+            }
+            is MainNav.OpenSettings -> {
+                navigateSafe(MainFragmentDirections.actionMainFragmentToSettingsFragment())
             }
         }
     }
