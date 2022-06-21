@@ -1,11 +1,12 @@
 plugins {
-   id("com.android.application")
-   id("kotlin-android")
-   id("kotlin-kapt")
-   id("kotlin-parcelize")
-   id("kotlinx-serialization")
-   id("androidx.navigation.safeargs.kotlin")
-   id("dagger.hilt.android.plugin")
+    id("com.android.application")
+    id("kotlin-android")
+    id("kotlin-kapt")
+    id("kotlin-parcelize")
+    id("kotlinx-serialization")
+    id("androidx.navigation.safeargs.kotlin")
+    id("dagger.hilt.android.plugin")
+    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -82,6 +83,8 @@ dependencies {
     implementation(Deps.Data.networkTools)
     // Timber
     implementation(Deps.Util.timber)
+
+    implementation(Deps.Util.ossLicense)
 
     // Test
 

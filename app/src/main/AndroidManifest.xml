@@ -45,6 +45,13 @@
 
         </activity>
 
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
+            />
+        <activity
+            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
+         />
+
         <provider
             android:name=".presentation.provider.CifsDocumentsProvider"
             android:authorities="com.wa2c.android.cifsdocumentsprovider.documents"
