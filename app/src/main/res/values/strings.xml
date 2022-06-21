@@ -93,4 +93,9 @@
     <string name="notification_channel_name_send">Data Transfer</string>
     <string name="notification_title_send_completed">Completed</string>
 
+    <!-- Theme Enum -->
+    <string name="enum_theme_default">Default</string>
+    <string name="enum_theme_light">Light</string>
+    <string name="enum_theme_dark">Dark</string>
+
 </resources>

@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult

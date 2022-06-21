@@ -35,6 +35,18 @@
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
 
                 <TextView
+                    android:id="@+id/settings_theme_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:minHeight="64dp"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="8dp"
+                    android:text="テーマ"
+                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+
+                <TextView
                     android:id="@+id/settings_language_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -90,18 +102,6 @@
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
                     android:text="貢献者"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
-
-                <TextView
-                    android:id="@+id/settings_license_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:gravity="center_vertical"
-                    android:minHeight="64dp"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="8dp"
-                    android:text="ライセンス"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                 <TextView

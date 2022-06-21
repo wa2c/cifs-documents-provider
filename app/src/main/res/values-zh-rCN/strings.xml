@@ -92,4 +92,9 @@
     <string name="notification_channel_name_send">数据传输</string>
     <string name="notification_title_send_completed">成功</string>
     <string name="host_select_confirmation_message">输入所选数据以编辑表单。</string>
+
+    <!-- Theme Enum -->
+    <string name="enum_theme_default">デフォルト</string>
+    <string name="enum_theme_light">ライト</string>
+    <string name="enum_theme_dark">ダーク</string>
 </resources>

@@ -93,4 +93,9 @@
     <string name="notification_channel_name_send">Prenos súborov</string>
     <string name="notification_title_send_completed">Dokončené</string>
 
+    <!-- Theme Enum -->
+    <string name="enum_theme_default">Predvolené</string>
+    <string name="enum_theme_light">Svetlo</string>
+    <string name="enum_theme_dark">Tmavý</string>
+
 </resources>

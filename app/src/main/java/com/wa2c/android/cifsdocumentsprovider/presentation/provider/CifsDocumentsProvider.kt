@@ -6,7 +6,6 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.os.*
-import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import com.wa2c.android.cifsdocumentsprovider.AppModule
