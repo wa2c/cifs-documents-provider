@@ -71,6 +71,14 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">Nastavenie</string>
+    <string name="settings_section_set">Nastavenie</string>
+    <string name="settings_set_theme">Téma</string>
+    <string name="settings_set_language">Jazyk</string>
+    <string name="settings_set_use_as_local">Použite ako miestne úložisko\n(Vyžaduje sa reštart zariadenia)</string>
+    <string name="settings_section_info">Informácie</string>
+    <string name="settings_info_contributors">Prispievatelia</string>
+    <string name="settings_info_libraries">Knižnice</string>
+    <string name="settings_info_app">App</string>
 
     <!-- Send Screen -->
     <string name="send_title">Prenos súborov</string>

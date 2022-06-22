@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
-                    android:text="設定"
+                    android:text="@string/settings_section_set"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
 
                 <TextView
@@ -43,7 +43,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="テーマ"
+                    android:text="@string/settings_set_theme"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                 <TextView
@@ -55,7 +55,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="表示言語変更"
+                    android:text="@string/settings_set_language"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                 <CheckBox
@@ -70,7 +70,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="ローカルストレージとして利用\n (端末再起動が必要)"
+                    android:text="@string/settings_set_use_as_local"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
             </LinearLayout>
@@ -89,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
                     android:padding="8dp"
-                    android:text="情報"
+                    android:text="@string/settings_section_info"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Caption" />
 
                 <TextView
@@ -101,7 +101,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="貢献者"
+                    android:text="@string/settings_info_contributors"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                 <TextView
@@ -113,7 +113,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="ライブラリ情報"
+                    android:text="@string/settings_info_libraries"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
                 <TextView
@@ -125,7 +125,7 @@
                     android:minHeight="64dp"
                     android:paddingHorizontal="16dp"
                     android:paddingVertical="8dp"
-                    android:text="アプリ情報"
+                    android:text="@string/settings_info_app"
                     android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
 
             </LinearLayout>

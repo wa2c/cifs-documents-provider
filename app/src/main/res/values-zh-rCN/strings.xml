@@ -70,6 +70,14 @@
 
     <!-- Settings Screen -->
     <string name="settings_title">设置</string>
+    <string name="settings_section_set">设置</string>
+    <string name="settings_set_theme">主题</string>
+    <string name="settings_set_language">语言</string>
+    <string name="settings_set_use_as_local">用作本地存储\n(需要重启设备)</string>
+    <string name="settings_section_info">" 信息"</string>
+    <string name="settings_info_contributors">" 贡献者"</string>
+    <string name="settings_info_libraries">图书馆</string>
+    <string name="settings_info_app">应用程序</string>
 
     <!-- Send Screen -->
     <string name="send_title">发送文件</string>
