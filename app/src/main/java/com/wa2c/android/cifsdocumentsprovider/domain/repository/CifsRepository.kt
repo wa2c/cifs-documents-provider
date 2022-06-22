@@ -11,7 +11,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
@@ -26,6 +25,9 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * CIFS Repository
+ */
 @Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject constructor(
@@ -40,15 +42,9 @@ class CifsRepository @Inject constructor(
     /** CIFS File cache */
     private val cifsFileCache = CifsFileCache()
 
-    /** UI Theme */
-    var uiTheme: UiTheme
-        get() = UiTheme.findByKeyOrDefault(appPreferences.uiTheme)
-        set(value) { appPreferences.uiTheme = value.key }
-
     /** Use as local */
-    var useAsLocal: Boolean
+    val useAsLocal: Boolean
         get() = appPreferences.useAsLocal
-        set(value) { appPreferences.useAsLocal = value }
 
     /**
      * True if directory URI

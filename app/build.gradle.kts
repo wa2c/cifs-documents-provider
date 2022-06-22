@@ -83,7 +83,9 @@ dependencies {
     implementation(Deps.Data.networkTools)
     // Timber
     implementation(Deps.Util.timber)
-
+    // Localization
+    implementation(Deps.Util.localization)
+    // OSS License
     implementation(Deps.Util.ossLicense)
 
     // Test

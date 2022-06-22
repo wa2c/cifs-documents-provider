@@ -55,6 +55,11 @@ class AppPreferences @Inject constructor(
         get() = preferences.getString(PREFKEY_UI_THEME, null)
         set(value) { preferences.edit { putString(PREFKEY_UI_THEME, value) } }
 
+    /** Language */
+    var language: String?
+        get() = preferences.getString(PREFKEY_LANGUAGE, null)
+        set(value) { preferences.edit { putString(PREFKEY_LANGUAGE, value) } }
+
     /** Use as local */
     var useAsLocal: Boolean
         get() = preferences.getBoolean(PREFKEY_USE_AS_LOCAL, false)
@@ -65,6 +70,7 @@ class AppPreferences @Inject constructor(
         private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"
         private const val PREFKEY_HOST_SORT_TYPE = "prefkey_host_sort_type"
         private const val PREFKEY_UI_THEME = "prefkey_ui_theme"
+        private const val PREFKEY_LANGUAGE = "prefkey_language"
         private const val PREFKEY_USE_AS_LOCAL = "prefkey_use_as_local"
 
         fun getPreferences(context: Context): SharedPreferences {

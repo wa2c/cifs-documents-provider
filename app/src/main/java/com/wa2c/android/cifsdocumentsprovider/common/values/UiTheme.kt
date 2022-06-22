@@ -1,13 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
-interface A {
-
-}
-
 /**
  * UI theme
  */
-enum class UiTheme(val key: String): A {
+enum class UiTheme(
+    /** Key */
+    val key: String
+) {
     /** Default */
     DEFAULT("default"),
     /** Light */
@@ -16,6 +15,7 @@ enum class UiTheme(val key: String): A {
     DARK("dark"),
     ;
 
+    /** Index */
     val index: Int = this.ordinal
 
     companion object {

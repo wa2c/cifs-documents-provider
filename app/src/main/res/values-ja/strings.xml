@@ -94,8 +94,8 @@
     <string name="notification_title_send_completed">完了しました</string>
 
     <!-- Theme Enum -->
-    <string name="enum_theme_default">默认</string>
-    <string name="enum_theme_light">淺色主題</string>
-    <string name="enum_theme_dark">深色主題</string>
+    <string name="enum_theme_default">デフォルト</string>
+    <string name="enum_theme_light">ライト</string>
+    <string name="enum_theme_dark">ダーク</string>
 
 </resources>

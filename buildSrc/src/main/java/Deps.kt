@@ -45,6 +45,7 @@ object Deps {
 
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
+        const val localization = "com.akexorcist:localization:1.2.11"
         const val ossLicensePlugin = "com.google.android.gms:oss-licenses-plugin:0.10.5"
         const val ossLicense = "com.google.android.gms:play-services-oss-licenses:17.0.0"
     }

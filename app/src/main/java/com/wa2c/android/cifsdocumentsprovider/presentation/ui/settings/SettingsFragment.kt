@@ -13,12 +13,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSettingsBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 
 class SettingsFragment: Fragment(R.layout.fragment_settings) {
 
+    /** View Model */
+    private val mainViewModel by activityViewModels<MainViewModel>()
     /** View Model */
     private val viewModel by activityViewModels<SettingsViewModel>()
     /** Binding */
@@ -42,13 +46,15 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
             // Settings
             bind.settingsThemeText.setOnClickListener {
                 val title = bind.settingsThemeText.text.toString()
-                val themes = UiTheme.values().map { it.getLabel(requireContext()) }.toTypedArray()
+                val items = UiTheme.values().map { it.getLabel(requireContext()) }.toTypedArray()
                 val selected = viewModel.uiTheme.index
-                navigateSafe(SettingsFragmentDirections.actionSettingsFragmentToListDialog(DIALOG_KEY_THEME, title, themes, selected))
+                navigateSafe(SettingsFragmentDirections.actionSettingsFragmentToListDialog(DIALOG_KEY_THEME, title, items, selected))
             }
             bind.settingsLanguageText.setOnClickListener {
                 val title = bind.settingsThemeText.text.toString()
-
+                val items = Language.values().map { it.getLabel(requireContext()) }.toTypedArray()
+                val selected = viewModel.language.index
+                navigateSafe(SettingsFragmentDirections.actionSettingsFragmentToListDialog(DIALOG_KEY_LANGUAGE, title, items, selected))
             }
 
             // Information
@@ -69,6 +75,11 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
             viewModel.uiTheme = theme
             AppCompatDelegate.setDefaultNightMode(theme.mode)
         }
+        setFragmentResultListener(DIALOG_KEY_LANGUAGE) { _, result ->
+            val language = Language.findByIndexOrDefault(result.getInt(ListDialog.DIALOG_RESULT_INDEX, -1))
+            viewModel.language = language
+            mainViewModel.updateLanguage(language)
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -87,7 +98,7 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
 
     companion object {
         private const val DIALOG_KEY_THEME = "DIALOG_KEY_THEME"
+        private const val DIALOG_KEY_LANGUAGE = "DIALOG_KEY_LANGUAGE"
     }
-
 
 }

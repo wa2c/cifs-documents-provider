@@ -4,9 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
+import com.akexorcist.localizationactivity.ui.LocalizationActivity
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragmentArgs
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -15,14 +16,21 @@ import dagger.hilt.android.AndroidEntryPoint
  * Main Activity
  */
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(R.layout.activity_main) {
+class MainActivity : LocalizationActivity(R.layout.activity_main) {
 
     /** View Model */
     private val sendViewModel by viewModels<SendViewModel>()
+    /** Main View Model */
+    private val mainViewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         processIntent(intent)
+
+        mainViewModel.language.collectIn(this) {
+            setLanguage(it.code)
+        }
+        mainViewModel.updateLanguage() // Initialize Language
     }
 
     override fun onNewIntent(intent: Intent?) {

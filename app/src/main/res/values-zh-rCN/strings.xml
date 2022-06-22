@@ -94,7 +94,8 @@
     <string name="host_select_confirmation_message">输入所选数据以编辑表单。</string>
 
     <!-- Theme Enum -->
-    <string name="enum_theme_default">デフォルト</string>
-    <string name="enum_theme_light">ライト</string>
-    <string name="enum_theme_dark">ダーク</string>
+    <string name="enum_theme_default">默认</string>
+    <string name="enum_theme_light">淺色主題</string>
+    <string name="enum_theme_dark">深色主題</string>
+
 </resources>
