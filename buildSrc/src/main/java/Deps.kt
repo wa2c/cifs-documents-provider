@@ -9,7 +9,7 @@ object Deps {
         const val core = "androidx.core:core-ktx:1.8.0"
         const val appcompat = "androidx.appcompat:appcompat:1.4.2"
         const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        const val gradleTool = "com.android.tools.build:gradle:7.2.0"
+        const val gradleTool = "com.android.tools.build:gradle:7.2.1"
 
         private const val coroutineVersion = "1.6.0"
         const val coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutineVersion}"
