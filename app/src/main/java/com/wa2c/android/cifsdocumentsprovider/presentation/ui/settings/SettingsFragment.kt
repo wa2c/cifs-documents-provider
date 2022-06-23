@@ -51,7 +51,7 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
                 navigateSafe(SettingsFragmentDirections.actionSettingsFragmentToListDialog(DIALOG_KEY_THEME, title, items, selected))
             }
             bind.settingsLanguageText.setOnClickListener {
-                val title = bind.settingsThemeText.text.toString()
+                val title = bind.settingsLanguageText.text.toString()
                 val items = Language.values().map { it.getLabel(requireContext()) }.toTypedArray()
                 val selected = viewModel.language.index
                 navigateSafe(SettingsFragmentDirections.actionSettingsFragmentToListDialog(DIALOG_KEY_LANGUAGE, title, items, selected))

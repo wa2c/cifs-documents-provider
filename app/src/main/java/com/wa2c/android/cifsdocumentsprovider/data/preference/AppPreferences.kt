@@ -26,7 +26,9 @@ class AppPreferences @Inject constructor(
     var cifsSettings: List<CifsSetting>
         get() {
             return try {
-                Json.decodeFromString(preferences.getString(PREFKEY_CIFS_SETTINGS, "{}")!!)
+                preferences.getString(PREFKEY_CIFS_SETTINGS, null)?.let {
+                    Json.decodeFromString(it)
+                } ?: emptyList()
             } catch(e: Exception) {
                 logE(e)
                 emptyList()
