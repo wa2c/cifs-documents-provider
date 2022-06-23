@@ -20,8 +20,8 @@ android {
         applicationId = "com.wa2c.android.cifsdocumentsprovider"
         minSdk = Deps.minSdkVersion
         targetSdk = Deps.targetSdkVersion
-        versionCode = 12
-        versionName = "1.4.1"
+        versionCode = 13
+        versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
