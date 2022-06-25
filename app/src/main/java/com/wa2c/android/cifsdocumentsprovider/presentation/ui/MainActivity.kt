@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.akexorcist.localizationactivity.ui.LocalizationActivity
 import com.wa2c.android.cifsdocumentsprovider.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragmentArgs
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import dagger.hilt.android.AndroidEntryPoint

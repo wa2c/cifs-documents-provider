@@ -5,8 +5,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MainCoroutineScope
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.mapState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mapState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow

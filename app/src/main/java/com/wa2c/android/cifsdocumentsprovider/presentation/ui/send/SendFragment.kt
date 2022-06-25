@@ -17,9 +17,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSendBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * Send Screen
@@ -35,6 +37,9 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     private val adapter: SendListAdapter by lazy { SendListAdapter(viewModel) }
     /** Arguments */
     private val args: SendFragmentArgs by navArgs()
+
+    @Inject
+    lateinit var notification: SendNotification
 
     /** Single URI result launcher */
     private val singleUriLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
@@ -167,6 +172,15 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                     }
                     .setNeutralButton(R.string.dialog_close, null)
                     .show()
+            }
+            is SendNav.NotificationUpdateProgress -> {
+                notification.updateProgress(event.sendData, event.countCurrent, event.countAll)
+            }
+            is SendNav.NotificationComplete -> {
+                notification.complete()
+            }
+            is SendNav.NotificationCancel -> {
+                notification.cancel()
             }
         }
     }

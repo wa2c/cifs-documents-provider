@@ -18,6 +18,8 @@ object Deps {
         const val daggerHiltPlugin = "com.google.dagger:hilt-android-gradle-plugin:$daggerVersion"
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
         const val daggerHiltCompiler = "com.google.dagger:hilt-android-compiler:$daggerVersion"
+
+        const val documentFile = "androidx.documentfile:documentfile:1.0.1"
     }
 
     object Ui {

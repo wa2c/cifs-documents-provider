@@ -5,7 +5,6 @@ import android.net.Uri
 import android.text.format.DateUtils
 import android.text.format.Formatter
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.labelRes
 
 /**
  * Send Data
@@ -50,24 +49,24 @@ data class SendData(
         state = SendDataState.CANCEL
     }
 
-    companion object {
-
-        /**
-         * Summary Text
-         * ex. 10% [10MB/100MB] 1MB/s (1:00)
-         */
-        fun SendData.getSummaryText(context: Context): String {
-            return when (state) {
-                SendDataState.PROGRESS -> {
-                    val sendSize = " (${Formatter.formatShortFileSize(context, progressSize)}/${Formatter.formatShortFileSize(context, size)})"
-                    val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)})"
-                    "$progress% $sendSize $sendSpeed"
-                }
-                else -> {
-                    context.getString(state.labelRes)
-                }
-            }
-        }
-
-    }
+//    companion object {
+//
+//        /**
+//         * Summary Text
+//         * ex. 10% [10MB/100MB] 1MB/s (1:00)
+//         */
+//        fun SendData.getSummaryText(context: Context): String {
+//            return when (state) {
+//                SendDataState.PROGRESS -> {
+//                    val sendSize = " (${Formatter.formatShortFileSize(context, progressSize)}/${Formatter.formatShortFileSize(context, size)})"
+//                    val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)})"
+//                    "$progress% $sendSize $sendSpeed"
+//                }
+//                else -> {
+//                    context.getString(state.labelRes)
+//                }
+//            }
+//        }
+//
+//    }
 }

@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.databinding.LayoutSendItemBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData.Companion.getSummaryText
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
 
 /**
  * Send list adapter.

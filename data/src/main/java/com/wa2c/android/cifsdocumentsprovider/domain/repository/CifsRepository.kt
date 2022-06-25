@@ -11,7 +11,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
@@ -31,7 +30,7 @@ import javax.inject.Singleton
 @Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject constructor(
-    private val cifsClient: CifsClient,
+    private val cifsClient: com.wa2c.android.cifsdocumentsprovider.data.CifsClient,
     private val appPreferences: AppPreferences,
     private val storageManager: StorageManager
 ) {

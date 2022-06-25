@@ -27,6 +27,7 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentEditBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment

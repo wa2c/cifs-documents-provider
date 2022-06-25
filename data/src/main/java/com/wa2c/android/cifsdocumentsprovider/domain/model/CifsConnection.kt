@@ -3,8 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 import android.net.Uri
 import android.os.Parcelable
 import android.util.Base64
-import com.wa2c.android.cifsdocumentsprovider.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -160,7 +160,7 @@ private fun encrypt(originalString: String, secretKey: String): String {
 /**
  * Decrypt key.
  */
-private fun decrypt(encryptBytesBase64String: String, secretKey: String): String {
+private fun decrypt(encryptBytesBase64String: String?, secretKey: String): String {
     val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
     val secretKeyBytes = secretKey.toByteArray()
     val secretKeySpec = SecretKeySpec(secretKeyBytes, algorithm)

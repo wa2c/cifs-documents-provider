@@ -6,9 +6,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.NotificationRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -20,7 +19,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SendViewModel @Inject constructor(
     private val sendRepository: SendRepository,
-    private val notificationRepository: NotificationRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _navigationEvent = MutableSharedFlow<SendNav>()
@@ -61,7 +59,8 @@ class SendViewModel @Inject constructor(
                 val list = sendDataList.value.ifEmpty { return@collect }
                 val count = list.count { it.state.isFinished } + 1
                 val countAll = list.size
-                notificationRepository.updateProgress(data, count, countAll)
+                _navigationEvent.emit(SendNav.NotificationUpdateProgress(data, count, countAll))
+                //notificationRepository.updateProgress(data, count, countAll)
             }
         }
     }
@@ -106,7 +105,8 @@ class SendViewModel @Inject constructor(
                     logE(it)
                 }
             }
-            notificationRepository.complete()
+            _navigationEvent.emit(SendNav.NotificationComplete)
+            //notificationRepository.complete()
             sendJob = null
         }
     }
@@ -169,9 +169,10 @@ class SendViewModel @Inject constructor(
         _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
         runBlocking {
             sendJob?.cancel()
+            _navigationEvent.emit(SendNav.NotificationCancel)
         }
         _sendDataList.value = emptyList()
-        notificationRepository.cancel()
+        //notificationRepository.cancel()
     }
 
     override fun onCleared() {

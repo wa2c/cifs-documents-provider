@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.domain.repository
+package com.wa2c.android.cifsdocumentsprovider.presentation.notification
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -10,14 +10,15 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData.Companion.getSummaryText
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO create background behavior
 @Singleton
-class NotificationRepository @Inject constructor(
+class SendNotification @Inject constructor(
     @ApplicationContext private val context: Context,
     private val notificationManager: NotificationManager,
 ) {

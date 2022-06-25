@@ -25,8 +25,6 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "K", "\"com.wa2c.android\"")
-
         base.archivesName.set("CIFSDocumentsProvider-${versionName}")
     }
 
@@ -52,6 +50,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":presentation"))
+    implementation(project(":data"))
 
     implementation(Deps.App.daggerHilt)
     kapt(Deps.App.daggerHiltCompiler)

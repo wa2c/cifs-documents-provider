@@ -16,6 +16,9 @@ import com.wa2c.android.cifsdocumentsprovider.R
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentSettingsBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.*
 

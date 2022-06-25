@@ -1,9 +1,11 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
+package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 
 import android.content.Context
 import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.format.DateUtils
+import android.text.format.Formatter
 import android.text.style.StyleSpan
 import android.view.MenuItem
 import android.view.View
@@ -30,6 +32,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.wa2c.android.cifsdocumentsprovider.R
+import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.labelRes
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -181,4 +186,21 @@ fun MenuItem.startLoadingAnimation() {
 fun MenuItem.stopLoadingAnimation() {
     actionView?.animation?.cancel()
     actionView = null
+}
+
+/**
+ * Summary Text
+ * ex. 10% [10MB/100MB] 1MB/s (1:00)
+ */
+fun SendData.getSummaryText(context: Context): String {
+    return when (state) {
+        SendDataState.PROGRESS -> {
+            val sendSize = " (${Formatter.formatShortFileSize(context, progressSize)}/${Formatter.formatShortFileSize(context, size)})"
+            val sendSpeed = "${Formatter.formatShortFileSize(context, bps)}/s (${DateUtils.formatElapsedTime(elapsedTime / 1000)})"
+            "$progress% $sendSize $sendSpeed"
+        }
+        else -> {
+            context.getString(state.labelRes)
+        }
+    }
 }

@@ -18,10 +18,10 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.databinding.FragmentMainBinding
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.navigateSafe
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
