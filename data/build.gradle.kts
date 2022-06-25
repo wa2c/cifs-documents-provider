@@ -8,16 +8,16 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    compileSdk = Deps.compileSdkVersion
 
     defaultConfig {
-        minSdk = 26
-        targetSdk = 32
-
-        buildConfigField("String", "K", "\"com.wa2c.android\"")
+        minSdk = Deps.minSdkVersion
+        targetSdk = Deps.targetSdkVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "K", "\"com.wa2c.android\"")
     }
 
     buildTypes {

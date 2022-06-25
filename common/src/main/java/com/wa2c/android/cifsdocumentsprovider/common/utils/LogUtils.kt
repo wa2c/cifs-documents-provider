@@ -2,6 +2,16 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 
 import timber.log.Timber
 
+/**
+ * Initialize log
+ */
+fun initLog(isDebug: Boolean) {
+    // Set logger
+    if (isDebug) {
+        Timber.plant(Timber.DebugTree())
+    }
+}
+
 /** Output the verbose message */
 fun logV(obj: Any?, vararg args: Any?) = run {
     if (obj is Throwable) { Timber.asTree().v(obj) }

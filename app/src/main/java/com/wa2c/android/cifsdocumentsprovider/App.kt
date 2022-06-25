@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import com.akexorcist.localizationactivity.ui.LocalizationApplication
+import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.mode
 import dagger.hilt.android.HiltAndroidApp
-import timber.log.Timber
 import java.util.*
 import javax.inject.Inject
 
@@ -28,10 +28,7 @@ class App: LocalizationApplication() {
 
         migrate()
 
-        // Set logger
-        if (BuildConfig.DEBUG) {
-            Timber.plant(Timber.DebugTree())
-        }
+        initLog(BuildConfig.DEBUG)
     }
 
     /**
