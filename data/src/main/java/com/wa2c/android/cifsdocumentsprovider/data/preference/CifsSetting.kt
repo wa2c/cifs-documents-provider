@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * CIFS Connection
  */
 @Serializable
-data class CifsSetting(
+internal data class CifsSetting(
     val id: String,
     val name: String,
     val domain: String? = null,

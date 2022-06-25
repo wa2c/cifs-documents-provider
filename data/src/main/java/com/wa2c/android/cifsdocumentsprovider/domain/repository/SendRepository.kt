@@ -16,7 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SendRepository @Inject constructor(
+class SendRepository @Inject internal constructor(
     private val dataSender: com.wa2c.android.cifsdocumentsprovider.data.DataSender
 ) {
 

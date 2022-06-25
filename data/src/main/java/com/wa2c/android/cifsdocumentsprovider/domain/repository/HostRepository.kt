@@ -17,7 +17,7 @@ import javax.inject.Singleton
  * Host Repository
  */
 @Singleton
-class HostRepository @Inject constructor(
+class HostRepository @Inject internal constructor(
     private val preferences: AppPreferences
 ) {
     private val _hostFlow: MutableSharedFlow<HostData?> = MutableSharedFlow(0, 20, BufferOverflow.SUSPEND)

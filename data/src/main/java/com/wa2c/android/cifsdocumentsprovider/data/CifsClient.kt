@@ -16,7 +16,7 @@ import javax.inject.Singleton
  * CIFS Client
  */
 @Singleton
-class CifsClient @Inject constructor() {
+internal class CifsClient @Inject constructor() {
 
     /**
      * Get auth by user. Anonymous if user and password are empty.

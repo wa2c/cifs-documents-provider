@@ -100,7 +100,7 @@ data class CifsConnection(
 /**
  * Convert to data from model.
  */
-fun CifsConnection.toData(): CifsSetting {
+internal fun CifsConnection.toData(): CifsSetting {
     return CifsSetting(
         id = this.id,
         name = this.name,
@@ -120,7 +120,7 @@ fun CifsConnection.toData(): CifsSetting {
 /**
  * Convert model to data.
  */
-fun CifsSetting.toModel(): CifsConnection {
+internal fun CifsSetting.toModel(): CifsConnection {
     return CifsConnection(
         id = this.id,
         name = this.name,

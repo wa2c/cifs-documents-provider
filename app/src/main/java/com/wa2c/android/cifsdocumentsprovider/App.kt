@@ -2,10 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import com.akexorcist.localizationactivity.ui.LocalizationApplication
 import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.mode
 import dagger.hilt.android.HiltAndroidApp
@@ -26,21 +24,8 @@ class App: LocalizationApplication() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(repository.uiTheme.mode) // Set theme
 
-        migrate()
+        repository.migrate()
 
         initLog(BuildConfig.DEBUG)
-    }
-
-    /**
-     * Migrate
-     */
-    private fun migrate() {
-        val prefs = AppPreferences.getPreferences(this)
-
-        // Delete obsoleted settings
-        if (prefs.contains("prefkey_cifs_settings_temporal")) {
-            prefs.edit { remove("prefkey_cifs_settings_temporal") }
-        }
-
     }
 }

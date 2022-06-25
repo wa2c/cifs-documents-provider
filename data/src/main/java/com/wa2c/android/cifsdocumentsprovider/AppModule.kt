@@ -3,6 +3,9 @@ package com.wa2c.android.cifsdocumentsprovider
 import android.app.NotificationManager
 import android.content.Context
 import android.os.storage.StorageManager
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +15,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+internal object AppModule {
 
     /** Storage Manager */
     @Singleton
@@ -32,4 +35,12 @@ object AppModule {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
+}
+
+fun createCifsRepository(context: Context): CifsRepository {
+    return CifsRepository(
+        CifsClient(),
+        AppPreferences(context),
+        AppModule.provideStorageManager(context)
+    )
 }

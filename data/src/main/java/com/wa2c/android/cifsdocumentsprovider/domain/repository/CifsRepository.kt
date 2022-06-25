@@ -11,10 +11,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.data.CifsContextCache
+import com.wa2c.android.cifsdocumentsprovider.data.CifsFileCache
+import com.wa2c.android.cifsdocumentsprovider.data.SmbFileCache
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
-import com.wa2c.android.cifsdocumentsprovider.domain.model.*
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.toData
+import com.wa2c.android.cifsdocumentsprovider.domain.model.toModel
 import jcifs.CIFSContext
 import jcifs.smb.NtStatus
 import jcifs.smb.SmbException
@@ -29,7 +35,7 @@ import javax.inject.Singleton
  */
 @Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
-class CifsRepository @Inject constructor(
+class CifsRepository @Inject internal constructor(
     private val cifsClient: com.wa2c.android.cifsdocumentsprovider.data.CifsClient,
     private val appPreferences: AppPreferences,
     private val storageManager: StorageManager

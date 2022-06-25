@@ -31,7 +31,7 @@ import java.io.IOException
 /**
  * CIFS Proxy File Callback (by BufferedReader / BufferedWriter)
  */
-class CifsProxyFileCallback(
+internal class CifsProxyFileCallback(
     private val smbFile: SmbFile,
     private val mode: AccessMode
 ) : ProxyFileDescriptorCallback() {

@@ -1,9 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
-import android.content.Context
 import android.net.Uri
-import android.text.format.DateUtils
-import android.text.format.Formatter
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 
 /**

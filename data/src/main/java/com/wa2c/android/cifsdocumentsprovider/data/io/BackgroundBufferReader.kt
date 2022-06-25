@@ -34,7 +34,7 @@ import kotlin.math.min
 /**
  * BackgroundBufferReader
  */
-class BackgroundBufferReader (
+internal class BackgroundBufferReader (
     /** Whole data Size */
     private val streamSize: Long,
     /** Buffer unit size */

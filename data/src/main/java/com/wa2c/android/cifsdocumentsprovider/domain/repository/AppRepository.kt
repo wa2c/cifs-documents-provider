@@ -11,7 +11,7 @@ import javax.inject.Singleton
  * App Repository
  */
 @Singleton
-class AppRepository @Inject constructor(
+class AppRepository @Inject internal constructor(
     private val appPreferences: AppPreferences
 ) {
 
@@ -29,5 +29,12 @@ class AppRepository @Inject constructor(
     var useAsLocal: Boolean
         get() = appPreferences.useAsLocal
         set(value) { appPreferences.useAsLocal = value }
+
+    /**
+     * Migrate
+     */
+    fun migrate() {
+        appPreferences.migrate()
+    }
 
 }

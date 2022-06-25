@@ -33,7 +33,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * CIFS Proxy File Callback (by SmbRandomAccessFile)
  */
-class CifsProxyFileCallbackSafe(
+internal class CifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,
     private val mode: AccessMode
 ) : ProxyFileDescriptorCallback(), CoroutineScope {

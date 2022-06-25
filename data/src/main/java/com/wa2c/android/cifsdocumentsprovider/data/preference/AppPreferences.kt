@@ -16,7 +16,7 @@ import javax.inject.Singleton
  * Preference repository
  */
 @Singleton
-class AppPreferences @Inject constructor(
+internal class AppPreferences @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
@@ -67,6 +67,16 @@ class AppPreferences @Inject constructor(
         get() = preferences.getBoolean(PREFKEY_USE_AS_LOCAL, false)
         set(value) { preferences.edit { putBoolean(PREFKEY_USE_AS_LOCAL, value) } }
 
+
+    /**
+     * Migrate
+     */
+    fun migrate() {
+        // Delete obsoleted settings
+        if (preferences.contains("prefkey_cifs_settings_temporal")) {
+            preferences.edit { remove("prefkey_cifs_settings_temporal") }
+        }
+    }
 
     companion object {
         private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"

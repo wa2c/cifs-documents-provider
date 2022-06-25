@@ -10,7 +10,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class DataSender @Inject constructor(
+internal class DataSender @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     /**

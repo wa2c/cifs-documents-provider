@@ -10,8 +10,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.MenuRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.common.values.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.R
 
 
 /** ConnectionResult icon resource ID */

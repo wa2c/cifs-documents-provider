@@ -8,14 +8,12 @@ import android.graphics.Point
 import android.os.*
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
-import com.wa2c.android.cifsdocumentsprovider.AppModule
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
@@ -33,13 +31,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val providerContext: Context by lazy { context!! }
 
     /** Cifs Repository */
-    private val cifsRepository: CifsRepository by lazy {
-        CifsRepository(
-            CifsClient(),
-            AppPreferences(providerContext),
-            AppModule.provideStorageManager(providerContext)
-        )
-    }
+    private val cifsRepository: CifsRepository by lazy { createCifsRepository(providerContext) }
 
     /** File handler */
     private val fileHandler: Handler = HandlerThread(this.javaClass.simpleName)
