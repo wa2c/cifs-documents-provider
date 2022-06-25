@@ -1,2 +1,5 @@
 include ':app'
 rootProject.name = "CIFS Documents Provider"
+include ':common'
+include ':data'
+include ':presentation'
