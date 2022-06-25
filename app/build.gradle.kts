@@ -50,6 +50,13 @@ android {
 }
 
 dependencies {
+    implementation(project(":common"))
+    implementation(project(":presentation"))
+
+    implementation(Deps.App.daggerHilt)
+    kapt(Deps.App.daggerHiltCompiler)
+
+
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
 
     // App

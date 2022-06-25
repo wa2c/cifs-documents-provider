@@ -5,6 +5,7 @@ import android.net.Uri
 import android.text.format.DateUtils
 import android.text.format.Formatter
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.labelRes
 
 /**
  * Send Data

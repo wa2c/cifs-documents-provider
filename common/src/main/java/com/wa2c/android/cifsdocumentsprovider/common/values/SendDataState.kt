@@ -1,26 +1,21 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
-import androidx.annotation.StringRes
-import com.wa2c.android.cifsdocumentsprovider.R
-
 /**
  * Send data state.
  */
-enum class SendDataState(
-    @StringRes val labelRes: Int
-) {
+enum class SendDataState {
     /** In ready */
-    READY(R.string.send_state_ready),
+    READY,
     /** In overwriting */
-    OVERWRITE(R.string.send_state_overwrite),
+    OVERWRITE,
     /** In progress */
-    PROGRESS(R.string.send_state_cancel),
+    PROGRESS,
     /** Succeeded */
-    SUCCESS(R.string.send_state_success),
+    SUCCESS,
     /** Failed */
-    FAILURE(R.string.send_state_failure),
+    FAILURE,
     /** Canceled */
-    CANCEL(R.string.send_state_cancel),
+    CANCEL,
     ;
 
     val isReady: Boolean

@@ -77,10 +77,10 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         // Sort
-        menu.findItem(viewModel.sortType.menuId)?.let {
+        menu.findItem(viewModel.sortType.menuRes)?.let {
             it.isChecked = true
         } ?: let {
-            menu.findItem(HostSortType.DEFAULT.menuId).isChecked = true
+            menu.findItem(HostSortType.DEFAULT.menuRes).isChecked = true
         }
 
         // Reload
@@ -117,7 +117,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
      * Select sort
      */
     private fun selectSort(item: MenuItem) {
-        val sortType = HostSortType.values().firstOrNull { it.menuId == item.itemId } ?: return
+        val sortType = HostSortType.values().firstOrNull { it.menuRes == item.itemId } ?: return
         viewModel.onClickSort(sortType)
         adapter.sort()
         item.isChecked = true

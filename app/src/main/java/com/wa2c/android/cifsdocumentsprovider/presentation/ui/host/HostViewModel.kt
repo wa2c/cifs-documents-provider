@@ -1,11 +1,11 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.common.utils.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.HostRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*

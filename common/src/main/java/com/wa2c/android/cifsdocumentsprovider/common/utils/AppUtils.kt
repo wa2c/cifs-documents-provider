@@ -2,11 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 
 import android.net.Uri
 import android.webkit.MimeTypeMap
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
-
 
 /**
  * Renew collection elements.
@@ -24,16 +19,6 @@ fun <K, V, T : MutableMap<K, V>> T.renew(m: Map<K, V>): T {
     this.clear()
     this.putAll(m)
     return this
-}
-
-/**
- * Main Coroutine Scope
- */
-class MainCoroutineScope: CoroutineScope {
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
 }
 
 /**

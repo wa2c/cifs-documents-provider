@@ -1,6 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
 import android.content.Context
+import android.graphics.Typeface
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.StyleSpan
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +12,8 @@ import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.Toast
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
@@ -24,9 +30,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import com.wa2c.android.cifsdocumentsprovider.R
+
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -52,6 +62,17 @@ fun <T : ViewDataBinding> Fragment.viewBinding(): ReadOnlyProperty<Fragment, T?>
         }
     }
 }
+
+/**
+ * Main Coroutine Scope
+ */
+class MainCoroutineScope: CoroutineScope {
+    private val job = Job()
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+}
+
 
 /**
  * Collect flow
