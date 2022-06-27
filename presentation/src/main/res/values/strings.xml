@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CIFS Documents Provider</string>
     <string name="app_summary">Access the shared folder.</string>
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">Close</string>

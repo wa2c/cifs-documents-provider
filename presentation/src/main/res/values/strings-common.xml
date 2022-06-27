@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="MissingTranslation">
 
+    <string name="app_name">CIFS Documents Provider</string>
+
     <string name="enum_language_en">English</string>
     <string name="enum_language_ja">日本語</string>
     <string name="enum_language_sk">Slovenský</string>

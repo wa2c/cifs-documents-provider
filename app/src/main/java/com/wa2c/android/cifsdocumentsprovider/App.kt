@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.akexorcist.localizationactivity.ui.LocalizationApplication
 import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.mode
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import dagger.hilt.android.HiltAndroidApp
 import java.util.*
 import javax.inject.Inject

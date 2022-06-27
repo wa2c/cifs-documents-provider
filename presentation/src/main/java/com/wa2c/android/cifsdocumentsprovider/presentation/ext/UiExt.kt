@@ -28,7 +28,6 @@ import androidx.navigation.fragment.findNavController
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.labelRes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

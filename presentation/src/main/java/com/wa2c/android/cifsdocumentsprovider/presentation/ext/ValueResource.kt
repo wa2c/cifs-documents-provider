@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
+package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 
 import android.content.Context
 import android.graphics.Typeface
