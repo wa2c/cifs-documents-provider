@@ -28,9 +28,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.colorRes
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.iconRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint

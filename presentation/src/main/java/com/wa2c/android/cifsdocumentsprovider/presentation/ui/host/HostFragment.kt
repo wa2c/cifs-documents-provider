@@ -21,7 +21,6 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentHostBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.menuRes
 import dagger.hilt.android.AndroidEntryPoint
 
 /**

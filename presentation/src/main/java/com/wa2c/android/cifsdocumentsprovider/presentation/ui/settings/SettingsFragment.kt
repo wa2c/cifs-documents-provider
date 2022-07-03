@@ -16,13 +16,9 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentSettingsBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 
 class SettingsFragment: Fragment(R.layout.fragment_settings) {
 

@@ -9,8 +9,12 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -45,25 +49,11 @@ class SendViewModel @Inject constructor(
         }
     }.shareIn(this, SharingStarted.Eagerly, 0)
 
-    private val _updateIndex = MutableSharedFlow<Int>(extraBufferCapacity = 20)
+    private val _updateIndex = MutableSharedFlow<Int>(onBufferOverflow = BufferOverflow.SUSPEND)
     val updateIndex: Flow<Int> = _updateIndex
 
     /** Send job */
     private var sendJob: Job? = null
-
-    init {
-        // Notification update
-        launch {
-            sendData.collect { data ->
-                data ?: return@collect
-                val list = sendDataList.value.ifEmpty { return@collect }
-                val count = list.count { it.state.isFinished } + 1
-                val countAll = list.size
-                _navigationEvent.emit(SendNav.NotificationUpdateProgress(data, count, countAll))
-                //notificationRepository.updateProgress(data, count, countAll)
-            }
-        }
-    }
 
     /**
      * Send URI
@@ -105,8 +95,6 @@ class SendViewModel @Inject constructor(
                     logE(it)
                 }
             }
-            _navigationEvent.emit(SendNav.NotificationComplete)
-            //notificationRepository.complete()
             sendJob = null
         }
     }
@@ -114,11 +102,21 @@ class SendViewModel @Inject constructor(
     /**
      * Update data state
      */
-    private fun updateState(index: Int, state: SendDataState) {
+    private suspend fun updateState(index: Int, state: SendDataState) {
         _sendDataList.value.getOrNull(index)?.let {
             it.state = state
-            _updateIndex.tryEmit(index)
+            _updateIndex.emit(index)
         }
+    }
+
+    /**
+     * Cancel all
+     */
+    private fun cancelAll() {
+        _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
+        _sendDataList.value = _sendDataList.value // reload
+        sendJob?.cancel()
+        sendJob = null
     }
 
     /**
@@ -126,62 +124,61 @@ class SendViewModel @Inject constructor(
      */
     fun updateToReady(dataSet: Set<SendData>) {
         logD("onClickCancel")
-        dataSet.forEachIndexed { index, sendData ->
-            sendData.state = SendDataState.READY
-            _updateIndex.tryEmit(index)
+        launch {
+            dataSet.forEachIndexed { index, sendData ->
+                sendData.state = SendDataState.READY
+                _updateIndex.emit(index)
+            }
+            startSendJob()
         }
-        startSendJob()
     }
 
     fun onClickCancel(index: Int) {
         logD("onClickCancel")
-        updateState(index, SendDataState.CANCEL)
-        startSendJob()
+        launch {
+            updateState(index, SendDataState.CANCEL)
+            startSendJob()
+        }
     }
 
     fun onClickRetry(index: Int) {
         logD("onClickCancel")
-        updateState(index, SendDataState.READY)
-        startSendJob()
+        launch {
+            updateState(index, SendDataState.READY)
+            startSendJob()
+        }
     }
 
     fun onClickRemove(index: Int) {
         logD("onClickCancel")
-        _sendDataList.value.toMutableList().let {
-            it.removeAt(index)
-            _sendDataList.value = it // reload
+        launch {
+            _sendDataList.value.toMutableList().let {
+                val sendData = it.getOrNull(index) ?: return@let
+                if (sendData.state.isCancelable) sendData.cancel()
+                it.remove(sendData)
+                _sendDataList.value = it // reload
+            }
         }
     }
 
     fun onClickCancelAll() {
         logD("onClickCancelAll")
-        _sendDataList.value.filter { it.state.isCancelable }.forEachIndexed { index, sendData ->
-            sendData.cancel()
-            _updateIndex.tryEmit(index)
+        launch {
+            cancelAll()
         }
-    }
-
-    /**
-     * Finish
-     */
-    private fun finishSending() {
-        logD("finishSending")
-        _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
-        runBlocking {
-            sendJob?.cancel()
-            _navigationEvent.emit(SendNav.NotificationCancel)
-        }
-        _sendDataList.value = emptyList()
-        //notificationRepository.cancel()
     }
 
     override fun onCleared() {
-        finishSending()
+        logD("onCleared")
+        cancelAll()
+        _sendDataList.value = emptyList()
         super.onCleared()
     }
 
     companion object {
         private const val NOTIFY_CYCLE = 500
     }
+
+
 
 }

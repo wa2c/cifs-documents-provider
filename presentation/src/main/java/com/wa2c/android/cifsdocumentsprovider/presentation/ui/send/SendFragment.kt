@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -21,7 +22,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 /**
  * Send Screen
@@ -38,8 +38,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     /** Arguments */
     private val args: SendFragmentArgs by navArgs()
 
-    @Inject
-    lateinit var notification: SendNotification
+    private val notification: SendNotification by lazy { SendNotification(requireActivity()) }
 
     /** Single URI result launcher */
     private val singleUriLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
@@ -101,8 +100,15 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                 adapter.submitList(list)
                 updateCancelButton()
             }
-            vm.sendData.collectIn(viewLifecycleOwner) { data ->
-                val index = vm.sendDataList.value.indexOfLast { it == data }
+            vm.sendData.collectIn(viewLifecycleOwner, state = Lifecycle.State.CREATED) { data ->
+                if (data == null) return@collectIn
+                val list = vm.sendDataList.value
+
+                val countIncomplete = list.count { it.state.isFinished || it.state.inProgress }
+                val countAll = countIncomplete + list.count { it.state.isReady }
+                notification.updateProgress(data, countIncomplete, countAll)
+
+                val index = list.indexOfLast { it == data }
                 if (index < 0) return@collectIn
                 adapter.notifyItemChanged(index)
                 updateCancelButton()
@@ -114,6 +120,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             }
         }
 
+        // NOTE: Required activity context for file URI access. (SecurityException occurred if not)
         val uris = args.inputUris
         when {
             uris.size == 1 -> {
@@ -144,6 +151,10 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         return super.onOptionsItemSelected(item)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
     /**
      * Confirm closing.
      */
@@ -172,15 +183,6 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                     }
                     .setNeutralButton(R.string.dialog_close, null)
                     .show()
-            }
-            is SendNav.NotificationUpdateProgress -> {
-                notification.updateProgress(event.sendData, event.countCurrent, event.countAll)
-            }
-            is SendNav.NotificationComplete -> {
-                notification.complete()
-            }
-            is SendNav.NotificationCancel -> {
-                notification.cancel()
             }
         }
     }
