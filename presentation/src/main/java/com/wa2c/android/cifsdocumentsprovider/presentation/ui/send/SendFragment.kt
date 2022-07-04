@@ -113,9 +113,8 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                 adapter.notifyItemChanged(index)
                 updateCancelButton()
             }
-            vm.updateIndex.collectIn(viewLifecycleOwner) { index ->
-                if (index < 0) return@collectIn
-                adapter.notifyItemChanged(index)
+            vm.updateIndex.collectIn(viewLifecycleOwner) { indexRange ->
+                adapter.notifyItemRangeChanged(indexRange.first, indexRange.count())
                 updateCancelButton()
             }
         }

@@ -49,8 +49,8 @@ class SendViewModel @Inject constructor(
         }
     }.shareIn(this, SharingStarted.Eagerly, 0)
 
-    private val _updateIndex = MutableSharedFlow<Int>(onBufferOverflow = BufferOverflow.SUSPEND)
-    val updateIndex: Flow<Int> = _updateIndex
+    private val _updateIndex = MutableSharedFlow<IntRange>(onBufferOverflow = BufferOverflow.SUSPEND)
+    val updateIndex: Flow<IntRange> = _updateIndex
 
     /** Send job */
     private var sendJob: Job? = null
@@ -80,7 +80,6 @@ class SendViewModel @Inject constructor(
     private fun startSendJob() {
         logD("startSendJob")
         if (sendJob != null && sendJob?.isActive == true) return
-        _sendDataList.value = sendDataList.value // reset state
 
         sendJob = launch {
             while (isActive) {
@@ -100,12 +99,19 @@ class SendViewModel @Inject constructor(
     }
 
     /**
+     * Update data by index
+     */
+    private suspend fun updateIndex(first: Int, endInclusive: Int = first) {
+        _updateIndex.emit(first..endInclusive)
+    }
+
+    /**
      * Update data state
      */
     private suspend fun updateState(index: Int, state: SendDataState) {
         _sendDataList.value.getOrNull(index)?.let {
             it.state = state
-            _updateIndex.emit(index)
+            updateIndex(index)
         }
     }
 
@@ -113,10 +119,13 @@ class SendViewModel @Inject constructor(
      * Cancel all
      */
     private fun cancelAll() {
-        _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
-        _sendDataList.value = _sendDataList.value // reload
-        sendJob?.cancel()
-        sendJob = null
+        logD("cancelAll")
+        launch {
+            _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
+            updateIndex(0, _sendDataList.value.size - 1)
+            sendJob?.cancel()
+            sendJob = null
+        }
     }
 
     /**
@@ -127,7 +136,7 @@ class SendViewModel @Inject constructor(
         launch {
             dataSet.forEachIndexed { index, sendData ->
                 sendData.state = SendDataState.READY
-                _updateIndex.emit(index)
+                updateIndex(index)
             }
             startSendJob()
         }
