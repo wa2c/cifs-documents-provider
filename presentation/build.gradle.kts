@@ -68,6 +68,9 @@ dependencies {
 
     // Util
 
+    // Paging
+    implementation(Deps.Data.pagingKtx)
+
     // Localization
     implementation(Deps.Util.localization)
     // OSS License

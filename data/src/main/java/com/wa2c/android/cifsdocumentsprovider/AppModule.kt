@@ -4,6 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.storage.StorageManager
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
@@ -35,12 +36,25 @@ internal object AppModule {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
+    /** AppDatabase */
+    @Singleton
+    @Provides
+    fun provideDatabase(
+        @ApplicationContext context: Context
+    ) = AppDatabase.buildDb(context)
+
+    /** StorageSettingDao */
+    @Singleton
+    @Provides
+    fun provideDao(db: AppDatabase) = db.getStorageSettingDao()
+
 }
 
 fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
         CifsClient(),
         AppPreferences(context),
+        AppModule.provideDatabase(context).getStorageSettingDao(),
         AppModule.provideStorageManager(context)
     )
 }

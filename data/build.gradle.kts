@@ -18,6 +18,12 @@ android {
         consumerProguardFiles("consumer-rules.pro")
 
         buildConfigField("String", "K", "\"com.wa2c.android\"")
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
+        }
     }
 
     buildTypes {
@@ -52,12 +58,21 @@ dependencies {
 
     // Data
 
+    // Room
+    kapt(Deps.Data.roomCompiler)
+    implementation(Deps.Data.roomKtx)
+    implementation(Deps.Data.roomPaging)
     // Json
     implementation(Deps.Data.kotlinxSerializationJson)
     // jCIFS-ng
     implementation(Deps.Data.jcifsNg)
     // Android Network Tools
     implementation(Deps.Data.networkTools)
+
+    // Util
+
+    // Paging
+    implementation(Deps.Data.pagingKtx)
 
     // Test
 

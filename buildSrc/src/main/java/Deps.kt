@@ -39,6 +39,13 @@ object Deps {
     }
 
     object Data {
+        private const val roomVersion = "2.4.2"
+        const val roomCompiler = "androidx.room:room-compiler:$roomVersion"
+        const val roomKtx = "androidx.room:room-ktx:$roomVersion"
+        const val roomPaging = "androidx.room:room-paging:$roomVersion"
+        private const val pagingVersion = "3.1.1"
+        const val pagingKtx = "androidx.paging:paging-runtime-ktx:$pagingVersion"
+
         const val kotlinxSerialization = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3"
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.7"

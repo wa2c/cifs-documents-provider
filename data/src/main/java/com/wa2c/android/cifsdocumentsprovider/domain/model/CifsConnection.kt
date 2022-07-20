@@ -8,7 +8,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.io.Serializable
+import kotlinx.serialization.Serializable
 import java.nio.file.Paths
 import java.util.*
 import javax.crypto.Cipher
@@ -18,6 +18,7 @@ import javax.crypto.spec.SecretKeySpec
  * CIFS Connection
  */
 @Parcelize
+@Serializable
 data class CifsConnection(
     val id: String,
     val name: String,
@@ -31,7 +32,7 @@ data class CifsConnection(
     val anonymous: Boolean,
     val extension: Boolean,
     val safeTransfer: Boolean,
-): Parcelable, Serializable {
+): Parcelable, java.io.Serializable {
 
     /** True if new item. */
     @IgnoredOnParcel
