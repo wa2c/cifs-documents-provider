@@ -1,15 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
 import androidx.lifecycle.ViewModel
+import androidx.paging.PagingData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,13 +23,7 @@ class MainViewModel @Inject constructor(
 
     private val _navigationEvent = MutableSharedFlow<MainNav>()
     val navigationEvent: SharedFlow<MainNav> = _navigationEvent
-
-    private val _cifsConnection: MutableStateFlow<List<CifsConnection>> = MutableStateFlow(emptyList())
-    val cifsConnections: StateFlow<List<CifsConnection>> = _cifsConnection
-
-    fun initialize() {
-        _cifsConnection.value = cifsRepository.loadConnection()
-    }
+    val connectionFlow: Flow<PagingData<CifsConnection>> = cifsRepository.connectionFlow
 
     /**
      * Click item.
@@ -54,7 +48,7 @@ class MainViewModel @Inject constructor(
      */
     fun onClickOpenFile() {
         launch {
-            _navigationEvent.emit(MainNav.OpenFile(cifsRepository.loadConnection().isNotEmpty()))
+            _navigationEvent.emit(MainNav.OpenFile(cifsRepository.isExists()))
         }
     }
 
@@ -67,13 +61,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-
     /**
      * Move item.
      */
     fun onItemMove(fromPosition: Int, toPosition: Int) {
-        cifsRepository.moveConnection(fromPosition, toPosition)
-        _cifsConnection.value = cifsRepository.loadConnection()
+        launch {
+            cifsRepository.moveConnection(fromPosition, toPosition)
+        }
     }
 
 }

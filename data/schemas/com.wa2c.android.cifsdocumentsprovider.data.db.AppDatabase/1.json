@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "4b1966b26576cba860c7c8b13d695f60",
+    "identityHash": "13e876ad6de42cfdcf3472b14fb65b84",
     "entities": [
       {
         "tableName": "connection_setting",
@@ -57,14 +57,25 @@
           ],
           "autoGenerate": false
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_connection_setting_uri_sort_order",
+            "unique": false,
+            "columnNames": [
+              "uri",
+              "sort_order"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_connection_setting_uri_sort_order` ON `${TABLE_NAME}` (`uri`, `sort_order`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b1966b26576cba860c7c8b13d695f60')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '13e876ad6de42cfdcf3472b14fb65b84')"
     ]
   }
 }

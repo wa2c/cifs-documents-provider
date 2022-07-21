@@ -5,28 +5,37 @@ import android.os.Handler
 import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.webkit.MimeTypeMap
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.CifsContextCache
 import com.wa2c.android.cifsdocumentsprovider.data.CifsFileCache
 import com.wa2c.android.cifsdocumentsprovider.data.SmbFileCache
+import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
+import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toModel
+import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
 import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.domain.model.toData
-import com.wa2c.android.cifsdocumentsprovider.domain.model.toModel
 import jcifs.CIFSContext
 import jcifs.smb.NtStatus
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,9 +45,10 @@ import javax.inject.Singleton
 @Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject internal constructor(
-    private val cifsClient: com.wa2c.android.cifsdocumentsprovider.data.CifsClient,
+    private val cifsClient: CifsClient,
     private val appPreferences: AppPreferences,
-    private val storageManager: StorageManager
+    private val connectionSettingDao: ConnectionSettingDao,
+    private val storageManager: StorageManager,
 ) {
     /** CIFS Context cache */
     private val contextCache = CifsContextCache()
@@ -58,6 +68,21 @@ class CifsRepository @Inject internal constructor(
         get() = this.endsWith('/')
 
     /**
+     * Connection flow
+     */
+    val connectionFlow: Flow<PagingData<CifsConnection>> = Pager(
+        PagingConfig(pageSize = Int.MAX_VALUE, initialLoadSize = Int.MAX_VALUE)
+    ) {
+        connectionSettingDao.getPagingSource()
+    }.flow.map { pagingData ->
+        pagingData.map { it.toModel() }
+    }
+
+    suspend fun isExists(): Boolean {
+        return connectionSettingDao.getCount() > 0
+    }
+
+    /**
      * Get CIFS Context
      */
     private suspend fun getCifsContext(connection: CifsConnection, forced: Boolean): CIFSContext {
@@ -71,52 +96,54 @@ class CifsRepository @Inject internal constructor(
     }
 
     /**
-     * Load connection
+     * Get connection
      */
-    fun loadConnection(): List<CifsConnection>  {
-        return appPreferences.cifsSettings.map { data -> data.toModel() }
+    suspend fun loadConnection(): List<CifsConnection>  {
+        return withContext(Dispatchers.IO) {
+            connectionSettingDao.getList().map { it.toModel() }
+        }
     }
 
     /**
      * Save connection
      */
-    fun saveConnection(connection: CifsConnection) {
-        val connections = loadConnection().toMutableList()
-        connections.indexOfFirst { it.id == connection.id }.let { index ->
-            if (index >= 0) {
-                connections[index] = connection
-            } else {
-                connections.add(connection)
+    suspend fun saveConnection(connection: CifsConnection) {
+        withContext(Dispatchers.IO) {
+            val existsEntity = connectionSettingDao.getEntity(connection.id)
+            val entity = existsEntity?.let {
+                connection.toEntity(sortOrder = it.sortOrder, modifiedDate = Date())
+            } ?: let {
+                val maxSortOrder = connectionSettingDao.getMaxSortOrder()
+                connection.toEntity(sortOrder = maxSortOrder + 1, modifiedDate = Date())
             }
+            connectionSettingDao.insert(entity)
         }
-        appPreferences.cifsSettings = connections.map { it.toData() }
     }
 
     /**
      * Get connection from URI
      */
-    private fun getConnection(uriText: String): CifsConnection? {
-        return loadConnection().firstOrNull { uriText.indexOf(it.folderSmbUri) == 0 }
+    private suspend fun getConnection(uriText: String): CifsConnection? {
+        return withContext(Dispatchers.IO) {
+            connectionSettingDao.getEntityByUri(uriText)?.toModel()
+        }
     }
 
     /**
      * Delete connection
      */
-    fun deleteConnection(id: String) {
-        val connections = loadConnection().toMutableList()
-        connections.removeIf { it.id == id }
-        appPreferences.cifsSettings = connections.map { it.toData() }
+    suspend fun deleteConnection(id: String) {
+        withContext(Dispatchers.IO) {
+            connectionSettingDao.delete(id)
+        }
     }
 
     /**
      * Move connections order
      */
-    fun moveConnection(fromPosition: Int, toPosition: Int) {
-        appPreferences.cifsSettings.let {
-            val list = appPreferences.cifsSettings.toMutableList()
-            list.add(toPosition, list.removeAt(fromPosition))
-            appPreferences.cifsSettings = list
-            contextCache.evictAll()
+    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        withContext(Dispatchers.IO) {
+            connectionSettingDao.move(fromPosition, toPosition)
         }
     }
 

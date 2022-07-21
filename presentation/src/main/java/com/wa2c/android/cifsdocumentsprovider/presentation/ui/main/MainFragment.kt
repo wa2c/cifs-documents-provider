@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentMainBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -35,7 +34,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     /** Binding */
     private val binding: FragmentMainBinding? by viewBinding()
     /** List adapter */
-    private val adapter: MainListAdapter by lazy { MainListAdapter(viewModel) }
+    private val adapter: MainPagingDataAdapter by lazy { MainPagingDataAdapter(viewModel) }
 
     /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -103,8 +102,9 @@ class MainFragment: Fragment(R.layout.fragment_main) {
 
         viewModel.let {
             it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            it.cifsConnections.collectIn(viewLifecycleOwner, observer = ::onLoadConnection)
-            it.initialize()
+            it.connectionFlow.collectIn(viewLifecycleOwner) { data ->
+                adapter.submitData(lifecycle, data)
+            }
         }
     }
 
@@ -147,10 +147,6 @@ class MainFragment: Fragment(R.layout.fragment_main) {
                 navigateSafe(MainFragmentDirections.actionMainFragmentToSettingsFragment())
             }
         }
-    }
-
-    private fun onLoadConnection(list: List<CifsConnection>) {
-        adapter.submitList(list)
     }
 
 }

@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -14,19 +14,14 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.LayoutCif
 /**
  * Main list adapter.
  */
-class MainListAdapter(
+class MainPagingDataAdapter(
     private val viewModel: MainViewModel
-): ListAdapter<CifsConnection, RecyclerView.ViewHolder>(
+): PagingDataAdapter<CifsConnection, RecyclerView.ViewHolder>(
     object: DiffUtil.ItemCallback<CifsConnection>() {
         override fun areItemsTheSame(oldItem: CifsConnection, newItem: CifsConnection): Boolean { return oldItem == newItem }
         override fun areContentsTheSame(oldItem: CifsConnection, newItem: CifsConnection): Boolean { return oldItem == newItem }
     }
 ) {
-
-    init {
-        this.submitList(viewModel.cifsConnections.value.toMutableList())
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return (DataBindingUtil.inflate(LayoutInflater.from(parent.context), R.layout.layout_cifs_item, parent,false) as LayoutCifsItemBinding).let {
             val rootView = it.root

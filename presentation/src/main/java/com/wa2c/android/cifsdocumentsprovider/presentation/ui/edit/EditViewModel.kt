@@ -92,16 +92,19 @@ class EditViewModel @Inject constructor(
      * Save connection
      */
     private fun save() {
-        createCifsConnection(isNew)?.let { con ->
-            if (cifsRepository.loadConnection().filter { it.id != con.id }.any { it.folderSmbUri == con.folderSmbUri }) {
-                // Duplicate URI
-                throw IllegalArgumentException()
+        launch {
+            createCifsConnection(isNew)?.let { con ->
+                if (cifsRepository.loadConnection().filter { it.id != con.id }
+                        .any { it.folderSmbUri == con.folderSmbUri }) {
+                    // Duplicate URI
+                    throw IllegalArgumentException()
+                }
+                cifsRepository.saveConnection(con)
+                currentId = con.id
+                initConnection = con
+            } ?: run {
+                throw IOException()
             }
-            cifsRepository.saveConnection(con)
-            currentId = con.id
-            initConnection = con
-        } ?: run {
-            throw IOException()
         }
     }
 
@@ -109,7 +112,9 @@ class EditViewModel @Inject constructor(
      * Delete connection
      */
     private fun delete() {
-        cifsRepository.deleteConnection(currentId)
+        launch {
+            cifsRepository.deleteConnection(currentId)
+        }
     }
 
     /**

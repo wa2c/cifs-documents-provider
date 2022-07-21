@@ -2,10 +2,12 @@ package com.wa2c.android.cifsdocumentsprovider.data.db
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = ConnectionSettingEntity.TABLE_NAME,
+    indices = [Index(value = ["uri", "sort_order"])]
 )
 internal data class ConnectionSettingEntity(
     /** ID */
