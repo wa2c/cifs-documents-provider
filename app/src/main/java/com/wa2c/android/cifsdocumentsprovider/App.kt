@@ -7,6 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.runBlocking
 import java.util.*
 import javax.inject.Inject
 
@@ -24,7 +25,9 @@ class App: LocalizationApplication() {
         super.onCreate()
         AppCompatDelegate.setDefaultNightMode(repository.uiTheme.mode) // Set theme
 
-        repository.migrate()
+        runBlocking {
+            repository.migrate()
+        }
 
         initLog(BuildConfig.DEBUG)
     }

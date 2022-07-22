@@ -2,7 +2,10 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
+import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
+import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +15,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class AppRepository @Inject internal constructor(
-    private val appPreferences: AppPreferences
+    private val appPreferences: AppPreferences,
+    private val connectionSettingDao: ConnectionSettingDao,
 ) {
 
     /** UI Theme */
@@ -33,8 +37,28 @@ class AppRepository @Inject internal constructor(
     /**
      * Migrate
      */
-    fun migrate() {
-        appPreferences.migrate()
+    suspend fun migrate() {
+        appPreferences.removeOldKeys()
+        appPreferences.removeOldSetting().let { list ->
+            list.forEachIndexed { index, map ->
+                 val connection = CifsConnection(
+                        id = map["id"] ?: return@forEachIndexed,
+                        name = map["name"] ?: return@forEachIndexed,
+                        domain = map["domain"],
+                        host = map["host"] ?: return@forEachIndexed,
+                        port = map["port"],
+                        enableDfs = map["enableDfs"]?.toBooleanStrictOrNull() ?: false,
+                        folder = map["folder"],
+                        user = map["user"],
+                        password = map["password"],
+                        anonymous = map["anonymous"]?.toBooleanStrictOrNull() ?: false,
+                        extension = map["extension"]?.toBooleanStrictOrNull() ?: false,
+                        safeTransfer = map["safeTransfer"]?.toBooleanStrictOrNull() ?: false,
+                    )
+                val entity = connection.toEntity(sortOrder = index, modifiedDate = Date())
+                connectionSettingDao.insert(entity)
+            }
+        }
     }
 
 }

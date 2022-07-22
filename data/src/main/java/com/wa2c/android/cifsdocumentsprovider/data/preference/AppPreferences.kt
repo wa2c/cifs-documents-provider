@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,26 +22,6 @@ internal class AppPreferences @Inject constructor(
 ) {
 
     private val preferences: SharedPreferences = getPreferences(context)
-
-    /** CIFS settings */
-    var cifsSettings: List<CifsSetting>
-        get() {
-            return try {
-                preferences.getString(PREFKEY_CIFS_SETTINGS, null)?.let {
-                    Json.decodeFromString(it)
-                } ?: emptyList()
-            } catch(e: Exception) {
-                logE(e)
-                emptyList()
-            }
-        }
-        set(value) {
-            try {
-                preferences.edit { putString(PREFKEY_CIFS_SETTINGS, Json.encodeToString(value)) }
-            } catch (e: Exception) {
-                logE(e)
-            }
-        }
 
     /** Host sort type */
     var hostSortType: HostSortType
@@ -69,17 +50,30 @@ internal class AppPreferences @Inject constructor(
 
 
     /**
-     * Migrate
+     * Remove old keys
      */
-    fun migrate() {
+    fun removeOldKeys() {
         // Delete obsoleted settings
         if (preferences.contains("prefkey_cifs_settings_temporal")) {
             preferences.edit { remove("prefkey_cifs_settings_temporal") }
         }
     }
 
+    /**
+     * Remove old settings
+     */
+    fun removeOldSetting(): List<Map<String, String?>> {
+        if (preferences.getString("prefkey_cifs_settings", null) == null)
+            return emptyList()
+
+        return preferences.getString("prefkey_cifs_settings", null)?.let {
+            //preferences.edit { remove("prefkey_cifs_settings") } TODO
+            val format = Json { isLenient = true }
+            format.decodeFromString<List<Map<String, String?>>>(it)
+        } ?: emptyList()
+    }
+
     companion object {
-        private const val PREFKEY_CIFS_SETTINGS = "prefkey_cifs_settings"
         private const val PREFKEY_HOST_SORT_TYPE = "prefkey_host_sort_type"
         private const val PREFKEY_UI_THEME = "prefkey_ui_theme"
         private const val PREFKEY_LANGUAGE = "prefkey_language"
@@ -88,7 +82,6 @@ internal class AppPreferences @Inject constructor(
         fun getPreferences(context: Context): SharedPreferences {
             return context.getSharedPreferences("App", Context.MODE_PRIVATE)
         }
-
     }
 
 }

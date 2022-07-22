@@ -4,8 +4,6 @@ import android.net.Uri
 import android.os.Parcelable
 import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
-import com.wa2c.android.cifsdocumentsprovider.data.preference.CifsSetting
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -96,46 +94,6 @@ data class CifsConnection(
         }
 
     }
-}
-
-/**
- * Convert to data from model.
- */
-internal fun CifsConnection.toData(): CifsSetting {
-    return CifsSetting(
-        id = this.id,
-        name = this.name,
-        domain = this.domain,
-        host = this.host,
-        port = this.port?.toIntOrNull(),
-        enableDfs = this.enableDfs,
-        folder = this.folder,
-        user = this.user,
-        password = this.password?.let { try { encrypt(it, BuildConfig.K) } catch (e: Exception) { null } },
-        anonymous = this.anonymous,
-        extension = this.extension,
-        safeTransfer = this.safeTransfer,
-    )
-}
-
-/**
- * Convert model to data.
- */
-internal fun CifsSetting.toModel(): CifsConnection {
-    return CifsConnection(
-        id = this.id,
-        name = this.name,
-        domain = this.domain,
-        host = this.host,
-        port = this.port?.toString(),
-        enableDfs = this.enableDfs ?: false,
-        folder = this.folder,
-        user = this.user,
-        password = this.password?.let { try { decrypt(this.password, BuildConfig.K) } catch (e: Exception) { null } },
-        anonymous = this.anonymous ?: false,
-        extension = this.extension ?: false,
-        safeTransfer = this.safeTransfer ?: false,
-    )
 }
 
 private val algorithm: String
