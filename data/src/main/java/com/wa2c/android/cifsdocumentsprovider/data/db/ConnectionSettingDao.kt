@@ -15,7 +15,7 @@ internal interface ConnectionSettingDao {
     @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE id = :id")
     suspend fun getEntity(id: String): ConnectionSettingEntity?
 
-    @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE uri = :uri")
+    @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE instr(:uri, uri) > 0 ORDER BY sort_order" )
     suspend fun getEntityByUri(uri: String): ConnectionSettingEntity?
 
     @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} ORDER BY sort_order")
@@ -32,6 +32,8 @@ internal interface ConnectionSettingDao {
 
     @Query("UPDATE ${ConnectionSettingEntity.TABLE_NAME} SET sort_order = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: String, sortOrder: Int)
+
+
 
     @Transaction
     suspend fun move(fromPosition: Int, toPosition: Int) {
