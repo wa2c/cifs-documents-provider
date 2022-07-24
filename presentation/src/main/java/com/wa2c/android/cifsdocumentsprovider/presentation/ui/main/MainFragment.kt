@@ -90,8 +90,8 @@ class MainFragment: Fragment(R.layout.fragment_main) {
                     viewHolder: RecyclerView.ViewHolder,
                     target: RecyclerView.ViewHolder
                 ): Boolean {
-                    val fromPosition = viewHolder.adapterPosition
-                    val toPosition = target.adapterPosition
+                    val fromPosition = viewHolder.bindingAdapterPosition
+                    val toPosition = target.bindingAdapterPosition
                     viewModel.onItemMove(fromPosition, toPosition)
                     return true
                 }

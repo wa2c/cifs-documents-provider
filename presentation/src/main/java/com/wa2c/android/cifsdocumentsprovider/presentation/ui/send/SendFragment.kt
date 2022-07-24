@@ -150,10 +150,6 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     /**
      * Confirm closing.
      */

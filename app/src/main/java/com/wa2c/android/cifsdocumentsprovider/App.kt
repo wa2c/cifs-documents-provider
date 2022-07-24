@@ -23,12 +23,10 @@ class App: LocalizationApplication() {
 
     override fun onCreate() {
         super.onCreate()
+        initLog(BuildConfig.DEBUG)
         AppCompatDelegate.setDefaultNightMode(repository.uiTheme.mode) // Set theme
-
         runBlocking {
             repository.migrate()
         }
-
-        initLog(BuildConfig.DEBUG)
     }
 }
