@@ -3,13 +3,10 @@ package com.wa2c.android.cifsdocumentsprovider.data.preference
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.Serializable
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,12 +59,12 @@ internal class AppPreferences @Inject constructor(
     /**
      * Remove old settings
      */
-    fun removeOldSetting(): List<Map<String, String?>> {
+    fun removeOldConnection(): List<Map<String, String?>> {
         if (preferences.getString("prefkey_cifs_settings", null) == null)
             return emptyList()
 
         return preferences.getString("prefkey_cifs_settings", null)?.let {
-            //preferences.edit { remove("prefkey_cifs_settings") } TODO
+            preferences.edit { remove("prefkey_cifs_settings") }
             val format = Json { isLenient = true }
             format.decodeFromString<List<Map<String, String?>>>(it)
         } ?: emptyList()

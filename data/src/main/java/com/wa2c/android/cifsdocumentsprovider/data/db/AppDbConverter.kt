@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.db
 
+import android.annotation.SuppressLint
 import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -20,7 +21,7 @@ internal object AppDbConverter {
      * Convert model to data.
      */
     fun ConnectionSettingEntity.toModel(): CifsConnection {
-        return decrypt(this.data, BuildConfig.K).decodeJson()
+        return decrypt(this.data).decodeJson()
     }
 
     /**
@@ -34,7 +35,7 @@ internal object AppDbConverter {
             id = this.id,
             name = this.name,
             uri = this.folderSmbUri,
-            data = encrypt(this.encodeJson(), BuildConfig.K)  ,
+            data = encrypt(this.encodeJson())  ,
             sortOrder = sortOrder,
             modifiedDate = modifiedDate.time
         )
@@ -52,6 +53,8 @@ internal object AppDbConverter {
         return formatter.decodeFromString(this)
     }
 
+    private const val SECRET_KEY = BuildConfig.K
+
     private const val ALGORITHM: String = "AES"
 
     private const val TRANSFORMATION: String = "AES/CBC/PKCS5PADDING"
@@ -61,9 +64,9 @@ internal object AppDbConverter {
     /**
      * Encrypt key.
      */
-    private fun encrypt(originalString: String, secretKey: String): String {
+    private fun encrypt(originalString: String): String {
         val originalBytes = originalString.toByteArray()
-        val secretKeyBytes = secretKey.toByteArray()
+        val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, spec)
@@ -75,12 +78,26 @@ internal object AppDbConverter {
     /**
      * Decrypt key.
      */
-    private fun decrypt(encryptBytesBase64String: String?, secretKey: String): String {
+    private fun decrypt(encryptBytesBase64String: String?): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
-        val secretKeyBytes = secretKey.toByteArray()
+        val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, spec)
+        val originalBytes = cipher.doFinal(encryptBytes)
+        return String(originalBytes)
+    }
+
+    /**
+     * Decrypt key.
+     */
+    @SuppressLint("GetInstance")
+    fun decryptOld(encryptBytesBase64String: String?): String {
+        val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
+        val secretKeyBytes = SECRET_KEY.toByteArray()
+        val secretKeySpec = SecretKeySpec(secretKeyBytes, "AES")
+        val cipher = Cipher.getInstance("AES")
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)
         val originalBytes = cipher.doFinal(encryptBytes)
         return String(originalBytes)
     }

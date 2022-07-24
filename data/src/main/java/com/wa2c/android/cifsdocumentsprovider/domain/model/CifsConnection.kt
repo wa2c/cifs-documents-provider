@@ -2,15 +2,12 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.net.Uri
 import android.os.Parcelable
-import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import java.nio.file.Paths
 import java.util.*
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * CIFS Connection
@@ -94,37 +91,4 @@ data class CifsConnection(
         }
 
     }
-}
-
-private val algorithm: String
-    get() = "AES"
-
-private val transformation: String
-    get() = "AES"
-
-/**
- * Encrypt key.
- */
-private fun encrypt(originalString: String, secretKey: String): String {
-    val originalBytes = originalString.toByteArray()
-    val secretKeyBytes = secretKey.toByteArray()
-    val secretKeySpec = SecretKeySpec(secretKeyBytes, algorithm)
-    val cipher = Cipher.getInstance(transformation)
-    cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec)
-    val encryptBytes = cipher.doFinal(originalBytes)
-    val encryptBytesBase64 = Base64.encode(encryptBytes, Base64.DEFAULT)
-    return String(encryptBytesBase64)
-}
-
-/**
- * Decrypt key.
- */
-private fun decrypt(encryptBytesBase64String: String?, secretKey: String): String {
-    val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
-    val secretKeyBytes = secretKey.toByteArray()
-    val secretKeySpec = SecretKeySpec(secretKeyBytes, algorithm)
-    val cipher = Cipher.getInstance(transformation)
-    cipher.init(Cipher.DECRYPT_MODE, secretKeySpec)
-    val originalBytes = cipher.doFinal(encryptBytes)
-    return String(originalBytes)
 }
