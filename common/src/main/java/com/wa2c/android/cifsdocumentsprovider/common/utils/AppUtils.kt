@@ -41,3 +41,9 @@ val Uri.pathFragment: String
         val pathIndex = uriText.indexOf('/', startIndex) + 1
         return uriText.substring(pathIndex)
     }
+
+/**
+ * True if directory URI
+ */
+val String.isDirectoryUri: Boolean
+    get() = this.endsWith('/')
