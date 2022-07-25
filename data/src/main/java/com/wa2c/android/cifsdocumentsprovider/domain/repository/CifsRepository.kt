@@ -23,6 +23,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import jcifs.smb.NtStatus
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
@@ -97,9 +98,11 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get connection from URI
      */
-    private suspend fun getConnection(uriText: String): CifsConnection? {
+    private suspend fun getClientDto(uriText: String): CifsClientDto? {
         return withContext(Dispatchers.IO) {
-            connectionSettingDao.getEntityByUri(uriText)?.toModel()
+            connectionSettingDao.getEntityByUri(uriText)?.toModel()?.let {
+                CifsClientDto(it, uriText)
+            }
         }
     }
 
@@ -126,7 +129,7 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun getFile(connection: CifsConnection, uri: String? = null): CifsFile? {
         return withContext(Dispatchers.IO) {
-            cifsClient.getSmbFile(connection, uri)?.toCifsFile()
+            cifsClient.getSmbFile(CifsClientDto(connection, uri))?.toCifsFile()
         }
     }
 
@@ -134,7 +137,9 @@ class CifsRepository @Inject internal constructor(
      * Get CIFS File from uri.
      */
     suspend fun getFile(uri: String): CifsFile? {
-        return getConnection(uri)?.let { getFile(it, uri) }
+        return withContext(Dispatchers.IO) {
+            getClientDto(uri)?.let { cifsClient.getSmbFile(it) }?.toCifsFile()
+        }
     }
 
     /**
@@ -142,9 +147,9 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun getFileChildren(connection: CifsConnection, uri: String): List<CifsFile> {
         return withContext(Dispatchers.IO) {
-            cifsClient.getSmbFile(connection, uri)?.listFiles()?.mapNotNull {
-                cifsClient.getSmbFile(connection, it.url.toString())?.toCifsFile()
-            } ?: emptyList()
+            cifsClient.getSmbFileChildren(CifsClientDto(connection, uri)).map {
+                it.toCifsFile()
+            }
         }
     }
 
@@ -152,8 +157,10 @@ class CifsRepository @Inject internal constructor(
      * Get children CIFS files from uri.
      */
     suspend fun getFileChildren(uri: String): List<CifsFile> {
-        return getConnection(uri)?.let {
-            getFileChildren(it, uri)
+        return getClientDto(uri)?.let { dto ->
+            cifsClient.getSmbFileChildren(dto).map {
+                it.toCifsFile()
+            }
         } ?: emptyList()
     }
 
@@ -162,9 +169,9 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun createFile(uri: String, mimeType: String?): CifsFile? {
         return withContext(Dispatchers.IO) {
+            val dto = getClientDto(uri) ?: return@withContext null
             cifsClient.createFile(
-                getConnection(uri) ?: return@withContext null,
-                uri,
+                dto,
                 mimeType,
             )?.toCifsFile()
         }
@@ -175,8 +182,8 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun deleteFile(uri: String): Boolean {
         return withContext(Dispatchers.IO) {
-            getConnection(uri)?.let {
-                cifsClient.deleteFile(it, uri)
+            getClientDto(uri)?.let {
+                cifsClient.deleteFile(it)
             } ?: false
         }
     }
@@ -191,14 +198,9 @@ class CifsRepository @Inject internal constructor(
             } else {
                 sourceUri.trimEnd('/').replaceAfterLast('/', newName)
             }
-            val sourceConnection = getConnection(sourceUri) ?: return@withContext null
-            val targetConnection = getConnection(targetUri) ?: return@withContext null
-            cifsClient.renameFile(
-                sourceConnection,
-                sourceUri,
-                targetConnection,
-                targetUri
-            )?.toCifsFile()?.also {
+            val sourceDto = getClientDto(sourceUri) ?: return@withContext null
+            val targetDto = getClientDto(targetUri) ?: return@withContext null
+            cifsClient.renameFile(sourceDto, targetDto)?.toCifsFile()?.also {
                 cifsFileCache.remove(sourceUri)
             }
         }
@@ -209,12 +211,9 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun copyFile(sourceUri: String, targetUri: String): CifsFile? {
         return withContext(Dispatchers.IO) {
-            cifsClient.copyFile(
-                getConnection(sourceUri) ?: return@withContext null,
-                sourceUri,
-                getConnection(targetUri) ?: return@withContext null,
-                targetUri,
-            )?.toCifsFile()
+            val sourceDto = getClientDto(sourceUri) ?: return@withContext null
+            val targetDto = getClientDto(targetUri) ?: return@withContext null
+            cifsClient.copyFile(sourceDto, targetDto)?.toCifsFile()
         }
     }
 
@@ -223,14 +222,9 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun moveFile(sourceUri: String, targetUri: String): CifsFile? {
         return withContext(Dispatchers.IO) {
-            val sourceConnection = getConnection(sourceUri) ?: return@withContext null
-            val targetConnection = getConnection(targetUri) ?: return@withContext null
-            cifsClient.moveFile(
-                sourceConnection,
-                sourceUri,
-                targetConnection,
-                targetUri,
-            )?.toCifsFile()
+            val sourceDto = getClientDto(sourceUri) ?: return@withContext null
+            val targetDto = getClientDto(targetUri) ?: return@withContext null
+            cifsClient.moveFile(sourceDto, targetDto)?.toCifsFile()
         }
     }
 
@@ -241,7 +235,7 @@ class CifsRepository @Inject internal constructor(
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(Dispatchers.IO) {
             try {
-                cifsClient.getSmbFile(connection, connection.folderSmbUri, true)?.list()
+                cifsClient.getSmbFile(CifsClientDto(connection), true)?.list()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -294,9 +288,9 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun getFileDescriptor(uri: String, mode: AccessMode, handler: Handler): ParcelFileDescriptor? {
         return withContext(Dispatchers.IO) {
-            val connection = getConnection(uri) ?: return@withContext null
-            val file = cifsClient.getSmbFile(connection, uri) ?: return@withContext null
-            val callback = if (connection.safeTransfer) {
+            val dto = getClientDto(uri) ?: return@withContext null
+            val file = cifsClient.getSmbFile(dto) ?: return@withContext null
+            val callback = if (dto.connection.safeTransfer) {
                 CifsProxyFileCallbackSafe(file, mode)
             } else {
                 CifsProxyFileCallback(file, mode)
