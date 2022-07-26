@@ -19,8 +19,6 @@ data class CifsFile(
     val lastModified: Long = 0,
     /** True if directory */
     val isDirectory: Boolean,
-    /** True if is top. */
-    val isTop: Boolean
 ) {
     /** True if root */
     val isRoot: Boolean

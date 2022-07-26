@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.os.*
+import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -29,7 +30,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Context */
     private val providerContext: Context by lazy { context!! }
-
+    /** Storage Manager */
+    private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy { createCifsRepository(providerContext) }
 
@@ -144,10 +146,16 @@ class CifsDocumentsProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor? {
+        val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            val accessMode = AccessMode.fromSafMode(mode)
-            cifsRepository.getFileDescriptor(uri, accessMode, fileHandler)
+            cifsRepository.getCallback(uri, accessMode)
+        }?.let { callback ->
+            storageManager.openProxyFileDescriptor(
+                ParcelFileDescriptor.parseMode(accessMode.safMode),
+                callback,
+                fileHandler
+            )
         }
     }
 

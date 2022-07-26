@@ -9,7 +9,7 @@ internal interface ConnectionSettingDao {
     @Query("SELECT count(id) FROM ${ConnectionSettingEntity.TABLE_NAME}")
     suspend fun getCount(): Int
 
-    @Query("SELECT max(sort_order) FROM ${ConnectionSettingEntity.TABLE_NAME}")
+    @Query("SELECT coalesce(max(sort_order), 0) FROM ${ConnectionSettingEntity.TABLE_NAME}")
     suspend fun getMaxSortOrder(): Int
 
     @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE id = :id")
@@ -32,8 +32,6 @@ internal interface ConnectionSettingDao {
 
     @Query("UPDATE ${ConnectionSettingEntity.TABLE_NAME} SET sort_order = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: String, sortOrder: Int)
-
-
 
     @Transaction
     suspend fun move(fromPosition: Int, toPosition: Int) {

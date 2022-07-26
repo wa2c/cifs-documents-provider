@@ -23,7 +23,7 @@ internal data class ConnectionSettingEntity(
     /** URI */
     @ColumnInfo(name = "uri")
     val uri: String,
-    /** Data */
+    /** Data (Encrypted) */
     @ColumnInfo(name = "data")
     val data: String,
     @ColumnInfo(name = "sort_order")
