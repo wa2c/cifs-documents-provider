@@ -303,7 +303,7 @@ internal class CifsClient @Inject constructor() {
                 name = name.trim('/'),
                 server = server,
                 uri = Uri.parse(urlText),
-                size = if (isDir) 0 else length(),
+                size = if (isDir || !isFile) 0 else length(),
                 lastModified = lastModified,
                 isDirectory = isDir,
             )
