@@ -4,19 +4,21 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import com.mikepenz.aboutlibraries.LibsBuilder
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentSettingsBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog
 
@@ -63,8 +65,14 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
                 openUrl("https://github.com/wa2c/cifs-documents-provider/graphs/contributors")
             }
             bind.settingsLibraryText.setOnClickListener {
-                OssLicensesMenuActivity.setActivityTitle(getString(R.string.settings_title))
-                startActivity(Intent(requireActivity(), OssLicensesMenuActivity::class.java))
+                navigateSafe(
+                    SettingsFragmentDirections.actionSettingsFragmentToAboutLibrariesFragment(
+                        LibsBuilder()
+                            .withActivityTitle(getString(R.string.settings_title))
+                            .withAboutIconShown(true)
+                            .withAboutVersionShown(true)
+                    )
+                )
             }
             bind.settingsInfoText.setOnClickListener {
                 startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + requireContext().packageName)))
@@ -81,16 +89,6 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
             viewModel.language = language
             mainViewModel.updateLanguage(language)
         }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                navigateBack()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun openUrl(url: String) {

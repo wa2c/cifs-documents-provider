@@ -3,7 +3,6 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-    id("com.google.android.gms.oss-licenses-plugin")
 }
 
 android {
@@ -58,8 +57,6 @@ dependencies {
 
     // Localization
     implementation(Deps.Util.localization)
-    // OSS License
-    implementation(Deps.Util.ossLicense)
 }
 
 kapt {

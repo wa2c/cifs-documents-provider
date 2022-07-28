@@ -4,7 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("androidx.navigation.safeargs.kotlin")
     id("dagger.hilt.android.plugin")
-    //id("com.google.android.gms.oss-licenses-plugin")
+    id(Deps.Util.licensePlugin)
 }
 
 android {
@@ -39,6 +39,9 @@ android {
         dataBinding = true
     }
 
+    aboutLibraries {
+        includeAllLicenses = true
+    }
 }
 
 dependencies {
@@ -59,6 +62,7 @@ dependencies {
     implementation(Deps.Ui.material)
     implementation(Deps.Ui.activityKtx)
     implementation(Deps.Ui.fragmentKtx)
+    implementation(Deps.Ui.cardView)
     // Lifecycle
     implementation(Deps.Ui.lifecycleViewModel )
     implementation(Deps.Ui.lifecycleRuntime)
@@ -74,7 +78,7 @@ dependencies {
     // Localization
     implementation(Deps.Util.localization)
     // OSS License
-    implementation(Deps.Util.ossLicense)
+    implementation(Deps.Util.license)
 
     // Test
 

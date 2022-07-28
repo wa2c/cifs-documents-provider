@@ -88,10 +88,6 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                navigateBack()
-                return true
-            }
             R.id.folder_menu_reload -> {
                 viewModel.reload()
                 return true

@@ -91,10 +91,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                viewModel.onClickBack()
-                return true
-            }
             R.id.edit_menu_delete -> {
                 MaterialAlertDialogBuilder(requireContext())
                     .setMessage(R.string.edit_delete_confirmation_message)

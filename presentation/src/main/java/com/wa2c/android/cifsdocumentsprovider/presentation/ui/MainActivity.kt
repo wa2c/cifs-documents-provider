@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.akexorcist.localizationactivity.ui.LocalizationActivity
@@ -36,6 +37,16 @@ class MainActivity : LocalizationActivity(R.layout.activity_main) {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         processIntent(intent)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     /**

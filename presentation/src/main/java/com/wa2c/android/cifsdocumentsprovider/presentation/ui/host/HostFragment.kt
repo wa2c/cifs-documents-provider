@@ -93,10 +93,6 @@ class HostFragment: Fragment(R.layout.fragment_host) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            android.R.id.home -> {
-                navigateBack()
-                return true
-            }
             R.id.host_menu_reload -> {
                 startDiscovery()
                 return true

@@ -27,6 +27,7 @@ object Deps {
         const val fragmentKtx = "androidx.fragment:fragment-ktx:1.4.1"
         const val material = "com.google.android.material:material:1.6.1"
         const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
+        const val cardView = "com.google.android.material:material:1.6.1"
 
         private const val lifeCycleVersion = "2.4.1"
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
@@ -45,7 +46,6 @@ object Deps {
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
         private const val pagingVersion = "3.1.1"
         const val pagingKtx = "androidx.paging:paging-runtime-ktx:$pagingVersion"
-
         const val kotlinxSerialization = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3"
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.7"
@@ -55,8 +55,10 @@ object Deps {
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
         const val localization = "com.akexorcist:localization:1.2.11"
-        const val ossLicensePlugin = "com.google.android.gms:oss-licenses-plugin:0.10.5"
-        const val ossLicense = "com.google.android.gms:play-services-oss-licenses:17.0.0"
+        private const val licenseVersion = "8.9.4"
+        const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
+        const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"
+        const val license = "com.mikepenz:aboutlibraries:${licenseVersion}"
     }
 
     object Test {

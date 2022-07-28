@@ -98,6 +98,18 @@
         <action
             android:id="@+id/action_settingsFragment_to_listDialog"
             app:destination="@id/listDialog" />
+        <action
+            android:id="@+id/action_settingsFragment_to_aboutLibrariesFragment"
+            app:destination="@id/aboutLibrariesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/aboutLibrariesFragment"
+        android:name="com.mikepenz.aboutlibraries.ui.LibsSupportFragment"
+        android:label="AboutLibrariesFragment">
+        <argument
+            android:name="data"
+            app:argType="com.mikepenz.aboutlibraries.LibsBuilder" />
     </fragment>
 
     <fragment
