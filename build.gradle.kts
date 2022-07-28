@@ -8,11 +8,11 @@ buildscript {
         maven(url="https://plugins.gradle.org/m2/")
     }
     dependencies {
-        classpath(Deps.App.gradleTool)
-        classpath(Deps.App.kotlinPlugin)
-        classpath(Deps.App.daggerHiltPlugin)
-        classpath(Deps.Ui.navigationPlugin)
-        classpath(Deps.Data.kotlinxSerialization)
+        classpath(Deps.App.gradlePluginClasspath)
+        classpath(Deps.App.kotlinPluginClasspath)
+        classpath(Deps.App.daggerHiltPluginClasspath)
+        classpath(Deps.Ui.navigationPluginClasspath)
+        classpath(Deps.Data.kotlinxSerializationClasspath)
         classpath(Deps.Util.licensePluginClassPath)
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files

@@ -1,8 +1,8 @@
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("kotlin-kapt")
-    id("dagger.hilt.android.plugin")
+    id(Deps.App.appPlugin)
+    id(Deps.App.kotlinAndroidPlugin)
+    id(Deps.App.kotlinKaptPlugin)
+    id(Deps.App.daggerHiltPlugin)
 }
 
 android {

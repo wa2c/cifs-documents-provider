@@ -1,10 +1,10 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
-    id("kotlin-parcelize")
-    id("kotlinx-serialization")
-    id("dagger.hilt.android.plugin")
+    id(Deps.App.libraryPlugin)
+    id(Deps.App.kotlinAndroidPlugin)
+    id(Deps.App.kotlinKaptPlugin)
+    id(Deps.App.daggerHiltPlugin)
+    id(Deps.Data.kotlinParcelizePlugin)
+    id(Deps.Data.kotlinSerializationPlugin)
 }
 
 android {

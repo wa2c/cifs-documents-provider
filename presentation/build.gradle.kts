@@ -1,9 +1,9 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
-    id("androidx.navigation.safeargs.kotlin")
-    id("dagger.hilt.android.plugin")
+    id(Deps.App.libraryPlugin)
+    id(Deps.App.kotlinAndroidPlugin)
+    id(Deps.App.kotlinKaptPlugin)
+    id(Deps.App.daggerHiltPlugin)
+    id(Deps.Ui.navigationSafeargsPlugin)
     id(Deps.Util.licensePlugin)
 }
 
