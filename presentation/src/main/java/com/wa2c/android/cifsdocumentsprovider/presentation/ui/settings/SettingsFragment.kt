@@ -22,6 +22,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog
 
+/**
+ * Settings Screen
+ */
 class SettingsFragment: Fragment(R.layout.fragment_settings) {
 
     /** View Model */
@@ -66,12 +69,7 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
             }
             bind.settingsLibraryText.setOnClickListener {
                 navigateSafe(
-                    SettingsFragmentDirections.actionSettingsFragmentToAboutLibrariesFragment(
-                        LibsBuilder()
-                            .withActivityTitle(getString(R.string.settings_title))
-                            .withAboutIconShown(true)
-                            .withAboutVersionShown(true)
-                    )
+                    SettingsFragmentDirections.actionSettingsFragmentToLibraryFragment()
                 )
             }
             bind.settingsInfoText.setOnClickListener {
