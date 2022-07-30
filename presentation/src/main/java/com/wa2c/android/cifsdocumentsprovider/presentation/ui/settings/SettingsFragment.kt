@@ -10,15 +10,11 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
-import com.mikepenz.aboutlibraries.LibsBuilder
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentSettingsBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog
 
@@ -90,7 +86,11 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
     }
 
     private fun openUrl(url: String) {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            toast(R.string.provider_error_message)
+        }
     }
 
     companion object {

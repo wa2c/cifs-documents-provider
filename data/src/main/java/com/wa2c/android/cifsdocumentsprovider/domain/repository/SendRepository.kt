@@ -5,22 +5,25 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Send Repository
+ */
 @Singleton
 class SendRepository @Inject internal constructor(
     private val dataSender: com.wa2c.android.cifsdocumentsprovider.data.DataSender
 ) {
 
-    private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow(0, 1, BufferOverflow.DROP_OLDEST)
+    private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow()
     val sendFlow: SharedFlow<SendData?> = _sendFlow
 
     /**
@@ -84,7 +87,7 @@ class SendRepository @Inject internal constructor(
             } ?: throw IOException()
 
             sendData.startTime = System.currentTimeMillis()
-            _sendFlow.tryEmit(sendData)
+            _sendFlow.emit(sendData)
             val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
                 if (!sendData.state.inProgress) {
                     return@sendFile false
@@ -95,7 +98,9 @@ class SendRepository @Inject internal constructor(
                 }
 
                 sendData.progressSize = progressSize
-                _sendFlow.tryEmit(sendData)
+                runBlocking {
+                    _sendFlow.emit(sendData)
+                }
                 return@sendFile true
             }
 
@@ -114,7 +119,7 @@ class SendRepository @Inject internal constructor(
                 }
             }
 
-            _sendFlow.tryEmit(sendData)
+            _sendFlow.emit(sendData)
             sendData.state
         }
     }
