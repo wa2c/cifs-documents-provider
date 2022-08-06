@@ -78,7 +78,7 @@ internal object AppDbConverter {
     /**
      * Decrypt key.
      */
-    private fun decrypt(encryptBytesBase64String: String?): String {
+    private fun decrypt(encryptBytesBase64String: String): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
         val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
@@ -92,7 +92,7 @@ internal object AppDbConverter {
      * Decrypt key.
      */
     @SuppressLint("GetInstance")
-    fun decryptOld(encryptBytesBase64String: String?): String {
+    fun decryptOld(encryptBytesBase64String: String): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
         val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, "AES")

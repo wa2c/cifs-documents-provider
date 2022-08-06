@@ -51,7 +51,7 @@ class AppRepository @Inject internal constructor(
                         enableDfs = map["enableDfs"]?.toBooleanStrictOrNull() ?: false,
                         folder = map["folder"],
                         user = map["user"],
-                        password = decryptOld(map["password"]),
+                        password = map["password"]?.let { decryptOld(it) },
                         anonymous = map["anonymous"]?.toBooleanStrictOrNull() ?: false,
                         extension = map["extension"]?.toBooleanStrictOrNull() ?: false,
                         safeTransfer = map["safeTransfer"]?.toBooleanStrictOrNull() ?: false,
