@@ -39,9 +39,6 @@ android {
         dataBinding = true
     }
 
-    aboutLibraries {
-        includeAllLicenses = true
-    }
 }
 
 dependencies {
