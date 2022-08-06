@@ -30,12 +30,13 @@ import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 /**
  * CIFS Client
  */
 @Singleton
 @Suppress("BlockingMethodInNonBlockingContext")
-internal class CifsClient @Inject constructor() {
+internal class CifsClient @Inject constructor(): CifsClientInterface {
 
     /** CIFS Context cache */
     private val contextCache = LruCache<CifsConnection, CIFSContext>(10)
@@ -104,7 +105,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Check setting connectivity.
      */
-    suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
+    override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
         return withContext(Dispatchers.IO) {
             try {
                 getSmbFile(dto, true)?.list()
@@ -135,14 +136,14 @@ internal class CifsClient @Inject constructor() {
     /**
      * Get CifsFile
      */
-    suspend fun getFile(access: CifsClientDto, forced: Boolean = false): CifsFile? {
+    override suspend fun getFile(access: CifsClientDto, forced: Boolean): CifsFile? {
         return getSmbFile(access, forced)?.toCifsFile()
     }
 
     /**
      * Get children CifsFile list
      */
-    suspend fun getChildren(dto: CifsClientDto, forced: Boolean = false): List<CifsFile> {
+    override suspend fun getChildren(dto: CifsClientDto, forced: Boolean): List<CifsFile> {
         return getSmbFile(dto, forced)?.listFiles()?.mapNotNull {
             getSmbFile(dto.copy(inputUri = it.url.toString()), forced)?.toCifsFile()
         } ?: emptyList()
@@ -152,7 +153,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Create new CifsFile.
      */
-    suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
+    override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
         return withContext(Dispatchers.IO) {
             val createUri = if (!dto.uri.isDirectoryUri && dto.connection.extension) {
                 val uriMimeType = dto.uri.mimeType
@@ -189,7 +190,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Copy CifsFile
      */
-    suspend fun copyFile(
+    override suspend fun copyFile(
         sourceDto: CifsClientDto,
         accessDto: CifsClientDto,
     ): CifsFile? {
@@ -212,7 +213,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Rename file
      */
-    suspend fun renameFile(
+    override suspend fun renameFile(
         sourceDto: CifsClientDto,
         targetDto: CifsClientDto,
     ): CifsFile? {
@@ -235,7 +236,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Delete file
      */
-    suspend fun deleteFile(
+    override suspend fun deleteFile(
         dto: CifsClientDto,
     ): Boolean {
         return withContext(Dispatchers.IO) {
@@ -253,7 +254,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Move file
      */
-    suspend fun moveFile(
+    override suspend fun moveFile(
         sourceDto: CifsClientDto,
         targetDto: CifsClientDto,
     ): CifsFile? {
@@ -273,7 +274,7 @@ internal class CifsClient @Inject constructor() {
     /**
      * Get ParcelFileDescriptor
      */
-    suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
         return withContext(Dispatchers.IO) {
             val file = getSmbFile(dto) ?: return@withContext null
             if (dto.connection.safeTransfer) {

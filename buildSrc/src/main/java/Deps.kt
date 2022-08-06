@@ -62,6 +62,8 @@ object Deps {
         const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3"
 
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.8"
+        const val smbj = "com.hierynomus:smbj:0.11.5"
+        const val smbjRpc = "com.rapid7.client:dcerpc:0.12.0"
         const val networkTools = "com.github.stealthcopter:AndroidNetworkTools:0.4.5.3"
     }
 

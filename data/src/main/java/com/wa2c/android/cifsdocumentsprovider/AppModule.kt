@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider
 import android.app.NotificationManager
 import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
+import com.wa2c.android.cifsdocumentsprovider.data.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
@@ -38,11 +40,19 @@ internal object AppModule {
     @Provides
     fun provideDao(db: AppDatabase) = db.getStorageSettingDao()
 
+
+    /** CifsClient */
+    @Singleton
+    @Provides
+    fun provideCifsClient(): CifsClientInterface {
+        return SmbjClient()
+    }
+
 }
 
 fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
-        CifsClient(),
+        SmbjClient(),
         AppPreferences(context),
         AppModule.provideDatabase(context).getStorageSettingDao(),
     )

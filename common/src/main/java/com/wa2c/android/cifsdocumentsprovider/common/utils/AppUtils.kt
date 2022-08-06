@@ -2,6 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.values.SCHEME_SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.values.SEPARATOR
 
 /**
  * Renew collection elements.
@@ -36,14 +38,23 @@ val String?.mimeType: String
  */
 val Uri.pathFragment: String
     get() = run {
-        val startIndex = scheme?.let { "$it://".length } ?: 0
+        val startIndex = scheme?.let { "$it$SCHEME_SEPARATOR".length } ?: 0
         val uriText = toString()
-        val pathIndex = uriText.indexOf('/', startIndex) + 1
+        val pathIndex = uriText.indexOf(SEPARATOR, startIndex) + 1
         return uriText.substring(pathIndex)
     }
 
-/**
- * True if directory URI
- */
+/** True if directory URI */
 val String.isDirectoryUri: Boolean
-    get() = this.endsWith('/')
+    get() = this.endsWith(SEPARATOR)
+
+/** Append separator(/) */
+fun String.appendSeparator(): String {
+    return if (this.isDirectoryUri) this else this + SEPARATOR
+}
+
+/** Append child entry */
+fun String.appendChild(childName: String, isDirectory: Boolean): String {
+    val name = if (isDirectory) childName.appendSeparator() else childName
+    return Uri.withAppendedPath(Uri.parse(this), name).toString()
+}

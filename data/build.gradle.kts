@@ -64,8 +64,11 @@ dependencies {
     implementation(Deps.Data.roomPaging)
     // Json
     implementation(Deps.Data.kotlinxSerializationJson)
-    // jCIFS-ng
+    // SMB
     implementation(Deps.Data.jcifsNg)
+    implementation(Deps.Data.smbj)
+    implementation(Deps.Data.smbjRpc)
+    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
     // Android Network Tools
     implementation(Deps.Data.networkTools)
 
