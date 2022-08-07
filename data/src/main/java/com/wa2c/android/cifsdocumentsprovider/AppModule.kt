@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider
 
 import android.app.NotificationManager
 import android.content.Context
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.data.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase

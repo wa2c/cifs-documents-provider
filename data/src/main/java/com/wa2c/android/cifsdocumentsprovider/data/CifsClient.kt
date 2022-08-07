@@ -32,7 +32,7 @@ import javax.inject.Singleton
 
 
 /**
- * CIFS Client
+ * jCIFS-ng Client
  */
 @Singleton
 @Suppress("BlockingMethodInNonBlockingContext")

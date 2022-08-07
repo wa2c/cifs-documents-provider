@@ -9,7 +9,6 @@ import androidx.paging.map
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity

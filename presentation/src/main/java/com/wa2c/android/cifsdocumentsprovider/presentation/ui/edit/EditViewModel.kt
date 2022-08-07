@@ -2,6 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
@@ -44,11 +46,11 @@ class EditViewModel @Inject constructor(
     var safeTransfer = MutableStateFlow<Boolean>(false)
 
     val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        CifsConnection.getSmbUri(host, port, folder)
+        getSmbUri(host, port, folder, true)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        CifsConnection.getContentUri(host, port, folder)
+        getContentUri(host, port, folder)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()

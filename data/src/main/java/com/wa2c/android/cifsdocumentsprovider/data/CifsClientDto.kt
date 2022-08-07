@@ -1,9 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.data
 
-import com.wa2c.android.cifsdocumentsprovider.common.values.SCHEME_SEPARATOR
-import com.wa2c.android.cifsdocumentsprovider.common.values.SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import java.net.URI
 
 /**
  * Cifs Client DTO
@@ -19,15 +18,15 @@ internal data class CifsClientDto(
 
     /** Share name */
     val shareName: String = uri
-        .substringAfter(SCHEME_SEPARATOR, "")
-        .substringAfter(SEPARATOR, "")
-        .substringBefore(SEPARATOR)
+        .substringAfter(URI_START, "")
+        .substringAfter(URI_SEPARATOR, "")
+        .substringBefore(URI_SEPARATOR)
 
     /** Share path */
     val sharePath: String = uri
-        .substringAfter(SCHEME_SEPARATOR, "")
-        .substringAfter(SEPARATOR, "")
-        .substringAfter(SEPARATOR)
+        .substringAfter(URI_START, "")
+        .substringAfter(URI_SEPARATOR, "")
+        .substringAfter(URI_SEPARATOR)
 
     /** True if this is root */
     val isRoot: Boolean = shareName.isEmpty()
