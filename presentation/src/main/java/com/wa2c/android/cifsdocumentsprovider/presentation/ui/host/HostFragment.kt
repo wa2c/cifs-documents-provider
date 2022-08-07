@@ -7,10 +7,12 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,18 +42,52 @@ class HostFragment: Fragment(R.layout.fragment_host) {
     /** True if is initializing */
     private val isInit: Boolean get() = (args.cifsConnection == null)
     /** Reload menu button */
-    private lateinit var reloadMenuButton: MenuItem
+    private var reloadMenuButton: MenuItem? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.host_title)
-            it.setDisplayShowHomeEnabled(false)
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setDisplayShowTitleEnabled(true)
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.host_title)
+                it.setDisplayShowHomeEnabled(false)
+                it.setDisplayHomeAsUpEnabled(true)
+                it.setDisplayShowTitleEnabled(true)
+            }
+
+            act.addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menu.clear()
+                    menuInflater.inflate(R.menu.menu_host, menu)
+                }
+                override fun onPrepareMenu(menu: Menu) {
+                    // Sort
+                    menu.findItem(viewModel.sortType.menuRes)?.let {
+                        it.isChecked = true
+                    } ?: let {
+                        menu.findItem(HostSortType.DEFAULT.menuRes).isChecked = true
+                    }
+                    // Reload
+                    reloadMenuButton = menu.findItem(R.id.host_menu_reload).also { item ->
+                        viewModel.isLoading.collectIn(viewLifecycleOwner) {
+                            if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
+                        }
+                    }
+                }
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.host_menu_reload -> {
+                            startDiscovery()
+                            true
+                        }
+                        else -> {
+                            selectSort(menuItem)
+                            true
+                        }
+                    }
+                }
+            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
         binding?.let { bind ->
@@ -69,44 +105,9 @@ class HostFragment: Fragment(R.layout.fragment_host) {
         startDiscovery()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_host, menu)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        // Sort
-        menu.findItem(viewModel.sortType.menuRes)?.let {
-            it.isChecked = true
-        } ?: let {
-            menu.findItem(HostSortType.DEFAULT.menuRes).isChecked = true
-        }
-
-        // Reload
-        reloadMenuButton = menu.findItem(R.id.host_menu_reload).also { item ->
-            viewModel.isLoading.collectIn(viewLifecycleOwner) {
-                if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
-            }
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.host_menu_reload -> {
-                startDiscovery()
-                return true
-            }
-            else -> {
-                selectSort(item)
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onDestroy() {
+        reloadMenuButton?.stopLoadingAnimation()
         super.onDestroy()
-        reloadMenuButton.stopLoadingAnimation()
     }
 
     /**

@@ -13,11 +13,13 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.MenuProvider
 import androidx.core.widget.TextViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
@@ -49,19 +51,42 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.edit_title)
-            it.setDisplayShowHomeEnabled(true)
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setDisplayShowTitleEnabled(true)
-        }
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                viewModel.onClickBack()
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.edit_title)
+                it.setDisplayShowHomeEnabled(true)
+                it.setDisplayHomeAsUpEnabled(true)
+                it.setDisplayShowTitleEnabled(true)
             }
-        })
+
+            act.addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_edit, menu)
+                }
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.edit_menu_delete -> {
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setMessage(R.string.edit_delete_confirmation_message)
+                                .setPositiveButton(R.string.dialog_accept) { _, _ -> viewModel.onClickDelete() }
+                                .setNeutralButton(R.string.dialog_close, null)
+                                .show()
+                            true
+                        }
+                        else -> {
+                            false
+                        }
+                    }
+                }
+            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+            act.onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    viewModel.onClickBack()
+                }
+            })
+        }
 
         binding.let {
             it?.viewModel = viewModel
@@ -80,26 +105,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
         view?.let {
             (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)?.hideSoftInputFromWindow(it.windowToken, 0)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        if (!viewModel.isNew) {
-            inflater.inflate(R.menu.menu_edit, menu)
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.edit_menu_delete -> {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setMessage(R.string.edit_delete_confirmation_message)
-                    .setPositiveButton(R.string.dialog_accept) { _, _ -> viewModel.onClickDelete() }
-                    .setNeutralButton(R.string.dialog_close, null)
-                    .show()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     private fun onNavigate(event: EditNav) {

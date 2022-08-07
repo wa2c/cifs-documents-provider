@@ -8,8 +8,10 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -65,13 +67,34 @@ class MainFragment: Fragment(R.layout.fragment_main) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.app_name)
-            it.setDisplayShowHomeEnabled(false)
-            it.setDisplayHomeAsUpEnabled(false)
-            it.setDisplayShowTitleEnabled(true)
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.app_name)
+                it.setDisplayShowHomeEnabled(false)
+                it.setDisplayHomeAsUpEnabled(false)
+                it.setDisplayShowTitleEnabled(true)
+            }
+            act.addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_main, menu)
+                }
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.main_menu_open_file -> {
+                            viewModel.onClickOpenFile()
+                            true
+                        }
+                        R.id.main_menu_open_settings -> {
+                            viewModel.onClickOpenSettings()
+                            true
+                        }
+                        else -> {
+                            false
+                        }
+                    }
+                }
+            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
         binding?.let { bind ->
@@ -107,25 +130,6 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             }
         }
     }
-
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_main, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.main_menu_open_file -> {
-                viewModel.onClickOpenFile()
-            }
-            R.id.main_menu_open_settings -> {
-                viewModel.onClickOpenSettings()
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
 
     private fun onNavigate(event: MainNav) {
         when (event) {

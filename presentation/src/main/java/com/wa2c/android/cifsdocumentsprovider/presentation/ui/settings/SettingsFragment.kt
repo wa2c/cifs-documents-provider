@@ -33,13 +33,14 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.settings_title)
-            it.setDisplayShowHomeEnabled(false)
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setDisplayShowTitleEnabled(true)
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.settings_title)
+                it.setDisplayShowHomeEnabled(false)
+                it.setDisplayHomeAsUpEnabled(true)
+                it.setDisplayShowTitleEnabled(true)
+            }
         }
 
         binding?.let { bind ->

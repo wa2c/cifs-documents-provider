@@ -8,6 +8,7 @@ import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -41,7 +42,7 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     private val notification: SendNotification by lazy { SendNotification(requireActivity()) }
 
     /** Single URI result launcher */
-    private val singleUriLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument()) { uri ->
+    private val singleUriLauncher = registerForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
         if (uri == null) {
             activity?.finishAffinity()
             return@registerForActivityResult
@@ -73,18 +74,36 @@ class SendFragment: Fragment(R.layout.fragment_send) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Disable back key
-        activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner) {
-            confirmClose()
-        }
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.send_title)
+                it.setDisplayShowHomeEnabled(false)
+                it.setDisplayHomeAsUpEnabled(false)
+                it.setDisplayShowTitleEnabled(true)
+            }
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.send_title)
-            it.setDisplayShowHomeEnabled(false)
-            it.setDisplayHomeAsUpEnabled(false)
-            it.setDisplayShowTitleEnabled(true)
+            act.addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_send, menu)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.send_menu_close -> {
+                            confirmClose()
+                            true
+                        }
+                        else -> {
+                            false
+                        }
+                    }
+                }
+            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+            act.onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                confirmClose()
+            }
         }
 
         binding?.let { bind ->
@@ -133,21 +152,6 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                 multipleUriLauncher.launch(args.inputUris.first())
             }
         }
-    }
-
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_send, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.send_menu_close -> {
-                confirmClose()
-            }
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     /**
