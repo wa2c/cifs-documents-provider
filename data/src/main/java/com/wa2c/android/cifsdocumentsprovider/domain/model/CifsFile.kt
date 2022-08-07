@@ -9,8 +9,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.SEPARATOR
 data class CifsFile(
     /** File name */
     val name: String,
-    /** Host */
-    val server: String,
     /** CIFS URI (smb://...) */
     val uri: Uri,
     /** File size */

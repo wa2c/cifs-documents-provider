@@ -310,7 +310,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
      * Get Document ID from CIFS file
      */
     private fun CifsFile.getDocumentId(): String {
-        return CifsConnection.getDocumentId(this.server, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
+        return CifsConnection.getDocumentId(this.uri.host, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
     }
 
     /**

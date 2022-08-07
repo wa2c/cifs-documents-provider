@@ -301,7 +301,6 @@ internal class CifsClient @Inject constructor() {
             val isDir = urlText.isDirectoryUri || isDirectory
             CifsFile(
                 name = name.trim('/'),
-                server = server,
                 uri = Uri.parse(urlText),
                 size = if (isDir || !isFile) 0 else length(),
                 lastModified = lastModified,
