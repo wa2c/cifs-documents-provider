@@ -25,16 +25,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * SMBJ Client
  */
-@Singleton
-internal class SmbjClient @Inject constructor(): CifsClientInterface {
+internal class SmbjClient constructor(
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+): CifsClientInterface {
 
     /** SMBJ Client */
     private val client = SMBClient()
@@ -113,7 +113,7 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
     /**
      * Open Disk
      */
-    private fun  openEntry(diskShare: DiskShare, sharePath: String, isRead: Boolean): DiskEntry {
+    private fun openEntry(diskShare: DiskShare, sharePath: String, isRead: Boolean): DiskEntry {
         return if (isRead) {
             diskShare.open(
                 sharePath.ifEmpty { "/" },
@@ -156,7 +156,7 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
     }
 
     override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 getChildren(dto)
                 ConnectionResult.Success
@@ -192,57 +192,65 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
     }
 
     override suspend fun getFile(dto: CifsClientDto, forced: Boolean): CifsFile? {
-        return if (dto.isRoot) {
-            CifsFile(
-                dto.connection.name,
-                dto.uri.toUri(),
-                0,
-                0,
-                true,
-            )
-        } else {
-            useDiskShare(dto) { diskShare ->
-                val info = diskShare.getFileInformation(dto.sharePath)
-                info.toCifsFile(dto.uri)
+        return withContext(dispatcher) {
+            if (dto.isRoot) {
+                CifsFile(
+                    dto.connection.name,
+                    dto.uri.toUri(),
+                    0,
+                    0,
+                    true,
+                )
+            } else {
+                useDiskShare(dto) { diskShare ->
+                    val info = diskShare.getFileInformation(dto.sharePath)
+                    info.toCifsFile(dto.uri)
+                }
             }
         }
     }
 
     override suspend fun getChildren(dto: CifsClientDto, forced: Boolean): List<CifsFile> {
-        return if (dto.isRoot) {
-            // Root
-            openSession(dto).use { session ->
-                val transport = SMBTransportFactories.SRVSVC.getTransport(session)
-                val serverService = ServerService(transport)
-                serverService.shares0.filter { !it.netName.isInvalidFileName }.map { info ->
-                    CifsFile(
-                        name = info.netName,
-                        uri =  dto.uri.appendChild(info.netName, true).toUri(),
-                        size = 0,
-                        lastModified = 0,
-                        isDirectory = true,
-                    )
+        return withContext(dispatcher) {
+            if (dto.isRoot) {
+                // Root
+                openSession(dto).use { session ->
+                    val transport = SMBTransportFactories.SRVSVC.getTransport(session)
+                    val serverService = ServerService(transport)
+                    serverService.shares0.filter { !it.netName.isInvalidFileName }.map { info ->
+                        CifsFile(
+                            name = info.netName,
+                            uri = dto.uri.appendChild(info.netName, true).toUri(),
+                            size = 0,
+                            lastModified = 0,
+                            isDirectory = true,
+                        )
+                    }
                 }
-            }
-        } else {
-            // Shared folder
-            useDiskShare(dto) { diskShare ->
-                diskShare.list(dto.sharePath).filter { !it.fileName.isInvalidFileName }.map { info ->
-                    val isDirectory = EnumWithValue.EnumUtils.isSet(info.fileAttributes, FileAttributes.FILE_ATTRIBUTE_DIRECTORY)
-                    CifsFile(
-                        name = info.fileName,
-                        uri = dto.uri.appendChild(info.fileName, isDirectory).toUri(),
-                        size = info.endOfFile,
-                        lastModified = info.changeTime.toEpochMillis(),
-                        isDirectory = isDirectory,
-                    )
+            } else {
+                // Shared folder
+                useDiskShare(dto) { diskShare ->
+                    diskShare.list(dto.sharePath).filter { !it.fileName.isInvalidFileName }
+                        .map { info ->
+                            val isDirectory = EnumWithValue.EnumUtils.isSet(
+                                info.fileAttributes,
+                                FileAttributes.FILE_ATTRIBUTE_DIRECTORY
+                            )
+                            CifsFile(
+                                name = info.fileName,
+                                uri = dto.uri.appendChild(info.fileName, isDirectory).toUri(),
+                                size = info.endOfFile,
+                                lastModified = info.changeTime.toEpochMillis(),
+                                isDirectory = isDirectory,
+                            )
+                        }
                 }
             }
         }
     }
 
     override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
             try {
                 useDiskShare(dto) { diskShare ->
@@ -262,38 +270,46 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
     }
 
     override suspend fun copyFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile? {
-        return useIO(sourceDto, targetDto) { sourceEntry, targetEntry ->
-            sourceEntry.inputStream.use { input ->
-                targetEntry.outputStream.use { output ->
-                    input.copyTo(output)
-                    targetEntry.toCifsFile()
+        return withContext(dispatcher) {
+            useIO(sourceDto, targetDto) { sourceEntry, targetEntry ->
+                sourceEntry.inputStream.use { input ->
+                    targetEntry.outputStream.use { output ->
+                        input.copyTo(output)
+                        targetEntry.toCifsFile()
+                    }
                 }
             }
         }
     }
 
     override suspend fun renameFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile? {
-        return useDiskShare(sourceDto) { diskShare ->
-            openDiskFile(diskShare, sourceDto.sharePath, false).use { diskEntry ->
-                diskEntry.rename(targetDto.name)
-                diskEntry.toCifsFile()
+        return withContext(dispatcher) {
+            useDiskShare(sourceDto) { diskShare ->
+                openDiskFile(diskShare, sourceDto.sharePath, false).use { diskEntry ->
+                    diskEntry.rename(targetDto.name)
+                    diskEntry.toCifsFile()
+                }
             }
         }
     }
 
     override suspend fun deleteFile(dto: CifsClientDto): Boolean {
-        return useDiskShare(dto) { diskShare ->
-            diskShare.rm(dto.sharePath)
-            true
+        return withContext(dispatcher) {
+            useDiskShare(dto) { diskShare ->
+                diskShare.rm(dto.sharePath)
+                true
+            }
         }
     }
 
     override suspend fun moveFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile? {
-        TODO("Not yet implemented")
+        return withContext(dispatcher) {
+            TODO("Not yet implemented")
+        }
     }
 
     override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             val session = openSession(dto)
             val diskShare = openDiskShare(session, dto.shareName)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)

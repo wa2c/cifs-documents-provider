@@ -3,9 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.common
 import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
-
 
 /**
  * Proxy Callback process
@@ -13,7 +11,7 @@ import java.io.IOException
 @Throws(ErrnoException::class)
 fun <T> processFileIo(process: () -> T): T {
     return try {
-        runBlocking { process() }
+        process()
     } catch (e: IOException) {
         logE(e)
         if (e.cause is ErrnoException) {

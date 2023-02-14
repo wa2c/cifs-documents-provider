@@ -3,7 +3,10 @@ package com.wa2c.android.cifsdocumentsprovider.data.jcifs
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import com.wa2c.android.cifsdocumentsprovider.common.utils.*
+import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
+import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -20,19 +23,18 @@ import jcifs.smb.NtStatus
 import jcifs.smb.NtlmPasswordAuthenticator
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
-import javax.inject.Inject
-import javax.inject.Singleton
 
 
 /**
  * jCIFS-ng Client
  */
-@Singleton
-@Suppress("BlockingMethodInNonBlockingContext")
-internal class JCifsClient @Inject constructor(): CifsClientInterface {
+internal class JCifsClient constructor(
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+): CifsClientInterface {
 
     /** CIFS Context cache */
     private val contextCache = LruCache<CifsConnection, CIFSContext>(10)
@@ -53,7 +55,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
             setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
             setProperty("jcifs.smb.client.dfs.disabled", (!connection.enableDfs).toString())
-            setProperty("jcifs.smb.client.ipcSigningEnforced", (!connection.user.isNullOrEmpty() && !connection.user.equals("guest")).toString())
+            setProperty("jcifs.smb.client.ipcSigningEnforced", (!connection.user.isNullOrEmpty() && connection.user != "guest").toString())
             setProperty("jcifs.smb.client.guestUsername", "cifs-documents-provider")
         }
 
@@ -85,7 +87,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      * Get SMB file
      */
     private suspend fun getSmbFile(dto: CifsClientDto, forced: Boolean = false): SmbFile? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val context = (if (forced) null else contextCache[dto.connection]) ?: getCifsContext(dto.connection)
                 val file = (if (forced) null else smbFileCache[dto.uri]) ?: getSmbFile(context, dto.uri)
@@ -102,7 +104,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      * Check setting connectivity.
      */
     override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 getSmbFile(dto, true)?.list()
                 ConnectionResult.Success
@@ -150,7 +152,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      * Create new CifsFile.
      */
     override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
             try {
                 getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
@@ -175,17 +177,17 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      */
     override suspend fun copyFile(
         sourceDto: CifsClientDto,
-        accessDto: CifsClientDto,
+        targetDto: CifsClientDto,
     ): CifsFile? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val source = getSmbFile(sourceDto) ?: return@withContext null
-                val target = getSmbFile(accessDto) ?: return@withContext null
+                val target = getSmbFile(targetDto) ?: return@withContext null
                 source.copyTo(target)
-                smbFileCache.put(accessDto.uri, target)
+                smbFileCache.put(targetDto.uri, target)
                 target.toCifsFile()
             } catch (e: Exception) {
-                removeFileCache(accessDto.uri)
+                removeFileCache(targetDto.uri)
                 throw e
             } finally {
                 removeFileCache(sourceDto.uri)
@@ -200,7 +202,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
         sourceDto: CifsClientDto,
         targetDto: CifsClientDto,
     ): CifsFile? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 val sourceFile = getSmbFile(sourceDto) ?: return@withContext null
                 val targetFile = getSmbFile(targetDto) ?: return@withContext null
@@ -222,7 +224,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
     override suspend fun deleteFile(
         dto: CifsClientDto,
     ): Boolean {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             try {
                 getSmbFile(dto)?.let {
                     it.delete()
@@ -241,7 +243,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
         sourceDto: CifsClientDto,
         targetDto: CifsClientDto,
     ): CifsFile? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             if (sourceDto.connection == targetDto.connection) {
                 // Same connection
                 renameFile(sourceDto, targetDto)
@@ -258,7 +260,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      * Get ParcelFileDescriptor
      */
     override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
             if (dto.connection.safeTransfer) {
                 JCifsProxyFileCallbackSafe(file, mode)
@@ -281,7 +283,7 @@ internal class JCifsClient @Inject constructor(): CifsClientInterface {
      */
     private suspend fun SmbFile.toCifsFile(): CifsFile {
         val urlText = url.toString()
-        return cifsFileCache[urlText] ?: withContext(Dispatchers.IO) {
+        return cifsFileCache[urlText] ?: withContext(dispatcher) {
             val isDir = urlText.isDirectoryUri || isDirectory
             CifsFile(
                 name = name.trim('/'),

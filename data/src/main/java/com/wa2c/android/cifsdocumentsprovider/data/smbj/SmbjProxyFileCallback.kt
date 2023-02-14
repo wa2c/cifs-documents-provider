@@ -6,20 +6,14 @@ import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlin.coroutines.CoroutineContext
 
+/**
+ * Proxy File Callback for SMBJ
+ */
 class SmbjProxyFileCallback(
     private val file: File,
     private val mode: AccessMode,
-) : ProxyFileDescriptorCallback(), CoroutineScope {
-
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+) : ProxyFileDescriptorCallback() {
 
     override fun onGetSize(): Long {
         return file.fileInformation.standardInformation.endOfFile
