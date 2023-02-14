@@ -3,9 +3,10 @@ package com.wa2c.android.cifsdocumentsprovider
 import android.app.NotificationManager
 import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
+import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
 import dagger.Provides
@@ -44,14 +45,15 @@ internal object AppModule {
     @Singleton
     @Provides
     fun provideCifsClient(): CifsClientInterface {
-        return SmbjClient()
+        //return SmbjClient()
+        return JCifsClient()
     }
 
 }
 
 fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
-        SmbjClient(),
+        AppModule.provideCifsClient(),
         AppPreferences(context),
         AppModule.provideDatabase(context).getStorageSettingDao(),
     )

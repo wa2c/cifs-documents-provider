@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
 import android.net.Uri
+import android.provider.DocumentsContract
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.common.values.*
 import java.nio.file.Paths
@@ -70,6 +71,10 @@ val Uri.pathFragment: String
         return uriText.substring(pathIndex)
     }
 
+/** True if invalid file name */
+val String.isInvalidFileName: Boolean
+    get() = this == "." || this == ".."
+
 /** True if directory URI */
 val String.isDirectoryUri: Boolean
     get() = this.endsWith(URI_SEPARATOR)
@@ -88,8 +93,24 @@ fun String.appendChild(childName: String, isDirectory: Boolean): String {
 /** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */
 fun String.uncPathToUri(isDirectory: Boolean): String? {
     val elements = this.substringAfter(UNC_START).split(UNC_SEPARATOR).ifEmpty { return null }
-    val (server, port) = elements.getOrNull(0)?.split('@')?.let {
-        it.getOrNull(0) to it.getOrNull(1) } ?: return null
+    val params = elements.getOrNull(0)?.split('@') ?: return null
+    val server = params.getOrNull(0) ?: return null
+    val port = if (params.size >= 2) params.lastOrNull() else null
     val path = elements.subList(1, elements.size).joinToString(UNC_SEPARATOR)
     return getSmbUri(server, port, path, isDirectory)
+}
+
+/**
+ * Optimize URI
+ */
+fun String.optimizeUri(mimeType: String? = null): String {
+    return  if (mimeType == null) {
+        this
+    } else if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
+        this.appendSeparator()
+    } else {
+        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+        if (ext == this.mimeType) this
+        else "$this.$ext"
+    }
 }

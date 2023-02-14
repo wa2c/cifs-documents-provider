@@ -14,24 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.wa2c.android.cifsdocumentsprovider.data.io
+package com.wa2c.android.cifsdocumentsprovider.data.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
+import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import jcifs.smb.SmbException
+import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
-import kotlinx.coroutines.runBlocking
-import java.io.IOException
 
 /**
  * CIFS Proxy File Callback (by BufferedReader / BufferedWriter)
  */
-internal class CifsProxyFileCallback(
+internal class JCifsProxyFileCallback(
     private val smbFile: SmbFile,
     private val mode: AccessMode
 ) : ProxyFileDescriptorCallback() {
@@ -40,13 +39,8 @@ internal class CifsProxyFileCallback(
      * File size
      */
     private val fileSeize: Long by lazy {
-        runBlocking {
-            try {
-                runBlocking { smbFile.length() }
-            } catch (e: IOException) {
-                throwErrnoException(e)
-                0
-            }
+        processFileIo {
+            smbFile.length()
         }
     }
 
@@ -101,23 +95,17 @@ internal class CifsProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        try {
-            return getReader().readBuffer(offset, size, data)
-        } catch (e: IOException) {
-            throwErrnoException(e)
+        return processFileIo {
+            getReader().readBuffer(offset, size, data)
         }
-        return 0
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        try {
-            if (mode != AccessMode.W) { throw SmbException("Writing is not permitted") }
-            return getWriter().writeBuffer(offset, size, data)
-        } catch (e: IOException) {
-            throwErrnoException(e)
+        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
+        return processFileIo {
+            getWriter().writeBuffer(offset, size, data)
         }
-        return 0
     }
 
     @Throws(ErrnoException::class)
@@ -128,26 +116,12 @@ internal class CifsProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onRelease() {
         logD("onRelease")
-        try {
+        processFileIo {
             reader?.close()
             writer?.close()
             outputAccess?.close()
             smbFile.close()
-        } catch (e: IOException) {
-            throwErrnoException(e)
-        }
-    }
-
-    @Throws(ErrnoException::class)
-    private fun throwErrnoException(e: IOException) {
-        logE(e)
-
-        // Hack around that SambaProxyFileCallback throws ErrnoException rather than IOException
-        // assuming the underlying cause is an ErrnoException.
-        if (e.cause is ErrnoException) {
-            throw (e.cause as ErrnoException?)!!
-        } else {
-            throw ErrnoException("I/O", OsConstants.EIO, e)
+            0
         }
     }
 

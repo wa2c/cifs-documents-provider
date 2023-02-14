@@ -9,13 +9,12 @@ import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
-import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -45,7 +44,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
      */
     private fun <T> runOnFileHandler(function: suspend () -> T): T {
         return runBlocking(fileHandler.asCoroutineDispatcher()) {
-            function()
+            try {
+                function()
+            } catch (e: Exception) {
+                throw e
+            }
         }
     }
 
@@ -145,17 +148,21 @@ class CifsDocumentsProvider : DocumentsProvider() {
         documentId: String?,
         mode: String,
         signal: CancellationSignal?
-    ): ParcelFileDescriptor? {
+    ): ParcelFileDescriptor {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            cifsRepository.getCallback(uri, accessMode)
+            val a = cifsRepository.getCallback(uri, accessMode)
+            logD(a)
+            a
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
                 callback,
                 fileHandler
             )
+        } ?: let {
+            throw OperationCanceledException()
         }
     }
 

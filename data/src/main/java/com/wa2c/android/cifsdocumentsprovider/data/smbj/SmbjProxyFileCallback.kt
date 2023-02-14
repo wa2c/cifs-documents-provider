@@ -1,16 +1,14 @@
-package com.wa2c.android.cifsdocumentsprovider.data.io
+package com.wa2c.android.cifsdocumentsprovider.data.smbj
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
 import com.hierynomus.smbj.share.File
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
-import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
 class SmbjProxyFileCallback(
@@ -34,6 +32,7 @@ class SmbjProxyFileCallback(
     }
 
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
+        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo {
             file.write(data, offset, 0, size)
         }
@@ -50,20 +49,6 @@ class SmbjProxyFileCallback(
             file.diskShare.close()
             file.diskShare.treeConnect.session.close()
             0
-        }
-    }
-
-    @Throws(ErrnoException::class)
-    private fun processFileIo(process: () -> Int): Int {
-        return try {
-            runBlocking { process() }
-        } catch (e: IOException) {
-            logE(e)
-            if (e.cause is ErrnoException) {
-                throw (e.cause as ErrnoException)
-            } else {
-                throw ErrnoException("I/O", OsConstants.EIO, e)
-            }
         }
     }
 }

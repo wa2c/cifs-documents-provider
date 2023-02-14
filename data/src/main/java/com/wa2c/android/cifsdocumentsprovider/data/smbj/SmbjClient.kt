@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.smbj
 
 import android.os.ProxyFileDescriptorCallback
 import androidx.core.net.toUri
@@ -22,13 +22,13 @@ import com.rapid7.client.dcerpc.transport.SMBTransportFactories
 import com.wa2c.android.cifsdocumentsprovider.common.utils.*
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.data.io.SmbjProxyFileCallback
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.io.path.Path
 
 /**
  * SMBJ Client
@@ -71,16 +71,16 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
                 setOf(SMB2ShareAccess.FILE_SHARE_READ),
                 SMB2CreateDisposition.FILE_OPEN,
-                emptySet(),
+                null,
             )
         } else {
             diskShare.openFile(
                 sharePath,
-                setOf(AccessMask.GENERIC_WRITE),
+                setOf(AccessMask.FILE_READ_DATA, AccessMask.FILE_WRITE_DATA, AccessMask.FILE_APPEND_DATA, AccessMask.DELETE),
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-                setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
-                SMB2CreateDisposition.FILE_CREATE,
-                emptySet(),
+                SMB2ShareAccess.ALL,
+                SMB2CreateDisposition.FILE_OPEN,
+                null,
             )
         }
     }
@@ -96,7 +96,7 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
                 setOf(FileAttributes.FILE_ATTRIBUTE_DIRECTORY),
                 setOf(SMB2ShareAccess.FILE_SHARE_READ),
                 SMB2CreateDisposition.FILE_OPEN,
-                emptySet(),
+                null,
             )
         } else {
             diskShare.openDirectory(
@@ -105,7 +105,7 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
                 setOf(FileAttributes.FILE_ATTRIBUTE_DIRECTORY),
                 setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
                 SMB2CreateDisposition.FILE_CREATE,
-                emptySet(),
+                null,
             )
         }
     }
@@ -119,18 +119,18 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
                 sharePath.ifEmpty { "/" },
                 setOf(AccessMask.GENERIC_READ),
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-                setOf(SMB2ShareAccess.FILE_SHARE_READ),
-                SMB2CreateDisposition.FILE_OPEN,
-                emptySet(),
+                setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
+                SMB2CreateDisposition.FILE_OPEN_IF,
+                null,
             )
         } else {
-            diskShare.openFile(
+            diskShare.open(
                 sharePath,
-                setOf(AccessMask.GENERIC_WRITE),
+                setOf(AccessMask.GENERIC_ALL),
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-                setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
+                SMB2ShareAccess.ALL,
                 SMB2CreateDisposition.FILE_CREATE,
-                emptySet(),
+                null,
             )
         }
     }
@@ -143,6 +143,17 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
         }
     }
 
+    private fun <T> useIO(sourceDto: CifsClientDto, targetDto: CifsClientDto, action: (sourceEntry: File, targetEntry: File) -> T): T {
+        return useDiskShare(sourceDto) { diskShare ->
+            openDiskFile(diskShare, sourceDto.sharePath, true).use { diskEntry ->
+                useDiskShare(targetDto) { targetDiskShare ->
+                    openDiskFile(targetDiskShare, targetDto.sharePath, false).use { outputEntry ->
+                        action(diskEntry, outputEntry)
+                    }
+                }
+            }
+        }
+    }
 
     override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
         return withContext(Dispatchers.IO) {
@@ -203,7 +214,7 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
             openSession(dto).use { session ->
                 val transport = SMBTransportFactories.SRVSVC.getTransport(session)
                 val serverService = ServerService(transport)
-                serverService.shares0.map { info ->
+                serverService.shares0.filter { !it.netName.isInvalidFileName }.map { info ->
                     CifsFile(
                         name = info.netName,
                         uri =  dto.uri.appendChild(info.netName, true).toUri(),
@@ -216,37 +227,56 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
         } else {
             // Shared folder
             useDiskShare(dto) { diskShare ->
-                diskShare.list(dto.sharePath).map { info ->
+                diskShare.list(dto.sharePath).filter { !it.fileName.isInvalidFileName }.map { info ->
                     val isDirectory = EnumWithValue.EnumUtils.isSet(info.fileAttributes, FileAttributes.FILE_ATTRIBUTE_DIRECTORY)
-                    val childName = info.fileName.let { if (isDirectory) it.appendSeparator() else it }
                     CifsFile(
                         name = info.fileName,
-                        uri = dto.uri.appendChild(childName, isDirectory).toUri(),
+                        uri = dto.uri.appendChild(info.fileName, isDirectory).toUri(),
                         size = info.endOfFile,
                         lastModified = info.changeTime.toEpochMillis(),
-                        isDirectory = EnumWithValue.EnumUtils.isSet(info.fileAttributes, FileAttributes.FILE_ATTRIBUTE_DIRECTORY),
+                        isDirectory = isDirectory,
                     )
                 }
             }
         }
     }
 
-    override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
-        // Shared folder
-        TODO("Not yet implemented")
-
+    override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile {
+        return withContext(Dispatchers.IO) {
+            val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
+            try {
+                useDiskShare(dto) { diskShare ->
+                    if (optimizedUri.isDirectoryUri) {
+                        diskShare.mkdir(dto.sharePath)
+                        diskShare.getFileInformation(dto.sharePath)
+                    } else {
+                        openDiskFile(diskShare, dto.sharePath, false).use {
+                            it.fileInformation
+                        }
+                    }
+                }.toCifsFile(dto.sharePath)
+            } catch (e: Exception) {
+                throw e
+            }
+        }
     }
 
-    override suspend fun copyFile(sourceDto: CifsClientDto, accessDto: CifsClientDto): CifsFile? {
-        TODO("Not yet implemented")
+    override suspend fun copyFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile? {
+        return useIO(sourceDto, targetDto) { sourceEntry, targetEntry ->
+            sourceEntry.inputStream.use { input ->
+                targetEntry.outputStream.use { output ->
+                    input.copyTo(output)
+                    targetEntry.toCifsFile()
+                }
+            }
+        }
     }
 
     override suspend fun renameFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile? {
         return useDiskShare(sourceDto) { diskShare ->
-            openEntry(diskShare, sourceDto.sharePath, false).use { diskEntry ->
-                diskEntry.rename(targetDto.shareName)
-                val uri = diskEntry.uncPath.uncPathToUri(diskEntry is Directory) ?: return@useDiskShare null
-                diskEntry.fileInformation.toCifsFile(uri)
+            openDiskFile(diskShare, sourceDto.sharePath, false).use { diskEntry ->
+                diskEntry.rename(targetDto.name)
+                diskEntry.toCifsFile()
             }
         }
     }
@@ -271,13 +301,26 @@ internal class SmbjClient @Inject constructor(): CifsClientInterface {
         }
     }
 
-    private fun FileAllInformation.toCifsFile(uri: String): CifsFile {
+    private fun FileAllInformation.toCifsFile(uriText: String): CifsFile {
+        val uri = uriText.toUri()
         return CifsFile(
-            name = nameInformation,
-            uri = uri.toUri(),
+            name = uri.lastPathSegment ?: "",
+            uri = uri,
             size = standardInformation.endOfFile,
             lastModified = basicInformation.changeTime.toEpochMillis(),
             isDirectory = standardInformation.isDirectory
+        )
+    }
+
+    private fun DiskEntry.toCifsFile(): CifsFile? {
+        val isDirectory = this.fileInformation.standardInformation.isDirectory
+        val uri = this.uncPath.uncPathToUri(isDirectory)?.toUri() ?: return null
+        return CifsFile(
+            name = uri.lastPathSegment ?: "",
+            uri = uri,
+            size = this.fileInformation.standardInformation.endOfFile,
+            lastModified = this.fileInformation.basicInformation.changeTime.toEpochMillis(),
+            isDirectory = isDirectory
         )
     }
 

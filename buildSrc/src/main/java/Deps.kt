@@ -1,3 +1,4 @@
+@Suppress("SpellCheckingInspection")
 object Deps {
 
     const val compileSdkVersion = 33

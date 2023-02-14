@@ -1,19 +1,15 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.jcifs
 
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import android.webkit.MimeTypeMap
-import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.common.utils.*
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallback
-import com.wa2c.android.cifsdocumentsprovider.data.io.CifsProxyFileCallbackSafe
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
+import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import jcifs.CIFSContext
@@ -36,7 +32,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @Suppress("BlockingMethodInNonBlockingContext")
-internal class CifsClient @Inject constructor(): CifsClientInterface {
+internal class JCifsClient @Inject constructor(): CifsClientInterface {
 
     /** CIFS Context cache */
     private val contextCache = LruCache<CifsConnection, CIFSContext>(10)
@@ -136,8 +132,8 @@ internal class CifsClient @Inject constructor(): CifsClientInterface {
     /**
      * Get CifsFile
      */
-    override suspend fun getFile(access: CifsClientDto, forced: Boolean): CifsFile? {
-        return getSmbFile(access, forced)?.toCifsFile()
+    override suspend fun getFile(dto: CifsClientDto, forced: Boolean): CifsFile? {
+        return getSmbFile(dto, forced)?.toCifsFile()
     }
 
     /**
@@ -155,23 +151,10 @@ internal class CifsClient @Inject constructor(): CifsClientInterface {
      */
     override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
         return withContext(Dispatchers.IO) {
-            val createUri = if (!dto.uri.isDirectoryUri && dto.connection.extension) {
-                val uriMimeType = dto.uri.mimeType
-                if (mimeType == uriMimeType) {
-                    dto.uri
-                } else {
-                    // Add extension
-                    val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-                    if (ext.isNullOrEmpty()) dto.uri
-                    else "${dto.uri}.$ext"
-                }
-            } else {
-                dto.uri
-            }
-
+            val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
             try {
-                getSmbFile(dto.copy(inputUri = createUri))?.let {
-                    if (createUri.isDirectoryUri) {
+                getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
+                    if (optimizedUri.isDirectoryUri) {
                         // Directory
                         it.mkdir()
                     } else {
@@ -181,7 +164,7 @@ internal class CifsClient @Inject constructor(): CifsClientInterface {
                     it.toCifsFile()
                 }
             } catch (e: Exception) {
-                removeFileCache(createUri)
+                removeFileCache(optimizedUri)
                 throw e
             }
         }
@@ -278,9 +261,9 @@ internal class CifsClient @Inject constructor(): CifsClientInterface {
         return withContext(Dispatchers.IO) {
             val file = getSmbFile(dto) ?: return@withContext null
             if (dto.connection.safeTransfer) {
-                CifsProxyFileCallbackSafe(file, mode)
+                JCifsProxyFileCallbackSafe(file, mode)
             } else {
-                CifsProxyFileCallback(file, mode)
+                JCifsProxyFileCallback(file, mode)
             }
         }
     }
