@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.jcifs
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.wa2c.android.cifsdocumentsprovider.common.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
@@ -61,8 +62,8 @@ internal class JCifsClient constructor(
 
         val context = BaseContext(PropertyConfiguration(property)).let {
             when {
-                connection.anonymous -> it.withAnonymousCredentials() // Anonymous
-                connection.user.isNullOrEmpty() -> it.withGuestCrendentials() // Guest if empty username
+                connection.isAnonymous -> it.withAnonymousCredentials() // Anonymous
+                connection.isGuest -> it.withGuestCrendentials() // Guest if empty username
                 else -> it.withCredentials(NtlmPasswordAuthenticator(connection.domain, connection.user, connection.password, null))
             }
         }
@@ -110,7 +111,7 @@ internal class JCifsClient constructor(
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
-                val c = getCause(e)
+                val c = e.getCause()
                 if (e is SmbException && e.ntStatus in warningStatus) {
                     // Warning
                     ConnectionResult.Warning(c)
@@ -120,15 +121,6 @@ internal class JCifsClient constructor(
                 }
             }
         }
-    }
-
-    /**
-     * Get throwable cause.
-     */
-    private fun getCause(throwable: Throwable): Throwable {
-        val c = throwable.cause
-        return if (c == null) return throwable
-        else getCause(c)
     }
 
     /**

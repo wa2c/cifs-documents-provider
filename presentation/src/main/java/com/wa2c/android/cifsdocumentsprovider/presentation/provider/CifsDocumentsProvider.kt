@@ -152,9 +152,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            val a = cifsRepository.getCallback(uri, accessMode)
-            logD(a)
-            a
+            cifsRepository.getCallback(uri, accessMode)
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),

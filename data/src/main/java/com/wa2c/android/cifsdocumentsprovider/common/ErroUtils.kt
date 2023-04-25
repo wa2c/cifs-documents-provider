@@ -21,3 +21,11 @@ fun <T> processFileIo(process: () -> T): T {
         }
     }
 }
+
+/**
+ * Get throwable cause.
+ */
+fun Throwable.getCause(): Throwable {
+    val c = cause
+    return c?.getCause() ?: return this
+}
