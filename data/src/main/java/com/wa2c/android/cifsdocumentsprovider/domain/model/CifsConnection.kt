@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -15,6 +16,7 @@ import kotlinx.serialization.Serializable
 data class CifsConnection(
     val id: String,
     val name: String,
+    val storage: StorageType = StorageType.default,
     val domain: String?,
     val host: String,
     val port: String?,
@@ -56,6 +58,7 @@ data class CifsConnection(
             return CifsConnection(
                 id = NEW_ID,
                 name = hostText,
+                storage = StorageType.default,
                 domain = null,
                 host = hostText,
                 port = null,

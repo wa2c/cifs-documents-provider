@@ -75,6 +75,37 @@
 
                 </TableRow>
 
+
+                <TableRow
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="0"
+                        android:gravity="center_vertical|end"
+                        android:labelFor="@id/edit_port_edit_text"
+                        android:text="@string/edit_storage_title" />
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_span="2"
+                        android:layout_weight="1">
+
+                        <Spinner
+                            android:id="@+id/edit_storage_spinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:selectedItemPosition="@={viewModel.storageIndex}" />
+
+                    </FrameLayout>
+
+                </TableRow>
+
+
                 <TableRow
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">

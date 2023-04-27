@@ -14,6 +14,7 @@
     <string name="edit_title">Connection</string>
     <string name="edit_name_title">Name</string>
     <string name="edit_name_hint">Host name if empty</string>
+    <string name="edit_storage_title">Storage</string>
     <string name="edit_domain_title">Domain</string>
     <string name="edit_domain_hint">Input as needed</string>
     <string name="edit_host_title">Host</string>
