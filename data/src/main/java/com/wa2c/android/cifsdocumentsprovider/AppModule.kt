@@ -44,16 +44,25 @@ internal object AppModule {
     /** CifsClient */
     @Singleton
     @Provides
-    fun provideCifsClient(): CifsClientInterface {
-        //return SmbjClient()
+    fun provideJcifsClient(): JCifsClient {
         return JCifsClient()
     }
+
+
+    /** CifsClient */
+    @Singleton
+    @Provides
+    fun provideSmbjClient(): SmbjClient {
+        return SmbjClient()
+    }
+
 
 }
 
 fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
-        AppModule.provideCifsClient(),
+        AppModule.provideJcifsClient(),
+        AppModule.provideSmbjClient(),
         AppPreferences(context),
         AppModule.provideDatabase(context).getStorageSettingDao(),
     )

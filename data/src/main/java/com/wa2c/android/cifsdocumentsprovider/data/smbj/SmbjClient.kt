@@ -15,7 +15,6 @@ import com.hierynomus.smbj.SMBClient
 import com.hierynomus.smbj.SmbConfig
 import com.hierynomus.smbj.auth.AuthenticationContext
 import com.hierynomus.smbj.session.Session
-import com.hierynomus.smbj.share.Directory
 import com.hierynomus.smbj.share.DiskEntry
 import com.hierynomus.smbj.share.DiskShare
 import com.hierynomus.smbj.share.File
