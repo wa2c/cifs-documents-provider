@@ -38,10 +38,6 @@ internal class SmbjClient constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): CifsClientInterface {
 
-    private val config = SmbConfig.builder().build()
-    /** SMBJ Client */
-    private val client = SMBClient(config)
-
     /** CIFS Context cache */
     private val sessionCache = LruCache<CifsClientDto, Session>(10)
 
@@ -49,7 +45,14 @@ internal class SmbjClient constructor(
      * Open Session
      */
     private fun openSession(dto: CifsClientDto): Session {
-       val context = when {
+        val config = SmbConfig.builder()
+            .withDfsEnabled(dto.connection.enableDfs)
+            .build()
+        val client = SMBClient(config)
+        val port = dto.connection.port?.toIntOrNull()
+        val connection = port?.let { client.connect(dto.connection.host, it) } ?: client.connect(dto.connection.host)
+
+        val context = when {
             dto.connection.isAnonymous -> AuthenticationContext.anonymous() // Anonymous
             dto.connection.isGuest -> AuthenticationContext.guest() // Guest if empty username
             else -> AuthenticationContext(
@@ -58,10 +61,9 @@ internal class SmbjClient constructor(
                 dto.connection.domain
             )
         }
-
-        val port = dto.connection.port?.toIntOrNull()
-        val connection = port?.let { client.connect(dto.connection.host, it) } ?: client.connect(dto.connection.host)
-        return connection.authenticate(context)
+        return connection.authenticate(context).also {
+            sessionCache.put(dto, it)
+        }
     }
 
     /**
@@ -69,7 +71,6 @@ internal class SmbjClient constructor(
      */
     private fun getSession(dto: CifsClientDto): Session {
         return sessionCache[dto]?.takeIf { it.connection.isConnected } ?: openSession(dto)
-        //return openSession(dto)
     }
 
     /**
