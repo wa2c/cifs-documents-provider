@@ -5,31 +5,15 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
 
 /**
- * Proxy File Callback for SMBJ (Buffering IO)
+ * Proxy File Callback for SMBJ (Normal IO)
  */
-class SmbjProxyFileCallback(
+class SmbjProxyFileCallbackSafe(
     private val file: File,
     private val mode: AccessMode,
 ) : ProxyFileDescriptorCallback() {
-
-    private var reader: BackgroundBufferReader? = null
-
-    private fun getReader(): BackgroundBufferReader {
-        return reader ?: BackgroundBufferReader(onGetSize()) { start, array, off, len ->
-            file.inputStream.use {
-                it.skip(start)
-                it.read(array, off, len)
-            }
-        }.also {
-            reader = it
-            logD("Reader created")
-        }
-    }
 
     override fun onGetSize(): Long {
         return file.fileInformation.standardInformation.endOfFile
@@ -37,13 +21,14 @@ class SmbjProxyFileCallback(
 
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo {
-            getReader().readBuffer(offset, size, data)
+            file.read(data, offset, 0, size)
         }
     }
 
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo {
+            //file.write(data, offset, 0, size)
             file.writeAsync(data, offset, 0, size)
             size
         }

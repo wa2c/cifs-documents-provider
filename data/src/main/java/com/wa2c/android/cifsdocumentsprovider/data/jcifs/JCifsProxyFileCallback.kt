@@ -28,7 +28,7 @@ import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 
 /**
- * Proxy File Callback for jCIFS-ng (by BufferedReader / BufferedWriter)
+ * Proxy File Callback for jCIFS-ng (Buffering IO)
  */
 internal class JCifsProxyFileCallback(
     private val smbFile: SmbFile,

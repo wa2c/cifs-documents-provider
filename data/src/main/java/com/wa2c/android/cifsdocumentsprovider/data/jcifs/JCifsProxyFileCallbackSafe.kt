@@ -29,7 +29,7 @@ import kotlinx.coroutines.Job
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Proxy File Callback for jCIFS-ng (by SmbRandomAccessFile)
+ * Proxy File Callback for jCIFS-ng (Normal IO)
  */
 internal class JCifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,

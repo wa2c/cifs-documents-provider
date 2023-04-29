@@ -328,7 +328,11 @@ internal class SmbjClient constructor(
             val session = getSession(dto)
             val diskShare = openDiskShare(session, dto.shareName)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)
-            SmbjProxyFileCallback(diskFile, mode)
+            if (dto.connection.safeTransfer) {
+                SmbjProxyFileCallbackSafe(diskFile, mode)
+            } else {
+                SmbjProxyFileCallback(diskFile, mode)
+            }
         }
     }
 
