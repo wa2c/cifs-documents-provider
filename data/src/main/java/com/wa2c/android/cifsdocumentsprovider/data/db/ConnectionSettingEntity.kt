@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 
 @Entity(
     tableName = ConnectionSettingEntity.TABLE_NAME,
@@ -19,7 +20,7 @@ internal data class ConnectionSettingEntity(
     val name: String,
     /** Type */
     @ColumnInfo(name = "type")
-    val type: String = "SMB",
+    val type: String = StorageType.default.value,
     /** URI */
     @ColumnInfo(name = "uri")
     val uri: String,
