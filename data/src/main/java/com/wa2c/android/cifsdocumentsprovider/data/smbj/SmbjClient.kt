@@ -104,56 +104,6 @@ internal class SmbjClient constructor(
         }
     }
 
-//    /**
-//     * Open Directory
-//     */
-//    private fun openDiskDirectory(diskShare: DiskShare, sharePath: String, isRead: Boolean): Directory {
-//        return if (isRead) {
-//            diskShare.openDirectory(
-//                sharePath,
-//                setOf(AccessMask.GENERIC_READ),
-//                setOf(FileAttributes.FILE_ATTRIBUTE_DIRECTORY),
-//                setOf(SMB2ShareAccess.FILE_SHARE_READ),
-//                SMB2CreateDisposition.FILE_OPEN,
-//                null,
-//            )
-//        } else {
-//            diskShare.openDirectory(
-//                sharePath,
-//                setOf(AccessMask.GENERIC_WRITE),
-//                setOf(FileAttributes.FILE_ATTRIBUTE_DIRECTORY),
-//                setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
-//                SMB2CreateDisposition.FILE_CREATE,
-//                null,
-//            )
-//        }
-//    }
-//
-//    /**
-//     * Open Disk
-//     */
-//    private fun openEntry(diskShare: DiskShare, sharePath: String, isRead: Boolean): DiskEntry {
-//        return if (isRead) {
-//            diskShare.open(
-//                sharePath.ifEmpty { "/" },
-//                setOf(AccessMask.GENERIC_READ),
-//                setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-//                setOf(SMB2ShareAccess.FILE_SHARE_WRITE),
-//                SMB2CreateDisposition.FILE_OPEN_IF,
-//                null,
-//            )
-//        } else {
-//            diskShare.open(
-//                sharePath,
-//                setOf(AccessMask.GENERIC_ALL),
-//                setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
-//                SMB2ShareAccess.ALL,
-//                SMB2CreateDisposition.FILE_CREATE,
-//                null,
-//            )
-//        }
-//    }
-
     private fun <T> useDiskShare(dto: CifsClientDto, action: (diskShare: DiskShare) -> T): T {
         return getSession(dto).use { session ->
             openDiskShare(session, dto.shareName).use { diskShare ->
@@ -201,7 +151,7 @@ internal class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFile(dto: CifsClientDto, forced: Boolean): CifsFile? {
+    override suspend fun getFile(dto: CifsClientDto, forced: Boolean): CifsFile {
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 CifsFile(
@@ -323,7 +273,7 @@ internal class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val session = getSession(dto)
             val diskShare = openDiskShare(session, dto.shareName)

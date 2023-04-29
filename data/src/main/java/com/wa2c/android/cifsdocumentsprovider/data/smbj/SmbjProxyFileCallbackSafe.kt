@@ -6,6 +6,10 @@ import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Proxy File Callback for SMBJ (Normal IO)
@@ -13,18 +17,27 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 class SmbjProxyFileCallbackSafe(
     private val file: File,
     private val mode: AccessMode,
-) : ProxyFileDescriptorCallback() {
+) : ProxyFileDescriptorCallback(), CoroutineScope {
 
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + Job()
+
+    /** File size */
+    private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
+
+    @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        return file.fileInformation.standardInformation.endOfFile
+        return fileSize
     }
 
+    @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo {
             file.read(data, offset, 0, size)
         }
     }
 
+    @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo {
@@ -39,6 +52,7 @@ class SmbjProxyFileCallbackSafe(
         // Nothing to do
     }
 
+    @Throws(ErrnoException::class)
     override fun onRelease() {
         processFileIo {
             file.close()

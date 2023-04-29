@@ -23,9 +23,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -33,13 +31,14 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class JCifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,
-    private val mode: AccessMode
+    private val mode: AccessMode,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
-    private val job = Job()
-
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+        get() = Dispatchers.IO + Job()
+
+    /** File size */
+    private val fileSize: Long by lazy { processFileIo { access.length() } }
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
@@ -50,18 +49,9 @@ internal class JCifsProxyFileCallbackSafe(
         }
     }
 
-    /**
-     * File size
-     */
-    private val fileSeize: Long by lazy {
-        processFileIo {
-            access.length()
-        }
-    }
-
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        return fileSeize
+        return fileSize
     }
 
     @Throws(ErrnoException::class)
@@ -87,11 +77,12 @@ internal class JCifsProxyFileCallbackSafe(
         // Nothing to do
     }
 
+    @Throws(ErrnoException::class)
     override fun onRelease() {
         processFileIo {
             if (isAccessOpened) access.close()
             smbFile.close()
-            job.complete()
+            0
         }
     }
 

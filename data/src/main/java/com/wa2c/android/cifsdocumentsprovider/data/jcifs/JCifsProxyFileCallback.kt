@@ -26,23 +26,24 @@ import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
 import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Proxy File Callback for jCIFS-ng (Buffering IO)
  */
 internal class JCifsProxyFileCallback(
     private val smbFile: SmbFile,
-    private val mode: AccessMode
-) : ProxyFileDescriptorCallback() {
+    private val mode: AccessMode,
+) : ProxyFileDescriptorCallback(), CoroutineScope {
 
-    /**
-     * File size
-     */
-    private val fileSeize: Long by lazy {
-        processFileIo {
-            smbFile.length()
-        }
-    }
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.IO + Job()
+
+    /** File size */
+    private val fileSeize: Long by lazy { processFileIo { smbFile.length() } }
 
     private var reader: BackgroundBufferReader? = null
 
@@ -59,7 +60,7 @@ internal class JCifsProxyFileCallback(
             logD("Writer released")
         }
 
-        return reader ?: BackgroundBufferReader(fileSeize) { start, array, off, len ->
+        return reader ?: BackgroundBufferReader(coroutineContext, fileSeize) { start, array, off, len ->
             smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
                 access.seek(start)
                 access.read(array, off, len)
@@ -77,7 +78,7 @@ internal class JCifsProxyFileCallback(
             logD("Reader released")
         }
 
-        return writer ?: BackgroundBufferWriter { start, array, off, len ->
+        return writer ?: BackgroundBufferWriter(coroutineContext) { start, array, off, len ->
             (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
                 access.seek(start)
                 access.write(array, off, len)

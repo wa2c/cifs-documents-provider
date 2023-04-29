@@ -34,7 +34,9 @@ import kotlin.math.min
 /**
  * BackgroundBufferReader
  */
-internal class BackgroundBufferReader (
+internal class BackgroundBufferReader(
+    /** Coroutine context */
+    override val coroutineContext: CoroutineContext,
     /** Whole data Size */
     private val streamSize: Long,
     /** Buffer unit size */
@@ -43,12 +45,7 @@ internal class BackgroundBufferReader (
     private val queueCapacity: Int = DEFAULT_CAPACITY,
     /** Background reading */
     private val readBackgroundAsync: (start: Long, array: ByteArray, off: Int, len: Int) -> Int
-): CoroutineScope, Closeable {
-
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+): Closeable, CoroutineScope {
 
     /** Dummy queue item. */
     private val dummyQueueItem = async { null }
@@ -216,9 +213,11 @@ internal class BackgroundBufferReader (
      */
     override fun close() {
         logD("close")
-        readingCycleTask.cancel()
-        resetQueue()
-        currentDataBuffer = null
+        runBlocking(coroutineContext) {
+            readingCycleTask.cancel()
+            resetQueue()
+            currentDataBuffer = null
+        }
     }
 
     /**
