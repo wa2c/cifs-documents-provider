@@ -3,13 +3,11 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.data.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
@@ -20,7 +18,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class SendRepository @Inject internal constructor(
-    private val dataSender: com.wa2c.android.cifsdocumentsprovider.data.DataSender
+    private val dataSender: DataSender,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow()
@@ -30,7 +29,7 @@ class SendRepository @Inject internal constructor(
      * Get send data list.
      */
     suspend fun getSendData(sourceUris: List<Uri>, targetUri: Uri): List<SendData> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             sourceUris.mapNotNull { uri ->
                 dataSender.getDocumentFile(uri)?.let { file ->
                     SendData(
@@ -69,7 +68,7 @@ class SendRepository @Inject internal constructor(
      * Send a data.
      */
     suspend fun send(sendData: SendData): SendDataState {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             if (!sendData.state.isReady) return@withContext sendData.state
             sendData.state = SendDataState.PROGRESS
 
