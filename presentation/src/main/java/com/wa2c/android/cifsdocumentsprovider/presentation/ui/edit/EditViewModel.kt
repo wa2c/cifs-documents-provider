@@ -175,7 +175,7 @@ class EditViewModel @Inject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
+                   createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
                 }
             }.getOrNull().let {
                 _connectionResult.emit(it ?: ConnectionResult.Failure())
@@ -284,5 +284,4 @@ class EditViewModel @Inject constructor(
             _navigationEvent.emit(EditNav.Back(initConnection == null || initConnection != createCifsConnection(false)))
         }
     }
-
 }

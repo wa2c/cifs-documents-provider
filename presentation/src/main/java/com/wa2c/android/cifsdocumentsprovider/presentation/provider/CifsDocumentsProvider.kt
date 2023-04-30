@@ -216,6 +216,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun shutdown() {
+        runOnFileHandler { cifsRepository.closeAllSessions() }
         fileHandler.looper.quit()
     }
 

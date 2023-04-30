@@ -27,4 +27,6 @@ internal interface CifsClientInterface {
 
     suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback?
 
+    suspend fun close()
+
 }

@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
+import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.data.DataSender
@@ -19,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class SendRepository @Inject internal constructor(
     private val dataSender: DataSender,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow()

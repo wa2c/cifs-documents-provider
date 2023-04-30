@@ -6,6 +6,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -21,7 +22,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -39,7 +39,7 @@ class CifsRepository @Inject internal constructor(
     private val smbjClient: SmbjClient,
     private val appPreferences: AppPreferences,
     private val connectionSettingDao: ConnectionSettingDao,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
     /** Use as local */
     val useAsLocal: Boolean
@@ -237,6 +237,16 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             getClient(dto).getFileDescriptor(dto, mode) ?: return@withContext null
+        }
+    }
+
+    /**
+     * Close all sessions.
+     */
+    suspend fun closeAllSessions() {
+        withContext(dispatcher) {
+            jCifsClient.close()
+            smbjClient.close()
         }
     }
 

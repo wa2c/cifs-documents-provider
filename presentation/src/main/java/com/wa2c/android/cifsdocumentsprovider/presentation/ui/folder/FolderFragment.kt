@@ -101,8 +101,8 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         reloadMenuButton?.stopLoadingAnimation()
+        super.onDestroy()
     }
 
     private fun onNavigate(event: FolderNav) {

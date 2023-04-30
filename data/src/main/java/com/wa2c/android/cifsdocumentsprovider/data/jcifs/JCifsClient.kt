@@ -38,9 +38,20 @@ internal class JCifsClient constructor(
 ): CifsClientInterface {
 
     /** CIFS Context cache */
-    private val contextCache = LruCache<CifsConnection, CIFSContext>(10)
+    private val contextCache = object : LruCache<CifsConnection, CIFSContext>(10) {
+        override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
+            try { oldValue?.close() } catch (e: Exception) { logE(e) }
+            super.entryRemoved(evicted, key, oldValue, newValue)
+        }
+    }
     /** SMB File cache */
-    private val smbFileCache = LruCache<String, SmbFile>(100)
+    private val smbFileCache = object : LruCache<String, SmbFile>(100) {
+        override fun entryRemoved(evicted: Boolean, key: String?, oldValue: SmbFile?, newValue: SmbFile?) {
+            if (!evicted) { try { oldValue?.close() } catch (e: Exception) { logE(e) } }
+            super.entryRemoved(evicted, key, oldValue, newValue)
+        }
+    }
+
     /** CIFS File cache */
     private val cifsFileCache = LruCache<String, CifsFile>(1000)
 
@@ -119,6 +130,9 @@ internal class JCifsClient constructor(
                     // Failure
                     ConnectionResult.Failure(c)
                 }
+            } finally {
+                contextCache.remove(dto.connection)
+                smbFileCache.remove(dto.uri)
             }
         }
     }
@@ -260,6 +274,12 @@ internal class JCifsClient constructor(
                 JCifsProxyFileCallback(file, mode)
             }
         }
+    }
+
+    override suspend fun close() {
+        contextCache.evictAll()
+        smbFileCache.evictAll()
+        cifsFileCache.evictAll()
     }
 
     /**
