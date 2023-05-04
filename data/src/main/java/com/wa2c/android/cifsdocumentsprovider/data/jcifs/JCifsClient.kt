@@ -269,11 +269,13 @@ internal class JCifsClient constructor(
             val file = getSmbFile(dto) ?: return@withContext null
             if (dto.connection.safeTransfer) {
                 JCifsProxyFileCallbackSafe(file, mode) {
-                    file.close()
+                    smbFileCache.remove(dto.uri)
+                    contextCache.remove(dto.connection)
                 }
             } else {
                 JCifsProxyFileCallback(file, mode) {
-                    file.close()
+                    smbFileCache.remove(dto.uri)
+                    contextCache.remove(dto.connection)
                 }
             }
         }

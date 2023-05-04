@@ -71,56 +71,59 @@ class SendRepository @Inject internal constructor(
     suspend fun send(sendData: SendData): SendDataState {
         return withContext(dispatcher) {
             if (!sendData.state.isReady) return@withContext sendData.state
-            sendData.state = SendDataState.PROGRESS
 
-            val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
-                if (it.isDirectory) {
-                    val file = it.findFile(sendData.name)
+            val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let { df ->
+                if (df.isDirectory) {
+                    val file = df.findFile(sendData.name)
                     if (file?.exists() == true) {
                         file
                     } else {
-                        it.createFile(sendData.mimeType, sendData.name)
+                        df.createFile(sendData.mimeType, sendData.name)
                     }
                 } else {
-                    it
+                    df
                 }
             } ?: throw IOException()
 
-            sendData.startTime = System.currentTimeMillis()
-            _sendFlow.emit(sendData)
-            val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
-                if (!sendData.state.inProgress) {
-                    return@sendFile false
-                }
-                if (!isActive) {
-                    sendData.state = SendDataState.FAILURE
-                    return@sendFile false
-                }
+            try {
+                sendData.state = SendDataState.PROGRESS
+                sendData.startTime = System.currentTimeMillis()
+                _sendFlow.emit(sendData)
 
-                sendData.progressSize = progressSize
-                runBlocking {
+                val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
+                    if (!sendData.state.inProgress) {
+                        return@sendFile false
+                    }
+                    if (!isActive) {
+                        sendData.state = SendDataState.FAILURE
+                        return@sendFile false
+                    }
+
+                    sendData.progressSize = progressSize
                     _sendFlow.emit(sendData)
+                    return@sendFile true
                 }
-                return@sendFile true
-            }
 
-            sendData.state = when {
-                isSuccess -> SendDataState.SUCCESS
-                sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
-                else -> sendData.state
-            }
-
-            // Delete if incomplete
-            if (sendData.state.isIncomplete) {
-                try {
-                    targetFile.delete()
-                } catch (e: Exception) {
-                    logE(e)
+                sendData.state = when {
+                    isSuccess -> SendDataState.SUCCESS
+                    sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
+                    else -> sendData.state
+                }
+                sendData.state
+            } catch (e: Exception) {
+                sendData.state = SendDataState.FAILURE
+                throw e
+            } finally {
+                _sendFlow.emit(sendData)
+                // Delete if incomplete
+                if (sendData.state.isIncomplete) {
+                    try {
+                        targetFile.delete()
+                    } catch (e: Exception) {
+                        logE(e)
+                    }
                 }
             }
-
-            _sendFlow.emit(sendData)
-            sendData.state
         }
     }
 

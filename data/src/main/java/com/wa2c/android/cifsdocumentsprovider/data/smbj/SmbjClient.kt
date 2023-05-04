@@ -28,9 +28,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlin.coroutines.CoroutineContext
 
 /**
  * SMBJ Client
@@ -98,7 +97,7 @@ internal class SmbjClient constructor(
     /**
      * Open File
      */
-    private fun  openDiskFile(diskShare: DiskShare, sharePath: String, isRead: Boolean): File {
+    private fun openDiskFile(diskShare: DiskShare, sharePath: String, isRead: Boolean): File {
         return if (isRead) {
             diskShare.openFile(
                 sharePath.ifEmpty { "/" },
@@ -216,20 +215,16 @@ internal class SmbjClient constructor(
     override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile {
         return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
-            try {
-                openDiskShare(dto).use { diskShare ->
-                    if (optimizedUri.isDirectoryUri) {
-                        diskShare.mkdir(dto.sharePath)
-                        diskShare.getFileInformation(dto.sharePath)
-                    } else {
-                        openDiskFile(diskShare, dto.sharePath, false).use {
-                            it.fileInformation
-                        }
+            openDiskShare(dto).use { diskShare ->
+                if (optimizedUri.isDirectoryUri) {
+                    diskShare.mkdir(dto.sharePath)
+                    diskShare.getFileInformation(dto.sharePath)
+                } else {
+                    openDiskFile(diskShare, dto.sharePath, false).use { f ->
+                        f.fileInformation
                     }
-                }.toCifsFile(optimizedUri)
-            } catch (e: Exception) {
-                throw e
-            }
+                }
+            }.toCifsFile(optimizedUri)
         }
     }
 
