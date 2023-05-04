@@ -20,6 +20,7 @@ import kotlin.coroutines.CoroutineContext
 class SmbjProxyFileCallback(
     private val file: File,
     private val mode: AccessMode,
+    private val onFileReleased: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -93,13 +94,13 @@ class SmbjProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onRelease() {
+        logD("onRelease: ${file.uncPath}")
         processFileIo {
+            logD("release begin")
             reader?.close()
             writer?.close()
-            file.close()
-            file.diskShare.close()
-            file.diskShare.treeConnect.session.close()
-            0
+            onFileReleased()
+            logD("release end")
         }
     }
 }

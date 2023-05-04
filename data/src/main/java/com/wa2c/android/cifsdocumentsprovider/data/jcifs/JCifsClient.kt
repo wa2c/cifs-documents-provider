@@ -4,10 +4,7 @@ import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.getCause
-import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.*
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -42,6 +39,7 @@ internal class JCifsClient constructor(
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
             try { oldValue?.close() } catch (e: Exception) { logE(e) }
             super.entryRemoved(evicted, key, oldValue, newValue)
+            logD("CIFSContext Removed: ${key?.name}")
         }
     }
     /** SMB File cache */
@@ -49,6 +47,7 @@ internal class JCifsClient constructor(
         override fun entryRemoved(evicted: Boolean, key: String?, oldValue: SmbFile?, newValue: SmbFile?) {
             if (!evicted) { try { oldValue?.close() } catch (e: Exception) { logE(e) } }
             super.entryRemoved(evicted, key, oldValue, newValue)
+            logD("SMBFile Removed: $key")
         }
     }
 
@@ -269,9 +268,13 @@ internal class JCifsClient constructor(
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
             if (dto.connection.safeTransfer) {
-                JCifsProxyFileCallbackSafe(file, mode)
+                JCifsProxyFileCallbackSafe(file, mode) {
+                    file.close()
+                }
             } else {
-                JCifsProxyFileCallback(file, mode)
+                JCifsProxyFileCallback(file, mode) {
+                    file.close()
+                }
             }
         }
     }

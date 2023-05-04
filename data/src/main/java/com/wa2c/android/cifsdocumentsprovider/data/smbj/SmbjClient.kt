@@ -42,8 +42,16 @@ internal class SmbjClient constructor(
     /** CIFS Context cache */
     private val sessionCache = object : LruCache<CifsConnection, Session>(10) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: Session?, newValue: Session?) {
-            try { oldValue?.close() } catch (e: Exception) { logE(e) }
+            try {
+                if (oldValue?.connection?.isConnected == true) {
+                    oldValue.close()
+                    logD("Session Disconnected: ${key?.name}")
+                }
+            } catch (e: Exception) {
+                logE(e)
+            }
             super.entryRemoved(evicted, key, oldValue, newValue)
+            logD("Session Removed: ${key?.name}")
         }
     }
 
@@ -52,8 +60,7 @@ internal class SmbjClient constructor(
      */
     private fun openSession(dto: CifsClientDto): Session {
         val config = SmbConfig.builder()
-            //.withDfsEnabled(dto.connection.enableDfs)
-            .withEncryptData(true)
+            .withDfsEnabled(dto.connection.enableDfs)
             .build()
         val client = SMBClient(config)
         val port = dto.connection.port?.toIntOrNull()
@@ -279,9 +286,17 @@ internal class SmbjClient constructor(
             val diskShare = openDiskShare(dto)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)
             if (dto.connection.safeTransfer) {
-                SmbjProxyFileCallbackSafe(diskFile, mode)
+                SmbjProxyFileCallbackSafe(diskFile, mode) {
+                    diskFile.closeNoWait()
+                    diskFile.diskShare.close()
+                    sessionCache.remove(dto.connection)
+                }
             } else {
-                SmbjProxyFileCallback(diskFile, mode)
+                SmbjProxyFileCallback(diskFile, mode) {
+                    diskFile.closeNoWait()
+                    diskFile.diskShare.close()
+                    sessionCache.remove(dto.connection)
+                }
             }
         }
     }

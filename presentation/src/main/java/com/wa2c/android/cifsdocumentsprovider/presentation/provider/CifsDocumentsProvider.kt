@@ -9,6 +9,7 @@ import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -216,6 +217,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun shutdown() {
+        logD("shutdown")
         runOnFileHandler { cifsRepository.closeAllSessions() }
         fileHandler.looper.quit()
     }

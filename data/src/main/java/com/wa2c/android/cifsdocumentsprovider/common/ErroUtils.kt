@@ -4,11 +4,8 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newCoroutineContext
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Proxy Callback process

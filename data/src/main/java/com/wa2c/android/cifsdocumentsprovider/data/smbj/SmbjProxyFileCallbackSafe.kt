@@ -5,6 +5,7 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,7 @@ import kotlin.coroutines.CoroutineContext
 class SmbjProxyFileCallbackSafe(
     private val file: File,
     private val mode: AccessMode,
+    private val onFileReleased: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -54,11 +56,11 @@ class SmbjProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onRelease() {
+        logD("onRelease: ${file.uncPath}")
         processFileIo {
-            file.close()
-            file.diskShare.close()
-            file.diskShare.treeConnect.session.close()
-            0
+            logD("release begin")
+            onFileReleased()
+            logD("release end")
         }
     }
 }

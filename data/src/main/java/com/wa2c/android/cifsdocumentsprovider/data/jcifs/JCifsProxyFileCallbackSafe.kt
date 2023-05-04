@@ -32,6 +32,7 @@ import kotlin.coroutines.CoroutineContext
 internal class JCifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,
     private val mode: AccessMode,
+    private val onFileReleased: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -81,8 +82,7 @@ internal class JCifsProxyFileCallbackSafe(
     override fun onRelease() {
         processFileIo {
             if (isAccessOpened) access.close()
-            smbFile.close()
-            0
+            onFileReleased()
         }
     }
 
