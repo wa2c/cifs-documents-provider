@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.smbj
 
+import android.os.Build
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
@@ -60,8 +61,14 @@ class SmbjProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo {
-            getInputStream(offset).read(data, 0, size).also {
-                position += it
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                getInputStream(offset).readNBytes(data, 0, size).also {
+                    position += it
+                }
+            } else {
+                getInputStream(offset).read(data, 0, size).also {
+                    position += it
+                }
             }
         }
     }
