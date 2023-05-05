@@ -14,6 +14,7 @@
     <string name="edit_title">Pripojenie</string>
     <string name="edit_name_title">Názov</string>
     <string name="edit_name_hint">Použije sa názov hostiteľa, ak nevyplníte</string>
+    <string name="edit_storage_title">Skladovanie</string>
     <string name="edit_domain_title">Doména</string>
     <string name="edit_domain_hint">Zadajte podľa potreby</string>
     <string name="edit_host_title">Hostiteľ</string>

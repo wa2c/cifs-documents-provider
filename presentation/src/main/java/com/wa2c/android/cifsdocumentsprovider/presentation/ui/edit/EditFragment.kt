@@ -9,6 +9,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,7 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -88,14 +90,19 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
             })
         }
 
-        binding.let {
-            it?.viewModel = viewModel
+        binding?.let { bind ->
+            bind.viewModel = viewModel
+            bind.editStorageSpinner.adapter = ArrayAdapter(
+                requireContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                viewModel.storageTypes.map { getString(it.labelRes) },
+            )
         }
 
-        viewModel.let {
-            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            it.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
-            it.initialize(args.cifsConnection)
+        viewModel.let { vm ->
+            vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+            vm.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
+            vm.initialize(args.cifsConnection)
         }
     }
 

@@ -28,11 +28,11 @@ internal class DataSender @Inject constructor(
      * Send single file
      * @return False if canceled
      */
-    fun sendFile(
+    suspend fun sendFile(
         sourceUri: Uri,
         targetUri: Uri,
         bufferSize: Int = BUFFER_SIZE,
-        updateProgress: (progressSize: Long) -> Boolean
+        updateProgress: suspend (progressSize: Long) -> Boolean
     ): Boolean {
         val buffer = ByteArray(bufferSize)
         var progressSize = 0L

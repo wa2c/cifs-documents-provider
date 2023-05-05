@@ -67,6 +67,13 @@ class SendNotification constructor(
     }
 
     /**
+     * Close notification
+     */
+    fun close() {
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    /**
      * Create channel
      */
     private fun createChannel() {

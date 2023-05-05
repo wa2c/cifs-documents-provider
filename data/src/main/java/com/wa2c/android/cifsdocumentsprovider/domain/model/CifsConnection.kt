@@ -1,13 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
-import android.net.Uri
 import android.os.Parcelable
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import java.nio.file.Paths
-import java.util.*
 
 /**
  * CIFS Connection
@@ -17,6 +16,7 @@ import java.util.*
 data class CifsConnection(
     val id: String,
     val name: String,
+    val storage: StorageType = StorageType.default,
     val domain: String?,
     val host: String,
     val port: String?,
@@ -33,42 +33,23 @@ data class CifsConnection(
     @IgnoredOnParcel
     val isNew: Boolean = (id == NEW_ID)
 
+    val isAnonymous: Boolean
+        get() = anonymous
+
+    val isGuest: Boolean
+        get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
+
     /** Root SMB URI (smb://) */
     val rootSmbUri: String
-        get() = getSmbUri(host, port, null)
+        get() = getSmbUri(host, port, null, true)
 
     /** Folder SMB URI (smb://) */
     val folderSmbUri: String
-        get() = getSmbUri(host, port, folder)
+        get() = getSmbUri(host, port, folder, true)
 
     companion object {
 
         const val NEW_ID = ""
-
-        /**
-         * Get document ID ( authority[:port]/[path] )
-         */
-        fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boolean): String? {
-            if (host.isNullOrBlank()) return null
-            val authority = host + if (port == null || port <= 0) "" else ":$port"
-            return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
-        }
-
-        /**
-         * Get SMB URI ( smb://documentId )
-         */
-        fun getSmbUri(host: String?, port: String?, folder: String?): String {
-            val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
-            return "smb://$documentId"
-        }
-
-        /**
-         * Get content URI ( content://applicationId/tree/encodedDocumentId )
-         */
-        fun getContentUri(host: String?, port: String?, folder: String?): String {
-            val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
-            return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
-        }
 
         /**
          * Create from host
@@ -77,6 +58,7 @@ data class CifsConnection(
             return CifsConnection(
                 id = NEW_ID,
                 name = hostText,
+                storage = StorageType.default,
                 domain = null,
                 host = hostText,
                 port = null,

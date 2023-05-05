@@ -1,7 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.net.Uri
-import com.wa2c.android.cifsdocumentsprovider.common.values.SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
+import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 
 /**
  * CIFS File
@@ -27,7 +29,11 @@ data class CifsFile(
         get() {
             if (uri.pathSegments.isEmpty()) return null
             val uriText = uri.toString()
-                .let { if (it.last() == SEPARATOR) it.substring(0, it.length - 1) else it }
-            return try { Uri.parse(uriText.substring(0, uriText.lastIndexOf(SEPARATOR) + 1)) } catch (e: Exception) { null }
+                .let { if (it.last() == URI_SEPARATOR) it.substring(0, it.length - 1) else it }
+            return try { Uri.parse(uriText.substring(0, uriText.lastIndexOf(URI_SEPARATOR) + 1)) } catch (e: Exception) { null }
         }
+
+    val documentId: String
+        get() = getDocumentId(this.uri.host, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
+
 }

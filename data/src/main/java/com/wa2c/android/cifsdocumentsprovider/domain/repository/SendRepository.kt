@@ -1,15 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
+import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.data.DataSender
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.*
 import javax.inject.Inject
@@ -20,7 +20,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class SendRepository @Inject internal constructor(
-    private val dataSender: com.wa2c.android.cifsdocumentsprovider.data.DataSender
+    private val dataSender: DataSender,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
 
     private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow()
@@ -30,12 +31,12 @@ class SendRepository @Inject internal constructor(
      * Get send data list.
      */
     suspend fun getSendData(sourceUris: List<Uri>, targetUri: Uri): List<SendData> {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             sourceUris.mapNotNull { uri ->
                 dataSender.getDocumentFile(uri)?.let { file ->
                     SendData(
                         UUID.randomUUID().toString(),
-                        file.name ?: file.uri.lastPathSegment ?: return@mapNotNull null,
+                        file.name ?: file.uri.fileName,
                         file.length(),
                         file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
                         file.uri,
@@ -69,58 +70,61 @@ class SendRepository @Inject internal constructor(
      * Send a data.
      */
     suspend fun send(sendData: SendData): SendDataState {
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatcher) {
             if (!sendData.state.isReady) return@withContext sendData.state
-            sendData.state = SendDataState.PROGRESS
 
-            val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let {
-                if (it.isDirectory) {
-                    val file = it.findFile(sendData.name)
+            val targetFile = dataSender.getDocumentFile(sendData.targetUri)?.let { df ->
+                if (df.isDirectory) {
+                    val file = df.findFile(sendData.name)
                     if (file?.exists() == true) {
                         file
                     } else {
-                        it.createFile(sendData.mimeType, sendData.name)
+                        df.createFile(sendData.mimeType, sendData.name)
                     }
                 } else {
-                    it
+                    df
                 }
             } ?: throw IOException()
 
-            sendData.startTime = System.currentTimeMillis()
-            _sendFlow.emit(sendData)
-            val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
-                if (!sendData.state.inProgress) {
-                    return@sendFile false
-                }
-                if (!isActive) {
-                    sendData.state = SendDataState.FAILURE
-                    return@sendFile false
-                }
+            try {
+                sendData.state = SendDataState.PROGRESS
+                sendData.startTime = System.currentTimeMillis()
+                _sendFlow.emit(sendData)
 
-                sendData.progressSize = progressSize
-                runBlocking {
+                val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
+                    if (!sendData.state.inProgress) {
+                        return@sendFile false
+                    }
+                    if (!isActive) {
+                        sendData.state = SendDataState.FAILURE
+                        return@sendFile false
+                    }
+
+                    sendData.progressSize = progressSize
                     _sendFlow.emit(sendData)
+                    return@sendFile true
                 }
-                return@sendFile true
-            }
 
-            sendData.state = when {
-                isSuccess -> SendDataState.SUCCESS
-                sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
-                else -> sendData.state
-            }
-
-            // Delete if incomplete
-            if (sendData.state.isIncomplete) {
-                try {
-                    targetFile.delete()
-                } catch (e: Exception) {
-                    logE(e)
+                sendData.state = when {
+                    isSuccess -> SendDataState.SUCCESS
+                    sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
+                    else -> sendData.state
                 }
+                sendData.state
+            } catch (e: Exception) {
+                sendData.state = SendDataState.FAILURE
+                throw e
+            } finally {
+                // Delete if incomplete
+                if (sendData.state.isIncomplete) {
+                    try {
+                        targetFile.delete()
+                    } catch (e: Exception) {
+                        logE(e)
+                    }
+                }
+                _sendFlow.emit(sendData)
             }
-
-            _sendFlow.emit(sendData)
-            sendData.state
         }
     }
 

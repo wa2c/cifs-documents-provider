@@ -142,7 +142,11 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             is MainNav.OpenFile -> {
                 if (event.isSuccess) {
                     // Open file
-                    fileOpenLauncher.launch(arrayOf("*/*"))
+                    try {
+                        fileOpenLauncher.launch(arrayOf("*/*"))
+                    } catch (e: Exception) {
+                        toast(R.string.provider_error_message)
+                    }
                 } else {
                     toast(R.string.main_open_file_ng_message)
                 }

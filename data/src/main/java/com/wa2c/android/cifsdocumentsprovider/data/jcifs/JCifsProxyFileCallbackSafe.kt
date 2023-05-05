@@ -14,38 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.wa2c.android.cifsdocumentsprovider.data.io
+package com.wa2c.android.cifsdocumentsprovider.data.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
-import java.io.IOException
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 /**
- * CIFS Proxy File Callback (by SmbRandomAccessFile)
+ * Proxy File Callback for jCIFS-ng (Normal IO)
  */
-internal class CifsProxyFileCallbackSafe(
+internal class JCifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,
-    private val mode: AccessMode
+    private val mode: AccessMode,
+    private val onFileReleased: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
-    private val job = Job()
-
     override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
+        get() = Dispatchers.IO + Job()
+
+    /** File size */
+    private val fileSize: Long by lazy { processFileIo { access.length() } }
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
-        runBlocking {
+        processFileIo {
             smbFile.openRandomAccess(mode.smbMode).also {
                 isAccessOpened = true
             }
@@ -54,39 +52,25 @@ internal class CifsProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        try {
-            return runBlocking { access.length() }
-        } catch (e: IOException) {
-            throwErrnoException(e)
-        }
-        return 0
+        return fileSize
     }
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        try {
-            return runBlocking {
-                access.seek(offset)
-                access.read(data, 0, size)
-            }
-        } catch (e: IOException) {
-            throwErrnoException(e)
+        return processFileIo {
+            access.seek(offset)
+            access.read(data, 0, size)
         }
-        return 0
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        try {
-            return runBlocking {
-                access.seek(offset)
-                access.write(data, 0, size)
-                size
-            }
-        } catch (e: IOException) {
-            throwErrnoException(e)
+        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
+        return processFileIo {
+            access.seek(offset)
+            access.write(data, 0, size)
+            size
         }
-        return 0
     }
 
     @Throws(ErrnoException::class)
@@ -94,25 +78,11 @@ internal class CifsProxyFileCallbackSafe(
         // Nothing to do
     }
 
-    override fun onRelease() {
-        try {
-            if (isAccessOpened) access.close()
-            smbFile.close()
-            job.complete()
-        } catch (e: IOException) {
-            throwErrnoException(e)
-        }
-    }
     @Throws(ErrnoException::class)
-    private fun throwErrnoException(e: IOException) {
-        logE(e)
-
-        // Hack around that SambaProxyFileCallback throws ErrnoException rather than IOException
-        // assuming the underlying cause is an ErrnoException.
-        if (e.cause is ErrnoException) {
-            throw (e.cause as ErrnoException?)!!
-        } else {
-            throw ErrnoException("I/O", OsConstants.EIO, e)
+    override fun onRelease() {
+        processFileIo {
+            if (isAccessOpened) access.close()
+            onFileReleased()
         }
     }
 

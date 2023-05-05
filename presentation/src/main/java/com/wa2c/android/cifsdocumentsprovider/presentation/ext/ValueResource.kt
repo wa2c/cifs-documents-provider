@@ -34,7 +34,7 @@ val ConnectionResult.colorRes: Int
 
 /** ConnectionResult message string resource ID */
 val ConnectionResult.messageRes
-    @ColorRes
+    @StringRes
     get() = when (this) {
         is ConnectionResult.Success -> { R.string.edit_check_connection_ok_message }
         is ConnectionResult.Warning -> { R.string.edit_check_connection_wn_message }
@@ -128,4 +128,11 @@ val SendDataState.labelRes: Int
         SendDataState.SUCCESS -> R.string.send_state_success
         SendDataState.FAILURE -> R.string.send_state_failure
         SendDataState.CANCEL -> R.string.send_state_cancel
+    }
+
+val StorageType.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        StorageType.JCIFS -> R.string.enum_storage_jcifs
+        StorageType.SMBJ -> R.string.enum_storage_smbj
     }

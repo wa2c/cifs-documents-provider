@@ -9,13 +9,12 @@ import android.os.*
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
-import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -45,7 +44,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
      */
     private fun <T> runOnFileHandler(function: suspend () -> T): T {
         return runBlocking(fileHandler.asCoroutineDispatcher()) {
-            function()
+            try {
+                function()
+            } catch (e: Exception) {
+                throw e
+            }
         }
     }
 
@@ -145,7 +148,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         documentId: String?,
         mode: String,
         signal: CancellationSignal?
-    ): ParcelFileDescriptor? {
+    ): ParcelFileDescriptor {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
@@ -156,6 +159,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 callback,
                 fileHandler
             )
+        } ?: let {
+            throw OperationCanceledException()
         }
     }
 
@@ -171,7 +176,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             } else {
                 getCifsFileUri(documentId)
             }
-            cifsRepository.createFile(uri, mimeType)?.getDocumentId()
+            cifsRepository.createFile(uri, mimeType)?.documentId
         }
     }
 
@@ -185,14 +190,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun renameDocument(documentId: String?, displayName: String?): String? {
         if (documentId == null || displayName == null) return null
         return runOnFileHandler {
-            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)?.getDocumentId()
+            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)?.documentId
         }
     }
 
     override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String? {
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
        return runOnFileHandler {
-            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.getDocumentId()
+            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
         }
     }
 
@@ -203,7 +208,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): String? {
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
         return runOnFileHandler {
-            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.getDocumentId()
+            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
         }
     }
 
@@ -212,6 +217,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun shutdown() {
+        logD("shutdown")
+        runOnFileHandler { cifsRepository.closeAllSessions() }
         fileHandler.looper.quit()
     }
 
@@ -240,7 +247,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 }
                 file.isDirectory -> {
                     // Directory
-                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId)
                     row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
@@ -258,7 +265,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 }
                 else -> {
                     // File
-                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.getDocumentId())
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId)
                     row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, name ?: file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
@@ -304,13 +311,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
         } else {
             this
         }
-    }
-
-    /**
-     * Get Document ID from CIFS file
-     */
-    private fun CifsFile.getDocumentId(): String {
-        return CifsConnection.getDocumentId(this.uri.host, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
     }
 
     /**

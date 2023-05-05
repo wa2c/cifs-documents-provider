@@ -2,7 +2,10 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -32,6 +35,7 @@ class EditViewModel @Inject constructor(
     val isBusy: StateFlow<Boolean> = _isBusy
 
     var name = MutableStateFlow<String?>(null)
+    var storageIndex = MutableStateFlow<Int?>(null)
     var domain = MutableStateFlow<String?>(null)
     var host = MutableStateFlow<String?>(null)
     var port = MutableStateFlow<String?>(null)
@@ -44,17 +48,21 @@ class EditViewModel @Inject constructor(
     var safeTransfer = MutableStateFlow<Boolean>(false)
 
     val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        CifsConnection.getSmbUri(host, port, folder)
+        getSmbUri(host, port, folder, true)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        CifsConnection.getContentUri(host, port, folder)
+        getContentUri(host, port, folder)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    private val selectedStorage: StorageType?
+        get() = storageIndex.value?.let { storageTypes.getOrNull(it) }
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResultNotify: SharedFlow<ConnectionResult?> = _connectionResult
     val connectionResult = channelFlow<ConnectionResult?> {
         launch { _connectionResult.collect { send(it) } }
+        launch { storageIndex.collect { send(null) } }
         launch { domain.collect { send(null) } }
         launch { host.collect { send(null) } }
         launch { port.collect { send(null) } }
@@ -77,6 +85,9 @@ class EditViewModel @Inject constructor(
 
     /** True if initialized */
     private var initialized: Boolean = false
+
+    /** Storage types */
+    val storageTypes: List<StorageType> get() = StorageType.values().toList()
 
     /**
      * Initialize
@@ -121,6 +132,7 @@ class EditViewModel @Inject constructor(
     private fun deployCifsConnection(connection: CifsConnection?) {
         currentId = connection?.id ?: CifsConnection.NEW_ID
         name.value = connection?.name
+        storageIndex.value = connection?.storage?.let { storageTypes.indexOf(it) }
         domain.value = connection?.domain
         host.value = connection?.host
         port.value = connection?.port
@@ -141,6 +153,7 @@ class EditViewModel @Inject constructor(
         return CifsConnection(
             id = if (generateId) UUID.randomUUID().toString() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
+            storage = selectedStorage ?: StorageType.default,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
             port = port.value?.ifEmpty { null },
@@ -162,7 +175,7 @@ class EditViewModel @Inject constructor(
         launch {
             runCatching {
                 withContext(Dispatchers.IO) {
-                    createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
+                   createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
                 }
             }.getOrNull().let {
                 _connectionResult.emit(it ?: ConnectionResult.Failure())
@@ -271,5 +284,4 @@ class EditViewModel @Inject constructor(
             _navigationEvent.emit(EditNav.Back(initConnection == null || initConnection != createCifsConnection(false)))
         }
     }
-
 }

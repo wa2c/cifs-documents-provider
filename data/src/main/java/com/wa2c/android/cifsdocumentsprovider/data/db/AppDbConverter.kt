@@ -29,12 +29,13 @@ internal object AppDbConverter {
      */
     fun CifsConnection.toEntity(
         sortOrder: Int,
-        modifiedDate: Date = Date()
+        modifiedDate: Date,
     ): ConnectionSettingEntity {
         return ConnectionSettingEntity(
             id = this.id,
             name = this.name,
             uri = this.folderSmbUri,
+            type = this.storage.value,
             data = encrypt(this.encodeJson())  ,
             sortOrder = sortOrder,
             modifiedDate = modifiedDate.time

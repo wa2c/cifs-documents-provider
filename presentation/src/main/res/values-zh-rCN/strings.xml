@@ -14,6 +14,7 @@
     <string name="edit_title">连接</string>
     <string name="edit_name_title">名称</string>
     <string name="edit_name_hint">如果留空则为主机名</string>
+    <string name="edit_storage_title">存储</string>
     <string name="edit_domain_title">域名</string>
     <string name="edit_domain_hint">按需填写</string>
     <string name="edit_host_title">主机名</string>

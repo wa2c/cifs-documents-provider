@@ -14,6 +14,7 @@
     <string name="edit_title">接続情報</string>
     <string name="edit_name_title">識別名</string>
     <string name="edit_name_hint">未入力の場合はホスト</string>
+    <string name="edit_storage_title">ストレージ</string>
     <string name="edit_domain_title">ドメイン</string>
     <string name="edit_domain_hint">必要に応じて入力</string>
     <string name="edit_host_title">ホスト</string>
