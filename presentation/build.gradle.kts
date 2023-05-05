@@ -12,7 +12,6 @@ android {
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
-        targetSdk = Deps.targetSdkVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -59,7 +58,6 @@ dependencies {
     implementation(Deps.Ui.material)
     implementation(Deps.Ui.activityKtx)
     implementation(Deps.Ui.fragmentKtx)
-    implementation(Deps.Ui.cardView)
     // Lifecycle
     implementation(Deps.Ui.lifecycleViewModel )
     implementation(Deps.Ui.lifecycleRuntime)
