@@ -83,15 +83,19 @@ internal class SmbjClient constructor(
     /**
      * Get session
      */
-    private fun getSession(dto: CifsClientDto): Session {
-        return sessionCache[dto.connection]?.takeIf { it.connection.isConnected } ?: openSession(dto)
+    private fun getSession(dto: CifsClientDto, forced: Boolean = false): Session {
+        return if (forced) {
+            openSession(dto)
+        } else {
+            sessionCache[dto.connection]?.takeIf { it.connection.isConnected } ?: openSession(dto)
+        }
     }
 
     /**
      * Open DiskShare
      */
-    private fun openDiskShare(dto: CifsClientDto): DiskShare {
-        return getSession(dto).connectShare(dto.shareName) as DiskShare
+    private fun openDiskShare(dto: CifsClientDto, forced: Boolean = false): DiskShare {
+        return getSession(dto, forced).connectShare(dto.shareName) as DiskShare
     }
 
     /**
@@ -163,7 +167,7 @@ internal class SmbjClient constructor(
                     true,
                 )
             } else {
-                openDiskShare(dto).use { diskShare ->
+                openDiskShare(dto, forced).use { diskShare ->
                     val info = diskShare.getFileInformation(dto.sharePath)
                     info.toCifsFile(dto.uri)
                 }
@@ -175,7 +179,7 @@ internal class SmbjClient constructor(
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 // Root
-                val session = getSession(dto)
+                val session = getSession(dto, forced)
                 val transport = SMBTransportFactories.SRVSVC.getTransport(session)
                 val serverService = ServerService(transport)
                 serverService.shares0
@@ -191,7 +195,7 @@ internal class SmbjClient constructor(
                     }
             } else {
                 // Shared folder
-                openDiskShare(dto).use { diskShare ->
+                openDiskShare(dto, forced).use {  diskShare ->
                     diskShare.list(dto.sharePath)
                         .filter { !it.fileName.isInvalidFileName }
                         .map { info ->
@@ -280,21 +284,20 @@ internal class SmbjClient constructor(
         return withContext(dispatcher) {
             val diskShare = openDiskShare(dto)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)
+            val onFileRelease = fun() {
+                diskFile.closeSilently()
+                diskFile.diskShare.takeIf { it.isConnected }?.close()
+                sessionCache.remove(dto.connection)
+            }
+
             if (dto.connection.safeTransfer) {
-                SmbjProxyFileCallbackSafe(diskFile, mode) {
-                    diskFile.closeNoWait()
-                    diskFile.diskShare.close()
-                    sessionCache.remove(dto.connection)
-                }
+                SmbjProxyFileCallbackSafe(diskFile, mode, onFileRelease)
             } else {
-                SmbjProxyFileCallback(diskFile, mode) {
-                    diskFile.closeNoWait()
-                    diskFile.diskShare.close()
-                    sessionCache.remove(dto.connection)
-                }
+                SmbjProxyFileCallback(diskFile, mode, onFileRelease)
             }
         }
     }
+
 
     override suspend fun close() {
         sessionCache.evictAll()

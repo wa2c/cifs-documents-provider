@@ -21,6 +21,7 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
 import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
@@ -121,7 +122,7 @@ internal class JCifsProxyFileCallback(
         processFileIo {
             reader?.close()
             writer?.close()
-            outputAccess?.close()
+            try { outputAccess?.close() } catch (e: Exception) { logE(e) }
             onFileReleased()
         }
     }

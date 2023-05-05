@@ -6,12 +6,12 @@ import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.io.BackgroundBufferWriter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import java.io.BufferedInputStream
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -29,40 +29,26 @@ class SmbjProxyFileCallback(
     /** File size */
     private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
 
-    private var reader: BackgroundBufferReader? = null
+    private var position: Long = 0
+    private var bufferedInputStream: BufferedInputStream? = null
 
-    private var writer: BackgroundBufferWriter? = null
-
-    private fun getReader(): BackgroundBufferReader {
-        writer?.let {
-            it.close()
-            writer = null
-            logD("Writer released")
-        }
-        return reader ?: BackgroundBufferReader(coroutineContext, onGetSize()) { start, array, off, len ->
-            file.inputStream.use {
-                it.skip(start)
-                it.read(array, off, len)
+    /**
+     * Get BufferedInputStream
+     */
+    private fun getInputStream(current: Long): BufferedInputStream {
+        return bufferedInputStream?.let { stream ->
+            if (position == current) {
+                stream
+            } else {
+                try { stream.close() } catch (e: Exception) { logE(e) }
+                null
             }
-        }.also {
-            reader = it
-            logD("Reader created")
-        }
-    }
-
-
-    private fun getWriter(): BackgroundBufferWriter {
-        reader?.let {
-            it.close()
-            reader = null
-            logD("Reader released")
-        }
-
-        return writer ?: BackgroundBufferWriter(coroutineContext) { start, array, off, len ->
-            file.writeAsync(array, start, off, len)
-        }.also {
-            writer = it
-            logD("Writer created")
+        } ?: let {
+            BufferedInputStream(file.inputStream, READ_BUFFER_SIZE).also {
+                it.skip(current)
+                position = current
+                bufferedInputStream = it
+            }
         }
     }
 
@@ -74,7 +60,9 @@ class SmbjProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo {
-            getReader().readBuffer(offset, size, data)
+            getInputStream(offset).read(data, 0, size).also {
+                position += it
+            }
         }
     }
 
@@ -82,7 +70,7 @@ class SmbjProxyFileCallback(
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo {
-            getWriter().writeBuffer(offset, size, data)
+            file.writeAsync(data, offset, 0, size)
             size
         }
     }
@@ -97,10 +85,13 @@ class SmbjProxyFileCallback(
         logD("onRelease: ${file.uncPath}")
         processFileIo {
             logD("release begin")
-            reader?.close()
-            writer?.close()
+            try { bufferedInputStream?.close() } catch (e: Exception) { logE(e) }
             onFileReleased()
             logD("release end")
         }
+    }
+
+    companion object {
+        const val READ_BUFFER_SIZE = 8 * 1024 * 1024
     }
 }

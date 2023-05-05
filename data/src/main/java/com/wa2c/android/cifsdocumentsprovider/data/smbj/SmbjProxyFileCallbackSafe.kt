@@ -43,7 +43,7 @@ class SmbjProxyFileCallbackSafe(
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo {
-            file.writeAsync(data, offset, 0, size)
+            file.write(data, offset, 0, size)
             size
         }
     }

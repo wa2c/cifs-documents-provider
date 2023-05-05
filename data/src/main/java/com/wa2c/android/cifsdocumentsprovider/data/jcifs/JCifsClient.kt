@@ -267,16 +267,15 @@ internal class JCifsClient constructor(
     override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
+            val onFileRelease = fun() {
+                smbFileCache.remove(dto.uri)
+                contextCache.remove(dto.connection)
+            }
+
             if (dto.connection.safeTransfer) {
-                JCifsProxyFileCallbackSafe(file, mode) {
-                    smbFileCache.remove(dto.uri)
-                    contextCache.remove(dto.connection)
-                }
+                JCifsProxyFileCallbackSafe(file, mode, onFileRelease)
             } else {
-                JCifsProxyFileCallback(file, mode) {
-                    smbFileCache.remove(dto.uri)
-                    contextCache.remove(dto.connection)
-                }
+                JCifsProxyFileCallback(file, mode, onFileRelease)
             }
         }
     }
