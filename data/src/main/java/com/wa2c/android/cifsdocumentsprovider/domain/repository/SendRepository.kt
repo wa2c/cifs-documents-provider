@@ -114,7 +114,6 @@ class SendRepository @Inject internal constructor(
                 sendData.state = SendDataState.FAILURE
                 throw e
             } finally {
-                _sendFlow.emit(sendData)
                 // Delete if incomplete
                 if (sendData.state.isIncomplete) {
                     try {
@@ -123,6 +122,7 @@ class SendRepository @Inject internal constructor(
                         logE(e)
                     }
                 }
+                _sendFlow.emit(sendData)
             }
         }
     }

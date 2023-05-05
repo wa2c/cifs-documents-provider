@@ -110,7 +110,7 @@ internal class SmbjClient constructor(
         } else {
             diskShare.openFile(
                 sharePath,
-                setOf(AccessMask.GENERIC_ALL),
+                setOf(AccessMask.GENERIC_READ, AccessMask.GENERIC_WRITE),
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
                 SMB2ShareAccess.ALL,
                 SMB2CreateDisposition.FILE_OPEN_IF,
