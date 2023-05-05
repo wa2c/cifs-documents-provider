@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.LayoutCifsItemBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 
 /**
  * Main list adapter.
@@ -34,9 +35,8 @@ class MainPagingDataAdapter(
         val binding = holder.itemView.tag as LayoutCifsItemBinding
         val item = getItem(position)
         if (item != null) {
-            binding.cifsListItemTitle.visibility = View.VISIBLE
-            binding.cifsListItemSummary.visibility = View.VISIBLE
             binding.cifsListItemTitle.text = item.name
+            binding.cifsListItemStorage.text = binding.root.context.getString(item.storage.labelRes)
             binding.cifsListItemSummary.text = item.folderSmbUri
         }
         binding.root.setOnClickListener { viewModel.onClickItem(item) }

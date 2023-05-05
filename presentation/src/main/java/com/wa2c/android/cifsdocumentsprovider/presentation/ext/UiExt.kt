@@ -6,9 +6,6 @@ import android.text.format.Formatter
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.Animation
-import android.view.animation.LinearInterpolator
-import android.view.animation.RotateAnimation
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
@@ -153,30 +150,17 @@ fun Fragment.toast(text: CharSequence) {
     Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
 }
 
-
 /**
  * Start loading animation
  */
 fun MenuItem.startLoadingAnimation() {
-    stopLoadingAnimation()
     setActionView(R.layout.layout_menu_item_reload)
-    actionView?.animation = RotateAnimation(
-        0.0f, 360.0f,
-        Animation.RELATIVE_TO_SELF, 0.5f,
-        Animation.RELATIVE_TO_SELF, 0.5f
-    ).apply {
-        duration = 1000
-        repeatCount = Animation.INFINITE
-        interpolator = LinearInterpolator()
-        start()
-    }
 }
 
 /**
  * Stop loading animation
  */
 fun MenuItem.stopLoadingAnimation() {
-    actionView?.animation?.cancel()
     actionView = null
 }
 

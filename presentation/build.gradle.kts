@@ -9,10 +9,10 @@ plugins {
 
 android {
     compileSdk = Deps.compileSdkVersion
+    namespace = "${Deps.namespaceBase}.presentation"
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
-        targetSdk = Deps.targetSdkVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -28,20 +28,19 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = Deps.javaVersionEnum
+        targetCompatibility = Deps.javaVersionEnum
     }
 
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+        }
+    }
     buildFeatures {
         dataBinding = true
     }
 
-    aboutLibraries {
-        includeAllLicenses = true
-    }
 }
 
 dependencies {
@@ -62,7 +61,6 @@ dependencies {
     implementation(Deps.Ui.material)
     implementation(Deps.Ui.activityKtx)
     implementation(Deps.Ui.fragmentKtx)
-    implementation(Deps.Ui.cardView)
     // Lifecycle
     implementation(Deps.Ui.lifecycleViewModel )
     implementation(Deps.Ui.lifecycleRuntime)

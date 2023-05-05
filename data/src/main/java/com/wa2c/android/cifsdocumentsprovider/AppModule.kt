@@ -2,15 +2,19 @@ package com.wa2c.android.cifsdocumentsprovider
 
 import android.app.NotificationManager
 import android.content.Context
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
+import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -38,12 +42,65 @@ internal object AppModule {
     @Provides
     fun provideDao(db: AppDatabase) = db.getStorageSettingDao()
 
+
+    /** CifsClient */
+    @Singleton
+    @Provides
+    fun provideJcifsClient(): JCifsClient {
+        return JCifsClient()
+    }
+
+
+    /** CifsClient */
+    @Singleton
+    @Provides
+    fun provideSmbjClient(): SmbjClient {
+        return SmbjClient()
+    }
 }
+
+@Module
+@InstallIn(SingletonComponent::class)
+object CoroutineDispatcherModule {
+    @DefaultDispatcher
+    @Provides
+    fun provideDefaultDispatcher(): CoroutineDispatcher {
+        return Dispatchers.Default
+    }
+
+    @IoDispatcher
+    @Provides
+    fun provideIODispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
+    }
+
+    @MainDispatcher
+    @Provides
+    fun provideMainDispatcher(): CoroutineDispatcher {
+        Dispatchers.Unconfined
+        return Dispatchers.Main
+    }
+}
+
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class IoDispatcher
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MainDispatcher
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DefaultDispatcher
 
 fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
-        CifsClient(),
-        AppPreferences(context),
-        AppModule.provideDatabase(context).getStorageSettingDao(),
+        jCifsClient = AppModule.provideJcifsClient(),
+        smbjClient = AppModule.provideSmbjClient(),
+        appPreferences = AppPreferences(context),
+        connectionSettingDao = AppModule.provideDatabase(context).getStorageSettingDao(),
+        dispatcher = CoroutineDispatcherModule.provideIODispatcher(),
     )
 }

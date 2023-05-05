@@ -9,10 +9,10 @@ plugins {
 
 android {
     compileSdk = Deps.compileSdkVersion
+    namespace = "${Deps.namespaceBase}.data"
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
-        targetSdk = Deps.targetSdkVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -36,11 +36,18 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = Deps.javaVersionEnum
+        targetCompatibility = Deps.javaVersionEnum
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
 
@@ -64,8 +71,11 @@ dependencies {
     implementation(Deps.Data.roomPaging)
     // Json
     implementation(Deps.Data.kotlinxSerializationJson)
-    // jCIFS-ng
+    // SMB
     implementation(Deps.Data.jcifsNg)
+    implementation(Deps.Data.smbj)
+    implementation(Deps.Data.smbjRpc)
+    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
     // Android Network Tools
     implementation(Deps.Data.networkTools)
 

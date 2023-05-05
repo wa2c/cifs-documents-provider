@@ -8,16 +8,17 @@ plugins {
 android {
     compileSdk = Deps.compileSdkVersion
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = Deps.javaVersionEnum
+        targetCompatibility = Deps.javaVersionEnum
     }
+    namespace = Deps.namespaceBase
 
     defaultConfig {
         applicationId = "com.wa2c.android.cifsdocumentsprovider"
         minSdk = Deps.minSdkVersion
         targetSdk = Deps.targetSdkVersion
-        versionCode = 16
-        versionName = "1.6.0"
+        versionCode = 17
+        versionName = "1.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -34,8 +35,10 @@ android {
         }
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+        }
     }
 
     buildFeatures {

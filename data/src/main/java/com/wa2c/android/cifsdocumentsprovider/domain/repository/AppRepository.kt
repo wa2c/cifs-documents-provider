@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.decryptOld
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
@@ -45,6 +46,7 @@ class AppRepository @Inject internal constructor(
                  val connection = CifsConnection(
                         id = map["id"] ?: return@forEachIndexed,
                         name = map["name"] ?: return@forEachIndexed,
+                        storage = StorageType.JCIFS,
                         domain = map["domain"],
                         host = map["host"] ?: return@forEachIndexed,
                         port = map["port"],

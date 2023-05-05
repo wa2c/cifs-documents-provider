@@ -9,10 +9,12 @@ import android.widget.HorizontalScrollView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.view.MenuProvider
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -37,27 +39,54 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
     /** Arguments */
     private val args: FolderFragmentArgs by navArgs()
     /** Reload menu button */
-    private lateinit var reloadMenuButton: MenuItem
+    private var reloadMenuButton: MenuItem? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setHasOptionsMenu(true)
-        (activity as? AppCompatActivity)?.supportActionBar?.let {
-            it.setIcon(null)
-            it.setTitle(R.string.folder_title)
-            it.setDisplayShowHomeEnabled(false)
-            it.setDisplayHomeAsUpEnabled(true)
-            it.setDisplayShowTitleEnabled(true)
-        }
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (!viewModel.onUpFolder()) {
-                    navigateBack()
-                }
+        activity?.let { act ->
+            (act as? AppCompatActivity)?.supportActionBar?.let {
+                it.setIcon(null)
+                it.setTitle(R.string.folder_title)
+                it.setDisplayShowHomeEnabled(false)
+                it.setDisplayHomeAsUpEnabled(true)
+                it.setDisplayShowTitleEnabled(true)
             }
-        })
+
+            act.addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_folder, menu)
+                }
+                override fun onPrepareMenu(menu: Menu) {
+                    super.onPrepareMenu(menu)
+                    // Reload
+                    reloadMenuButton = menu.findItem(R.id.folder_menu_reload).also { item ->
+                        viewModel.isLoading.collectIn(viewLifecycleOwner) {
+                            if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
+                        }
+                    }
+                }
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.folder_menu_reload -> {
+                            viewModel.reload()
+                            true
+                        }
+                        else -> {
+                            false
+                        }
+                    }
+                }
+            }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
+            act.onBackPressedDispatcher.addCallback(viewLifecycleOwner, object: OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (!viewModel.onUpFolder()) {
+                        navigateBack()
+                    }
+                }
+            })
+        }
 
         binding?.let { bind ->
             bind.viewModel = viewModel
@@ -71,34 +100,9 @@ class FolderFragment: Fragment(R.layout.fragment_folder) {
         viewModel.initialize(args.cifsConnection)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.menu_folder, menu)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        // Reload
-        reloadMenuButton = menu.findItem(R.id.folder_menu_reload).also { item ->
-            viewModel.isLoading.collectIn(viewLifecycleOwner) {
-                if (it) item.startLoadingAnimation() else item.stopLoadingAnimation()
-            }
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.folder_menu_reload -> {
-                viewModel.reload()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onDestroy() {
+        reloadMenuButton?.stopLoadingAnimation()
         super.onDestroy()
-        reloadMenuButton.stopLoadingAnimation()
     }
 
     private fun onNavigate(event: FolderNav) {

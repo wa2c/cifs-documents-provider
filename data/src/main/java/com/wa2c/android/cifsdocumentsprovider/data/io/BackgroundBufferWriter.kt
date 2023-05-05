@@ -35,6 +35,8 @@ import kotlin.coroutines.CoroutineContext
  * BackgroundBufferReader
  */
 internal class BackgroundBufferWriter(
+    /** Coroutine context */
+    override val coroutineContext: CoroutineContext,
     /** Buffer unit size */
     private val bufferSize: Int = DEFAULT_BUFFER_SIZE,
     /** Buffer queue capacity  */
@@ -42,11 +44,6 @@ internal class BackgroundBufferWriter(
     /** Background writing */
     private val writeBackground: (start: Long, array: ByteArray, off: Int, len: Int) -> Unit
 ): CoroutineScope, Closeable {
-
-    private val job = Job()
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + job
 
     /** Data buffer queue */
     private val dataBufferQueue = ArrayBlockingQueue<WriteDataBuffer>(queueCapacity)
@@ -118,8 +115,7 @@ internal class BackgroundBufferWriter(
      */
     override fun close() {
         logD("close")
-
-        runBlocking {
+        runBlocking(coroutineContext) {
             currentBuffer?.let {
                 // Put current buffer to queue
                 currentBuffer = null

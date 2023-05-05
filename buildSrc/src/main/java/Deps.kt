@@ -1,26 +1,33 @@
+import org.gradle.api.JavaVersion
+
+@Suppress("SpellCheckingInspection")
 object Deps {
 
-    const val compileSdkVersion = 31
+    const val namespaceBase = "com.wa2c.android.cifsdocumentsprovider"
+
+    const val compileSdkVersion = 33
     const val minSdkVersion = 26
     const val targetSdkVersion = compileSdkVersion
-    const val kotlinVersion = "1.6.21"
+    const val kotlinVersion = "1.8.21"
+    const val javaVersion = 17
+    val javaVersionEnum =  JavaVersion.VERSION_17
 
     object App {
 
         const val appPlugin = "com.android.application"
         const val libraryPlugin = "com.android.library"
-        const val gradlePluginClasspath = "com.android.tools.build:gradle:7.2.1"
-        const val core = "androidx.core:core-ktx:1.8.0"
-        const val appcompat = "androidx.appcompat:appcompat:1.4.2"
+        const val gradlePluginClasspath = "com.android.tools.build:gradle:8.0.1"
+        const val core = "androidx.core:core-ktx:1.10.0"
+        const val appcompat = "androidx.appcompat:appcompat:1.6.1"
 
         const val kotlinAndroidPlugin = "org.jetbrains.kotlin.android"
         const val kotlinKaptPlugin = "kotlin-kapt"
         const val kotlinPluginClasspath = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
-        private const val coroutineVersion = "1.6.0"
+        private const val coroutineVersion = "1.6.4"
         const val coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutineVersion}"
 
-        private const val daggerVersion = "2.42"
+        private const val daggerVersion = "2.45"
         const val daggerHiltPlugin = "dagger.hilt.android.plugin"
         const val daggerHiltPluginClasspath = "com.google.dagger:hilt-android-gradle-plugin:$daggerVersion"
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
@@ -30,17 +37,16 @@ object Deps {
     }
 
     object Ui {
-        const val activityKtx = "androidx.activity:activity-ktx:1.4.0"
-        const val fragmentKtx = "androidx.fragment:fragment-ktx:1.4.1"
-        const val material = "com.google.android.material:material:1.6.1"
+        const val activityKtx = "androidx.activity:activity-ktx:1.7.1"
+        const val fragmentKtx = "androidx.fragment:fragment-ktx:1.5.7"
+        const val material = "com.google.android.material:material:1.8.0"
         const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
-        const val cardView = "com.google.android.material:material:1.6.1"
 
-        private const val lifeCycleVersion = "2.4.1"
+        private const val lifeCycleVersion = "2.6.1"
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
         const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
 
-        private const val navigationVersion = "2.4.2"
+        private const val navigationVersion = "2.5.3"
         const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
         const val navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
@@ -48,7 +54,7 @@ object Deps {
     }
 
     object Data {
-        private const val roomVersion = "2.4.2"
+        private const val roomVersion = "2.5.1"
         const val roomCompiler = "androidx.room:room-compiler:$roomVersion"
         const val roomKtx = "androidx.room:room-ktx:$roomVersion"
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
@@ -59,16 +65,18 @@ object Deps {
         const val kotlinParcelizePlugin = "kotlin-parcelize"
         const val kotlinSerializationPlugin = "kotlinx-serialization"
         const val kotlinxSerializationClasspath = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-        const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3"
+        const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"
 
-        const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.7"
+        const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.9"
+        const val smbj = "com.hierynomus:smbj:0.11.5"
+        const val smbjRpc = "com.rapid7.client:dcerpc:0.12.0"
         const val networkTools = "com.github.stealthcopter:AndroidNetworkTools:0.4.5.3"
     }
 
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
         const val localization = "com.akexorcist:localization:1.2.11"
-        private const val licenseVersion = "8.9.4"
+        private const val licenseVersion = "10.6.3"
         const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
         const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"
         const val license = "com.mikepenz:aboutlibraries:${licenseVersion}"
@@ -76,8 +84,8 @@ object Deps {
 
     object Test {
         const val junit = "junit:junit:4.13.2"
-        const val junitExt = "androidx.test.ext:junit:1.1.3"
-        const val espressoCore = "androidx.test.espresso:espresso-core:3.4.0"
+        const val junitExt = "androidx.test.ext:junit:1.1.5"
+        const val espressoCore = "androidx.test.espresso:espresso-core:3.5.1"
     }
 
 }

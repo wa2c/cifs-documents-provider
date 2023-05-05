@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -114,8 +115,9 @@ class FolderViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        super.onCleared()
+        runBlocking { cifsRepository.closeAllSessions() }
         _isLoading.value = false
+        super.onCleared()
     }
 
 }

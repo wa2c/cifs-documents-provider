@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+<ProgressBar xmlns:android="http://schemas.android.com/apk/res/android"
     style="?android:attr/actionButtonStyle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:contentDescription="@null"
-    android:src="@drawable/ic_reload" />
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:indeterminateDrawable="@drawable/ic_reload_rotate" />

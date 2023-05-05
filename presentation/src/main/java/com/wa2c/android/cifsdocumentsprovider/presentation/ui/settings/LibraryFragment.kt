@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import com.mikepenz.aboutlibraries.LibsBuilder
 import com.mikepenz.aboutlibraries.ui.LibsSupportFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -16,16 +17,16 @@ class LibraryFragment: LibsSupportFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        with(Bundle()) {
+    ): View? {
+        arguments = bundleOf().apply {
             putSerializable(
                 "data",
                 LibsBuilder()
-                .withActivityTitle(getString(R.string.settings_title))
-                .withAboutIconShown(true)
-                .withAboutVersionShown(true)
+                    .withActivityTitle(getString(R.string.settings_title))
+                    .withAboutIconShown(true)
+                    .withAboutVersionShown(true)
             )
-            return libsFragmentCompat.onCreateView(inflater.context, inflater, container, savedInstanceState, this)
         }
+        return super.onCreateView(inflater, container, savedInstanceState)
     }
 }
