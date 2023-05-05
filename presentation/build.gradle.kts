@@ -9,6 +9,7 @@ plugins {
 
 android {
     compileSdk = Deps.compileSdkVersion
+    namespace = "${Deps.namespaceBase}.presentation"
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
@@ -27,13 +28,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = Deps.javaVersionEnum
+        targetCompatibility = Deps.javaVersionEnum
     }
 
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+        }
+    }
     buildFeatures {
         dataBinding = true
     }

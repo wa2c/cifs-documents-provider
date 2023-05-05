@@ -1,16 +1,22 @@
+import org.gradle.api.JavaVersion
+
 @Suppress("SpellCheckingInspection")
 object Deps {
+
+    const val namespaceBase = "com.wa2c.android.cifsdocumentsprovider"
 
     const val compileSdkVersion = 33
     const val minSdkVersion = 26
     const val targetSdkVersion = compileSdkVersion
     const val kotlinVersion = "1.8.21"
+    const val javaVersion = 17
+    val javaVersionEnum =  JavaVersion.VERSION_17
 
     object App {
 
         const val appPlugin = "com.android.application"
         const val libraryPlugin = "com.android.library"
-        const val gradlePluginClasspath = "com.android.tools.build:gradle:7.4.2"
+        const val gradlePluginClasspath = "com.android.tools.build:gradle:8.0.1"
         const val core = "androidx.core:core-ktx:1.10.0"
         const val appcompat = "androidx.appcompat:appcompat:1.6.1"
 
@@ -21,7 +27,7 @@ object Deps {
         private const val coroutineVersion = "1.6.4"
         const val coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutineVersion}"
 
-        private const val daggerVersion = "2.46"
+        private const val daggerVersion = "2.45"
         const val daggerHiltPlugin = "dagger.hilt.android.plugin"
         const val daggerHiltPluginClasspath = "com.google.dagger:hilt-android-gradle-plugin:$daggerVersion"
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
