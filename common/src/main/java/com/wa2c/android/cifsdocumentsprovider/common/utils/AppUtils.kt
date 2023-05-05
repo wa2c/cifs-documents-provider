@@ -71,6 +71,19 @@ val Uri.pathFragment: String
         return uriText.substring(pathIndex)
     }
 
+/**
+ * Get file name (last segment)
+ */
+val Uri.fileName: String
+    get() = run {
+        val path = pathFragment.trimEnd(URI_SEPARATOR)
+        val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
+        return path.substring(startIndex)
+        // FIXME:
+        // Path is not encoded for URI. So file name including '#' occurs errors with lastPathSegment.
+    }
+
+
 /** True if invalid file name */
 val String.isInvalidFileName: Boolean
     get() = this == "." || this == ".."
@@ -87,7 +100,12 @@ fun String.appendSeparator(): String {
 /** Append child entry */
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
-    return Uri.withAppendedPath(Uri.parse(this), name).toString()
+    val nnn = Uri.withAppendedPath(Uri.parse(this), name).toString()
+    logD(nnn)
+    val nn2 = this + name
+    return nn2
+    //return nnn
+    //return this + name
 }
 
 /** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */

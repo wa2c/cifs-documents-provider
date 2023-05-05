@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.data.DataSender
@@ -35,7 +36,7 @@ class SendRepository @Inject internal constructor(
                 dataSender.getDocumentFile(uri)?.let { file ->
                     SendData(
                         UUID.randomUUID().toString(),
-                        file.name ?: file.uri.lastPathSegment ?: return@mapNotNull null,
+                        file.name ?: file.uri.fileName,
                         file.length(),
                         file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
                         file.uri,

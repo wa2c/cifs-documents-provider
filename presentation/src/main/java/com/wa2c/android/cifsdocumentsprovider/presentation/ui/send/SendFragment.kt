@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentSendBinding
@@ -145,13 +146,18 @@ class SendFragment: Fragment(R.layout.fragment_send) {
                 // Single
                 val uri = uris.first()
                 val file = DocumentFile.fromSingleUri(requireContext(), uri)
-                singleUriLauncher.launch(file?.name ?: uri.lastPathSegment)
+                singleUriLauncher.launch(file?.name ?: uri.fileName)
             }
             uris.size > 1 -> {
                 // Multiple
                 multipleUriLauncher.launch(args.inputUris.first())
             }
         }
+    }
+
+    override fun onDestroy() {
+        notification.close()
+        super.onDestroy()
     }
 
     /**

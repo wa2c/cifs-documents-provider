@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -187,7 +188,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
         return withContext(dispatcher) {
             val targetUri = if (newName.contains('/', false)) {
-                newName.trimEnd('/') + '/' + Uri.parse(sourceUri).lastPathSegment
+                newName.trimEnd('/') + '/' + Uri.parse(sourceUri).fileName
             } else {
                 sourceUri.trimEnd('/').replaceAfterLast('/', newName)
             }
