@@ -8,7 +8,9 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 
 @Entity(
     tableName = ConnectionSettingEntity.TABLE_NAME,
-    indices = [Index(value = ["uri", "sort_order"])]
+    indices = [
+        Index(value = ["sort_order"]),
+    ]
 )
 internal data class ConnectionSettingEntity(
     /** ID */

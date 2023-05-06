@@ -33,7 +33,6 @@ import javax.inject.Singleton
 /**
  * CIFS Repository
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject internal constructor(
     private val jCifsClient: JCifsClient,
@@ -65,7 +64,9 @@ class CifsRepository @Inject internal constructor(
     }
 
     suspend fun isExists(): Boolean {
-        return connectionSettingDao.getCount() > 0
+        return withContext(dispatcher) {
+            connectionSettingDao.getCount() > 0
+        }
     }
 
     /**
