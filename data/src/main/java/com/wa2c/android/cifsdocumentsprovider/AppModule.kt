@@ -4,7 +4,7 @@ import android.app.NotificationManager
 import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
@@ -41,6 +41,14 @@ internal object AppModule {
     @Singleton
     @Provides
     fun provideDao(db: AppDatabase) = db.getStorageSettingDao()
+
+
+    /** DataStore */
+    @Singleton
+    @Provides
+    fun providePreferencesDataStore(
+        @ApplicationContext context: Context
+    ): AppPreferencesDataStore = AppPreferencesDataStore(context)
 
 
     /** CifsClient */
@@ -99,7 +107,7 @@ fun createCifsRepository(context: Context): CifsRepository {
     return CifsRepository(
         jCifsClient = AppModule.provideJcifsClient(),
         smbjClient = AppModule.provideSmbjClient(),
-        appPreferences = AppPreferences(context),
+        appPreferences = AppModule.providePreferencesDataStore(context),
         connectionSettingDao = AppModule.provideDatabase(context).getStorageSettingDao(),
         dispatcher = CoroutineDispatcherModule.provideIODispatcher(),
     )

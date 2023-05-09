@@ -25,9 +25,9 @@ class App: LocalizationApplication() {
     override fun onCreate() {
         super.onCreate()
         initLog(BuildConfig.DEBUG)
-        AppCompatDelegate.setDefaultNightMode(repository.uiTheme.mode) // Set theme
-        runBlocking {
-            repository.migrate()
-        }
+        runBlocking { AppCompatDelegate.setDefaultNightMode(repository.getUiTheme().mode) } // Set theme
+//        runBlocking {
+//            repository.migrate()
+//        }
     }
 }

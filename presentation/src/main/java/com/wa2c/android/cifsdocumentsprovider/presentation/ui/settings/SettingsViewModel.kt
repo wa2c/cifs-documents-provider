@@ -7,6 +7,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -17,16 +19,22 @@ class SettingsViewModel @Inject constructor(
     private val appRepository: AppRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    var uiTheme: UiTheme
-        get() = appRepository.uiTheme
-        set(value) { appRepository.uiTheme = value }
+    /** UI Theme */
+    val uiTheme: UiTheme get() = runBlocking { appRepository.getUiTheme() }
 
-    var language: Language
-        get() = appRepository.language
-        set(value) { appRepository.language = value }
+    /** UI Theme */
+    fun setUiTheme(value: UiTheme) = launch { appRepository.setUiTheme(value) }
 
-    var useAsLocal: Boolean
-        get() = appRepository.useAsLocal
-        set(value) { appRepository.useAsLocal = value }
+    /** Language */
+    val language: Language get() = runBlocking { appRepository.getLanguage() }
+
+    /** Language */
+    fun setLanguage(value: Language) = launch { appRepository.setLanguage(value) }
+
+    /** Use as local */
+    val useAsLocal: Boolean get() = runBlocking { appRepository.getUseAsLocal() }
+
+    /** Use as local */
+    fun setUseAsLocal(value: Boolean) = launch { appRepository.setUseAsLocal(value) }
 
 }

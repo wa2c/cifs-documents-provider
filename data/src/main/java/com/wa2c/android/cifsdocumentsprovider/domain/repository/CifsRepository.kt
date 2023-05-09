@@ -18,7 +18,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toModel
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
@@ -37,13 +37,12 @@ import javax.inject.Singleton
 class CifsRepository @Inject internal constructor(
     private val jCifsClient: JCifsClient,
     private val smbjClient: SmbjClient,
-    private val appPreferences: AppPreferences,
+    private val appPreferences: AppPreferencesDataStore,
     private val connectionSettingDao: ConnectionSettingDao,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
     /** Use as local */
-    val useAsLocal: Boolean
-        get() = appPreferences.useAsLocal
+    suspend fun getUseAsLocal(): Boolean = appPreferences.getUseAsLocal()
 
     /**
      * Connection flow

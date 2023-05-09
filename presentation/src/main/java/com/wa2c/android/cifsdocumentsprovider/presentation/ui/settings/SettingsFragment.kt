@@ -17,6 +17,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentS
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog
+import kotlinx.coroutines.runBlocking
 
 /**
  * Settings Screen
@@ -76,13 +77,13 @@ class SettingsFragment: Fragment(R.layout.fragment_settings) {
 
         setFragmentResultListener(DIALOG_KEY_THEME) { _, result ->
             val theme = UiTheme.findByIndexOrDefault(result.getInt(ListDialog.DIALOG_RESULT_INDEX, -1))
-            viewModel.uiTheme = theme
             AppCompatDelegate.setDefaultNightMode(theme.mode)
+            viewModel.setUiTheme(theme)
         }
         setFragmentResultListener(DIALOG_KEY_LANGUAGE) { _, result ->
             val language = Language.findByIndexOrDefault(result.getInt(ListDialog.DIALOG_RESULT_INDEX, -1))
-            viewModel.language = language
             mainViewModel.updateLanguage(language)
+            viewModel.setLanguage(language)
         }
     }
 

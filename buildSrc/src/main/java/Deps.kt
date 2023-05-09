@@ -59,6 +59,8 @@ object Deps {
         const val roomKtx = "androidx.room:room-ktx:$roomVersion"
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
 
+        const val dataStore = "androidx.datastore:datastore-preferences:1.0.0"
+
         private const val pagingVersion = "3.1.1"
         const val pagingKtx = "androidx.paging:paging-runtime-ktx:$pagingVersion"
 
@@ -70,6 +72,7 @@ object Deps {
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.9"
         const val smbj = "com.hierynomus:smbj:0.11.5"
         const val smbjRpc = "com.rapid7.client:dcerpc:0.12.0"
+        const val guava = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
         const val networkTools = "com.github.stealthcopter:AndroidNetworkTools:0.4.5.3"
     }
 

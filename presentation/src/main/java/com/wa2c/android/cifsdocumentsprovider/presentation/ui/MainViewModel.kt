@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(
 
     fun updateLanguage(language: Language? = null) {
         launch {
-            val lang = language ?: appRepository.language
+            val lang = language ?: appRepository.getLanguage()
             _language.emit(lang)
         }
     }

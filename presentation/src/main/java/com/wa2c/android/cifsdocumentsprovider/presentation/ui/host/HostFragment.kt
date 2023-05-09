@@ -24,6 +24,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentHostBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.runBlocking
 
 /**
  * Host Screen
@@ -115,7 +116,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
      */
     private fun selectSort(item: MenuItem) {
         val sortType = HostSortType.values().firstOrNull { it.menuRes == item.itemId } ?: return
-        viewModel.onClickSort(sortType)
+        viewModel.sortType = sortType
         adapter.sort()
         item.isChecked = true
     }

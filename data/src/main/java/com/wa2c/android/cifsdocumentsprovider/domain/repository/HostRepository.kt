@@ -4,7 +4,7 @@ import com.stealthcopter.networktools.SubnetDevices
 import com.stealthcopter.networktools.subnet.Device
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
@@ -16,15 +16,16 @@ import javax.inject.Singleton
  */
 @Singleton
 class HostRepository @Inject internal constructor(
-    private val preferences: AppPreferences
+    private val preferences: AppPreferencesDataStore,
 ) {
     private val _hostFlow: MutableSharedFlow<HostData?> = MutableSharedFlow()
     val hostFlow: MutableSharedFlow<HostData?> = _hostFlow
 
     /** Sort type */
-    var sortType: HostSortType
-        get() = preferences.hostSortType
-        set(value) { preferences.hostSortType = value }
+    suspend fun getSortType(): HostSortType = preferences.getHostSortTyp()
+
+    /** Sort type */
+    suspend fun setSortType(value: HostSortType) = preferences.setHostSortTyp(value)
 
     /**
      * Start discovery

@@ -18,6 +18,7 @@ import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import dagger.hilt.EntryPoints
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
@@ -57,6 +58,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<String>?): Cursor {
+        val useAsLocal = runBlocking { cifsRepository.getUseAsLocal() }
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
             it.newRow().apply {
@@ -70,7 +72,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_FLAGS,
                     DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
                             DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
-                            if (cifsRepository.useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
+                            if (useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
                 )
             }
         }

@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -30,7 +31,9 @@ class HostViewModel @Inject constructor(
         if (it == null) _isLoading.value = false
     }.mapNotNull { it }
 
-    val sortType: HostSortType get() = hostRepository.sortType
+    var sortType: HostSortType
+        get() = runBlocking {  hostRepository.getSortType() }
+        set(value) { runBlocking { hostRepository.setSortType(value) } }
 
     fun discovery() {
         launch {
@@ -57,10 +60,6 @@ class HostViewModel @Inject constructor(
         launch {
             _navigationEvent.emit(HostNav.SelectItem(null))
         }
-    }
-
-    fun onClickSort(sortType: HostSortType) {
-        hostRepository.sortType = sortType
     }
 
     override fun onCleared() {
