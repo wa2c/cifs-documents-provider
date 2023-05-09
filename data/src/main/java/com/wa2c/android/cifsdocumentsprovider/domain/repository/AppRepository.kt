@@ -34,34 +34,4 @@ class AppRepository @Inject internal constructor(
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = appPreferences.setUseAsLocal(value)
 
-
-
-//    /**
-//     * Migrate
-//     */
-//    suspend fun migrate() {
-//        appPreferences.removeOldKeys()
-//        appPreferences.removeOldConnection().let { list ->
-//            list.forEachIndexed { index, map ->
-//                 val connection = CifsConnection(
-//                        id = map["id"] ?: return@forEachIndexed,
-//                        name = map["name"] ?: return@forEachIndexed,
-//                        storage = StorageType.JCIFS,
-//                        domain = map["domain"],
-//                        host = map["host"] ?: return@forEachIndexed,
-//                        port = map["port"],
-//                        enableDfs = map["enableDfs"]?.toBooleanStrictOrNull() ?: false,
-//                        folder = map["folder"],
-//                        user = map["user"],
-//                        password = map["password"]?.let { decryptOld(it) },
-//                        anonymous = map["anonymous"]?.toBooleanStrictOrNull() ?: false,
-//                        extension = map["extension"]?.toBooleanStrictOrNull() ?: false,
-//                        safeTransfer = map["safeTransfer"]?.toBooleanStrictOrNull() ?: false,
-//                    )
-//                val entity = connection.toEntity(sortOrder = index, modifiedDate = Date())
-//                connectionSettingDao.insert(entity)
-//            }
-//        }
-//    }
-
 }
