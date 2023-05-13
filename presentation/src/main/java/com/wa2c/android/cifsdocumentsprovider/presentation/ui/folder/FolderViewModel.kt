@@ -74,7 +74,6 @@ class FolderViewModel @Inject constructor(
      */
     fun onSelectFolder(file: CifsFile) {
         if (isLoading.value) return
-        _isLoading.value = true
         launch {
             loadList(file)
         }
@@ -84,6 +83,7 @@ class FolderViewModel @Inject constructor(
      * Load list
      */
     private suspend fun loadList(file: CifsFile) {
+        _isLoading.value = true
         runCatching {
             cifsRepository.getFileChildren(cifsConnection, file.uri.toString())
         }.onSuccess { list ->

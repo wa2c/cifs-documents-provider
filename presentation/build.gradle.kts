@@ -38,7 +38,11 @@ android {
         }
     }
     buildFeatures {
+        compose = true
         dataBinding = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = Deps.kotlinCompilerExtensionVersion
     }
 
 }
@@ -56,6 +60,16 @@ dependencies {
     kapt(Deps.App.daggerHiltCompiler)
 
     // UI
+
+    val composeBom = platform(Deps.Ui.composeBom)
+    implementation(composeBom)
+    testImplementation(composeBom)
+    androidTestImplementation(composeBom)
+
+    implementation(Deps.Ui.composeUi)
+    implementation(Deps.Ui.composeMaterial)
+    implementation(Deps.Ui.composeUiPreview)
+    debugImplementation(Deps.Ui.composeUiTooling)
 
     implementation(Deps.Ui.constraintLayout)
     implementation(Deps.Ui.material)

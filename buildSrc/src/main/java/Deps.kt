@@ -8,9 +8,10 @@ object Deps {
     const val compileSdkVersion = 33
     const val minSdkVersion = 26
     const val targetSdkVersion = compileSdkVersion
-    const val kotlinVersion = "1.8.21"
+    const val kotlinVersion = "1.8.20"
     const val javaVersion = 17
     val javaVersionEnum =  JavaVersion.VERSION_17
+    const val kotlinCompilerExtensionVersion = "1.4.6"
 
     object App {
 
@@ -42,9 +43,16 @@ object Deps {
         const val material = "com.google.android.material:material:1.8.0"
         const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
 
+        const val composeBom = "androidx.compose:compose-bom:2023.01.00"
+        const val composeUi = "androidx.compose.ui:ui"
+        const val composeMaterial = "androidx.compose.material3:material3"
+        const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"
+        const val composeUiTooling = "androidx.compose.ui:ui-tooling"
+
         private const val lifeCycleVersion = "2.6.1"
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
         const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
+        const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleViewModel"
 
         private const val navigationVersion = "2.5.3"
         const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"
