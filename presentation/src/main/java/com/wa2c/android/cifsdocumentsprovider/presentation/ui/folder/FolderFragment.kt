@@ -20,12 +20,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentFolderBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.startLoadingAnimation
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.stopLoadingAnimation
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,15 +31,10 @@ import dagger.hilt.android.AndroidEntryPoint
  * Folder Screen
  */
 @AndroidEntryPoint
-//class FolderFragment: Fragment(R.layout.fragment_folder) {
 class FolderFragment: Fragment() {
 
     /** View Model */
     private val viewModel by viewModels<FolderViewModel>()
-    /** Binding */
-    private val binding: FragmentFolderBinding? by viewBinding()
-    /** List adapter */
-    private val adapter: FolderListAdapter by lazy { FolderListAdapter(viewModel) }
     /** Arguments */
     private val args: FolderFragmentArgs by navArgs()
     /** Reload menu button */
@@ -118,27 +111,6 @@ class FolderFragment: Fragment() {
         viewModel.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
     }
 
-
-
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//
-
-//
-//        binding?.let { bind ->
-//            bind.viewModel = viewModel
-//            bind.folderList.adapter = adapter
-//            bind.folderList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
-//        }
-//
-//        viewModel.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-//        viewModel.fileList.collectIn(viewLifecycleOwner, observer = ::onLoadFileList)
-//        viewModel.currentFile.collectIn(viewLifecycleOwner, observer = ::onSetCurrentFile)
-//        viewModel.initialize(args.cifsConnection)
-//
-//
-//    }
-
     override fun onDestroy() {
         reloadMenuButton?.stopLoadingAnimation()
         super.onDestroy()
@@ -155,18 +127,6 @@ class FolderFragment: Fragment() {
             }
         }
     }
-
-//    private fun onLoadFileList(fileList: List<CifsFile>) {
-//        adapter.submitList(fileList)
-//    }
-
-//    private fun onSetCurrentFile(cifsFile: CifsFile?) {
-//        cifsFile ?: return
-//        binding?.folderSetPath?.text = cifsFile.uri.toString()
-//        binding?.folderSetPathScroll?.doOnNextLayout {
-//            binding?.folderSetPathScroll?.fullScroll(HorizontalScrollView.FOCUS_RIGHT)
-//        }
-//    }
 
     companion object {
         const val REQUEST_KEY_FOLDER = "REQUEST_KEY_FOLDER"
