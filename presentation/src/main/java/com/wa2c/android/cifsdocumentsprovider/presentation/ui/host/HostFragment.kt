@@ -1,49 +1,68 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentHostBinding
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.menuRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.startLoadingAnimation
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.stopLoadingAnimation
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.runBlocking
 
 /**
  * Host Screen
  */
 @AndroidEntryPoint
-class HostFragment: Fragment(R.layout.fragment_host) {
-
+class HostFragment: Fragment() {
     /** View Model */
     private val viewModel by viewModels<HostViewModel>()
-    /** Binding */
-    private val binding: FragmentHostBinding? by viewBinding()
-    /** List adapter */
-    private val adapter: HostListAdapter by lazy { HostListAdapter(viewModel) }
     /** Arguments */
     private val args: HostFragmentArgs by navArgs()
     /** True if is initializing */
     private val isInit: Boolean get() = (args.cifsConnection == null)
     /** Reload menu button */
     private var reloadMenuButton: MenuItem? = null
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Theme.AppTheme {
+                    val hostList = viewModel.hostDataList.collectAsState()
+                    HostScreen(
+                        hostList = hostList.value,
+                        isInit = isInit,
+                        onClickItem = { viewModel.onClickItem(it) },
+                        onClickSet = { viewModel.onClickSetManually() },
+                    )
+                }
+            }
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -64,7 +83,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
                 }
                 override fun onPrepareMenu(menu: Menu) {
                     // Sort
-                    menu.findItem(viewModel.sortType.menuRes)?.let {
+                    menu.findItem(viewModel.sortType.value.menuRes)?.let {
                         it.isChecked = true
                     } ?: let {
                         menu.findItem(HostSortType.DEFAULT.menuRes).isChecked = true
@@ -79,7 +98,7 @@ class HostFragment: Fragment(R.layout.fragment_host) {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.host_menu_reload -> {
-                            startDiscovery()
+                            viewModel.discovery()
                             true
                         }
                         else -> {
@@ -91,19 +110,11 @@ class HostFragment: Fragment(R.layout.fragment_host) {
             }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
-        binding?.let { bind ->
-            bind.viewModel = viewModel
-            bind.hostList.adapter = adapter
-            bind.hostList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
-            bind.hostSetManuallyContainer.isVisible = isInit
-        }
-
         viewModel.let {
             it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            it.hostData.collectIn(viewLifecycleOwner, observer = ::onHostFound)
         }
 
-        startDiscovery()
+        viewModel.discovery()
     }
 
     override fun onDestroy() {
@@ -116,17 +127,8 @@ class HostFragment: Fragment(R.layout.fragment_host) {
      */
     private fun selectSort(item: MenuItem) {
         val sortType = HostSortType.values().firstOrNull { it.menuRes == item.itemId } ?: return
-        viewModel.sortType = sortType
-        adapter.sort()
+        viewModel.sort(sortType)
         item.isChecked = true
-    }
-
-    /**
-     * Start discovery
-     */
-    private fun startDiscovery() {
-        adapter.clearData()
-        viewModel.discovery()
     }
 
     private fun onNavigate(event: HostNav) {
@@ -180,14 +182,6 @@ class HostFragment: Fragment(R.layout.fragment_host) {
             )
             navigateBack()
         }
-    }
-
-    /**
-     * Host found
-     */
-    private fun onHostFound(data: HostData) {
-        logD("onHostFound: data=$data")
-        adapter.addData(data)
     }
 
     companion object {

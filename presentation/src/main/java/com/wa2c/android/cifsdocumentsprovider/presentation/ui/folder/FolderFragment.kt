@@ -47,7 +47,7 @@ class FolderFragment: Fragment() {
                     val fileList = viewModel.fileList.collectAsState()
                     val currentFile = viewModel.currentFile.collectAsState()
                     val isLoading = viewModel.isLoading.collectAsState()
-                    FolderListScreen(
+                    FolderScreen(
                         fileList = fileList.value,
                         currentFile = currentFile.value,
                         isLoading = isLoading.value,

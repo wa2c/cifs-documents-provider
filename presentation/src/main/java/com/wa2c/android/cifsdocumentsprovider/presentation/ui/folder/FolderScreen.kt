@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,12 +39,12 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
  * Folder Screen
  */
 @Composable
-fun FolderListScreen(
+fun FolderScreen(
     fileList: List<CifsFile>,
     currentFile: CifsFile?,
     isLoading: Boolean,
     onClickItem: (CifsFile) -> Unit,
-    onClickSet: () -> Unit
+    onClickSet: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxHeight()
@@ -62,6 +63,7 @@ fun FolderListScreen(
                             cifsFile = file,
                             onClick = { onClickItem(file) },
                         )
+                        Divider(thickness = 0.5.dp, color = Theme.DividerColor)
                     }
                 }
             }
@@ -135,7 +137,7 @@ private fun FolderItem(
 @Composable
 private fun FolderScreenPreview() {
     Theme.AppTheme {
-        FolderListScreen(
+        FolderScreen(
             fileList = listOf(
                 CifsFile(
                     name = "example1.txt",
