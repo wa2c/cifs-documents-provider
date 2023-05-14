@@ -83,7 +83,6 @@ fun HostScreen(
     }
 }
 
-
 @Composable
 private fun HostItem(
     hostData: HostData,
