@@ -53,12 +53,15 @@ object Deps {
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
         const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
         const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion"
+        const val lifecycleRuntimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:$lifeCycleVersion"
 
         private const val navigationVersion = "2.5.3"
         const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
         const val navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
         const val navigationFragmentKtx = "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
+
+        const val navigationCompose = "androidx.hilt:hilt-navigation-compose:1.0.0"
     }
 
     object Data {
@@ -91,6 +94,7 @@ object Deps {
         const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
         const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"
         const val license = "com.mikepenz:aboutlibraries:${licenseVersion}"
+        const val licenseCompose = "com.mikepenz:aboutlibraries-compose:${licenseVersion}"
     }
 
     object Test {

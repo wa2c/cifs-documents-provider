@@ -13,7 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 
-
+/**
+ * Common dialog
+ */
 @Composable
 fun CommonDialog(
     title: String?,
@@ -49,7 +51,6 @@ fun CommonDialog(
         },
         onDismissRequest = {
         },
-        //modifier = Modifier.padding(vertical = 5.dp)
     )
 }
 

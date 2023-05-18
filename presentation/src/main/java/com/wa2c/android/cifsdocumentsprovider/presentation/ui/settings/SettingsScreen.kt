@@ -36,8 +36,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
 /**

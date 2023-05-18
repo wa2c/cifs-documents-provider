@@ -68,7 +68,6 @@ dependencies {
 
     implementation(Deps.Ui.composeUi)
     implementation(Deps.Ui.composeMaterial)
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
     implementation(Deps.Ui.composeUiPreview)
     debugImplementation(Deps.Ui.composeUiTooling)
 
@@ -80,21 +79,21 @@ dependencies {
     implementation(Deps.Ui.lifecycleViewModel )
     implementation(Deps.Ui.lifecycleRuntime)
     implementation(Deps.Ui.lifecycleViewModelCompose)
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation(Deps.Ui.lifecycleRuntimeCompose)
     // Navigation
     implementation(Deps.Ui.navigationUi)
     implementation(Deps.Ui.navigationFragmentKtx)
-    implementation("com.mikepenz:aboutlibraries-compose:10.6.3")
+    implementation(Deps.Ui.navigationCompose)
 
     // Util
 
     // Paging
     implementation(Deps.Data.pagingKtx)
-
     // Localization
     implementation(Deps.Util.localization)
     // OSS License
     implementation(Deps.Util.license)
+    implementation(Deps.Util.licenseCompose)
 
     // Test
 
