@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.Collections
@@ -32,7 +33,7 @@ class HostViewModel @Inject constructor(
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _sortType = MutableStateFlow<HostSortType>( runBlocking { hostRepository.getSortType() })
+    private val _sortType = MutableStateFlow<HostSortType>( runBlocking { hostRepository.hostSortTypeFlow.first() } )
     val sortType = _sortType.asStateFlow()
 
     private val _hostDataList = MutableStateFlow<List<HostData>>(mutableListOf())

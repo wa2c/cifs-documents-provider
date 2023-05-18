@@ -1,5 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
+import java.util.Locale
+
 /**
  * Language
  */
@@ -20,8 +22,10 @@ enum class Language(
     /** Index */
     val index: Int = this.ordinal
 
-
     companion object {
+        val default: Language
+            get() =  Language.findByCodeOrDefault(Locale.getDefault().language)
+
         /** Find value or default by code */
         fun findByCodeOrDefault(code: String?): Language {
             return values().firstOrNull { it.code == code } ?: ENGLISH

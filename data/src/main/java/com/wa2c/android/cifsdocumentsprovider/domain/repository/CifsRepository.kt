@@ -42,7 +42,7 @@ class CifsRepository @Inject internal constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
     /** Use as local */
-    suspend fun getUseAsLocal(): Boolean = appPreferences.getUseAsLocal()
+    val useAsLocalFlow = appPreferences.useAsLocalFlow
 
     /**
      * Connection flow

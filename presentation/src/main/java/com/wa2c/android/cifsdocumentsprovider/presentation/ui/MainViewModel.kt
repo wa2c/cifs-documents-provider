@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,7 +22,7 @@ class MainViewModel @Inject constructor(
 
     fun updateLanguage(language: Language? = null) {
         launch {
-            val lang = language ?: appRepository.getLanguage()
+            val lang = language ?: appRepository.languageFlow.first()
             _language.emit(lang)
         }
     }

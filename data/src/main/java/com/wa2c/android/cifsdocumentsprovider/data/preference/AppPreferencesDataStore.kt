@@ -1,8 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.preference
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -13,12 +11,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
+import com.wa2c.android.cifsdocumentsprovider.common.values.Language
+import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,25 +34,27 @@ internal class AppPreferencesDataStore @Inject constructor(
     )
 
     /** Host sort type */
-    suspend fun getHostSortTyp(): HostSortType = HostSortType.findByValueOrDefault(dataStore.getValue(PREFKEY_HOST_SORT_TYPE) ?: -1)
+    val hostSortTypeFlow: Flow<HostSortType> =  dataStore.data.map { HostSortType.findByValueOrDefault(it[PREFKEY_HOST_SORT_TYPE]) }
 
     /** Host sort type */
-    suspend fun setHostSortTyp(type: HostSortType) = dataStore.setValue(PREFKEY_HOST_SORT_TYPE, type.intValue)
+    suspend fun setHostSortType(type: HostSortType) = dataStore.setValue(PREFKEY_HOST_SORT_TYPE, type.intValue)
 
     /** UI Theme */
-    suspend fun getUiTheme(): String? = dataStore.getValue(PREFKEY_UI_THEME)
+    val uiThemeFlow: Flow<UiTheme> =  dataStore.data.map { UiTheme.findByKeyOrDefault(it[PREFKEY_UI_THEME]) }
 
     /** UI Theme */
-    suspend fun setUiTheme(value: String?) = dataStore.setValue(PREFKEY_UI_THEME, value)
+    suspend fun setUiTheme(value: UiTheme) = dataStore.setValue(PREFKEY_UI_THEME, value.key)
 
     /** Language */
-    suspend fun getLanguage(): String? = dataStore.getValue(PREFKEY_LANGUAGE)
+    val languageFlow: Flow<Language> = dataStore.data.map { Language.findByCodeOrDefault(it[PREFKEY_LANGUAGE])  }
 
     /** Language */
     suspend fun setLanguage(value: String?) = dataStore.setValue(PREFKEY_LANGUAGE, value)
 
     /** Use as local */
     suspend fun getUseAsLocal(): Boolean = dataStore.getValue(PREFKEY_USE_AS_LOCAL) ?: false
+
+    val useAsLocalFlow: Flow<Boolean> = dataStore.data.map { it[PREFKEY_USE_AS_LOCAL] ?: false  }
 
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = dataStore.setValue(PREFKEY_USE_AS_LOCAL, value)
