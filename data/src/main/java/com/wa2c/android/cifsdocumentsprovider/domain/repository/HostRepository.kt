@@ -22,10 +22,10 @@ class HostRepository @Inject internal constructor(
     val hostFlow: MutableSharedFlow<HostData?> = _hostFlow
 
     /** Sort type */
-    suspend fun getSortType(): HostSortType = preferences.getHostSortTyp()
+    val hostSortTypeFlow = preferences.hostSortTypeFlow
 
     /** Sort type */
-    suspend fun setSortType(value: HostSortType) = preferences.setHostSortTyp(value)
+    suspend fun setSortType(value: HostSortType) = preferences.setHostSortType(value)
 
     /**
      * Start discovery

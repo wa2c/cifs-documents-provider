@@ -52,7 +52,7 @@ object Deps {
         private const val lifeCycleVersion = "2.6.1"
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
         const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
-        const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleViewModel"
+        const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion"
 
         private const val navigationVersion = "2.5.3"
         const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"

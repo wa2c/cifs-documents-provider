@@ -58,12 +58,7 @@ fun HostScreen(
         }
 
         if (isInit) {
-            Spacer(
-                modifier = Modifier
-                    .height(1.dp)
-                    .fillMaxWidth()
-                    .background(color = Theme.DividerColor)
-            )
+            Divider(thickness = 1.dp, color = Theme.DividerColor)
 
             Column(
                 modifier = Modifier
