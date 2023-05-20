@@ -1,16 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
 import androidx.lifecycle.ViewModel
-import androidx.paging.PagingData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -23,7 +22,7 @@ class MainViewModel @Inject constructor(
 
     private val _navigationEvent = MutableSharedFlow<MainNav>()
     val navigationEvent: SharedFlow<MainNav> = _navigationEvent
-    val connectionFlow: Flow<PagingData<CifsConnection>> = cifsRepository.connectionFlow
+    val connectionListFlow = cifsRepository.connectionListFlow
 
     /**
      * Click item.
@@ -65,7 +64,8 @@ class MainViewModel @Inject constructor(
      * Move item.
      */
     fun onItemMove(fromPosition: Int, toPosition: Int) {
-        launch {
+        runBlocking {
+            // run blocking for drag animation
             cifsRepository.moveConnection(fromPosition, toPosition)
         }
     }

@@ -24,9 +24,10 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,15 +45,9 @@ class CifsRepository @Inject internal constructor(
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
 
-    /**
-     * Connection flow
-     */
-    val connectionFlow: Flow<PagingData<CifsConnection>> = Pager(
-        PagingConfig(pageSize = Int.MAX_VALUE, initialLoadSize = Int.MAX_VALUE)
-    ) {
-        connectionSettingDao.getPagingSource()
-    }.flow.map { pagingData ->
-        pagingData.map { it.toModel() }
+    /** Connection flow */
+    val connectionListFlow = connectionSettingDao.getList().map { list ->
+        list.map { it.toModel() }
     }
 
     private fun getClient(dto: CifsClientDto): CifsClientInterface {
@@ -73,7 +68,7 @@ class CifsRepository @Inject internal constructor(
      */
     suspend fun loadConnection(): List<CifsConnection>  {
         return withContext(dispatcher) {
-            connectionSettingDao.getList().map { it.toModel() }
+            connectionSettingDao.getList().first().map { it.toModel() }
         }
     }
 

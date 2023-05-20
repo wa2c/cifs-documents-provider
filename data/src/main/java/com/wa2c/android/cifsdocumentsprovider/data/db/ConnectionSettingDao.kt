@@ -1,7 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.data.db
 
-import androidx.paging.PagingSource
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 
 @Dao
 internal interface ConnectionSettingDao {
@@ -19,10 +20,7 @@ internal interface ConnectionSettingDao {
     suspend fun getEntityByUri(uri: String): ConnectionSettingEntity?
 
     @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} ORDER BY sort_order")
-    suspend fun getList(): List<ConnectionSettingEntity>
-
-    @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} ORDER BY sort_order")
-    fun getPagingSource(): PagingSource<Int, ConnectionSettingEntity>
+    fun getList(): Flow<List<ConnectionSettingEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: ConnectionSettingEntity)
@@ -35,7 +33,7 @@ internal interface ConnectionSettingDao {
 
     @Transaction
     suspend fun move(fromPosition: Int, toPosition: Int) {
-        val list = getList().toMutableList()
+        val list = getList().first().toMutableList()
         list.add(toPosition, list.removeAt(fromPosition))
         list.forEachIndexed { index, entity ->
             updateSortOrder(entity.id, index + 1)

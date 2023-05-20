@@ -70,6 +70,7 @@ dependencies {
     implementation(Deps.Ui.composeMaterial)
     implementation(Deps.Ui.composeUiPreview)
     debugImplementation(Deps.Ui.composeUiTooling)
+    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
 
     implementation(Deps.Ui.constraintLayout)
     implementation(Deps.Ui.material)

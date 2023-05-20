@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
@@ -16,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -51,7 +51,7 @@ class HostFragment: Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 Theme.AppTheme {
-                    val hostList = viewModel.hostDataList.collectAsState()
+                    val hostList = viewModel.hostDataList.collectAsStateWithLifecycle()
                     HostScreen(
                         hostList = hostList.value,
                         isInit = isInit,

@@ -2,27 +2,27 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentMainBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -33,10 +33,10 @@ class MainFragment: Fragment(R.layout.fragment_main) {
 
     /** View Model */
     private val viewModel by viewModels<MainViewModel>()
-    /** Binding */
-    private val binding: FragmentMainBinding? by viewBinding()
-    /** List adapter */
-    private val adapter: MainPagingDataAdapter by lazy { MainPagingDataAdapter(viewModel) }
+//    /** Binding */
+//    private val binding: FragmentMainBinding? by viewBinding()
+//    /** List adapter */
+//    private val adapter: MainPagingDataAdapter by lazy { MainPagingDataAdapter(viewModel) }
 
     /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -63,6 +63,23 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             startActivity(Intent.createChooser(shareIntent, null))
         }
     }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Theme.AppTheme {
+                    val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
+                    MainScreen(
+                        connectionList = connectionList.value,
+                        onClickItem = { viewModel.onClickItem(it) },
+                        onClickAddItem = { viewModel.onClickAddItem() },
+                        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
+                    )
+                }
+            }
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -97,37 +114,39 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
-        binding?.let { bind ->
-            bind.viewModel = viewModel
-            bind.cifsList.adapter = adapter
-            bind.cifsList.addItemDecoration(
-                DividerItemDecoration(
-                    requireContext(),
-                    DividerItemDecoration.VERTICAL
-                )
-            )
 
-            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    val fromPosition = viewHolder.bindingAdapterPosition
-                    val toPosition = target.bindingAdapterPosition
-                    viewModel.onItemMove(fromPosition, toPosition)
-                    return true
-                }
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                }
-            }).attachToRecyclerView(bind.cifsList)
-        }
+
+//        binding?.let { bind ->
+//            bind.viewModel = viewModel
+//            bind.cifsList.adapter = adapter
+//            bind.cifsList.addItemDecoration(
+//                DividerItemDecoration(
+//                    requireContext(),
+//                    DividerItemDecoration.VERTICAL
+//                )
+//            )
+//
+//            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
+//                override fun onMove(
+//                    recyclerView: RecyclerView,
+//                    viewHolder: RecyclerView.ViewHolder,
+//                    target: RecyclerView.ViewHolder
+//                ): Boolean {
+//                    val fromPosition = viewHolder.bindingAdapterPosition
+//                    val toPosition = target.bindingAdapterPosition
+//                    viewModel.onItemMove(fromPosition, toPosition)
+//                    return true
+//                }
+//                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+//                }
+//            }).attachToRecyclerView(bind.cifsList)
+//        }
 
         viewModel.let {
             it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            it.connectionFlow.collectIn(viewLifecycleOwner) { data ->
-                adapter.submitData(lifecycle, data)
-            }
+//            it.connectionFlow.collectIn(viewLifecycleOwner) { data ->
+//                adapter.submitData(lifecycle, data)
+//            }
         }
     }
 
