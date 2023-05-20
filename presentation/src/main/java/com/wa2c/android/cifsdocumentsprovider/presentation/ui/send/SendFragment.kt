@@ -1,18 +1,22 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.MenuProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -23,6 +27,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentS
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.viewBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -33,10 +38,10 @@ class SendFragment: Fragment(R.layout.fragment_send) {
 
     /** View Model */
     private val viewModel by activityViewModels<SendViewModel>()
-    /** Binding */
-    private val binding: FragmentSendBinding? by viewBinding()
-    /** List adapter */
-    private val adapter: SendListAdapter by lazy { SendListAdapter(viewModel) }
+//    /** Binding */
+//    private val binding: FragmentSendBinding? by viewBinding()
+//    /** List adapter */
+//    private val adapter: SendListAdapter by lazy { SendListAdapter(viewModel) }
     /** Arguments */
     private val args: SendFragmentArgs by navArgs()
 
@@ -70,6 +75,25 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         }
 
         viewModel.sendUri(source, uri)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Theme.AppTheme {
+                    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
+                    //val sendData = viewModel.sendData.collectAsStateWithLifecycle(initialValue = null)
+
+                    SendScreen(
+                        sendDataList = sendDataList.value,
+                        onClickItem = {
+                            //viewModel.onClickItem(it)
+                        },
+                        onClickCancelAll = { viewModel.onClickCancelAll() },
+                    )
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -107,36 +131,36 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             }
         }
 
-        binding?.let { bind ->
-            bind.viewModel = viewModel
-            bind.sendList.adapter = adapter
-            bind.sendList.itemAnimator = null
-            bind.sendList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
-        }
+//        binding?.let { bind ->
+//            bind.viewModel = viewModel
+//            bind.sendList.adapter = adapter
+//            bind.sendList.itemAnimator = null
+//            bind.sendList.addItemDecoration(DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL))
+//        }
 
         viewModel.let { vm ->
             vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            vm.sendDataList.collectIn(viewLifecycleOwner) { list ->
-                adapter.submitList(list)
-                updateCancelButton()
-            }
-            vm.sendData.collectIn(viewLifecycleOwner, state = Lifecycle.State.CREATED) { data ->
-                if (data == null) return@collectIn
-                val list = vm.sendDataList.value
-
-                val countIncomplete = list.count { it.state.isFinished || it.state.inProgress }
-                val countAll = countIncomplete + list.count { it.state.isReady }
-                notification.updateProgress(data, countIncomplete, countAll)
-
-                val index = list.indexOfLast { it == data }
-                if (index < 0) return@collectIn
-                adapter.notifyItemChanged(index)
-                updateCancelButton()
-            }
-            vm.updateIndex.collectIn(viewLifecycleOwner) { indexRange ->
-                adapter.notifyItemRangeChanged(indexRange.first, indexRange.count())
-                updateCancelButton()
-            }
+//            vm.sendDataList.collectIn(viewLifecycleOwner) { list ->
+//                adapter.submitList(list)
+//                //updateCancelButton()
+//            }
+//            vm.sendData.collectIn(viewLifecycleOwner, state = Lifecycle.State.CREATED) { data ->
+//                if (data == null) return@collectIn
+//                val list = vm.sendDataList.value
+//
+//                val countIncomplete = list.count { it.state.isFinished || it.state.inProgress }
+//                val countAll = countIncomplete + list.count { it.state.isReady }
+//                notification.updateProgress(data, countIncomplete, countAll)
+//
+//                val index = list.indexOfLast { it == data }
+//                if (index < 0) return@collectIn
+//                adapter.notifyItemChanged(index)
+//                updateCancelButton()
+//            }
+//            vm.updateIndex.collectIn(viewLifecycleOwner) { indexRange ->
+//                adapter.notifyItemRangeChanged(indexRange.first, indexRange.count())
+//                //updateCancelButton()
+//            }
         }
 
         // NOTE: Required activity context for file URI access. (SecurityException occurred if not)
@@ -173,9 +197,9 @@ class SendFragment: Fragment(R.layout.fragment_send) {
             .show()
     }
 
-    private fun updateCancelButton() {
-        binding?.sendCancelButton?.isEnabled = viewModel.sendDataList.value.any { it.state.isCancelable }
-    }
+//    private fun updateCancelButton() {
+//        binding?.sendCancelButton?.isEnabled = viewModel.sendDataList.value.any { it.state.isCancelable }
+//    }
 
     private fun onNavigate(event: SendNav) {
         logD("onNavigate: event=$event")

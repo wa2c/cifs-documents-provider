@@ -24,7 +24,7 @@ class SendRepository @Inject internal constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
 
-    private val _sendFlow: MutableSharedFlow<SendData?> = MutableSharedFlow()
+    private val _sendFlow: MutableSharedFlow<SendData> = MutableSharedFlow()
     val sendFlow: SharedFlow<SendData?> = _sendFlow
 
     /**

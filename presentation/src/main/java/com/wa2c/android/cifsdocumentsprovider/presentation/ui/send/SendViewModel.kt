@@ -32,22 +32,54 @@ class SendViewModel @Inject constructor(
     val sendDataList: StateFlow<List<SendData>> = _sendDataList
 
     private var previousTime = 0L
-    val sendData = sendRepository.sendFlow.distinctUntilChanged { old, new ->
-        // NOTE: true = not change, false = change
-        if (old == null && new == null) return@distinctUntilChanged true
-        else if (old == null) return@distinctUntilChanged false
-        else if (new == null) return@distinctUntilChanged false
-        if (old.id != new.id || old.state != new.state) return@distinctUntilChanged false
 
-        val currentTime = System.currentTimeMillis()
-        val change = (currentTime >= previousTime + NOTIFY_CYCLE || new.progress >= 100)
-        return@distinctUntilChanged if (change) {
-            previousTime = currentTime
-            false
-        } else {
-            true
+    init {
+        launch {
+            sendRepository.sendFlow.distinctUntilChanged { old, new ->
+                // NOTE: true = not change, false = change
+                if (old == null && new == null) return@distinctUntilChanged true
+                else if (old == null) return@distinctUntilChanged false
+                else if (new == null) return@distinctUntilChanged false
+                if (old.id != new.id || old.state != new.state) return@distinctUntilChanged false
+
+                val currentTime = System.currentTimeMillis()
+                val change = (currentTime >= previousTime + NOTIFY_CYCLE || new.progress >= 100)
+                return@distinctUntilChanged if (change) {
+                    previousTime = currentTime
+                    false
+                } else {
+                    true
+                }
+            }.collect { sendData ->
+                sendData ?: return@collect
+                val list = _sendDataList.value.toMutableList()
+                val index = list.indexOfFirst { it.id == sendData.id }
+                list[index] = sendData
+                _sendDataList.value =  list
+            }
         }
-    }.shareIn(this, SharingStarted.Eagerly, 0)
+    }
+
+
+
+//    val sendData = sendRepository.sendFlow.distinctUntilChanged { old, new ->
+//        // NOTE: true = not change, false = change
+//        if (old == null && new == null) return@distinctUntilChanged true
+//        else if (old == null) return@distinctUntilChanged false
+//        else if (new == null) return@distinctUntilChanged false
+//        if (old.id != new.id || old.state != new.state) return@distinctUntilChanged false
+//
+//        val currentTime = System.currentTimeMillis()
+//        val change = (currentTime >= previousTime + NOTIFY_CYCLE || new.progress >= 100)
+//        return@distinctUntilChanged if (change) {
+//            previousTime = currentTime
+//            false
+//        } else {
+//            true
+//        }
+//    }.shareIn(this, SharingStarted.Eagerly, 0)
+
+
 
     private val _updateIndex = MutableSharedFlow<IntRange>(onBufferOverflow = BufferOverflow.SUSPEND)
     val updateIndex: Flow<IntRange> = _updateIndex

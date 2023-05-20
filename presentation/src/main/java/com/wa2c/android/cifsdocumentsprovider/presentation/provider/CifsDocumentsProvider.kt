@@ -18,14 +18,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.PresentationModule
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
+import javax.inject.Inject
 
 /**
  * CIFS DocumentsProvider
@@ -37,7 +39,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /** Storage Manager */
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
     /** Cifs Repository */
-    private val cifsRepository: CifsRepository by lazy { createCifsRepository(providerContext) }
+    private val cifsRepository: CifsRepository by lazy {
+        val clazz = PresentationModule.SampleContentProviderEntryPoint::class.java
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
+        hiltEntryPoint.analyticsService()
+    }
 
     /** File handler */
     private val fileHandler: Handler = HandlerThread(this.javaClass.simpleName)
@@ -350,6 +356,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_FLAGS,
             DocumentsContract.Document.COLUMN_SIZE
         )
-
     }
+
+
 }
+class RepositoryAdapter @Inject constructor(
+    val cifsRepository: CifsRepository,
+)

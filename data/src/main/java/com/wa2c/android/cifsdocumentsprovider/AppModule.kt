@@ -9,6 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
@@ -103,12 +104,3 @@ annotation class MainDispatcher
 @Retention(AnnotationRetention.BINARY)
 annotation class DefaultDispatcher
 
-fun createCifsRepository(context: Context): CifsRepository {
-    return CifsRepository(
-        jCifsClient = AppModule.provideJcifsClient(),
-        smbjClient = AppModule.provideSmbjClient(),
-        appPreferences = AppModule.providePreferencesDataStore(context),
-        connectionSettingDao = AppModule.provideDatabase(context).getStorageSettingDao(),
-        dispatcher = CoroutineDispatcherModule.provideIODispatcher(),
-    )
-}
