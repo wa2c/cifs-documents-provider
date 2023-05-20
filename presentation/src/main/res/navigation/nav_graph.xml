@@ -88,6 +88,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        >
+        <action
+            android:id="@+id/action_settingsFragment_to_listDialog"
+            app:destination="@id/listDialog" />
+    </fragment>
+
+    <fragment
         android:id="@+id/sendFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragment"
         android:label="SendFragment"

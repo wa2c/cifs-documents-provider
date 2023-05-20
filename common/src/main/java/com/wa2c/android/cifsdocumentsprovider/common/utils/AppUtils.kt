@@ -41,7 +41,7 @@ val String?.mimeType: String
 fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boolean): String? {
     if (host.isNullOrBlank()) return null
     val authority = host + if (port == null || port <= 0) "" else ":$port"
-    return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+    return  (authority + "/" + (folder ?: "")).let { if (isDirectory) it.appendSeparator() else "" }
 }
 
 /**
