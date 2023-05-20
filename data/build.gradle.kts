@@ -81,11 +81,6 @@ dependencies {
     // Android Network Tools
     implementation(Deps.Data.networkTools)
 
-    // Util
-
-    // Paging
-    implementation(Deps.Data.pagingKtx)
-
     // Test
 
     testImplementation(Deps.Test.junit)

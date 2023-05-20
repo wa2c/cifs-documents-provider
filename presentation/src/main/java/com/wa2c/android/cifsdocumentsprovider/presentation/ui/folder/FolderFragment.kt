@@ -40,7 +40,7 @@ class FolderFragment: Fragment() {
     /** Reload menu button */
     private var reloadMenuButton: MenuItem? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
                 Theme.AppTheme {

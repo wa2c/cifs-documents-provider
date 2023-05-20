@@ -8,8 +8,7 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.main.MainFragment"
-        android:label="MainFragment"
-        tools:layout="@layout/fragment_main">
+        android:label="MainFragment">
         <action
             android:id="@+id/action_mainFragment_to_editFragment"
             app:destination="@id/editFragment"

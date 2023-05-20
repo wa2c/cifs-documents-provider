@@ -49,6 +49,8 @@ object Deps {
         const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"
         const val composeUiTooling = "androidx.compose.ui:ui-tooling"
 
+        const val composeReorderable = "org.burnoutcrew.composereorderable:reorderable:0.9.6"
+
         private const val lifeCycleVersion = "2.6.1"
         const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
         const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
@@ -71,9 +73,6 @@ object Deps {
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
 
         const val dataStore = "androidx.datastore:datastore-preferences:1.0.0"
-
-        private const val pagingVersion = "3.1.1"
-        const val pagingKtx = "androidx.paging:paging-runtime-ktx:$pagingVersion"
 
         const val kotlinParcelizePlugin = "kotlin-parcelize"
         const val kotlinSerializationPlugin = "kotlinx-serialization"

@@ -73,19 +73,6 @@ fun MainScreen(
             }
         }
 
-
-//        LazyColumn(
-//
-//        ) {
-//            items(items = connectionList) { connection ->
-//                ConnectionItem(
-//                    connection = connection,
-//                    onClick = { onClickItem(connection) },
-//                )
-//                Divider(thickness = 0.5.dp, color = Theme.DividerColor)
-//            }
-//        }
-
         FloatingActionButton(
             shape = FloatingActionButtonDefaults.largeShape,
             containerColor = MaterialTheme.colorScheme.primary,

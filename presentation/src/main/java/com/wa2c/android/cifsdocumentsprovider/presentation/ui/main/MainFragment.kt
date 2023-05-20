@@ -29,14 +29,10 @@ import dagger.hilt.android.AndroidEntryPoint
  * Main Screen
  */
 @AndroidEntryPoint
-class MainFragment: Fragment(R.layout.fragment_main) {
+class MainFragment: Fragment() {
 
     /** View Model */
     private val viewModel by viewModels<MainViewModel>()
-//    /** Binding */
-//    private val binding: FragmentMainBinding? by viewBinding()
-//    /** List adapter */
-//    private val adapter: MainPagingDataAdapter by lazy { MainPagingDataAdapter(viewModel) }
 
     /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -64,7 +60,7 @@ class MainFragment: Fragment(R.layout.fragment_main) {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
                 Theme.AppTheme {
@@ -114,39 +110,8 @@ class MainFragment: Fragment(R.layout.fragment_main) {
             }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
-
-
-//        binding?.let { bind ->
-//            bind.viewModel = viewModel
-//            bind.cifsList.adapter = adapter
-//            bind.cifsList.addItemDecoration(
-//                DividerItemDecoration(
-//                    requireContext(),
-//                    DividerItemDecoration.VERTICAL
-//                )
-//            )
-//
-//            ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0) {
-//                override fun onMove(
-//                    recyclerView: RecyclerView,
-//                    viewHolder: RecyclerView.ViewHolder,
-//                    target: RecyclerView.ViewHolder
-//                ): Boolean {
-//                    val fromPosition = viewHolder.bindingAdapterPosition
-//                    val toPosition = target.bindingAdapterPosition
-//                    viewModel.onItemMove(fromPosition, toPosition)
-//                    return true
-//                }
-//                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-//                }
-//            }).attachToRecyclerView(bind.cifsList)
-//        }
-
         viewModel.let {
             it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-//            it.connectionFlow.collectIn(viewLifecycleOwner) { data ->
-//                adapter.submitData(lifecycle, data)
-//            }
         }
     }
 

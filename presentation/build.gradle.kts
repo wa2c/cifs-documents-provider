@@ -70,7 +70,7 @@ dependencies {
     implementation(Deps.Ui.composeMaterial)
     implementation(Deps.Ui.composeUiPreview)
     debugImplementation(Deps.Ui.composeUiTooling)
-    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
+    implementation(Deps.Ui.composeReorderable)
 
     implementation(Deps.Ui.constraintLayout)
     implementation(Deps.Ui.material)
@@ -88,8 +88,6 @@ dependencies {
 
     // Util
 
-    // Paging
-    implementation(Deps.Data.pagingKtx)
     // Localization
     implementation(Deps.Util.localization)
     // OSS License
