@@ -2,44 +2,32 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
-import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
@@ -51,7 +39,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 @Composable
 fun SendScreen(
     sendDataList: List<SendData>,
-    onClickItem: (SendData) -> Unit,
+    onClickCancel: (SendData) -> Unit,
+    onClickRetry: (SendData) -> Unit,
+    onClickRemove: (SendData) -> Unit,
     onClickCancelAll: () -> Unit,
 ) {
     Column(
@@ -64,7 +54,9 @@ fun SendScreen(
                 items(items = sendDataList) { sendData ->
                     SendDataItem(
                         sendData = sendData,
-                        onClick = { onClickItem(sendData) },
+                        onClickCancel = onClickCancel,
+                        onClickRetry = onClickRetry,
+                        onClickRemove = onClickRemove,
                     )
                     Divider(thickness = 0.5.dp, color = Theme.DividerColor)
                 }
@@ -94,14 +86,19 @@ fun SendScreen(
 @Composable
 private fun SendDataItem(
     sendData: SendData,
-    onClick: () -> Unit,
+    onClickCancel: (SendData) -> Unit,
+    onClickRetry: (SendData) -> Unit,
+    onClickRemove: (SendData) -> Unit,
 ) {
-    var showPopup by remember { mutableStateOf(false) }
+    //var showPopup by remember { mutableStateOf(false) }
+    val showPopup = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = true, onClick = { showPopup = true })
+            .clickable(enabled = true, onClick = {
+                showPopup.value = true
+            })
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
@@ -120,16 +117,19 @@ private fun SendDataItem(
         )
     }
 
-    if (showPopup) {
+    if (showPopup.value) {
         DropdownMenu(
-            expanded = false,
-            onDismissRequest = { /*TODO*/ }
+            expanded = showPopup.value ,
+            onDismissRequest = {
+                showPopup.value = false
+            }
         ) {
             if (sendData.state.isCancelable) {
                 DropdownMenuItem(
                     text = { Text(stringResource(id = R.string.send_action_cancel)) },
                     onClick = {
-                        showPopup = false
+                        onClickCancel(sendData)
+                        showPopup.value = false
                     }
                 )
             }
@@ -137,14 +137,16 @@ private fun SendDataItem(
                 DropdownMenuItem(
                     text = { Text(stringResource(id = R.string.send_action_retry)) },
                     onClick = {
-                        showPopup = false
+                        onClickRetry(sendData)
+                        showPopup.value = false
                     }
                 )
             }
             DropdownMenuItem(
                 text = { Text(stringResource(id = R.string.send_action_remove)) },
                 onClick = {
-                    showPopup = false
+                    onClickRemove(sendData)
+                    showPopup.value = false
                 }
             )
         }
@@ -173,10 +175,9 @@ private fun SendScreenPreview() {
                     mimeType = "image/jpeg",
                     sourceUri = Uri.parse("smb://pc1/send"),
                     targetUri = Uri.parse("smb://pc2/receive"),
-                ).also {
-                    it.state = SendDataState.PROGRESS
-                    it.progressSize = 500000
-               } ,
+                    state = SendDataState.PROGRESS,
+                    progressSize = 500000,
+                ),
                 SendData(
                     id = "2",
                     name = "Sample2.MP3",
@@ -184,10 +185,9 @@ private fun SendScreenPreview() {
                     mimeType = "audio/mpeg",
                     sourceUri = Uri.parse("smb://pc1/send"),
                     targetUri = Uri.parse("smb://pc2/receive"),
-                ).also {
-                    it.state = SendDataState.READY
-                    it.progressSize = 0
-                },
+                    state = SendDataState.READY,
+                    progressSize = 0,
+                ),
                 SendData(
                     id = "3",
                     name = "sample3.mp4",
@@ -195,12 +195,13 @@ private fun SendScreenPreview() {
                     mimeType = "video/mp4",
                     sourceUri = Uri.parse("smb://pc1/send"),
                     targetUri = Uri.parse("smb://pc2/receive"),
-                ).also {
-                    it.state = SendDataState.CANCEL
-                    it.progressSize = 2000000
-                },
+                    state = SendDataState.CANCEL,
+                    progressSize = 2000000,
+                ),
             ),
-            onClickItem = {},
+            onClickCancel = {},
+            onClickRetry = {},
+            onClickRemove = {},
             onClickCancelAll = {},
         )
     }

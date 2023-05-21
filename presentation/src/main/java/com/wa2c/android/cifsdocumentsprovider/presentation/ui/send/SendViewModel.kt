@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
@@ -11,10 +12,16 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScop
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -28,8 +35,10 @@ class SendViewModel @Inject constructor(
     private val _navigationEvent = MutableSharedFlow<SendNav>()
     val navigationEvent: Flow<SendNav> = _navigationEvent
 
-    private val _sendDataList = MutableStateFlow<List<SendData>>(mutableListOf())
+    private val _sendDataList = MutableSharedFlow<List<SendData>>()
+    val sendDataListFlow = _sendDataList.asSharedFlow()
     val sendDataList: StateFlow<List<SendData>> = _sendDataList
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private var previousTime = 0L
 
@@ -52,10 +61,10 @@ class SendViewModel @Inject constructor(
                 }
             }.collect { sendData ->
                 sendData ?: return@collect
-                val list = _sendDataList.value.toMutableList()
-                val index = list.indexOfFirst { it.id == sendData.id }
+                val list = sendDataList.value.toMutableList()
+                val index = list.indexOfFirst { it.id == sendData.id }.takeIf { it >= 0 } ?: return@collect
                 list[index] = sendData
-                _sendDataList.value =  list
+                _sendDataList.emit(list)
             }
         }
     }
@@ -81,8 +90,8 @@ class SendViewModel @Inject constructor(
 
 
 
-    private val _updateIndex = MutableSharedFlow<IntRange>(onBufferOverflow = BufferOverflow.SUSPEND)
-    val updateIndex: Flow<IntRange> = _updateIndex
+//    private val _updateIndex = MutableSharedFlow<IntRange>(onBufferOverflow = BufferOverflow.SUSPEND)
+//    val updateIndex: Flow<IntRange> = _updateIndex
 
     /** Send job */
     private var sendJob: Job? = null
@@ -95,7 +104,7 @@ class SendViewModel @Inject constructor(
 
         launch {
             val inputList = sendRepository.getSendData(sourceUris, targetUri)
-            _sendDataList.value = sendDataList.value + inputList
+            _sendDataList.emit(sendDataList.value + inputList)
 
             val existsDataSet = inputList.filter { it.state == SendDataState.OVERWRITE }.toSet()
             if (existsDataSet.isEmpty()) {
@@ -130,77 +139,114 @@ class SendViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Update data by index
-     */
-    private suspend fun updateIndex(first: Int, endInclusive: Int = first) {
-        _updateIndex.emit(first..endInclusive)
+
+    private suspend fun updateList(data: SendData) {
+        val list = sendDataList.value.map {
+            if (it.id == data.id) data else it
+        }
+        _sendDataList.emit(list)
+    }
+    private suspend fun updateList(list: List<SendData>) {
+        _sendDataList.emit(list)
     }
 
-    /**
-     * Update data state
-     */
-    private suspend fun updateState(index: Int, state: SendDataState) {
-        _sendDataList.value.getOrNull(index)?.let {
-            it.state = state
-            updateIndex(index)
-        }
-    }
+//    /**
+//     * Update data by index
+//     */
+//    private suspend fun updateIndex(first: Int, endInclusive: Int = first) {
+//        _updateIndex.emit(first..endInclusive)
+//    }
+
+//    /**
+//     * Update data state
+//     */
+//    private suspend fun updateState(index: Int, state: SendDataState) {
+//        _sendDataList.value.getOrNull(index)?.let {
+//            it.state = state
+//            updateIndex(index)
+//        }
+//    }
 
     /**
      * Cancel all
      */
-    private fun cancelAll() {
+    private suspend fun cancelAll() {
         logD("cancelAll")
-        launch {
-            _sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
-            updateIndex(0, _sendDataList.value.size - 1)
-            sendJob?.cancel()
-            sendJob = null
+        val list = sendDataList.value.map {
+            if (it.state.isCancelable) it.copy(state = SendDataState.CANCEL) else it
         }
+        //sendDataList.value.filter { it.state.isCancelable }.forEach { it.cancel() }
+        updateList(list)
+        sendJob?.cancel()
+        sendJob = null
     }
 
     /**
      * Update state to READY
      */
-    fun updateToReady(dataSet: Set<SendData>) {
+    fun updateToReady(targetData: Set<SendData>) {
         logD("onClickCancel")
         launch {
-            dataSet.forEachIndexed { index, sendData ->
-                sendData.state = SendDataState.READY
-                updateIndex(index)
+            val targetIds = targetData.map { it.id }
+            val list = sendDataList.value.map { data ->
+                if (targetIds.contains(data.id)) data.copy(state = SendDataState.READY) else data
             }
+            updateList(list)
             startSendJob()
         }
     }
 
-    fun onClickCancel(index: Int) {
+    fun onClickCancel(sendData: SendData) {
         logD("onClickCancel")
         launch {
-            updateState(index, SendDataState.CANCEL)
+            updateList(sendData.copy(state = SendDataState.CANCEL))
             startSendJob()
         }
     }
 
-    fun onClickRetry(index: Int) {
+//    fun onClickCancel(index: Int) {
+//        logD("onClickCancel")
+//        launch {
+//            updateState(index, SendDataState.CANCEL)
+//            startSendJob()
+//        }
+//    }
+
+
+    fun onClickRetry(sendData: SendData) {
         logD("onClickCancel")
         launch {
-            updateState(index, SendDataState.READY)
+            updateList(sendData.copy(state = SendDataState.READY))
             startSendJob()
         }
     }
+//    fun onClickRetry(index: Int) {
+//        logD("onClickCancel")
+//        launch {
+//            updateState(index, SendDataState.READY)
+//            startSendJob()
+//        }
+//    }
 
-    fun onClickRemove(index: Int) {
+    fun onClickRemove(sendData: SendData) {
         logD("onClickCancel")
         launch {
-            _sendDataList.value.toMutableList().let {
-                val sendData = it.getOrNull(index) ?: return@let
-                if (sendData.state.isCancelable) sendData.cancel()
-                it.remove(sendData)
-                _sendDataList.value = it // reload
-            }
+            val list = sendDataList.value.filter { (sendData.id != it.id) }
+            _sendDataList.emit(list) // reload
         }
     }
+
+//    fun onClickRemove(index: Int) {
+//        logD("onClickCancel")
+//        launch {
+//            _sendDataList.value.toMutableList().let {
+//                val sendData = it.getOrNull(index) ?: return@let
+//                if (sendData.state.isCancelable) sendData.cancel()
+//                it.remove(sendData)
+//                _sendDataList.value = it // reload
+//            }
+//        }
+//    }
 
     fun onClickCancelAll() {
         logD("onClickCancelAll")
@@ -211,15 +257,15 @@ class SendViewModel @Inject constructor(
 
     override fun onCleared() {
         logD("onCleared")
-        cancelAll()
-        _sendDataList.value = emptyList()
+        runBlocking {
+            cancelAll()
+            _sendDataList.emit(emptyList())
+        }
         super.onCleared()
     }
 
     companion object {
         private const val NOTIFY_CYCLE = 500
     }
-
-
 
 }

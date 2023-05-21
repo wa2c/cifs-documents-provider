@@ -81,14 +81,14 @@ class SendFragment: Fragment(R.layout.fragment_send) {
         return ComposeView(requireContext()).apply {
             setContent {
                 Theme.AppTheme {
-                    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
+                    val sendDataList = viewModel.sendDataListFlow.collectAsStateWithLifecycle(emptyList())
                     //val sendData = viewModel.sendData.collectAsStateWithLifecycle(initialValue = null)
 
                     SendScreen(
                         sendDataList = sendDataList.value,
-                        onClickItem = {
-                            //viewModel.onClickItem(it)
-                        },
+                        onClickCancel = { viewModel.onClickCancel(it) },
+                        onClickRetry = { viewModel.onClickRetry(it) },
+                        onClickRemove = { viewModel.onClickRemove(it) },
                         onClickCancelAll = { viewModel.onClickCancelAll() },
                     )
                 }

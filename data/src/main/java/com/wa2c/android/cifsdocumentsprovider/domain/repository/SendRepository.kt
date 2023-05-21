@@ -35,15 +35,17 @@ class SendRepository @Inject internal constructor(
             sourceUris.mapNotNull { uri ->
                 dataSender.getDocumentFile(uri)?.let { file ->
                     SendData(
-                        UUID.randomUUID().toString(),
-                        file.name ?: file.uri.fileName,
-                        file.length(),
-                        file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
-                        file.uri,
-                        targetUri,
-                    ).also {
+                        id = UUID.randomUUID().toString(),
+                        name = file.name ?: file.uri.fileName,
+                        size = file.length(),
+                        mimeType = file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
+                        sourceUri = file.uri,
+                        targetUri = targetUri,
+                    ).let {
                         if (existsTarget(it)) {
-                            it.state = SendDataState.OVERWRITE
+                            it.copy(state = SendDataState.OVERWRITE)
+                        } else {
+                            it
                         }
                     }
                 }
@@ -86,44 +88,49 @@ class SendRepository @Inject internal constructor(
                 }
             } ?: throw IOException()
 
-            try {
-                sendData.state = SendDataState.PROGRESS
-                sendData.startTime = System.currentTimeMillis()
-                _sendFlow.emit(sendData)
 
-                val isSuccess = dataSender.sendFile(sendData.sourceUri, targetFile.uri) { progressSize ->
-                    if (!sendData.state.inProgress) {
+            var currentSendData = sendData.copy(
+                state = SendDataState.PROGRESS,
+                startTime = System.currentTimeMillis(),
+            )
+            _sendFlow.emit(currentSendData)
+
+            try {
+                val isSuccess = dataSender.sendFile(currentSendData.sourceUri, targetFile.uri) { progressSize ->
+                    if (!currentSendData.state.inProgress) {
                         return@sendFile false
                     }
                     if (!isActive) {
-                        sendData.state = SendDataState.FAILURE
+                        currentSendData = currentSendData.copy(state = SendDataState.FAILURE)
                         return@sendFile false
                     }
 
-                    sendData.progressSize = progressSize
-                    _sendFlow.emit(sendData)
+                    currentSendData = currentSendData.copy(progressSize = progressSize,)
+                    _sendFlow.emit(currentSendData)
                     return@sendFile true
                 }
 
-                sendData.state = when {
-                    isSuccess -> SendDataState.SUCCESS
-                    sendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
-                    else -> sendData.state
-                }
-                sendData.state
+                currentSendData = currentSendData.copy(
+                    state = when {
+                        isSuccess -> SendDataState.SUCCESS
+                        currentSendData.state == SendDataState.PROGRESS -> SendDataState.FAILURE
+                        else -> currentSendData.state
+                    }
+                )
+                currentSendData.state
             } catch (e: Exception) {
-                sendData.state = SendDataState.FAILURE
+                currentSendData = currentSendData.copy(state = SendDataState.FAILURE)
                 throw e
             } finally {
                 // Delete if incomplete
-                if (sendData.state.isIncomplete) {
+                if (currentSendData.state.isIncomplete) {
                     try {
                         targetFile.delete()
                     } catch (e: Exception) {
                         logE(e)
                     }
                 }
-                _sendFlow.emit(sendData)
+                _sendFlow.emit(currentSendData)
             }
         }
     }

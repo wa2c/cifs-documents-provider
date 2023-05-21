@@ -27,7 +27,6 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
-import javax.inject.Inject
 
 /**
  * CIFS DocumentsProvider
@@ -360,6 +359,3 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
 
 }
-class RepositoryAdapter @Inject constructor(
-    val cifsRepository: CifsRepository,
-)
