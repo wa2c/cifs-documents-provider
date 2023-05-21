@@ -91,39 +91,17 @@
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsFragment"
         android:label="SettingsFragment"
         >
-        <action
-            android:id="@+id/action_settingsFragment_to_listDialog"
-            app:destination="@id/listDialog" />
     </fragment>
 
     <fragment
         android:id="@+id/sendFragment"
         android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragment"
         android:label="SendFragment"
-        tools:layout="@layout/fragment_send"
         >
         <argument
             android:name="inputUris"
             app:argType="android.net.Uri[]" />
     </fragment>
 
-    <dialog
-        android:id="@+id/listDialog"
-        android:name="com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ListDialog"
-        android:label="ListDialog">
-        <argument
-            android:name="key"
-            app:argType="string" />
-        <argument
-            android:name="title"
-            app:argType="string" />
-        <argument
-            android:name="items"
-            app:argType="string[]" />
-        <argument
-            android:name="selected"
-            app:argType="integer"
-            android:defaultValue="0" />
-    </dialog>
 
 </navigation>
