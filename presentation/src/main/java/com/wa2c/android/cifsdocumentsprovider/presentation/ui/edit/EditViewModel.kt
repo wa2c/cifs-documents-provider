@@ -36,6 +36,9 @@ class EditViewModel @Inject constructor(
 
     var name = MutableStateFlow<String?>(null)
     var storageIndex = MutableStateFlow<Int?>(null)
+
+    var storage = MutableStateFlow<StorageType>(StorageType.default)
+
     var domain = MutableStateFlow<String?>(null)
     var host = MutableStateFlow<String?>(null)
     var port = MutableStateFlow<String?>(null)

@@ -4,15 +4,18 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.core.widget.TextViewCompat
@@ -26,12 +29,13 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +53,31 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     private val binding: FragmentEditBinding? by viewBinding()
     /** Arguments */
     private val args: EditFragmentArgs by navArgs()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                Theme.AppTheme {
+                    EditScreen(
+                        nameState = viewModel.name.collectAsMutableState(),
+                        storageState = viewModel.storage.collectAsMutableState(),
+                        domainState = viewModel.domain.collectAsMutableState(),
+                        hostState = viewModel.host.collectAsMutableState(),
+                        portState = viewModel.port.collectAsMutableState(),
+                        enableDfsState = viewModel.enableDfs.collectAsMutableState(),
+                        userState = viewModel.user.collectAsMutableState(),
+                        passwordState = viewModel.password.collectAsMutableState(),
+                        anonymousState = viewModel.anonymous.collectAsMutableState(),
+                        folderState = viewModel.folder.collectAsMutableState(),
+                        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+                        extensionState = viewModel.extension.collectAsMutableState(),
+                        onClickSet = {}
+                    )
+                }
+            }
+        }
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

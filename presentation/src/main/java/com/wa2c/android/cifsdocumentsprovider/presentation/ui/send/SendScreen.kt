@@ -90,7 +90,6 @@ private fun SendDataItem(
     onClickRetry: (SendData) -> Unit,
     onClickRemove: (SendData) -> Unit,
 ) {
-    //var showPopup by remember { mutableStateOf(false) }
     val showPopup = remember { mutableStateOf(false) }
 
     Column(
