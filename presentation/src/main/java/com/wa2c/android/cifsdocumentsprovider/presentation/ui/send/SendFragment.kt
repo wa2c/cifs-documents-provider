@@ -25,6 +25,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -33,6 +35,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SendFragment: Fragment() {
 
+    /** Main View Model */
+    private val mainViewModel by activityViewModels<MainViewModel>()
     /** View Model */
     private val viewModel by activityViewModels<SendViewModel>()
     /** Arguments */
@@ -73,7 +77,9 @@ class SendFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Theme.AppTheme {
+                Theme.AppTheme(
+                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+                ) {
                     val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
                     SendScreen(
                         sendDataList = sendDataList.value,

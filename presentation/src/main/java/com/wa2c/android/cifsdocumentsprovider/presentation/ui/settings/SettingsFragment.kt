@@ -6,9 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,7 +16,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import kotlinx.coroutines.flow.Flow
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 
 /**
  * Settings Screen
@@ -31,21 +28,11 @@ class SettingsFragment: Fragment() {
     /** View Model */
     private val viewModel by activityViewModels<SettingsViewModel>()
 
-    @Composable
-    fun Flow<UiTheme>.isDark() : Boolean {
-        val theme = collectAsState(UiTheme.DEFAULT).value
-        return if (theme == UiTheme.DEFAULT) {
-            isSystemInDarkTheme()
-        } else {
-            theme == UiTheme.DARK
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
                 Theme.AppTheme(
-                    darkTheme = viewModel.uiThemeFlow.isDark()
+                    darkTheme = mainViewModel.uiThemeFlow.isDark()
                 ) {
                     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT, viewLifecycleOwner)
                     val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default, viewLifecycleOwner)
@@ -59,7 +46,7 @@ class SettingsFragment: Fragment() {
                         language = language.value,
                         onSetLanguage = {
                             viewModel.setLanguage(it)
-                            mainViewModel.updateLanguage(it)
+                            //mainViewModel.updateLanguage(it)
                         },
                         useAsLocal = useAsLocal.value,
                         onSetUseAsLocal = { viewModel.setUseAsLocal(it) },

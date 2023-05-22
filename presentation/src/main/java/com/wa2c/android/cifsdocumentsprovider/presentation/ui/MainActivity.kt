@@ -31,7 +31,6 @@ class MainActivity : LocalizationActivity(R.layout.activity_main) {
         mainViewModel.language.collectIn(this) {
             setLanguage(it.code)
         }
-        mainViewModel.updateLanguage() // Initialize Language
     }
 
     override fun onNewIntent(intent: Intent?) {

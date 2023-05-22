@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +24,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -31,6 +33,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainFragment: Fragment() {
 
+    /** Main View Model */
+    private val mainViewModel by activityViewModels<com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel>()
     /** View Model */
     private val viewModel by viewModels<MainViewModel>()
 
@@ -63,7 +67,9 @@ class MainFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Theme.AppTheme {
+                Theme.AppTheme(
+                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+                ) {
                     val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
                     MainScreen(
                         connectionList = connectionList.value,

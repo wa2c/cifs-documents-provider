@@ -7,10 +7,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
 object Theme {
 
-    val DividerColor: Color = Color(0xFFBDBDBD)
+    val DividerColor = Color(0xFFBDBDBD)
+    val LoadingBackgroundColor = Color(0x80000000)
 
     private val DarkColors = darkColorScheme(
         primary = Color(0xFFFF9800),
@@ -49,5 +51,14 @@ object Theme {
             Surface(content = content)
         }
     }
+
+
+    val SizeSS = 4.dp
+    val SizeS = 8.dp
+    val SizeM = 16.dp
+    val SizeL = 24.dp
+    val SizeLL = 32.dp
+
+    val ScreenMargin = SizeM
 
 }

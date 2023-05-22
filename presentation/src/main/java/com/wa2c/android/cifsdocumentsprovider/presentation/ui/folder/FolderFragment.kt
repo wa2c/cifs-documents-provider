@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.startLoadingAnimation
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.stopLoadingAnimation
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -33,6 +36,8 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class FolderFragment: Fragment() {
 
+    /** Main View Model */
+    private val mainViewModel by activityViewModels<MainViewModel>()
     /** View Model */
     private val viewModel by viewModels<FolderViewModel>()
     /** Arguments */
@@ -43,7 +48,9 @@ class FolderFragment: Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Theme.AppTheme {
+                Theme.AppTheme(
+                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+                ) {
                     val fileList = viewModel.fileList.collectAsState()
                     val currentFile = viewModel.currentFile.collectAsState()
                     val isLoading = viewModel.isLoading.collectAsState()

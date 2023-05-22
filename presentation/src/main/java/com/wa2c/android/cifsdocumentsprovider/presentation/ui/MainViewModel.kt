@@ -1,15 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.common.values.Language
+import androidx.lifecycle.viewModelScope
+import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,14 +16,10 @@ class MainViewModel @Inject constructor(
     private val appRepository: AppRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _language = MutableSharedFlow<Language>()
-    val language: SharedFlow<Language> = _language
+    /** Language */
+    val language = appRepository.languageFlow
 
-    fun updateLanguage(language: Language? = null) {
-        launch {
-            val lang = language ?: appRepository.languageFlow.first()
-            _language.emit(lang)
-        }
-    }
+    /** UI Theme */
+    val uiThemeFlow = appRepository.uiThemeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, UiTheme.DEFAULT)
 
 }
