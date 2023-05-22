@@ -11,7 +11,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -21,9 +20,11 @@ import androidx.core.view.MenuProvider
 import androidx.core.widget.TextViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
@@ -38,6 +39,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -45,8 +48,10 @@ import dagger.hilt.android.AndroidEntryPoint
  * Edit Screen
  */
 @AndroidEntryPoint
-class EditFragment : Fragment(R.layout.fragment_edit) {
+class EditFragment : Fragment() {
 
+    /** Main View Model */
+    private val mainViewModel by activityViewModels<MainViewModel>()
     /** View Model */
     private val viewModel by viewModels<EditViewModel>()
     /** Binding */
@@ -57,7 +62,12 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                Theme.AppTheme {
+                Theme.AppTheme(
+                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+                ) {
+
+                    val isBusy = viewModel.isBusy.collectAsStateWithLifecycle()
+
                     EditScreen(
                         nameState = viewModel.name.collectAsMutableState(),
                         storageState = viewModel.storage.collectAsMutableState(),
@@ -71,7 +81,11 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                         folderState = viewModel.folder.collectAsMutableState(),
                         safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
                         extensionState = viewModel.extension.collectAsMutableState(),
-                        onClickSet = {}
+                        isBusy = isBusy.value,
+                        onClickSearchHost = { viewModel.onClickSearchHost() },
+                        onClickSelectFolder = { viewModel.onClickSelectFolder() },
+                        onClickCheckConnection = { viewModel.onClickCheckConnection() },
+                        onClickSave = { viewModel.onClickSave() }
                     )
                 }
             }
@@ -117,15 +131,6 @@ class EditFragment : Fragment(R.layout.fragment_edit) {
                     viewModel.onClickBack()
                 }
             })
-        }
-
-        binding?.let { bind ->
-            bind.viewModel = viewModel
-            bind.editStorageSpinner.adapter = ArrayAdapter(
-                requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                viewModel.storageTypes.map { getString(it.labelRes) },
-            )
         }
 
         viewModel.let { vm ->

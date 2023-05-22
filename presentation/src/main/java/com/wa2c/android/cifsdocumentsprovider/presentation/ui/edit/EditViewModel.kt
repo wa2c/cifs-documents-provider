@@ -258,7 +258,7 @@ class EditViewModel @Inject constructor(
     /**
      * Save Click
      */
-    fun onClickAccept() {
+    fun onClickSave() {
         _isBusy.value = true
         launch {
             runCatching {

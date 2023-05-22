@@ -452,7 +452,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:onClick="@{ () -> viewModel.onClickAccept() }"
+                android:onClick="@{ () -> viewModel.onClickSave() }"
                 android:text="@string/edit_save_button"
                 app:icon="@drawable/ic_save"
                 app:iconGravity="textStart" />
