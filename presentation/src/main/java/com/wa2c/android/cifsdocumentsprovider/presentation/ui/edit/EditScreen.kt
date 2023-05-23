@@ -16,6 +16,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -43,12 +44,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -56,6 +59,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import java.time.format.TextStyle
 
 /**
  * Edit Screen
@@ -93,6 +97,13 @@ fun EditScreen(
                     .padding(Theme.ScreenMargin)
                     .weight(1f)
             ) {
+
+
+
+
+
+
+
                 InputText(
                     title = stringResource(id = R.string.edit_name_title),
                     hint = stringResource(id = R.string.edit_name_hint),
@@ -188,7 +199,13 @@ fun EditScreen(
                     onClickSelectFolder()
                 }
 
-                Text("option")
+                // Option
+                
+                Text(
+                    text = stringResource(id = R.string.edit_option_title),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
 
                 InputCheck(
                     title = stringResource(id = R.string.edit_option_safe_transfer_label),
@@ -200,11 +217,35 @@ fun EditScreen(
                     state = extensionState,
                 )
 
-                Text("url")
+                // URI
 
-                Text(getSmbUri(hostState.value, portState.value, folderState.value, true))
+                Text(
+                    text = stringResource(id = R.string.edit_connection_uri_title),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
 
-                Text(getContentUri(hostState.value, portState.value, folderState.value))
+                SelectionContainer {
+                    Text(
+                        text = getSmbUri(hostState.value, portState.value, folderState.value, true),
+                        modifier = Modifier
+                            .padding(Theme.SizeS)
+                    )
+                }
+
+                Text(
+                    text = stringResource(id = R.string.edit_provider_uri_title),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+
+                SelectionContainer {
+                    Text(
+                        text = getContentUri(hostState.value, portState.value, folderState.value),
+                        modifier = Modifier
+                            .padding(Theme.SizeS)
+                    )
+                }
 
             }
 
