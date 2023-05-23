@@ -3,9 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,9 +17,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -40,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -74,7 +74,6 @@ fun EditScreen(
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
-    isBusy: Boolean,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
     onClickCheckConnection: () -> Unit,
@@ -212,6 +211,7 @@ fun EditScreen(
 
             Divider(thickness = 1.dp, color = Theme.DividerColor)
 
+
             Column(
                 modifier = Modifier
                     .padding(Theme.ScreenMargin)
@@ -226,11 +226,6 @@ fun EditScreen(
                     Text(text = stringResource(id = R.string.edit_check_connection_button))
                 }
 
-//            Snackbar(
-//            ) {
-//                Text("error")
-//            }
-
                 Button(
                     onClick = onClickSave,
                     shape = RoundedCornerShape(Theme.SizeSS),
@@ -241,26 +236,9 @@ fun EditScreen(
                     Text(text = stringResource(id = R.string.edit_save_button))
                 }
             }
+
         }
 
-        if (isBusy) {
-            val interactionSource = remember { MutableInteractionSource() }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Theme.LoadingBackgroundColor)
-                    .clickable(
-                        indication = null,
-                        interactionSource = interactionSource,
-                        onClick = {}
-                    ),
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                )
-            }
-        }
     }
 }
 
@@ -300,6 +278,7 @@ fun InputText(
             } else {
                 VisualTransformation.None
             },
+            maxLines = 1,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
@@ -336,8 +315,11 @@ fun <T> InputOption(
     enabled: Boolean = true,
 ) {
 
+    Icons.Filled.KeyboardArrowUp
     var expanded by remember { mutableStateOf(false) }
-
+    val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
+    val focusManager = LocalFocusManager.current
+    
     Column(
         modifier = Modifier
             .wrapContentWidth()
@@ -348,8 +330,8 @@ fun <T> InputOption(
             label = { Text(title) },
             enabled = enabled,
             readOnly = true,
-            onValueChange = {
-            },
+            onValueChange = {},
+            trailingIcon = { Icon(imageVector = icon, "") },
             modifier = Modifier
                 .onFocusChanged {
                     expanded = it.isFocused
@@ -359,9 +341,9 @@ fun <T> InputOption(
             expanded = expanded,
             onDismissRequest = {
                 expanded = false
+                focusManager.clearFocus()
             },
             modifier = Modifier
-                .fillMaxWidth()
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
@@ -370,6 +352,7 @@ fun <T> InputOption(
                     onClick = {
                         state.value = item.value
                         expanded = false
+                        focusManager.clearFocus()
                     }
                 )
             }
@@ -437,7 +420,6 @@ private fun EditScreenPreview() {
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
             extensionState = mutableStateOf(false),
-            isBusy = false,
             onClickSearchHost = {},
             onClickSelectFolder = {},
             onClickCheckConnection = {},

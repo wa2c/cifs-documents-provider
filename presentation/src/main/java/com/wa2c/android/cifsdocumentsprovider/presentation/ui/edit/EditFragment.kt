@@ -11,13 +11,23 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.MenuProvider
-import androidx.core.widget.TextViewCompat
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -29,18 +39,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.databinding.FragmentEditBinding
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ShowSnackBar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -54,8 +63,6 @@ class EditFragment : Fragment() {
     private val mainViewModel by activityViewModels<MainViewModel>()
     /** View Model */
     private val viewModel by viewModels<EditViewModel>()
-    /** Binding */
-    private val binding: FragmentEditBinding? by viewBinding()
     /** Arguments */
     private val args: EditFragmentArgs by navArgs()
 
@@ -66,27 +73,64 @@ class EditFragment : Fragment() {
                     darkTheme = mainViewModel.uiThemeFlow.isDark()
                 ) {
 
-                    val isBusy = viewModel.isBusy.collectAsStateWithLifecycle()
+                    Box(modifier = Modifier) {
+                        EditScreen(
+                            nameState = viewModel.name.collectAsMutableState(),
+                            storageState = viewModel.storage.collectAsMutableState(),
+                            domainState = viewModel.domain.collectAsMutableState(),
+                            hostState = viewModel.host.collectAsMutableState(),
+                            portState = viewModel.port.collectAsMutableState(),
+                            enableDfsState = viewModel.enableDfs.collectAsMutableState(),
+                            userState = viewModel.user.collectAsMutableState(),
+                            passwordState = viewModel.password.collectAsMutableState(),
+                            anonymousState = viewModel.anonymous.collectAsMutableState(),
+                            folderState = viewModel.folder.collectAsMutableState(),
+                            safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+                            extensionState = viewModel.extension.collectAsMutableState(),
+                            onClickSearchHost = { viewModel.onClickSearchHost() },
+                            onClickSelectFolder = { viewModel.onClickSelectFolder() },
+                            onClickCheckConnection = { viewModel.onClickCheckConnection() },
+                            onClickSave = { viewModel.onClickSave() }
+                        )
 
-                    EditScreen(
-                        nameState = viewModel.name.collectAsMutableState(),
-                        storageState = viewModel.storage.collectAsMutableState(),
-                        domainState = viewModel.domain.collectAsMutableState(),
-                        hostState = viewModel.host.collectAsMutableState(),
-                        portState = viewModel.port.collectAsMutableState(),
-                        enableDfsState = viewModel.enableDfs.collectAsMutableState(),
-                        userState = viewModel.user.collectAsMutableState(),
-                        passwordState = viewModel.password.collectAsMutableState(),
-                        anonymousState = viewModel.anonymous.collectAsMutableState(),
-                        folderState = viewModel.folder.collectAsMutableState(),
-                        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
-                        extensionState = viewModel.extension.collectAsMutableState(),
-                        isBusy = isBusy.value,
-                        onClickSearchHost = { viewModel.onClickSearchHost() },
-                        onClickSelectFolder = { viewModel.onClickSelectFolder() },
-                        onClickCheckConnection = { viewModel.onClickCheckConnection() },
-                        onClickSave = { viewModel.onClickSave() }
-                    )
+                        // Snackbar
+                        val connectionResult = remember { mutableStateOf<ConnectionResult?>(null)}
+                        LaunchedEffect(key1 = Unit) {
+                            viewModel.connectionResultNotify.collectIn(viewLifecycleOwner) { result ->
+                                connectionResult.value = result
+                            }
+                        }
+                        connectionResult.value?.let {
+                            ShowSnackBar(
+                                message = stringResource(id = it.messageRes),
+                                iconRes = it.iconRes,
+                                iconColor = colorResource(id = it.colorRes),
+                            )
+                        }
+
+                        // isBusy
+                        val isBusy = viewModel.isBusy.collectAsStateWithLifecycle()
+                        if (isBusy.value) {
+                            val interactionSource = remember { MutableInteractionSource() }
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Theme.LoadingBackgroundColor)
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = interactionSource,
+                                        onClick = {}
+                                    ),
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier
+                                        .align(Alignment.Center)
+                                )
+                            }
+                            connectionResult.value = null
+                        }
+                    }
+
                 }
             }
         }
@@ -135,7 +179,7 @@ class EditFragment : Fragment() {
 
         viewModel.let { vm ->
             vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-            vm.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
+//            vm.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
             vm.initialize(args.cifsConnection)
         }
     }
@@ -186,26 +230,6 @@ class EditFragment : Fragment() {
                     toast(event.messageId)
                 }
             }
-        }
-    }
-
-    private fun onConnect(result: ConnectionResult?) {
-        if (result == null) return
-
-        // Snack bar
-        binding?.root?.let { root ->
-            Snackbar.make(root, result.getMessage(requireContext()), Snackbar.LENGTH_SHORT).also { bar ->
-                val v = bar.view
-                (v.findViewById(com.google.android.material.R.id.snackbar_text) as? TextView)?.let { textView ->
-                    textView.maxLines = Integer.MAX_VALUE
-                    textView.compoundDrawablePadding = resources.getDimensionPixelSize(R.dimen.snack_bar_icon_padding)
-                    textView.setCompoundDrawablesWithIntrinsicBounds(result.iconRes, 0, 0, 0)
-                    TextViewCompat.setCompoundDrawableTintList(textView, ColorStateList.valueOf(ContextCompat.getColor(requireContext(), result.colorRes)))
-                }
-                v.setOnClickListener {
-                    bar.dismiss()
-                }
-            }.show()
         }
     }
 
