@@ -1,15 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,65 +14,227 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+
 
 /**
  * Host Screen
  */
 @Composable
 fun HostScreen(
+    viewModel: HostViewModel = hiltViewModel(),
+    route: (NavRoute) -> Unit,
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle(emptyList())
+    val aaa = remember { mutableStateOf(false) }
+
+    HostScreenContainer(
+        hostList = connectionList.value,
+        isInit = true,
+        onClickItem = { viewModel.onClickItem(it) },
+        onClickSet = { viewModel.onClickSetManually() },
+    )
+
+    if (aaa.value) {
+        CommonDialog(
+            title = "",
+            content = { Text("あああ") },
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = android.R.string.ok)) {
+                logD("")
+                aaa.value = false
+                },
+                DialogButton(label = stringResource(id = android.R.string.copy)) {
+                    logD("")
+                    aaa.value = false
+                }
+            ),
+            dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
+                logD("")
+                aaa.value = false
+            },
+        )
+    }
+
+    LaunchedEffect(true) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is HostNav.SelectItem -> {
+                    // TODO
+                    //confirmInputData(host =  event.host)
+                    aaa.value = true
+
+                }
+                is HostNav.NetworkError -> {
+                    showPopup(
+                        snackbarHostState = snackbarHostState,
+                        popupMessage = PopupMessage.Resource(
+                            res = R.string.host_error_network,
+                            type = PopupMessageType.Error,
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun CommonDialog(title: String, content: () -> Unit, dismissButton: DialogButton, any: Any) {
+
+}
+
+//@Composable
+//private fun onNavigate(event: HostNav) {
+//    logD("onNavigate: event=$event")
+//    when (event) {
+//        is HostNav.SelectItem -> {
+//            confirmInputData(event.host)
+//        }
+//        is HostNav.NetworkError -> {
+//            toast(R.string.host_error_network)
+//        }
+//    }
+//}
+
+///**
+// * Confirm input data
+// */
+//@Composable
+//private fun confirmInputData(host: HostData?) {
+//    if (host != null) {
+//        // Item selected
+//        if (host.hostName == host.ipAddress) {
+//            openEdit(host.hostName)
+//        } else {
+//            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
+//                .setMessage(R.string.host_select_confirmation_message)
+//                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
+//                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
+//                .setNeutralButton(R.string.dialog_close, null)
+//                .show()
+//            return
+//        }
+//    } else {
+//        // Set manually
+//        openEdit(null)
+//    }
+//}
+//
+///**
+// * Open Edit Screen
+// */
+//
+//@Composable
+//private fun openEdit(hostText: String?) {
+//    if (isInit) {
+//        // from Main
+//        val connection = hostText?.let { CifsConnection.createFromHost(it) }
+//        navigateSafe(HostFragmentDirections.actionHostFragmentToEditFragment(connection))
+//    } else {
+//        // from Edit
+//        setFragmentResult(
+//            HostFragment.REQUEST_KEY_HOST,
+//            bundleOf(HostFragment.RESULT_KEY_HOST_TEXT to hostText)
+//        )
+//        navigateBack()
+//    }
+//}
+
+/**
+ * Host Screen
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HostScreenContainer(
     hostList: List<HostData>,
     isInit: Boolean,
     onClickItem: (HostData) -> Unit,
     onClickSet: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.fillMaxHeight()
-    ) {
-        Box(
-            modifier = Modifier.weight(weight = 1f, fill = true)
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("title") }) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(paddingValues)
         ) {
-            LazyColumn {
-                items(items = hostList) { hostData ->
-                    HostItem(
-                        hostData = hostData,
-                        onClick = { onClickItem(hostData) },
-                    )
-                    Divider(thickness = 0.5.dp, color = Theme.DividerColor)
-                }
-            }
-        }
+            HostList(
+                hostList = hostList,
+                onClickItem = onClickItem,
+            )
 
-        if (isInit) {
-            Divider(thickness = 1.dp, color = Theme.DividerColor)
+            if (isInit) {
+                Divider(thickness = 1.dp, color = Theme.DividerColor)
 
-            Column(
-                modifier = Modifier
-                    .padding(8.dp),
-            ) {
-                Button(
-                    onClick = onClickSet,
-                    shape = RoundedCornerShape(4.dp),
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
+                        .padding(8.dp),
                 ) {
-                    Text(text = stringResource(id = R.string.host_set_manually))
+                    Button(
+                        onClick = onClickSet,
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp)
+                    ) {
+                        Text(text = stringResource(id = R.string.host_set_manually))
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Host Screen
+ */
+@Composable
+fun ColumnScope.HostList(
+    hostList: List<HostData>,
+    onClickItem: (HostData) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier
+            .weight(weight = 1f, fill = true)
+    ) {
+        items(items = hostList) { hostData ->
+            HostItem(
+                hostData = hostData,
+                onClick = { onClickItem(hostData) },
+            )
+            Divider(thickness = 0.5.dp, color = Theme.DividerColor)
+        }
+    }
+
 }
 
 @Composable
@@ -126,7 +285,7 @@ private fun HostItem(
 @Composable
 private fun FolderScreenPreview() {
     Theme.AppTheme {
-        HostScreen(
+        HostScreenContainer(
             hostList = listOf(
                 HostData(
                     hostName = "Host1",

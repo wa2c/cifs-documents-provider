@@ -3,6 +3,7 @@ plugins {
     id(Deps.App.kotlinAndroidPlugin)
     id(Deps.App.kotlinKaptPlugin)
     id(Deps.App.daggerHiltPlugin)
+    id(Deps.App.parcelizePlugin)
     id(Deps.Ui.navigationSafeargsPlugin)
     id(Deps.Util.licensePlugin)
 }
@@ -85,6 +86,7 @@ dependencies {
     implementation(Deps.Ui.navigationUi)
     implementation(Deps.Ui.navigationFragmentKtx)
     implementation(Deps.Ui.navigationCompose)
+    implementation(Deps.Ui.navigationComposeHilt)
 
     // Util
 

@@ -22,14 +22,14 @@ fun SingleChoiceDialog(
     items: List<String>,
     selectedIndex: Int = 0,
     title: String? = null,
-    confirmButton: DialogButton? = null,
+    confirmButtons: List<DialogButton>? = null,
     dismissButton: DialogButton? = null,
     result: (Int, String) -> Unit
 ) {
     if (items.isEmpty()) return
     CommonDialog(
         title = title,
-        confirmButton = confirmButton,
+        confirmButtons = confirmButtons,
         dismissButton = dismissButton,
     ) {
         SingleChoiceView(items, selectedIndex, result)

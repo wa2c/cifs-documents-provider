@@ -59,12 +59,12 @@ class HostFragment: Fragment() {
                     darkTheme = mainViewModel.uiThemeFlow.isDark()
                 ) {
                     val hostList = viewModel.hostDataList.collectAsStateWithLifecycle()
-                    HostScreen(
-                        hostList = hostList.value,
-                        isInit = isInit,
-                        onClickItem = { viewModel.onClickItem(it) },
-                        onClickSet = { viewModel.onClickSetManually() },
-                    )
+//                    HostScreen(
+//                        hostList = hostList.value,
+//                        isInit = isInit,
+//                        onClickItem = { viewModel.onClickItem(it) },
+//                        onClickSet = { viewModel.onClickSetManually() },
+//                    )
                 }
             }
         }
@@ -117,9 +117,9 @@ class HostFragment: Fragment() {
             }, viewLifecycleOwner, Lifecycle.State.RESUMED)
         }
 
-        viewModel.let {
-            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
-        }
+//        viewModel.let {
+//            it.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+//        }
 
         viewModel.discovery()
     }

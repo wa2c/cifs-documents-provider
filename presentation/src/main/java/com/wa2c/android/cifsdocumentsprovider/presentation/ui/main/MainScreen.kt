@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
 import android.content.res.Configuration
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,12 +15,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -26,11 +37,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
@@ -41,50 +61,176 @@ import org.burnoutcrew.reorderable.reorderable
  */
 @Composable
 fun MainScreen(
+    viewModel: MainViewModel = hiltViewModel(),
+    route: (NavRoute) -> Unit,
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val fileOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+        logD(uris)
+        route(NavRoute.OpenFile(uris))
+    }
+
+    val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
+
+    MainScreenContainer(
+        snackbarHostState = snackbarHostState,
+        connectionList = connectionList.value,
+        onClickItem = { viewModel.onClickItem(it) },
+        onClickAddItem = { viewModel.onClickAddItem() },
+        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
+        onClickMenuOpenFile = { fileOpenLauncher.launch(arrayOf("*/*")) },
+        onClickMenuSettings = { route(NavRoute.Settings) }
+    )
+    
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            //onNavigate(it, navController)
+            when (event) {
+                is MainNav.Edit -> {
+                    route(NavRoute.Main)
+                }
+                is MainNav.AddItem -> {
+                    route(NavRoute.Host(isInit = true))
+                }
+                is MainNav.OpenFile -> {
+                    if (event.isSuccess) {
+                        // Open file
+                        try {
+                            fileOpenLauncher.launch(arrayOf("*/*"))
+                        } catch (e: Exception) {
+                            showPopup(
+                                snackbarHostState = snackbarHostState,
+                                popupMessage = PopupMessage.Resource(
+                                    res = R.string.provider_error_message,
+                                    type = PopupMessageType.Error,
+                                    error = e,
+                                )
+                            )
+                        }
+                    } else {
+                        showPopup(
+                            snackbarHostState = snackbarHostState,
+                            popupMessage = PopupMessage.Resource(
+                                res = R.string.main_open_file_ng_message,
+                                type = PopupMessageType.Warning,
+                            )
+                        )
+                    }
+                }
+                is MainNav.OpenSettings -> {
+                    route(NavRoute.Settings)
+                }
+            }
+
+        }
+    }
+}
+
+/**
+ * Main Screen
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreenContainer(
+    snackbarHostState: SnackbarHostState,
     connectionList: List<CifsConnection>,
     onClickItem: (CifsConnection) -> Unit,
     onClickAddItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
+    onClickMenuOpenFile: () -> Unit,
+    onClickMenuSettings: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier.fillMaxHeight()
-    ) {
-        val state = rememberReorderableLazyListState(onMove = { from, to ->
-            onDragAndDrop(from.index, to.index)
-        })
-        LazyColumn(
-            state = state.listState,
-            modifier = Modifier
-                .reorderable(state)
-                .detectReorderAfterLongPress(state)
-        ) {
-            items(items = connectionList, { it }) { connection ->
-                ReorderableItem(state, key = connection) { isDragging ->
-                    val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                    ConnectionItem(
-                        connection = connection,
-                        modifier = Modifier
-                            .shadow(elevation.value)
-                            .background(MaterialTheme.colorScheme.surface),
-                        onClick = { onClickItem(connection) },
-                    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                colors=  TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+                actions = {
+                    IconButton(
+                        onClick = { onClickMenuOpenFile() }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_share),
+                            contentDescription = stringResource(id = R.string.main_open_file)
+                        )
+                    }
+                    IconButton(
+                        onClick = { onClickMenuSettings() }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_settings),
+                            contentDescription = stringResource(id = R.string.main_open_settings),
+                        )
+                    }
                 }
-                Divider(thickness = 0.5.dp, color = Theme.DividerColor)
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                shape = FloatingActionButtonDefaults.largeShape,
+                containerColor = MaterialTheme.colorScheme.primary,
+                onClick = { onClickAddItem() }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_add_folder),
+                    contentDescription = "Add Connection",
+                )
+            }
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                (data.visuals as? MessageSnackbarVisual)?.let {
+                    AppSnackbar(message = it.popupMessage)
+                }
             }
         }
-
-        FloatingActionButton(
-            shape = FloatingActionButtonDefaults.largeShape,
-            containerColor = MaterialTheme.colorScheme.primary,
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .padding(24.dp)
-                .align(alignment = Alignment.BottomEnd),
-            onClick = { onClickAddItem() }
+                .fillMaxHeight()
+                .padding(paddingValues)
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_add_folder),
-                contentDescription = "Add Folder",
+            ConnectionList(
+                connectionList = connectionList,
+                onClickItem = onClickItem,
+                onDragAndDrop = onDragAndDrop,
             )
+        }
+    }
+}
+
+/**
+ * Connection List
+ */
+@Composable
+fun ConnectionList(
+    connectionList: List<CifsConnection>,
+    onClickItem: (CifsConnection) -> Unit,
+    onDragAndDrop: (from: Int, to: Int) -> Unit,
+) {
+    val state = rememberReorderableLazyListState(onMove = { from, to ->
+        onDragAndDrop(from.index, to.index)
+    })
+    LazyColumn(
+        state = state.listState,
+        modifier = Modifier
+            .reorderable(state)
+            .detectReorderAfterLongPress(state)
+    ) {
+        items(items = connectionList, { it }) { connection ->
+            ReorderableItem(state, key = connection) { isDragging ->
+                val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
+                ConnectionItem(
+                    connection = connection,
+                    modifier = Modifier
+                        .shadow(elevation.value)
+                        .background(MaterialTheme.colorScheme.surface),
+                    onClick = { onClickItem(connection) },
+                )
+            }
+            Divider(thickness = 0.5.dp, color = Theme.DividerColor)
         }
     }
 }
@@ -138,9 +284,10 @@ private fun ConnectionItem(
     showBackground = true,
 )
 @Composable
-private fun MainScreenPreview() {
+private fun MainScreenContainerPreview() {
     Theme.AppTheme {
-        MainScreen(
+        MainScreenContainer(
+            snackbarHostState = SnackbarHostState(),
             connectionList = listOf(
                 CifsConnection(
                     id = "",
@@ -190,7 +337,9 @@ private fun MainScreenPreview() {
             ),
             onClickItem = {},
             onClickAddItem = {},
-            onDragAndDrop = { _, _ -> }
+            onDragAndDrop = { _, _ -> },
+            onClickMenuOpenFile = {},
+            onClickMenuSettings = {},
         )
     }
 }

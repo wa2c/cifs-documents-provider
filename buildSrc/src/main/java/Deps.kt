@@ -34,6 +34,8 @@ object Deps {
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
         const val daggerHiltCompiler = "com.google.dagger:hilt-android-compiler:$daggerVersion"
 
+        const val parcelizePlugin = "kotlin-parcelize"
+
         const val documentFile = "androidx.documentfile:documentfile:1.0.1"
     }
 
@@ -62,8 +64,8 @@ object Deps {
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
         const val navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
         const val navigationFragmentKtx = "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
-
-        const val navigationCompose = "androidx.hilt:hilt-navigation-compose:1.0.0"
+        const val navigationCompose = "androidx.navigation:navigation-compose:$navigationVersion"
+        const val navigationComposeHilt = "androidx.hilt:hilt-navigation-compose:1.0.0"
     }
 
     object Data {

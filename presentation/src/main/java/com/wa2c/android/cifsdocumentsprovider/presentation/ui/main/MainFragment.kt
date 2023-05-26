@@ -66,19 +66,19 @@ class MainFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
-            setContent {
-                Theme.AppTheme(
-                    darkTheme = mainViewModel.uiThemeFlow.isDark()
-                ) {
-                    val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
-                    MainScreen(
-                        connectionList = connectionList.value,
-                        onClickItem = { viewModel.onClickItem(it) },
-                        onClickAddItem = { viewModel.onClickAddItem() },
-                        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
-                    )
-                }
-            }
+//            setContent {
+//                Theme.AppTheme(
+//                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+//                ) {
+//                    val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
+//                    (
+//                        connectionList = connectionList.value,
+//                        onClickItem = { viewModel.onClickItem(it) },
+//                        onClickAddItem = { viewModel.onClickAddItem() },
+//                        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
+//                    )
+//                }
+//            }
         }
     }
 

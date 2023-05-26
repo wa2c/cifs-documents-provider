@@ -25,8 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.MenuProvider
 import androidx.databinding.BindingAdapter
 import androidx.fragment.app.Fragment
@@ -44,7 +43,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.ShowSnackBar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
@@ -101,11 +101,15 @@ class EditFragment : Fragment() {
                             }
                         }
                         connectionResult.value?.let {
-                            ShowSnackBar(
-                                message = stringResource(id = it.messageRes),
-                                iconRes = it.iconRes,
-                                iconColor = colorResource(id = it.colorRes),
+                            val message = PopupMessage.Text(
+                                text = it.getMessage(LocalContext.current),
+                                type = when (it) {
+                                    is ConnectionResult.Success -> PopupMessageType.Success
+                                    is ConnectionResult.Warning -> PopupMessageType.Warning
+                                    is ConnectionResult.Failure -> PopupMessageType.Error
+                                }
                             )
+                            //ShowSnackBar(message = message)
                         }
 
                         // isBusy
