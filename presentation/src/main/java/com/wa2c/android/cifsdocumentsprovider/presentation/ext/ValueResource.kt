@@ -89,6 +89,16 @@ val HostSortType.menuRes: Int
         HostSortType.IpAddressDescend -> { R.id.host_menu_sort_type_ip_address_descend }
     }
 
+val HostSortType.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        HostSortType.DetectionAscend -> R.string.host_sort_type_detection_ascend
+        HostSortType.DetectionDescend -> R.string.host_sort_type_detection_descend
+        HostSortType.HostNameAscend -> R.string.host_sort_type_host_name_ascend
+        HostSortType.HostNameDescend -> R.string.host_sort_type_host_name_descend
+        HostSortType.IpAddressAscend -> R.string.host_sort_type_ip_address_ascend
+        HostSortType.IpAddressDescend -> R.string.host_sort_type_ip_address_descend
+    }
 
 fun UiTheme.getLabel(context: Context): String {
     return when (this) {

@@ -1,6 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,24 +25,32 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
 
@@ -51,22 +65,42 @@ fun HostScreen(
     onSelectItem: (String?) -> Unit,
     onSetManually: () -> Unit,
 ) {
-    val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle(emptyList())
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showSortDialog = remember { mutableStateOf(false) }
     val selectedHost = remember { mutableStateOf<HostData?>(null) }
+    val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
+    val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle()
 
     HostScreenContainer(
-        hostList = connectionList.value,
+        snackbarHostState = snackbarHostState,
         isInit = isInit,
+        isLoading = isLoading.value,
+        hostList = connectionList.value,
         onClickBack = { onClickBack() },
+        onClickSort = { showSortDialog.value = true },
         onClickReload = { viewModel.discovery() },
-        onClickItem = { host ->
-            selectedHost.value = host
-        },
-        onClickSet = {
-            onSetManually()
-        },
+        onClickItem = { host -> selectedHost.value = host },
+        onClickSet = { onSetManually() },
     )
 
+    // Sort dialog
+    if (showSortDialog.value) {
+        val types =  HostSortType.values()
+        SingleChoiceDialog(
+            items = HostSortType.values().map { stringResource(id = it.labelRes) },
+            selectedIndex = types.indexOfFirst { it == viewModel.sortType.value },
+            dismissButton = DialogButton(
+                label = stringResource(id = R.string.dialog_close),
+                onClick = { showSortDialog.value = false }
+            ),
+            result = { index, _ ->
+                types.getOrNull(index)?.let { viewModel.sort(it) }
+                showSortDialog.value = false
+            },
+        )
+    }
+
+    // Confirmation dialog
     selectedHost.value?.let { host ->
         if (host.hostName == host.ipAddress) {
             CommonDialog(
@@ -88,168 +122,11 @@ fun HostScreen(
             onSelectItem(host.hostName)
         }
     }
+
+    LaunchedEffect(Unit) {
+        // TODO Error
+    }
 }
-
-
-///**
-// * Host Screen
-// */
-//@Composable
-//fun HostScreen2(
-//    viewModel: HostViewModel = hiltViewModel(),
-//    route: (NavRoute) -> Unit,
-//) {
-//    val snackbarHostState = remember { SnackbarHostState() }
-//    val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle(emptyList())
-//    val aaa = remember { mutableStateOf(false) }
-//
-//    HostScreenContainer(
-//        hostList = connectionList.value,
-//        isInit = true,
-//        onClickItem = { viewModel.onClickItem(it) },
-//        onClickSet = { viewModel.onClickSetManually() },
-//    )
-//
-//    if (aaa.value) {
-//        CommonDialog(
-//            title = "",
-//            content = { Text("あああ") },
-//            confirmButtons = listOf(
-//                DialogButton(label = stringResource(id = android.R.string.ok)) {
-//                logD("")
-//                aaa.value = false
-//                },
-//                DialogButton(label = stringResource(id = android.R.string.copy)) {
-//                    logD("")
-//                    aaa.value = false
-//                }
-//            ),
-//            dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
-//                logD("")
-//                aaa.value = false
-//            },
-//        )
-//    }
-//
-//    LaunchedEffect(true) {
-//        viewModel.navigationEvent.collect { event ->
-//            when (event) {
-//                is HostNav.SelectItem -> {
-//                    //confirmInputData(host =  event.host)
-//                    //aaa.value = true
-//                    val host = event.host
-//                    if (host != null) {
-//                        // Item selected
-//                        if (host.hostName == host.ipAddress) {
-//                            openEdit(host.hostName)
-//                        } else {
-//                            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
-//                                .setMessage(R.string.host_select_confirmation_message)
-//                                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
-//                                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
-//                                .setNeutralButton(R.string.dialog_close, null)
-//                                .show()
-//                            return
-//                        }
-//                    } else {
-//                        // Set manually
-//                        route. openEdit(null)
-//                    }
-//                }
-//                is HostNav.NetworkError -> {
-//                    showPopup(
-//                        snackbarHostState = snackbarHostState,
-//                        popupMessage = PopupMessage.Resource(
-//                            res = R.string.host_error_network,
-//                            type = PopupMessageType.Error,
-//                        )
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
-
-///**
-// * Confirm input data
-// */
-//@Composable
-//private fun confirmInputData(host: HostData?) {
-//    if (host != null) {
-//        // Item selected
-//        if (host.hostName == host.ipAddress) {
-//            openEdit(host.hostName)
-//        } else {
-//            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
-//                .setMessage(R.string.host_select_confirmation_message)
-//                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
-//                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
-//                .setNeutralButton(R.string.dialog_close, null)
-//                .show()
-//            return
-//        }
-//    } else {
-//        // Set manually
-//        openEdit(null)
-//    }
-//}
-
-//@Composable
-//private fun onNavigate(event: HostNav) {
-//    logD("onNavigate: event=$event")
-//    when (event) {
-//        is HostNav.SelectItem -> {
-//            confirmInputData(event.host)
-//        }
-//        is HostNav.NetworkError -> {
-//            toast(R.string.host_error_network)
-//        }
-//    }
-//}
-
-///**
-// * Confirm input data
-// */
-//@Composable
-//private fun confirmInputData(host: HostData?) {
-//    if (host != null) {
-//        // Item selected
-//        if (host.hostName == host.ipAddress) {
-//            openEdit(host.hostName)
-//        } else {
-//            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
-//                .setMessage(R.string.host_select_confirmation_message)
-//                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
-//                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
-//                .setNeutralButton(R.string.dialog_close, null)
-//                .show()
-//            return
-//        }
-//    } else {
-//        // Set manually
-//        openEdit(null)
-//    }
-//}
-//
-///**
-// * Open Edit Screen
-// */
-//
-//@Composable
-//private fun openEdit(hostText: String?) {
-//    if (isInit) {
-//        // from Main
-//        val connection = hostText?.let { CifsConnection.createFromHost(it) }
-//        navigateSafe(HostFragmentDirections.actionHostFragmentToEditFragment(connection))
-//    } else {
-//        // from Edit
-//        setFragmentResult(
-//            HostFragment.REQUEST_KEY_HOST,
-//            bundleOf(HostFragment.RESULT_KEY_HOST_TEXT to hostText)
-//        )
-//        navigateBack()
-//    }
-//}
 
 /**
  * Host Screen
@@ -257,13 +134,20 @@ fun HostScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HostScreenContainer(
-    hostList: List<HostData>,
+    snackbarHostState: SnackbarHostState,
     isInit: Boolean,
+    isLoading: Boolean,
+    hostList: List<HostData>,
     onClickBack: () -> Unit,
+    onClickSort: () -> Unit,
     onClickReload: () -> Unit,
     onClickItem: (HostData) -> Unit,
     onClickSet: () -> Unit,
 ) {
+    // Allow resume on rotation
+    val currentRotation = remember { mutableStateOf(0f) }
+    val rotation = remember { Animatable(currentRotation.value) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -273,11 +157,22 @@ fun HostScreenContainer(
                 ),
                 actions = {
                     IconButton(
-                        onClick = { onClickReload() }
+                        onClick = { onClickSort() }
                     ) {
                         Icon(
+                            painter = painterResource(id = R.drawable.ic_sort),
+                            contentDescription = stringResource(id = R.string.host_sort_button),
+                        )
+                    }
+                    IconButton(
+                        onClick = { onClickReload() }
+                    ) {
+
+                        Icon(
                             painter = painterResource(id = R.drawable.ic_reload),
-                            contentDescription = stringResource(id = R.string.host_reload_button)
+                            contentDescription = stringResource(id = R.string.host_reload_button),
+                            modifier = Modifier
+                                .rotate(rotation.value)
                         )
                     }
                 },
@@ -285,8 +180,15 @@ fun HostScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
                     }
-                }
+                },
             )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                (data.visuals as? MessageSnackbarVisual)?.let {
+                    AppSnackbar(message = it.popupMessage)
+                }
+            }
         }
     ) { paddingValues ->
         Column(
@@ -316,6 +218,33 @@ fun HostScreenContainer(
                         Text(text = stringResource(id = R.string.host_set_manually))
                     }
                 }
+            }
+        }
+    }
+
+    // Loading animation
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            // Infinite repeatable rotation when is playing
+            rotation.animateTo(
+                targetValue = currentRotation.value + 360f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(3000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            ) {
+                currentRotation.value = value
+            }
+        } else {
+            // Slow down rotation on pause
+            rotation.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(
+                    durationMillis = 0,
+                    easing = LinearOutSlowInEasing
+                )
+            ) {
+                currentRotation.value = 0f
             }
         }
     }
@@ -393,6 +322,8 @@ private fun HostItem(
 private fun FolderScreenPreview() {
     Theme.AppTheme {
         HostScreenContainer(
+            snackbarHostState = SnackbarHostState(),
+            isLoading = false,
             hostList = listOf(
                 HostData(
                     hostName = "Host1",
@@ -412,6 +343,7 @@ private fun FolderScreenPreview() {
             ),
             isInit = true,
             onClickBack = {},
+            onClickSort = {},
             onClickReload = {},
             onClickItem = {},
             onClickSet = {},

@@ -44,7 +44,7 @@ internal fun MainNavHost(
                         route = EditScreenName, ) // FIXME
                 },
                 onClickAdd = {
-                    navController.navigate(EditScreenName)
+                    navController.navigate(HostScreenName)
                 }
             )
         }
@@ -77,59 +77,6 @@ internal fun MainNavHost(
         }
     }
 }
-
-///**
-// * Navigation route
-// */
-//sealed class NavRoute : Parcelable {
-//
-//    abstract val name: String
-//
-//    @Parcelize
-//    object Main: NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = MainScreenName
-//    }
-//
-//    @Parcelize
-//    data class Edit(
-//        val connection: CifsConnection?
-//    ): NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = EditScreenName
-//    }
-//
-//    @Parcelize
-//    data class Host(
-//        val isInit: Boolean
-//    ): NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = HostScreenName
-//    }
-//
-//    @Parcelize
-//    object Folder: NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = FolderScreenName
-//    }
-//
-//    @Parcelize
-//    object Settings: NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = SettingsScreenName
-//    }
-//
-//    @Parcelize
-//    data class OpenFile(
-//        val url: List<Uri>
-//    ): NavRoute() {
-//        @IgnoredOnParcel
-//        override val name: String = OpenFileScreenName
-//    }
-//}
-
-
-
 
 private const val MainScreenName = "main"
 private const val EditScreenName = "edit"
