@@ -39,9 +39,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
-        val clazz = PresentationModule.SampleContentProviderEntryPoint::class.java
+        val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
         val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
-        hiltEntryPoint.analyticsService()
+        hiltEntryPoint.provideCifsRepository()
     }
 
     /** File handler */
