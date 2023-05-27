@@ -93,6 +93,7 @@ fun HostScreen(
                 label = stringResource(id = R.string.dialog_close),
                 onClick = { showSortDialog.value = false }
             ),
+            onDismiss = { showSortDialog.value = false },
             result = { index, _ ->
                 types.getOrNull(index)?.let { viewModel.sort(it) }
                 showSortDialog.value = false
@@ -114,7 +115,8 @@ fun HostScreen(
                 ),
                 dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
                     selectedHost.value = null
-                }
+                },
+                onDismiss = { selectedHost.value = null }
             ) {
                 Text(stringResource(id = R.string.host_select_confirmation_message))
             }

@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ fun CommonDialog(
     title: String? = null,
     confirmButtons: List<DialogButton>?,
     dismissButton: DialogButton?,
+    onDismiss: (() -> Unit)? = null,
     content: @Composable (() -> Unit)? = null
 ) {
     AlertDialog(
@@ -41,7 +43,9 @@ fun CommonDialog(
                     confirmButtons.forEach {
                         Button(
                             onClick = it.onClick,
+                            contentPadding = PaddingValues(Theme.SizeSS),
                             modifier = Modifier.padding(start = Theme.SizeS)
+
                         ) {
                             Text(it.label)
                         }
@@ -57,7 +61,10 @@ fun CommonDialog(
             }
         },
         onDismissRequest = {
-        },
+            if (onDismiss != null) {
+                onDismiss()
+            }
+       },
     )
 }
 

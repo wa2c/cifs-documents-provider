@@ -24,6 +24,7 @@ fun SingleChoiceDialog(
     title: String? = null,
     confirmButtons: List<DialogButton>? = null,
     dismissButton: DialogButton? = null,
+    onDismiss: (() -> Unit)? = null,
     result: (Int, String) -> Unit
 ) {
     if (items.isEmpty()) return
@@ -31,6 +32,7 @@ fun SingleChoiceDialog(
         title = title,
         confirmButtons = confirmButtons,
         dismissButton = dismissButton,
+        onDismiss = onDismiss,
     ) {
         SingleChoiceView(items, selectedIndex, result)
     }

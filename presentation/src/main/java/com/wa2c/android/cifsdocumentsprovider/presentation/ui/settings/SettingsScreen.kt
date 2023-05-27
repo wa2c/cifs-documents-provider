@@ -321,6 +321,7 @@ private fun SettingsSingleChoiceItem(
             dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
                 showThemeDialog.value = false
             },
+            onDismiss = { showThemeDialog.value = false }
         ) { index, _ ->
             onSetIndex(index)
             showThemeDialog.value = false
