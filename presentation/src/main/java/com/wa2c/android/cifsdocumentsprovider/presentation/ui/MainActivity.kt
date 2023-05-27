@@ -4,9 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -19,8 +19,8 @@ import dagger.hilt.android.AndroidEntryPoint
  * Main Activity
  */
 @AndroidEntryPoint
-//class MainActivity : LocalizationActivity(R.layout.activity_main) {
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+    // NOTE: Use AppCompatActivity (not ComponentActivity) for Language
 
     /** View Model */
     private val sendViewModel by viewModels<SendViewModel>()
