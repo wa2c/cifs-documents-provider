@@ -45,12 +45,6 @@ internal class AppPreferencesDataStore @Inject constructor(
     /** UI Theme */
     suspend fun setUiTheme(value: UiTheme) = dataStore.setValue(PREFKEY_UI_THEME, value.key)
 
-    /** Language */
-    val languageFlow: Flow<Language> = dataStore.data.map { Language.findByCodeOrDefault(it[PREFKEY_LANGUAGE])  }
-
-    /** Language */
-    suspend fun setLanguage(value: String?) = dataStore.setValue(PREFKEY_LANGUAGE, value)
-
     /** Use as local */
     suspend fun getUseAsLocal(): Boolean = dataStore.getValue(PREFKEY_USE_AS_LOCAL) ?: false
 
@@ -58,6 +52,17 @@ internal class AppPreferencesDataStore @Inject constructor(
 
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = dataStore.setValue(PREFKEY_USE_AS_LOCAL, value)
+
+
+    /**
+     * Migrate
+     */
+    suspend fun migrate() {
+        val language = stringPreferencesKey("prefkey_language")
+        dataStore.edit { edit ->
+            if (edit.contains(language)) edit.remove(language)
+        }
+    }
 
     companion object {
 
@@ -71,7 +76,6 @@ internal class AppPreferencesDataStore @Inject constructor(
 
         private val PREFKEY_HOST_SORT_TYPE = intPreferencesKey("prefkey_host_sort_type")
         private val PREFKEY_UI_THEME = stringPreferencesKey("prefkey_ui_theme")
-        private val PREFKEY_LANGUAGE = stringPreferencesKey("prefkey_language")
         private val PREFKEY_USE_AS_LOCAL = booleanPreferencesKey("prefkey_use_as_local")
     }
 

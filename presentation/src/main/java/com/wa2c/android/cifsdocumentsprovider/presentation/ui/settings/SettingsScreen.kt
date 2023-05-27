@@ -68,7 +68,6 @@ fun SettingsScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
-    val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default)
     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
 
     SettingsScreenContainer(
@@ -78,9 +77,8 @@ fun SettingsScreen(
             viewModel.setUiTheme(it)
             AppCompatDelegate.setDefaultNightMode(theme.value.mode)
         },
-        language = language.value,
+        language = Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()),
         onSetLanguage = {
-            viewModel.setLanguage(it)
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code))
         },
         useAsLocal = useAsLocal.value,

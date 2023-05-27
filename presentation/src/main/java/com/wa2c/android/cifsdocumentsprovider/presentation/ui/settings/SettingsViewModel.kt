@@ -23,12 +23,6 @@ class SettingsViewModel @Inject constructor(
     /** UI Theme */
     fun setUiTheme(value: UiTheme) = launch { appRepository.setUiTheme(value) }
 
-    /** Language */
-    val languageFlow = appRepository.languageFlow
-
-    /** Language */
-    fun setLanguage(value: Language) = launch { appRepository.setLanguage(value) }
-
     /** Use as local */
     val useAsLocalFlow = appRepository.useAsLocalFlow
 

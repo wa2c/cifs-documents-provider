@@ -16,9 +16,6 @@ class MainViewModel @Inject constructor(
     private val appRepository: AppRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    /** Language */
-    val language = appRepository.languageFlow
-
     /** UI Theme */
     val uiThemeFlow = appRepository.uiThemeFlow.stateIn(viewModelScope, SharingStarted.Eagerly, UiTheme.DEFAULT)
 

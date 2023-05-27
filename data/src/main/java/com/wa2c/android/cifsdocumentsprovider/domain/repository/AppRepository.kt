@@ -21,18 +21,18 @@ class AppRepository @Inject internal constructor(
     /** UI Theme */
     suspend fun setUiTheme(value: UiTheme) = appPreferences.setUiTheme(value)
 
-    /** Language */
-    val languageFlow = appPreferences.languageFlow
-
-    /** Language */
-    suspend fun setLanguage(value: Language) = appPreferences.setLanguage(value.code)
-
-
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
     suspend fun getUseAsLocal(): Boolean = appPreferences.getUseAsLocal()
 
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = appPreferences.setUseAsLocal(value)
+
+    /**
+     * Migrate
+     */
+    suspend fun migrate() {
+        appPreferences.migrate()
+    }
 
 }

@@ -28,6 +28,7 @@ class App: LocalizationApplication() {
         super.onCreate()
         initLog(BuildConfig.DEBUG)
         runBlocking {
+            repository.migrate()
             AppCompatDelegate.setDefaultNightMode(repository.uiThemeFlow.first().mode) // Set theme
         }
     }

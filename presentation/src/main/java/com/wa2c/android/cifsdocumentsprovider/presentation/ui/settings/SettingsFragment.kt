@@ -34,9 +34,9 @@ class SettingsFragment: Fragment() {
                 Theme.AppTheme(
                     darkTheme = mainViewModel.uiThemeFlow.isDark()
                 ) {
-                    val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT, viewLifecycleOwner)
-                    val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default, viewLifecycleOwner)
-                    val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false, viewLifecycleOwner)
+//                    val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT, viewLifecycleOwner)
+//                    val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default, viewLifecycleOwner)
+//                    val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false, viewLifecycleOwner)
 //                    SettingsScreen(
 //                        theme = theme.value,
 //                        onSetUiTheme = {
