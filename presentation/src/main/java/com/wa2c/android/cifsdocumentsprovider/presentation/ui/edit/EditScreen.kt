@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,10 +28,18 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,20 +60,112 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import java.time.format.TextStyle
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+
+@Composable
+fun EditScreen(
+    viewModel: EditViewModel = hiltViewModel(),
+    connection: CifsConnection?,
+    onNavigateBack: (update: Boolean) -> Unit,
+    onNavigateSearchHost: (CifsConnection?) -> Unit,
+    onNavigateSelectFolder: (CifsConnection?) -> Unit,
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showDeleteDialog = remember { mutableStateOf(false) }
+
+    viewModel.initialize(connection)
+
+    EditScreenContainer(
+        snackbarHostState = snackbarHostState,
+        nameState = viewModel.name.collectAsMutableState(),
+        storageState = viewModel.storage.collectAsMutableState(),
+        domainState = viewModel.domain.collectAsMutableState(),
+        hostState = viewModel.host.collectAsMutableState(),
+        portState = viewModel.port.collectAsMutableState(),
+        enableDfsState = viewModel.enableDfs.collectAsMutableState(),
+        userState = viewModel.user.collectAsMutableState(),
+        passwordState = viewModel.password.collectAsMutableState(),
+        anonymousState = viewModel.anonymous.collectAsMutableState(),
+        folderState = viewModel.folder.collectAsMutableState(),
+        onClickBack = { onNavigateBack(false) },
+        onClickDelete = { showDeleteDialog.value = true },
+        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+        extensionState = viewModel.extension.collectAsMutableState(),
+        onClickSearchHost = { viewModel.onClickSearchHost() },
+        onClickSelectFolder = { viewModel.onClickSelectFolder() },
+        onClickCheckConnection = { viewModel.onClickCheckConnection() },
+        onClickSave = { viewModel.onClickSave() },
+    )
+
+    // Sort dialog
+    if (showDeleteDialog.value) {
+        CommonDialog(
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    viewModel.onClickDelete()
+                },
+            ),
+            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                showDeleteDialog.value = false
+            },
+            onDismiss = { showDeleteDialog.value = false }
+        ) {
+            Text(stringResource(id = R.string.edit_delete_confirmation_message))
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                is EditNav.Back -> onNavigateBack(false)
+                is EditNav.SearchHost -> { onNavigateSearchHost(event.connection) }
+                is EditNav.SelectFolder -> { onNavigateSelectFolder(event.connection) }
+                is EditNav.Success -> {
+                    onNavigateBack(true)
+                }
+                is EditNav.Failure -> {
+                    val messageRes = if (event.error is IllegalArgumentException) {
+                        R.string.edit_save_duplicate_message // URI duplicated
+                    } else {
+                        R.string.edit_save_ng_message // Host empty
+                    }
+                    showPopup(
+                        snackbarHostState = snackbarHostState,
+                        popupMessage = PopupMessage.Resource(
+                            res = messageRes,
+                            type = PopupMessageType.Error,
+                            error = event.error
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
 
 /**
  * Edit Screen
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditScreen(
+private fun EditScreenContainer(
+    snackbarHostState: SnackbarHostState,
     nameState: MutableState<String?>,
     storageState: MutableState<StorageType>,
     domainState: MutableState<String?>,
@@ -78,206 +178,247 @@ fun EditScreen(
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
+    onClickBack: () -> Unit,
+    onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.host_title)) },
+                colors=  TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+                actions = {
+                    IconButton(
+                        onClick = onClickDelete
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_delete),
+                            contentDescription = stringResource(id = R.string.edit_delete_button),
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onClickBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
+                    }
+                },
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                (data.visuals as? MessageSnackbarVisual)?.let {
+                    AppSnackbar(message = it.popupMessage)
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(paddingValues)
         ) {
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(Theme.ScreenMargin)
-                    .weight(1f)
             ) {
-
-
-
-
-
-
-
-                InputText(
-                    title = stringResource(id = R.string.edit_name_title),
-                    hint = stringResource(id = R.string.edit_name_hint),
-                    state = nameState,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next,
-                    )
-                )
-
-                InputOption(
-                    title = stringResource(id = R.string.edit_storage_title),
-                    items = StorageType.values()
-                        .map { OptionItem(it, stringResource(id = it.labelRes)) },
-                    state = storageState,
-                )
-
-                InputText(
-                    title = stringResource(id = R.string.edit_domain_title),
-                    hint = stringResource(id = R.string.edit_domain_hint),
-                    state = domainState,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next,
-                    ),
-                )
-
-                InputText(
-                    title = stringResource(id = R.string.edit_host_title),
-                    hint = stringResource(id = R.string.edit_host_hint),
-                    state = hostState,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next,
-                    ),
-                    iconResource = R.drawable.ic_search,
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(Theme.ScreenMargin)
+                        .weight(1f)
                 ) {
-                    onClickSearchHost()
+
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_name_title),
+                        hint = stringResource(id = R.string.edit_name_hint),
+                        state = nameState,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next,
+                        )
+                    )
+
+                    InputOption(
+                        title = stringResource(id = R.string.edit_storage_title),
+                        items = StorageType.values()
+                            .map { OptionItem(it, stringResource(id = it.labelRes)) },
+                        state = storageState,
+                    )
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_domain_title),
+                        hint = stringResource(id = R.string.edit_domain_hint),
+                        state = domainState,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Uri,
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_host_title),
+                        hint = stringResource(id = R.string.edit_host_hint),
+                        state = hostState,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Uri,
+                            imeAction = ImeAction.Next,
+                        ),
+                        iconResource = R.drawable.ic_search,
+                    ) {
+                        onClickSearchHost()
+                    }
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_port_title),
+                        hint = stringResource(id = R.string.edit_port_hint),
+                        state = portState,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next,
+                        )
+                    )
+
+                    InputCheck(
+                        title = stringResource(id = R.string.edit_enable_dfs_label),
+                        state = enableDfsState,
+                    )
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_user_title),
+                        hint = stringResource(id = R.string.edit_user_hint),
+                        state = userState,
+                        enabled = !anonymousState.value,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email,
+                            imeAction = ImeAction.Next,
+                        ),
+                    )
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_password_title),
+                        hint = stringResource(id = R.string.edit_password_hint),
+                        state = passwordState,
+                        enabled = !anonymousState.value,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Password,
+                            imeAction = ImeAction.Next,
+                        )
+                    )
+
+                    InputCheck(
+                        title = stringResource(id = R.string.edit_anonymous_label),
+                        state = anonymousState,
+                    )
+
+                    InputText(
+                        title = stringResource(id = R.string.edit_folder_title),
+                        hint = stringResource(id = R.string.edit_folder_hint),
+                        state = folderState,
+                        iconResource = R.drawable.ic_folder,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Uri,
+                            imeAction = ImeAction.Next,
+                        ),
+                    ) {
+                        onClickSelectFolder()
+                    }
+
+                    // Option
+
+                    Text(
+                        text = stringResource(id = R.string.edit_option_title),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    InputCheck(
+                        title = stringResource(id = R.string.edit_option_safe_transfer_label),
+                        state = safeTransferState,
+                    )
+
+                    InputCheck(
+                        title = stringResource(id = R.string.edit_option_extension_label),
+                        state = extensionState,
+                    )
+
+                    // URI
+
+                    Text(
+                        text = stringResource(id = R.string.edit_connection_uri_title),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    SelectionContainer {
+                        Text(
+                            text = getSmbUri(
+                                hostState.value,
+                                portState.value,
+                                folderState.value,
+                                true
+                            ),
+                            modifier = Modifier
+                                .padding(Theme.SizeS)
+                        )
+                    }
+
+                    Text(
+                        text = stringResource(id = R.string.edit_provider_uri_title),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+
+                    SelectionContainer {
+                        Text(
+                            text = getContentUri(
+                                hostState.value,
+                                portState.value,
+                                folderState.value
+                            ),
+                            modifier = Modifier
+                                .padding(Theme.SizeS)
+                        )
+                    }
+
                 }
 
-                InputText(
-                    title = stringResource(id = R.string.edit_port_title),
-                    hint = stringResource(id = R.string.edit_port_hint),
-                    state = portState,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next,
-                    )
-                )
 
-                InputCheck(
-                    title = stringResource(id = R.string.edit_enable_dfs_label),
-                    state = enableDfsState,
-                )
+                Divider(thickness = 1.dp, color = Theme.DividerColor)
 
-                InputText(
-                    title = stringResource(id = R.string.edit_user_title),
-                    hint = stringResource(id = R.string.edit_user_hint),
-                    state = userState,
-                    enabled = !anonymousState.value,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next,
-                    ),
-                )
 
-                InputText(
-                    title = stringResource(id = R.string.edit_password_title),
-                    hint = stringResource(id = R.string.edit_password_hint),
-                    state = passwordState,
-                    enabled = !anonymousState.value,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Next,
-                    )
-                )
-
-                InputCheck(
-                    title = stringResource(id = R.string.edit_anonymous_label),
-                    state = anonymousState,
-                )
-
-                InputText(
-                    title = stringResource(id = R.string.edit_folder_title),
-                    hint = stringResource(id = R.string.edit_folder_hint),
-                    state = folderState,
-                    iconResource = R.drawable.ic_folder,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Next,
-                    ),
+                Column(
+                    modifier = Modifier
+                        .padding(Theme.ScreenMargin)
                 ) {
-                    onClickSelectFolder()
-                }
 
-                // Option
-                
-                Text(
-                    text = stringResource(id = R.string.edit_option_title),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                InputCheck(
-                    title = stringResource(id = R.string.edit_option_safe_transfer_label),
-                    state = safeTransferState,
-                )
-
-                InputCheck(
-                    title = stringResource(id = R.string.edit_option_extension_label),
-                    state = extensionState,
-                )
-
-                // URI
-
-                Text(
-                    text = stringResource(id = R.string.edit_connection_uri_title),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = getSmbUri(hostState.value, portState.value, folderState.value, true),
+                    OutlinedButton(
+                        onClick = onClickCheckConnection,
+                        shape = RoundedCornerShape(Theme.SizeSS),
                         modifier = Modifier
-                            .padding(Theme.SizeS)
-                    )
-                }
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(id = R.string.edit_check_connection_button))
+                    }
 
-                Text(
-                    text = stringResource(id = R.string.edit_provider_uri_title),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                SelectionContainer {
-                    Text(
-                        text = getContentUri(hostState.value, portState.value, folderState.value),
+                    Button(
+                        onClick = onClickSave,
+                        shape = RoundedCornerShape(Theme.SizeSS),
                         modifier = Modifier
-                            .padding(Theme.SizeS)
-                    )
+                            .fillMaxWidth()
+                            .padding(top = Theme.SizeS)
+                    ) {
+                        Text(text = stringResource(id = R.string.edit_save_button))
+                    }
                 }
 
             }
-
-
-            Divider(thickness = 1.dp, color = Theme.DividerColor)
-
-
-            Column(
-                modifier = Modifier
-                    .padding(Theme.ScreenMargin)
-            ) {
-
-                OutlinedButton(
-                    onClick = onClickCheckConnection,
-                    shape = RoundedCornerShape(Theme.SizeSS),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(text = stringResource(id = R.string.edit_check_connection_button))
-                }
-
-                Button(
-                    onClick = onClickSave,
-                    shape = RoundedCornerShape(Theme.SizeSS),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Theme.SizeS)
-                ) {
-                    Text(text = stringResource(id = R.string.edit_save_button))
-                }
-            }
-
         }
 
     }
@@ -448,7 +589,8 @@ fun InputCheck(
 @Composable
 private fun EditScreenPreview() {
     Theme.AppTheme {
-        EditScreen(
+        EditScreenContainer(
+            snackbarHostState = SnackbarHostState(),
             nameState = mutableStateOf("name1"),
             storageState = mutableStateOf(StorageType.SMBJ),
             domainState = mutableStateOf(""),
@@ -461,6 +603,8 @@ private fun EditScreenPreview() {
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
             extensionState = mutableStateOf(false),
+            onClickBack = {},
+            onClickDelete = {},
             onClickSearchHost = {},
             onClickSelectFolder = {},
             onClickCheckConnection = {},

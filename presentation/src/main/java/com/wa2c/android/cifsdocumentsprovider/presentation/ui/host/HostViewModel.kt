@@ -78,7 +78,7 @@ class HostViewModel @Inject constructor(
                 _isLoading.value = true
                 hostRepository.startDiscovery()
             }.onFailure {
-                _navigationEvent.emit(HostNav.NetworkError)
+                _navigationEvent.emit(HostNav.NetworkError(it))
                 _isLoading.value = false
             }
         }
@@ -90,7 +90,7 @@ class HostViewModel @Inject constructor(
             runCatching {
                 hostRepository.stopDiscovery()
             }.onFailure {
-                _navigationEvent.emit(HostNav.NetworkError)
+                _navigationEvent.emit(HostNav.NetworkError(it))
             }
             _isLoading.value = false
         }

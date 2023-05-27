@@ -36,22 +36,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 
 /**
@@ -59,8 +65,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
  */
 @Composable
 fun HostScreen(
-    isInit: Boolean,
     viewModel: HostViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    isInit: Boolean,
     onClickBack: () -> Unit,
     onSelectItem: (String?) -> Unit,
     onSetManually: () -> Unit,
@@ -126,7 +133,21 @@ fun HostScreen(
     }
 
     LaunchedEffect(Unit) {
-        // TODO Error
+        viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
+            when (event) {
+                is HostNav.NetworkError -> {
+                    showPopup(
+                        snackbarHostState = snackbarHostState,
+                        popupMessage = PopupMessage.Resource(
+                            res = R.string.host_error_network,
+                            type = PopupMessageType.Error,
+                            error = event.error
+                        )
+                    )
+                }
+                is HostNav.SelectItem -> TODO()
+            }
+        }
     }
 }
 

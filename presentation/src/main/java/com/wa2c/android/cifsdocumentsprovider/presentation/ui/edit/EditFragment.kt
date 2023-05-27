@@ -34,7 +34,6 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -46,7 +45,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderFragment
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostFragment
@@ -74,24 +72,24 @@ class EditFragment : Fragment() {
                 ) {
 
                     Box(modifier = Modifier) {
-                        EditScreen(
-                            nameState = viewModel.name.collectAsMutableState(),
-                            storageState = viewModel.storage.collectAsMutableState(),
-                            domainState = viewModel.domain.collectAsMutableState(),
-                            hostState = viewModel.host.collectAsMutableState(),
-                            portState = viewModel.port.collectAsMutableState(),
-                            enableDfsState = viewModel.enableDfs.collectAsMutableState(),
-                            userState = viewModel.user.collectAsMutableState(),
-                            passwordState = viewModel.password.collectAsMutableState(),
-                            anonymousState = viewModel.anonymous.collectAsMutableState(),
-                            folderState = viewModel.folder.collectAsMutableState(),
-                            safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
-                            extensionState = viewModel.extension.collectAsMutableState(),
-                            onClickSearchHost = { viewModel.onClickSearchHost() },
-                            onClickSelectFolder = { viewModel.onClickSelectFolder() },
-                            onClickCheckConnection = { viewModel.onClickCheckConnection() },
-                            onClickSave = { viewModel.onClickSave() }
-                        )
+//                        EditScreen(
+//                            nameState = viewModel.name.collectAsMutableState(),
+//                            storageState = viewModel.storage.collectAsMutableState(),
+//                            domainState = viewModel.domain.collectAsMutableState(),
+//                            hostState = viewModel.host.collectAsMutableState(),
+//                            portState = viewModel.port.collectAsMutableState(),
+//                            enableDfsState = viewModel.enableDfs.collectAsMutableState(),
+//                            userState = viewModel.user.collectAsMutableState(),
+//                            passwordState = viewModel.password.collectAsMutableState(),
+//                            anonymousState = viewModel.anonymous.collectAsMutableState(),
+//                            folderState = viewModel.folder.collectAsMutableState(),
+//                            safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+//                            extensionState = viewModel.extension.collectAsMutableState(),
+//                            onClickSearchHost = { viewModel.onClickSearchHost() },
+//                            onClickSelectFolder = { viewModel.onClickSelectFolder() },
+//                            onClickCheckConnection = { viewModel.onClickCheckConnection() },
+//                            onClickSave = { viewModel.onClickSave() }
+//                        )
 
                         // Snackbar
                         val connectionResult = remember { mutableStateOf<ConnectionResult?>(null)}
@@ -176,7 +174,7 @@ class EditFragment : Fragment() {
 
             act.onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    viewModel.onClickBack()
+                    //viewModel.onClickBack()
                 }
             })
         }
@@ -209,7 +207,7 @@ class EditFragment : Fragment() {
                     navigateBack(R.id.editFragment, true)
                 }
             }
-            is EditNav.SelectHost -> {
+            is EditNav.SearchHost -> {
                 // Select host
                 setFragmentResultListener(HostFragment.REQUEST_KEY_HOST) { _, bundle ->
                     bundle.getString(HostFragment.RESULT_KEY_HOST_TEXT)?.let { hostText ->
@@ -227,13 +225,16 @@ class EditFragment : Fragment() {
                 }
                 navigateSafe(EditFragmentDirections.actionEditFragmentToFolderFragment(event.connection))
             }
-            is EditNav.SaveResult -> {
-                if (event.messageId == null) {
-                    findNavController().popBackStack(R.id.editFragment, true)
-                } else {
-                    toast(event.messageId)
-                }
-            }
+//            is EditNav.SaveResult -> {
+//                if (event.messageId == null) {
+//                    findNavController().popBackStack(R.id.editFragment, true)
+//                } else {
+//                    toast(event.messageId)
+//                }
+//            }
+
+            is EditNav.Failure -> TODO()
+            EditNav.Success -> TODO()
         }
     }
 

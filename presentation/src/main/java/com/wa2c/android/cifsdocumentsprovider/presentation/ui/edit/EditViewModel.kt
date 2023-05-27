@@ -8,7 +8,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -94,33 +93,6 @@ class EditViewModel @Inject constructor(
     }
 
     /**
-     * Save connection
-     */
-    private suspend fun save() {
-        createCifsConnection(isNew)?.let { con ->
-            if (cifsRepository.loadConnection().filter { it.id != con.id }
-                    .any { it.folderSmbUri == con.folderSmbUri }) {
-                // Duplicate URI
-                throw IllegalArgumentException()
-            }
-            cifsRepository.saveConnection(con)
-            currentId = con.id
-            initConnection = con
-        } ?: run {
-            throw IOException()
-        }
-    }
-
-    /**
-     * Delete connection
-     */
-    private fun delete() {
-        launch {
-            cifsRepository.deleteConnection(currentId)
-        }
-    }
-
-    /**
      * Deploy connection data.
      */
     private fun deployCifsConnection(connection: CifsConnection?) {
@@ -180,7 +152,7 @@ class EditViewModel @Inject constructor(
 
     fun onClickSearchHost() {
         launch {
-            _navigationEvent.emit(EditNav.SelectHost(createCifsConnection(false)))
+            _navigationEvent.emit(EditNav.SearchHost(createCifsConnection(false)))
         }
     }
 
@@ -241,8 +213,16 @@ class EditViewModel @Inject constructor(
      */
     fun onClickDelete() {
         launch {
-            delete()
-            _navigationEvent.emit(EditNav.Back())
+            runCatching {
+                cifsRepository.deleteConnection(currentId)
+            }.onSuccess {
+                //_navigationEvent.emit(EditNav.SaveResult(null))
+                _navigationEvent.emit(EditNav.Success)
+                _isBusy.value = false
+            }.onFailure {
+                _navigationEvent.emit(EditNav.Failure(it))
+                _isBusy.value = false
+            }
         }
     }
 
@@ -253,29 +233,24 @@ class EditViewModel @Inject constructor(
         _isBusy.value = true
         launch {
             runCatching {
-                save()
+                createCifsConnection(isNew)?.let { con ->
+                    if (cifsRepository.loadConnection().filter { it.id != con.id }
+                            .any { it.folderSmbUri == con.folderSmbUri }) {
+                        // Duplicate URI
+                        throw IllegalArgumentException()
+                    }
+                    cifsRepository.saveConnection(con)
+                    currentId = con.id
+                    initConnection = con
+                } ?: throw IOException()
             }.onSuccess {
-                _navigationEvent.emit(EditNav.SaveResult(null))
+                //_navigationEvent.emit(EditNav.SaveResult(null))
+                _navigationEvent.emit(EditNav.Success)
                 _isBusy.value = false
             }.onFailure {
-                if (it is IllegalArgumentException) {
-                    // URI duplicated
-                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_duplicate_message))
-                } else {
-                    // Host empty
-                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_ng_message))
-                }
+                _navigationEvent.emit(EditNav.Failure(it))
                 _isBusy.value = false
             }
-        }
-    }
-
-    /**
-     * Back Click
-     */
-    fun onClickBack() {
-        launch {
-            _navigationEvent.emit(EditNav.Back(initConnection == null || initConnection != createCifsConnection(false)))
         }
     }
 }

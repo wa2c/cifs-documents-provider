@@ -1,23 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 
 import android.net.Uri
-import android.os.Parcelable
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navOptions
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.main.MainScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
-import kotlinx.parcelize.IgnoredOnParcel
-import kotlinx.parcelize.Parcelize
 
 /**
  * Main nav host
@@ -63,7 +55,18 @@ internal fun MainNavHost(
             )
         }
         composable(EditScreenName) {
-            logD(it)
+            EditScreen(
+                connection = null,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateSearchHost = {
+                    navController.navigate(HostScreenName)
+                },
+                onNavigateSelectFolder = {
+                    navController.navigate(FolderScreenName)
+                },
+            )
         }
         composable(FolderScreenName) {
 
