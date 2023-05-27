@@ -37,20 +37,20 @@ class SettingsFragment: Fragment() {
                     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT, viewLifecycleOwner)
                     val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default, viewLifecycleOwner)
                     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false, viewLifecycleOwner)
-                    SettingsScreen(
-                        theme = theme.value,
-                        onSetUiTheme = {
-                            viewModel.setUiTheme(it)
-                            AppCompatDelegate.setDefaultNightMode(theme.value.mode)
-                       },
-                        language = language.value,
-                        onSetLanguage = {
-                            viewModel.setLanguage(it)
-                            //mainViewModel.updateLanguage(it)
-                        },
-                        useAsLocal = useAsLocal.value,
-                        onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
-                    )
+//                    SettingsScreen(
+//                        theme = theme.value,
+//                        onSetUiTheme = {
+//                            viewModel.setUiTheme(it)
+//                            AppCompatDelegate.setDefaultNightMode(theme.value.mode)
+//                       },
+//                        language = language.value,
+//                        onSetLanguage = {
+//                            viewModel.setLanguage(it)
+//                            //mainViewModel.updateLanguage(it)
+//                        },
+//                        useAsLocal = useAsLocal.value,
+//                        onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
+//                    )
                 }
             }
         }

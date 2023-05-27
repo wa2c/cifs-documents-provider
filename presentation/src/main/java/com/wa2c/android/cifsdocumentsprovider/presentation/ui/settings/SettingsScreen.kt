@@ -6,37 +6,57 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.LocaleListCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
@@ -45,6 +65,91 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
  */
 @Composable
 fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    route: (NavRoute) -> Unit,
+) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
+    val language = viewModel.languageFlow.collectAsStateWithLifecycle(Language.default)
+    val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
+
+    SettingsScreenContainer(
+        snackbarHostState = snackbarHostState,
+        theme = theme.value,
+        onSetUiTheme = {
+            viewModel.setUiTheme(it)
+            AppCompatDelegate.setDefaultNightMode(theme.value.mode)
+        },
+        language = language.value,
+        onSetLanguage = {
+            viewModel.setLanguage(it)
+            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code))
+        },
+        useAsLocal = useAsLocal.value,
+        onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
+        onClickBack = { route(NavRoute.Back) }
+    )
+}
+
+/**
+ * Main Screen
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SettingsScreenContainer(
+    snackbarHostState: SnackbarHostState,
+    theme: UiTheme,
+    onSetUiTheme: (UiTheme) -> Unit,
+    language: Language,
+    onSetLanguage: (Language) -> Unit,
+    useAsLocal: Boolean,
+    onSetUseAsLocal: (Boolean) -> Unit,
+    onClickBack: () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.app_name)) },
+                colors=  TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+                navigationIcon = {
+                    IconButton(onClick = onClickBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
+                    }
+                }
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                (data.visuals as? MessageSnackbarVisual)?.let {
+                    AppSnackbar(message = it.popupMessage)
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(paddingValues)
+        ) {
+            SettingsList(
+                theme = theme,
+                onSetUiTheme = onSetUiTheme,
+                language = language,
+                onSetLanguage = onSetLanguage,
+                useAsLocal = useAsLocal,
+                onSetUseAsLocal = onSetUseAsLocal,
+            )
+        }
+    }
+}
+
+/**
+ * Settings Screen
+ */
+@Composable
+private fun SettingsList(
     theme: UiTheme,
     onSetUiTheme: (UiTheme) -> Unit,
     language: Language,
@@ -67,8 +172,6 @@ fun SettingsScreen(
                 backgroundColor = MaterialTheme.colorScheme.background,
                 contentColor = MaterialTheme.colorScheme.onBackground,
             ),
-
-
         )
     } else {
         // Screen

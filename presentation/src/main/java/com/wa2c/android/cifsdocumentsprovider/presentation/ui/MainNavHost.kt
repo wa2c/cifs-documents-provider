@@ -11,6 +11,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.main.MainScreen
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -25,6 +26,9 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = NavRoute.Main.name,
     ) {
+        composable(BackName) {
+            navController.popBackStack()
+        }
         composable(MainScreenName) {
             MainScreen { route ->
                 navController.navigate(route.name)
@@ -39,7 +43,9 @@ internal fun MainNavHost(
             }
         }
         composable(SettingsScreenName) {
-            logD(it)
+            SettingsScreen { route ->
+                navController.navigate(route.name)
+            }
         }
         composable(OpenFileScreenName) {
             logD(it)
