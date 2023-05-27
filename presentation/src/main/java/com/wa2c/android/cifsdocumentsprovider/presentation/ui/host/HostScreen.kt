@@ -16,13 +16,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -32,16 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 
 /**
@@ -49,67 +45,154 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
  */
 @Composable
 fun HostScreen(
+    isInit: Boolean,
     viewModel: HostViewModel = hiltViewModel(),
-    route: (NavRoute) -> Unit,
+    onClickBack: () -> Unit,
+    onSelectItem: (String?) -> Unit,
+    onSetManually: () -> Unit,
 ) {
-    val snackbarHostState = remember { SnackbarHostState() }
     val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle(emptyList())
-    val aaa = remember { mutableStateOf(false) }
+    val selectedHost = remember { mutableStateOf<HostData?>(null) }
 
     HostScreenContainer(
         hostList = connectionList.value,
-        isInit = true,
-        onClickItem = { viewModel.onClickItem(it) },
-        onClickSet = { viewModel.onClickSetManually() },
+        isInit = isInit,
+        onClickBack = { onClickBack() },
+        onClickReload = { viewModel.discovery() },
+        onClickItem = { host ->
+            selectedHost.value = host
+        },
+        onClickSet = {
+            onSetManually()
+        },
     )
 
-    if (aaa.value) {
-        CommonDialog(
-            title = "",
-            content = { Text("あああ") },
-            confirmButtons = listOf(
-                DialogButton(label = stringResource(id = android.R.string.ok)) {
-                logD("")
-                aaa.value = false
-                },
-                DialogButton(label = stringResource(id = android.R.string.copy)) {
-                    logD("")
-                    aaa.value = false
+    selectedHost.value?.let { host ->
+        if (host.hostName == host.ipAddress) {
+            CommonDialog(
+                confirmButtons = listOf(
+                    DialogButton(label = stringResource(id = R.string.host_select_host_name)) {
+                        onSelectItem(host.hostName)
+                    },
+                    DialogButton(label = stringResource(id = R.string.host_select_ip_address)) {
+                        onSelectItem(host.ipAddress)
+                    }
+                ),
+                dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                    selectedHost.value = null
                 }
-            ),
-            dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
-                logD("")
-                aaa.value = false
-            },
-        )
-    }
-
-    LaunchedEffect(true) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is HostNav.SelectItem -> {
-                    // TODO
-                    //confirmInputData(host =  event.host)
-                    aaa.value = true
-
-                }
-                is HostNav.NetworkError -> {
-                    showPopup(
-                        snackbarHostState = snackbarHostState,
-                        popupMessage = PopupMessage.Resource(
-                            res = R.string.host_error_network,
-                            type = PopupMessageType.Error,
-                        )
-                    )
-                }
+            ) {
+                Text(stringResource(id = R.string.host_select_confirmation_message))
             }
+        } else {
+            onSelectItem(host.hostName)
         }
     }
 }
 
-fun CommonDialog(title: String, content: () -> Unit, dismissButton: DialogButton, any: Any) {
 
-}
+///**
+// * Host Screen
+// */
+//@Composable
+//fun HostScreen2(
+//    viewModel: HostViewModel = hiltViewModel(),
+//    route: (NavRoute) -> Unit,
+//) {
+//    val snackbarHostState = remember { SnackbarHostState() }
+//    val connectionList = viewModel.hostDataList.collectAsStateWithLifecycle(emptyList())
+//    val aaa = remember { mutableStateOf(false) }
+//
+//    HostScreenContainer(
+//        hostList = connectionList.value,
+//        isInit = true,
+//        onClickItem = { viewModel.onClickItem(it) },
+//        onClickSet = { viewModel.onClickSetManually() },
+//    )
+//
+//    if (aaa.value) {
+//        CommonDialog(
+//            title = "",
+//            content = { Text("あああ") },
+//            confirmButtons = listOf(
+//                DialogButton(label = stringResource(id = android.R.string.ok)) {
+//                logD("")
+//                aaa.value = false
+//                },
+//                DialogButton(label = stringResource(id = android.R.string.copy)) {
+//                    logD("")
+//                    aaa.value = false
+//                }
+//            ),
+//            dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
+//                logD("")
+//                aaa.value = false
+//            },
+//        )
+//    }
+//
+//    LaunchedEffect(true) {
+//        viewModel.navigationEvent.collect { event ->
+//            when (event) {
+//                is HostNav.SelectItem -> {
+//                    //confirmInputData(host =  event.host)
+//                    //aaa.value = true
+//                    val host = event.host
+//                    if (host != null) {
+//                        // Item selected
+//                        if (host.hostName == host.ipAddress) {
+//                            openEdit(host.hostName)
+//                        } else {
+//                            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
+//                                .setMessage(R.string.host_select_confirmation_message)
+//                                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
+//                                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
+//                                .setNeutralButton(R.string.dialog_close, null)
+//                                .show()
+//                            return
+//                        }
+//                    } else {
+//                        // Set manually
+//                        route. openEdit(null)
+//                    }
+//                }
+//                is HostNav.NetworkError -> {
+//                    showPopup(
+//                        snackbarHostState = snackbarHostState,
+//                        popupMessage = PopupMessage.Resource(
+//                            res = R.string.host_error_network,
+//                            type = PopupMessageType.Error,
+//                        )
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}
+
+///**
+// * Confirm input data
+// */
+//@Composable
+//private fun confirmInputData(host: HostData?) {
+//    if (host != null) {
+//        // Item selected
+//        if (host.hostName == host.ipAddress) {
+//            openEdit(host.hostName)
+//        } else {
+//            MaterialAlertDialogBuilder(ContentProviderCompat.requireContext())
+//                .setMessage(R.string.host_select_confirmation_message)
+//                .setPositiveButton(R.string.host_select_host_name) { _, _ -> openEdit(host.hostName) }
+//                .setNegativeButton(R.string.host_select_ip_address) { _, _ -> openEdit(host.ipAddress) }
+//                .setNeutralButton(R.string.dialog_close, null)
+//                .show()
+//            return
+//        }
+//    } else {
+//        // Set manually
+//        openEdit(null)
+//    }
+//}
 
 //@Composable
 //private fun onNavigate(event: HostNav) {
@@ -176,11 +259,35 @@ fun CommonDialog(title: String, content: () -> Unit, dismissButton: DialogButton
 fun HostScreenContainer(
     hostList: List<HostData>,
     isInit: Boolean,
+    onClickBack: () -> Unit,
+    onClickReload: () -> Unit,
     onClickItem: (HostData) -> Unit,
     onClickSet: () -> Unit,
 ) {
     Scaffold(
-        topBar = { TopAppBar(title = { Text("title") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.host_title)) },
+                colors=  TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                ),
+                actions = {
+                    IconButton(
+                        onClick = { onClickReload() }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_reload),
+                            contentDescription = stringResource(id = R.string.host_reload_button)
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onClickBack) {
+                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
+                    }
+                }
+            )
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -304,6 +411,8 @@ private fun FolderScreenPreview() {
                 ),
             ),
             isInit = true,
+            onClickBack = {},
+            onClickReload = {},
             onClickItem = {},
             onClickSet = {},
         )

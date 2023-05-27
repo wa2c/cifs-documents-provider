@@ -41,7 +41,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val cifsRepository: CifsRepository by lazy {
         val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
         val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
-        hiltEntryPoint.provideCifsRepository()
+        hiltEntryPoint.analyticsService()
     }
 
     /** File handler */

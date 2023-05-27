@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
 
 import android.content.res.Configuration
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -44,7 +45,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
@@ -62,12 +62,15 @@ import org.burnoutcrew.reorderable.reorderable
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = hiltViewModel(),
-    route: (NavRoute) -> Unit,
+    onOpenFile: (uris: List<Uri>) -> Unit,
+    onClickSettings: () -> Unit,
+    onClickEdit: (CifsConnection) -> Unit,
+    onClickAdd: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val fileOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         logD(uris)
-        route(NavRoute.OpenFile(uris))
+        onOpenFile(uris)
     }
 
     val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
@@ -79,7 +82,7 @@ fun MainScreen(
         onClickAddItem = { viewModel.onClickAddItem() },
         onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
         onClickMenuOpenFile = { fileOpenLauncher.launch(arrayOf("*/*")) },
-        onClickMenuSettings = { route(NavRoute.Settings) }
+        onClickMenuSettings = { onClickSettings() }
     )
     
     LaunchedEffect(Unit) {
@@ -87,10 +90,10 @@ fun MainScreen(
             //onNavigate(it, navController)
             when (event) {
                 is MainNav.Edit -> {
-                    route(NavRoute.Main)
+                    event.connection?.let(onClickEdit)
                 }
                 is MainNav.AddItem -> {
-                    route(NavRoute.Host(isInit = true))
+                    onClickAdd()
                 }
                 is MainNav.OpenFile -> {
                     if (event.isSuccess) {
@@ -118,7 +121,7 @@ fun MainScreen(
                     }
                 }
                 is MainNav.OpenSettings -> {
-                    route(NavRoute.Settings)
+                    onClickSettings()
                 }
             }
 

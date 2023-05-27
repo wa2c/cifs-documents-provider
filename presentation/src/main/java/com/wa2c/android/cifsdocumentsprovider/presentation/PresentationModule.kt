@@ -13,7 +13,7 @@ internal object PresentationModule {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface DocumentsProviderEntryPoint {
-        fun provideCifsRepository(): CifsRepository
+        fun analyticsService(): CifsRepository
     }
 
 }

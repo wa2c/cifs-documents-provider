@@ -36,15 +36,14 @@ class MainActivity : AppCompatActivity() {
             Theme.AppTheme(
                 darkTheme = isDark
             ) {
-                Box {
-                    MainNavHost()
-                }
-
+                MainNavHost(
+                    onOpenFile = { startApp(it) }
+                )
             }
         }
     }
 
-    fun startApp(uris: List<Uri>) {
+    private fun startApp(uris: List<Uri>) {
         if (uris.isEmpty()) {
             return
         } else if (uris.size == 1) {

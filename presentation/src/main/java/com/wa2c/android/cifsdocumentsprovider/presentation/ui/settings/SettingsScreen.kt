@@ -51,7 +51,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
@@ -64,7 +63,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    route: (NavRoute) -> Unit,
+    onClickBack: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
@@ -83,7 +82,7 @@ fun SettingsScreen(
         },
         useAsLocal = useAsLocal.value,
         onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
-        onClickBack = { route(NavRoute.Back) }
+        onClickBack = { onClickBack() }
     )
 }
 

@@ -6,7 +6,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.HostRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.NavRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,6 +54,7 @@ class HostViewModel @Inject constructor(
                 setList(_hostDataList.value)
             }
         }
+        discovery()
     }
 
     private suspend fun setList(list: List<HostData>) {
