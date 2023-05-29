@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuProvider
@@ -25,9 +24,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateBack
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.startLoadingAnimation
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.stopLoadingAnimation
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -47,22 +44,22 @@ class FolderFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
-            setContent {
-                Theme.AppTheme(
-                    darkTheme = mainViewModel.uiThemeFlow.isDark()
-                ) {
-                    val fileList = viewModel.fileList.collectAsState()
-                    val currentFile = viewModel.currentFile.collectAsState()
-                    val isLoading = viewModel.isLoading.collectAsState()
-                    FolderScreen(
-                        fileList = fileList.value,
-                        currentFile = currentFile.value,
-                        isLoading = isLoading.value,
-                        onClickItem = { viewModel.onSelectFolder(it) },
-                        onClickSet = { viewModel.onClickSet() },
-                    )
-                }
-            }
+//            setContent {
+//                Theme.AppTheme(
+//                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+//                ) {
+//                    val fileList = viewModel.fileList.collectAsState()
+//                    val currentFile = viewModel.currentFile.collectAsState()
+//                    val isLoading = viewModel.isLoading.collectAsState()
+//                    FolderScreen(
+//                        fileList = fileList.value,
+//                        currentFile = currentFile.value,
+//                        isLoading = isLoading.value,
+//                        onClickItem = { viewModel.onSelectFolder(it) },
+//                        onClickSet = { viewModel.onClickSet() },
+//                    )
+//                }
+//            }
         }
     }
 
@@ -95,7 +92,7 @@ class FolderFragment: Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.folder_menu_reload -> {
-                            viewModel.reload()
+                            viewModel.onClickReload()
                             true
                         }
                         else -> {
@@ -114,8 +111,8 @@ class FolderFragment: Fragment() {
             })
         }
 
-        viewModel.initialize(args.cifsConnection)
-        viewModel.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+//        viewModel.initialize(args.cifsConnection)
+//        viewModel.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
     }
 
     override fun onDestroy() {

@@ -2,12 +2,17 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.view.KeyEvent
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +28,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -33,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -44,11 +51,17 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -61,12 +74,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
@@ -77,19 +96,21 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessag
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 @Composable
 fun EditScreen(
     viewModel: EditViewModel = hiltViewModel(),
-    connection: CifsConnection?,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: (update: Boolean) -> Unit,
     onNavigateSearchHost: (CifsConnection?) -> Unit,
-    onNavigateSelectFolder: (CifsConnection?) -> Unit,
+    onNavigateSelectFolder: (CifsConnection) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val showDeleteDialog = remember { mutableStateOf(false) }
-
-    viewModel.initialize(connection)
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -130,8 +151,68 @@ fun EditScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
+    // isBusy
+    val isBusy = viewModel.isBusy.collectAsStateWithLifecycle()
+    if (isBusy.value) {
+        val interactionSource = remember { MutableInteractionSource() }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Theme.LoadingBackgroundColor)
+                .clickable(
+                    indication = null,
+                    interactionSource = interactionSource,
+                    onClick = {}
+                ),
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .align(Alignment.Center)
+            )
+        }
+    }
+
+//    val test = viewModel.connectionResult.collectAsStateWithLifecycle()
+//    LaunchedEffect(snackbarHostState) {
+//        snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
+//    }
+
+    val test = viewModel.connectionResult.collectAsStateWithLifecycle()
+
+
+    LaunchedEffect(snackbarHostState) {
+//        viewModel.connectionResultNotify.collectIn(lifecycleOwner) { result ->
+//            result ?: return@collectIn
+//            showPopup(
+//                snackbarHostState = snackbarHostState,
+//                popupMessage = PopupMessage.Resource(
+//                    res = result.messageRes,
+//                    type = result.messageType,
+//                )
+//            )
+//        }
+
+
+//        scope2.launch {
+//            snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
+//        }
+
+        viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
+            result ?: return@collectIn
+            launch {
+                snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
+            }
+//            showPopup(
+//                snackbarHostState = snackbarHostState,
+//                popupMessage = PopupMessage.Resource(
+//                    res = result.messageRes,
+//                    type = result.messageType,
+//                    error = null
+//                )
+//            )
+        }
+
+        viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
             when (event) {
                 is EditNav.Back -> onNavigateBack(false)
                 is EditNav.SearchHost -> { onNavigateSearchHost(event.connection) }
@@ -427,7 +508,7 @@ private fun EditScreenContainer(
 /**
  * Input text
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun InputText(
     title: String,
@@ -441,6 +522,7 @@ fun InputText(
     @DrawableRes iconResource: Int? = null,
     onClickButton: () -> Unit = {},
 ) {
+    val focusManager = LocalFocusManager.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -464,6 +546,12 @@ fun InputText(
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
+                .onKeyEvent {
+                    if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_TAB) {
+                        focusManager.moveFocus(FocusDirection.Next)
+                    }
+                    false
+                }
         )
         iconResource?.let {res ->
             Button(

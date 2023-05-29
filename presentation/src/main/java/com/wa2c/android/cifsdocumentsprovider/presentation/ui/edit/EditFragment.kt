@@ -182,7 +182,7 @@ class EditFragment : Fragment() {
         viewModel.let { vm ->
             vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
 //            vm.connectionResultNotify.collectIn(viewLifecycleOwner, observer = ::onConnect)
-            vm.initialize(args.cifsConnection)
+            //vm.initialize(args.cifsConnection)
         }
     }
 

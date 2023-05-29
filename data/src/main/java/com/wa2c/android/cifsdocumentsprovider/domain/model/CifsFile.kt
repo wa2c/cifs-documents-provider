@@ -1,13 +1,16 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.net.Uri
+import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
+import kotlinx.parcelize.Parcelize
 
 /**
  * CIFS File
  */
+@Parcelize
 data class CifsFile(
     /** File name */
     val name: String,
@@ -19,7 +22,7 @@ data class CifsFile(
     val lastModified: Long = 0,
     /** True if directory */
     val isDirectory: Boolean,
-) {
+) : Parcelable {
     /** True if root */
     val isRoot: Boolean
         get() = (parentUri == null)

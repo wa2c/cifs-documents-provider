@@ -12,7 +12,16 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import com.wa2c.android.cifsdocumentsprovider.common.values.*
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 
+
+/** ConnectionResult type */
+val ConnectionResult.messageType: PopupMessageType
+    get() = when (this) {
+        is ConnectionResult.Success -> PopupMessageType.Success
+        is ConnectionResult.Warning -> PopupMessageType.Warning
+        is ConnectionResult.Failure -> PopupMessageType.Error
+    }
 
 /** ConnectionResult icon resource ID */
 val ConnectionResult.iconRes: Int

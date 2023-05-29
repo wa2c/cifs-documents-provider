@@ -1,14 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamHost
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,8 +25,20 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class EditViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val cifsRepository: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
+
+    private val paramId: String? = savedStateHandle[EditScreenParamId]
+    private val paramHost: String? = savedStateHandle[EditScreenParamHost]
+
+    init {
+        launch {
+            val connection = paramId?.let { cifsRepository.getConnection(paramId) } ?: CifsConnection.createFromHost(paramHost ?: "")
+            initConnection = connection
+            deployCifsConnection(connection)
+        }
+    }
 
     private val _navigationEvent = MutableSharedFlow<EditNav>()
     val navigationEvent: SharedFlow<EditNav> = _navigationEvent
@@ -46,13 +59,13 @@ class EditViewModel @Inject constructor(
     var extension = MutableStateFlow<Boolean>(false)
     var safeTransfer = MutableStateFlow<Boolean>(false)
 
-    val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        getSmbUri(host, port, folder, true)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-    val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        getContentUri(host, port, folder)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+//    val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
+//        getSmbUri(host, port, folder, true)
+//    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+//
+//    val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
+//        getContentUri(host, port, folder)
+//    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResultNotify: SharedFlow<ConnectionResult?> = _connectionResult
@@ -80,17 +93,17 @@ class EditViewModel @Inject constructor(
     private var initConnection: CifsConnection? = null
 
     /** True if initialized */
-    private var initialized: Boolean = false
-
-    /**
-     * Initialize
-     */
-    fun initialize(connection: CifsConnection?) {
-        if (initialized) return
-        initConnection = if (connection == null || connection.isNew) null else connection
-        deployCifsConnection(connection)
-        initialized = true
-    }
+//    private var initialized: Boolean = false
+//
+//    /**
+//     * Initialize
+//     */
+//    fun initialize(connection: CifsConnection?) {
+//        if (initialized) return
+//        initConnection = if (connection == null || connection.isNew) null else connection
+//        deployCifsConnection(connection)
+//        initialized = true
+//    }
 
     /**
      * Deploy connection data.

@@ -167,7 +167,6 @@ fun HostScreenContainer(
     onClickItem: (HostData) -> Unit,
     onClickSet: () -> Unit,
 ) {
-    // Allow resume on rotation
     val currentRotation = remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation.value) }
 

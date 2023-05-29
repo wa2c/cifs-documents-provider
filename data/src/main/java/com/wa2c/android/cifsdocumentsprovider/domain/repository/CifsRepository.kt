@@ -117,6 +117,12 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
+    suspend fun getConnection(id: String): CifsConnection? {
+        return withContext(dispatcher) {
+            connectionSettingDao.getEntity(id)?.toModel()
+        }
+    }
+
     /**
      * Get CIFS File from connection.`
      */
