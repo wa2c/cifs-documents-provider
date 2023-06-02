@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
+package com.wa2c.android.cifsdocumentsprovider.presentation.ui.home
 
 import android.content.res.Configuration
 import android.net.Uri
@@ -58,11 +58,11 @@ import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 
 /**
- * Main Screen
+ * Home Screen
  */
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel = hiltViewModel(),
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onClickSettings: () -> Unit,
     onClickEdit: (CifsConnection) -> Unit,
@@ -76,7 +76,7 @@ fun MainScreen(
     }
     val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
 
-    MainScreenContainer(
+    HomeScreenContainer(
         snackbarHostState = snackbarHostState,
         connectionList = connectionList.value,
         onClickItem = { viewModel.onClickItem(it) },
@@ -90,13 +90,13 @@ fun MainScreen(
         viewModel.navigationEvent.collect { event ->
             //onNavigate(it, navController)
             when (event) {
-                is MainNav.Edit -> {
+                is HomeNav.Edit -> {
                     event.connection?.let(onClickEdit)
                 }
-                is MainNav.AddItem -> {
+                is HomeNav.AddItem -> {
                     onClickAdd()
                 }
-                is MainNav.OpenFile -> {
+                is HomeNav.OpenFile -> {
                     if (event.isSuccess) {
                         // Open file
                         try {
@@ -115,13 +115,13 @@ fun MainScreen(
                         scope.showPopup(
                             snackbarHostState = snackbarHostState,
                             popupMessage = PopupMessage.Resource(
-                                res = R.string.main_open_file_ng_message,
+                                res = R.string.home_open_file_ng_message,
                                 type = PopupMessageType.Warning,
                             )
                         )
                     }
                 }
-                is MainNav.OpenSettings -> {
+                is HomeNav.OpenSettings -> {
                     onClickSettings()
                 }
             }
@@ -131,11 +131,11 @@ fun MainScreen(
 }
 
 /**
- * Main Screen
+ * Home Screen Container
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreenContainer(
+fun HomeScreenContainer(
     snackbarHostState: SnackbarHostState,
     connectionList: List<CifsConnection>,
     onClickItem: (CifsConnection) -> Unit,
@@ -157,7 +157,7 @@ fun MainScreenContainer(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_share),
-                            contentDescription = stringResource(id = R.string.main_open_file)
+                            contentDescription = stringResource(id = R.string.home_open_file)
                         )
                     }
                     IconButton(
@@ -165,7 +165,7 @@ fun MainScreenContainer(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_settings),
-                            contentDescription = stringResource(id = R.string.main_open_settings),
+                            contentDescription = stringResource(id = R.string.home_open_settings),
                         )
                     }
                 }
@@ -288,9 +288,9 @@ private fun ConnectionItem(
     showBackground = true,
 )
 @Composable
-private fun MainScreenContainerPreview() {
+private fun HomeScreenContainerPreview() {
     Theme.AppTheme {
-        MainScreenContainer(
+        HomeScreenContainer(
             snackbarHostState = SnackbarHostState(),
             connectionList = listOf(
                 CifsConnection(

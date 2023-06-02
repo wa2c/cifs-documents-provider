@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
+package com.wa2c.android.cifsdocumentsprovider.presentation.ui.home
 
 import android.content.Intent
 import android.os.Bundle
@@ -16,15 +16,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.navigateSafe
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -36,7 +33,7 @@ class MainFragment: Fragment() {
     /** Main View Model */
     private val mainViewModel by activityViewModels<com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainViewModel>()
     /** View Model */
-    private val viewModel by viewModels<MainViewModel>()
+    private val viewModel by viewModels<HomeViewModel>()
 
     /** Open File Picker */
     private val fileOpenLauncher = registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
@@ -121,15 +118,15 @@ class MainFragment: Fragment() {
         }
     }
 
-    private fun onNavigate(event: MainNav) {
+    private fun onNavigate(event: HomeNav) {
         when (event) {
-            is MainNav.Edit -> {
+            is HomeNav.Edit -> {
                 navigateSafe(MainFragmentDirections.actionMainFragmentToEditFragment(event.connection))
             }
-            is MainNav.AddItem -> {
+            is HomeNav.AddItem -> {
                 navigateSafe(MainFragmentDirections.actionMainFragmentToHostFragment())
             }
-            is MainNav.OpenFile -> {
+            is HomeNav.OpenFile -> {
                 if (event.isSuccess) {
                     // Open file
                     try {
@@ -138,10 +135,10 @@ class MainFragment: Fragment() {
                         toast(R.string.provider_error_message)
                     }
                 } else {
-                    toast(R.string.main_open_file_ng_message)
+                    toast(R.string.home_open_file_ng_message)
                 }
             }
-            is MainNav.OpenSettings -> {
+            is HomeNav.OpenSettings -> {
                 navigateSafe(MainFragmentDirections.actionMainFragmentToSettingsFragment())
             }
         }

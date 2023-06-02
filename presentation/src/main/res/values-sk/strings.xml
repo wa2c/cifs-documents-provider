@@ -4,11 +4,11 @@
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">Zatvoriť</string>
 
-    <!-- Main Screen -->
-    <string name="main_open_file">Otvoriť</string>
-    <string name="main_open_settings">Nastavenie</string>
-    <string name="main_open_file_ng_message">Pridajte pripojenie.</string>
-    <string name="main_add_connection_a11y">Pridať</string>
+    <!-- Home Screen -->
+    <string name="home_open_file">Otvoriť</string>
+    <string name="home_open_settings">Nastavenie</string>
+    <string name="home_open_file_ng_message">Pridajte pripojenie.</string>
+    <string name="home_add_connection_a11y">Pridať</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">Pripojenie</string>

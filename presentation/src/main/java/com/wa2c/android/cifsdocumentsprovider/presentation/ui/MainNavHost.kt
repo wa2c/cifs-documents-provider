@@ -12,7 +12,7 @@ import androidx.navigation.navOptions
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.main.MainScreen
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
 
 /**
@@ -25,11 +25,11 @@ internal fun MainNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = MainScreenName,
+        startDestination = HomeScreenName,
     ) {
-        // Main Screen
-        composable(MainScreenName) {
-            MainScreen(
+        // Home Screen
+        composable(HomeScreenName) {
+            HomeScreen(
                 onOpenFile = { uris ->
                     onOpenFile(uris)
                 },
@@ -62,12 +62,12 @@ internal fun MainNavHost(
                 },
                 onSelectItem = {
                     navController.navigate(route = EditScreenRouteName + "?host=${it ?: ""}", navOptions = navOptions {
-                        this.popUpTo(MainScreenName)
+                        this.popUpTo(HomeScreenName)
                     })
                 },
                 onSetManually = {
                     navController.navigate(route = EditScreenRouteName, navOptions = navOptions {
-                        this.popUpTo(MainScreenName)
+                        this.popUpTo(HomeScreenName)
                     })
                 }
             )
@@ -134,7 +134,7 @@ internal fun MainNavHost(
     }
 }
 
-private const val MainScreenName = "main"
+private const val HomeScreenName = "home"
 private const val EditScreenRouteName = "edit"
 
 private const val HostScreenName = "host"

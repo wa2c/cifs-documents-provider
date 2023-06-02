@@ -4,11 +4,11 @@
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">Close</string>
 
-    <!-- Main Screen -->
-    <string name="main_open_file">Open</string>
-    <string name="main_open_settings">Settings</string>
-    <string name="main_open_file_ng_message">Add any connection.</string>
-    <string name="main_add_connection_a11y">Add</string>
+    <!-- Home Screen -->
+    <string name="home_open_file">Open</string>
+    <string name="home_open_settings">Settings</string>
+    <string name="home_open_file_ng_message">Add any connection.</string>
+    <string name="home_add_connection_a11y">Add</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">Connection</string>

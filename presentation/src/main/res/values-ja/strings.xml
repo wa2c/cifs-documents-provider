@@ -4,11 +4,11 @@
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">閉じる</string>
 
-    <!-- Main Screen -->
-    <string name="main_open_file">開く</string>
-    <string name="main_open_settings">設定</string>
-    <string name="main_open_file_ng_message">接続情報を登録してください。</string>
-    <string name="main_add_connection_a11y">追加</string>
+    <!-- Home Screen -->
+    <string name="home_open_file">開く</string>
+    <string name="home_open_settings">設定</string>
+    <string name="home_open_file_ng_message">接続情報を登録してください。</string>
+    <string name="home_add_connection_a11y">追加</string>
 
     <!-- Edit Screen -->
     <string name="edit_title">接続情報</string>

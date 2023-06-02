@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.ui.main
+package com.wa2c.android.cifsdocumentsprovider.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -13,15 +13,15 @@ import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
- * Main Screen ViewModel
+ * Home Screen ViewModel
  */
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = MutableSharedFlow<MainNav>()
-    val navigationEvent: SharedFlow<MainNav> = _navigationEvent
+    private val _navigationEvent = MutableSharedFlow<HomeNav>()
+    val navigationEvent: SharedFlow<HomeNav> = _navigationEvent
     val connectionListFlow = cifsRepository.connectionListFlow
 
     /**
@@ -29,7 +29,7 @@ class MainViewModel @Inject constructor(
      */
     fun onClickItem(connection: CifsConnection?) {
         launch {
-            _navigationEvent.emit(MainNav.Edit(connection))
+            _navigationEvent.emit(HomeNav.Edit(connection))
         }
     }
 
@@ -38,7 +38,7 @@ class MainViewModel @Inject constructor(
      */
     fun onClickAddItem() {
         launch {
-            _navigationEvent.emit(MainNav.AddItem)
+            _navigationEvent.emit(HomeNav.AddItem)
         }
     }
 
@@ -47,7 +47,7 @@ class MainViewModel @Inject constructor(
      */
     fun onClickOpenFile() {
         launch {
-            _navigationEvent.emit(MainNav.OpenFile(cifsRepository.isExists()))
+            _navigationEvent.emit(HomeNav.OpenFile(cifsRepository.isExists()))
         }
     }
 
@@ -56,7 +56,7 @@ class MainViewModel @Inject constructor(
      */
     fun onClickOpenSettings() {
         launch {
-            _navigationEvent.emit(MainNav.OpenSettings)
+            _navigationEvent.emit(HomeNav.OpenSettings)
         }
     }
 
