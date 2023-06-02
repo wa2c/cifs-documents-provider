@@ -39,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -57,7 +56,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
@@ -78,7 +76,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -96,9 +93,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessag
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 @Composable
 fun EditScreen(
@@ -172,44 +166,17 @@ fun EditScreen(
         }
     }
 
-//    val test = viewModel.connectionResult.collectAsStateWithLifecycle()
-//    LaunchedEffect(snackbarHostState) {
-//        snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
-//    }
-
-    val test = viewModel.connectionResult.collectAsStateWithLifecycle()
-
-
     LaunchedEffect(snackbarHostState) {
-//        viewModel.connectionResultNotify.collectIn(lifecycleOwner) { result ->
-//            result ?: return@collectIn
-//            showPopup(
-//                snackbarHostState = snackbarHostState,
-//                popupMessage = PopupMessage.Resource(
-//                    res = result.messageRes,
-//                    type = result.messageType,
-//                )
-//            )
-//        }
-
-
-//        scope2.launch {
-//            snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
-//        }
-
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             result ?: return@collectIn
-            launch {
-                snackbarHostState.showSnackbar("てすと", "あああ", true, SnackbarDuration.Short)
-            }
-//            showPopup(
-//                snackbarHostState = snackbarHostState,
-//                popupMessage = PopupMessage.Resource(
-//                    res = result.messageRes,
-//                    type = result.messageType,
-//                    error = null
-//                )
-//            )
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                popupMessage = PopupMessage.Resource(
+                    res = result.messageRes,
+                    type = result.messageType,
+                    error = null
+                )
+            )
         }
 
         viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
@@ -226,7 +193,7 @@ fun EditScreen(
                     } else {
                         R.string.edit_save_ng_message // Host empty
                     }
-                    showPopup(
+                    scope.showPopup(
                         snackbarHostState = snackbarHostState,
                         popupMessage = PopupMessage.Resource(
                             res = messageRes,

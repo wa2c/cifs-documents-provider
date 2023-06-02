@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -67,12 +68,12 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 fun HostScreen(
     viewModel: HostViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    isInit: Boolean,
     onClickBack: () -> Unit,
     onSelectItem: (String?) -> Unit,
     onSetManually: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val showSortDialog = remember { mutableStateOf(false) }
     val selectedHost = remember { mutableStateOf<HostData?>(null) }
     val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
@@ -80,7 +81,7 @@ fun HostScreen(
 
     HostScreenContainer(
         snackbarHostState = snackbarHostState,
-        isInit = isInit,
+        isInit = viewModel.isInit,
         isLoading = isLoading.value,
         hostList = connectionList.value,
         onClickBack = { onClickBack() },
@@ -136,7 +137,7 @@ fun HostScreen(
         viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
             when (event) {
                 is HostNav.NetworkError -> {
-                    showPopup(
+                    scope.showPopup(
                         snackbarHostState = snackbarHostState,
                         popupMessage = PopupMessage.Resource(
                             res = R.string.host_error_network,

@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
@@ -26,6 +27,7 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = MainScreenName,
     ) {
+        // Main Screen
         composable(MainScreenName) {
             MainScreen(
                 onOpenFile = { uris ->
@@ -42,20 +44,36 @@ internal fun MainNavHost(
                 }
             )
         }
-        composable(HostScreenName) {
+
+        // Host Screen
+        composable(
+            route = "$HostScreenName?$HostScreenParamId={$HostScreenParamId}",
+            arguments = listOf(
+                navArgument(EditScreenParamId) {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
+            ),
+        ) {
             HostScreen(
-                isInit = true,
                 onClickBack = {
                     navController.popBackStack()
                 },
                 onSelectItem = {
-                    navController.navigate(route = EditScreenRouteName + "?host=${it ?: ""}")
+                    navController.navigate(route = EditScreenRouteName + "?host=${it ?: ""}", navOptions = navOptions {
+                        this.popUpTo(MainScreenName)
+                    })
                 },
                 onSetManually = {
-                    navController.navigate(route = EditScreenRouteName)
+                    navController.navigate(route = EditScreenRouteName, navOptions = navOptions {
+                        this.popUpTo(MainScreenName)
+                    })
                 }
             )
         }
+
+        // Edit Screen
         composable(
             route = "$EditScreenRouteName?$EditScreenParamHost={$EditScreenParamHost}&$EditScreenParamId={$EditScreenParamId}",
             arguments = listOf(
@@ -76,13 +94,15 @@ internal fun MainNavHost(
                     navController.popBackStack()
                 },
                 onNavigateSearchHost = {
-                    navController.navigate(HostScreenName)
+                    navController.navigate("$HostScreenName?$HostScreenParamId=${it?.id ?: ""}")
                 },
                 onNavigateSelectFolder = {
                     navController.navigate("$FolderScreenName?$FolderScreenParamUri=${it.folderSmbUri}")
                 },
             )
         }
+
+        // Folder Screen
         composable(
             route = "$FolderScreenName?$FolderScreenParamUri={$FolderScreenParamUri}",
             arguments = listOf(
@@ -102,6 +122,8 @@ internal fun MainNavHost(
                 }
             )
         }
+
+        // Settings Screen
         composable(SettingsScreenName) {
             SettingsScreen(
                 onClickBack = {
@@ -119,6 +141,7 @@ private const val HostScreenName = "host"
 private const val FolderScreenName = "folder"
 private const val SettingsScreenName = "settings"
 
+const val HostScreenParamId = "id"
 const val EditScreenParamHost = "host"
 const val EditScreenParamId = "id"
 const val FolderScreenParamUri = "uri"

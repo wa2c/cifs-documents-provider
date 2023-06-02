@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -68,11 +69,11 @@ fun MainScreen(
     onClickAdd: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val fileOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
         logD(uris)
         onOpenFile(uris)
     }
-
     val connectionList = viewModel.connectionListFlow.collectAsStateWithLifecycle(emptyList())
 
     MainScreenContainer(
@@ -101,7 +102,7 @@ fun MainScreen(
                         try {
                             fileOpenLauncher.launch(arrayOf("*/*"))
                         } catch (e: Exception) {
-                            showPopup(
+                            scope.showPopup(
                                 snackbarHostState = snackbarHostState,
                                 popupMessage = PopupMessage.Resource(
                                     res = R.string.provider_error_message,
@@ -111,7 +112,7 @@ fun MainScreen(
                             )
                         }
                     } else {
-                        showPopup(
+                        scope.showPopup(
                             snackbarHostState = snackbarHostState,
                             popupMessage = PopupMessage.Resource(
                                 res = R.string.main_open_file_ng_message,

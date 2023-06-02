@@ -1,10 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.HostData
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.HostRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.HostScreenParamId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,8 +25,12 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HostViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val hostRepository: HostRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
+
+    private val paramId: String? = savedStateHandle[HostScreenParamId]
+    val isInit = paramId.isNullOrEmpty()
 
     private val _navigationEvent = MutableSharedFlow<HostNav>()
     val navigationEvent: SharedFlow<HostNav> = _navigationEvent
