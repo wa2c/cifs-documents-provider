@@ -53,6 +53,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
@@ -168,9 +169,6 @@ fun HostScreenContainer(
     onClickItem: (HostData) -> Unit,
     onClickSet: () -> Unit,
 ) {
-    val currentRotation = remember { mutableStateOf(0f) }
-    val rotation = remember { Animatable(currentRotation.value) }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -187,17 +185,11 @@ fun HostScreenContainer(
                             contentDescription = stringResource(id = R.string.host_sort_button),
                         )
                     }
-                    IconButton(
-                        onClick = { onClickReload() }
-                    ) {
-
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_reload),
-                            contentDescription = stringResource(id = R.string.host_reload_button),
-                            modifier = Modifier
-                                .rotate(rotation.value)
-                        )
-                    }
+                    LoadingIconButton(
+                        contentDescription = stringResource(id = R.string.host_reload_button),
+                        isLoading = isLoading,
+                        onClick = onClickReload,
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
@@ -241,33 +233,6 @@ fun HostScreenContainer(
                         Text(text = stringResource(id = R.string.host_set_manually))
                     }
                 }
-            }
-        }
-    }
-
-    // Loading animation
-    LaunchedEffect(isLoading) {
-        if (isLoading) {
-            // Infinite repeatable rotation when is playing
-            rotation.animateTo(
-                targetValue = currentRotation.value + 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(3000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            ) {
-                currentRotation.value = value
-            }
-        } else {
-            // Slow down rotation on pause
-            rotation.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(
-                    durationMillis = 0,
-                    easing = LinearOutSlowInEasing
-                )
-            ) {
-                currentRotation.value = 0f
             }
         }
     }
