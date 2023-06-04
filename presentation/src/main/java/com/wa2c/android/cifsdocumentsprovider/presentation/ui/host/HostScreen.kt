@@ -1,12 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.host
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -36,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,7 +54,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoic
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
-
 /**
  * Host Screen
  */
@@ -69,7 +61,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 fun HostScreen(
     viewModel: HostViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    onClickBack: () -> Unit,
+    onNavigateBack: () -> Unit,
     onSelectItem: (String?) -> Unit,
     onSetManually: () -> Unit,
 ) {
@@ -85,7 +77,7 @@ fun HostScreen(
         isInit = viewModel.isInit,
         isLoading = isLoading.value,
         hostList = connectionList.value,
-        onClickBack = { onClickBack() },
+        onClickBack = { onNavigateBack() },
         onClickSort = { showSortDialog.value = true },
         onClickReload = { viewModel.discovery() },
         onClickItem = { host -> selectedHost.value = host },

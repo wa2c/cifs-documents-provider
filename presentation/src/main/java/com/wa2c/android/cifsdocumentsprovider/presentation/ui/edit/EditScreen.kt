@@ -76,6 +76,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -86,6 +87,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
@@ -122,6 +124,7 @@ fun EditScreen(
         onClickDelete = { showDeleteDialog.value = true },
         safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
+        connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
@@ -168,14 +171,15 @@ fun EditScreen(
 
     LaunchedEffect(snackbarHostState) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
-            result ?: return@collectIn
             scope.showPopup(
                 snackbarHostState = snackbarHostState,
-                popupMessage = PopupMessage.Resource(
-                    res = result.messageRes,
-                    type = result.messageType,
-                    error = null
-                )
+                popupMessage = result?.let {
+                    PopupMessage.Resource(
+                        res = result.messageRes,
+                        type = result.messageType,
+                        error = null
+                    )
+                }
             )
         }
 
@@ -226,6 +230,7 @@ private fun EditScreenContainer(
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
+    connectionResult: ConnectionResult?,
     onClickBack: () -> Unit,
     onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
@@ -281,8 +286,6 @@ private fun EditScreenContainer(
                         .padding(Theme.ScreenMargin)
                         .weight(1f)
                 ) {
-
-
                     InputText(
                         title = stringResource(id = R.string.edit_name_title),
                         hint = stringResource(id = R.string.edit_name_hint),
@@ -437,9 +440,7 @@ private fun EditScreenContainer(
 
                 }
 
-
                 Divider(thickness = 1.dp, color = Theme.DividerColor)
-
 
                 Column(
                     modifier = Modifier
@@ -452,6 +453,17 @@ private fun EditScreenContainer(
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
+                        if (connectionResult == null) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_check),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .padding(end = Theme.SizeM)
+                                    .align(Alignment.CenterVertically)
+                            )
+                        } else {
+                            MessageIcon(type = connectionResult.messageType)
+                        }
                         Text(text = stringResource(id = R.string.edit_check_connection_button))
                     }
 
@@ -658,6 +670,7 @@ private fun EditScreenPreview() {
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
             extensionState = mutableStateOf(false),
+            connectionResult = null,
             onClickBack = {},
             onClickDelete = {},
             onClickSearchHost = {},

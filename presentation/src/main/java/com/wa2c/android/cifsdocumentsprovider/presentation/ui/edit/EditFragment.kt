@@ -94,7 +94,7 @@ class EditFragment : Fragment() {
                         // Snackbar
                         val connectionResult = remember { mutableStateOf<ConnectionResult?>(null)}
                         LaunchedEffect(key1 = Unit) {
-                            viewModel.connectionResultNotify.collectIn(viewLifecycleOwner) { result ->
+                            viewModel.connectionResult.collectIn(viewLifecycleOwner) { result ->
                                 connectionResult.value = result
                             }
                         }

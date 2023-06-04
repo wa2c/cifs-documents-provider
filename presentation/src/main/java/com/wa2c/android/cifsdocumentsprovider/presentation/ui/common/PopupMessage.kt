@@ -77,6 +77,7 @@ sealed class PopupMessage : Parcelable {
  * Message icon
  */
 enum class PopupMessageType {
+    /** Normal */
     Normal,
 
     /** Success */
@@ -161,11 +162,10 @@ fun AppSnackbar(message: PopupMessage) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun CoroutineScope.showPopup(snackbarHostState: SnackbarHostState, popupMessage: PopupMessage) {
+fun CoroutineScope.showPopup(snackbarHostState: SnackbarHostState, popupMessage: PopupMessage?) {
     launch {
-        snackbarHostState.showSnackbar(
-            MessageSnackbarVisual.create(popupMessage)
-        )
+        snackbarHostState.currentSnackbarData?.dismiss()
+        popupMessage?.let { snackbarHostState.showSnackbar(MessageSnackbarVisual.create(it)) }
     }
 }
 

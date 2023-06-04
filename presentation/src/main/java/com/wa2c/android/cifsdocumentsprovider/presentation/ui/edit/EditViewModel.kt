@@ -56,19 +56,11 @@ class EditViewModel @Inject constructor(
     var user = MutableStateFlow<String?>(null)
     var password = MutableStateFlow<String?>(null)
     var anonymous = MutableStateFlow<Boolean>(false)
+
     var extension = MutableStateFlow<Boolean>(false)
     var safeTransfer = MutableStateFlow<Boolean>(false)
 
-//    val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-//        getSmbUri(host, port, folder, true)
-//    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-//
-//    val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-//        getContentUri(host, port, folder)
-//    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
-    val connectionResultNotify: SharedFlow<ConnectionResult?> = _connectionResult
     val connectionResult = channelFlow<ConnectionResult?> {
         launch { _connectionResult.collect { send(it) } }
         launch { storage.collect { send(null) } }
@@ -91,19 +83,6 @@ class EditViewModel @Inject constructor(
 
     /** Init connection */
     private var initConnection: CifsConnection? = null
-
-    /** True if initialized */
-//    private var initialized: Boolean = false
-//
-//    /**
-//     * Initialize
-//     */
-//    fun initialize(connection: CifsConnection?) {
-//        if (initialized) return
-//        initConnection = if (connection == null || connection.isNew) null else connection
-//        deployCifsConnection(connection)
-//        initialized = true
-//    }
 
     /**
      * Deploy connection data.
@@ -153,6 +132,7 @@ class EditViewModel @Inject constructor(
         _isBusy.value = true
         launch {
             runCatching {
+                _connectionResult.emit(null)
                 withContext(Dispatchers.IO) {
                    createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
                 }
