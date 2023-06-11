@@ -44,8 +44,11 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
@@ -165,9 +168,7 @@ fun HostScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.host_title)) },
-                colors=  TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
+                colors = AppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = { onClickSort() }
@@ -209,18 +210,18 @@ fun HostScreenContainer(
             )
 
             if (isInit) {
-                Divider(thickness = 1.dp, color = Theme.DividerColor)
+                DividerNormal()
 
                 Column(
                     modifier = Modifier
-                        .padding(8.dp),
+                        .padding(Theme.SizeS),
                 ) {
                     Button(
                         onClick = onClickSet,
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(Theme.SizeSS),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 8.dp)
+                            .padding(top = Theme.SizeS)
                     ) {
                         Text(text = stringResource(id = R.string.host_set_manually))
                     }
@@ -247,7 +248,7 @@ fun ColumnScope.HostList(
                 hostData = hostData,
                 onClick = { onClickItem(hostData) },
             )
-            Divider(thickness = 0.5.dp, color = Theme.DividerColor)
+            DividerThin()
         }
     }
 
@@ -262,7 +263,7 @@ private fun HostItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_host),
@@ -272,7 +273,7 @@ private fun HostItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 8.dp)
+                .padding(start = Theme.SizeS)
         ) {
 
             Text(

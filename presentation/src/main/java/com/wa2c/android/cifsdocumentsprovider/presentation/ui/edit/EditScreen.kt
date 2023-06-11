@@ -29,13 +29,11 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -43,7 +41,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -85,8 +82,10 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
@@ -242,9 +241,7 @@ private fun EditScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.host_title)) },
-                colors=  TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
+                colors = AppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = onClickDelete
@@ -440,7 +437,7 @@ private fun EditScreenContainer(
 
                 }
 
-                Divider(thickness = 1.dp, color = Theme.DividerColor)
+                DividerNormal()
 
                 Column(
                     modifier = Modifier
@@ -505,7 +502,7 @@ fun InputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp)
+            .padding(top = Theme.SizeSS)
     ) {
         OutlinedTextField(
             value = state.value ?: "",
@@ -534,12 +531,12 @@ fun InputText(
         )
         iconResource?.let {res ->
             Button(
-                shape = RoundedCornerShape(4.dp),
+                shape = RoundedCornerShape(Theme.SizeSS),
                 contentPadding = PaddingValues(0.dp),
                 enabled = enabled,
                 modifier = Modifier
                     .size(52.dp, 52.dp)
-                    .padding(top = 4.dp, start = 4.dp)
+                    .padding(top = Theme.SizeSS, start = Theme.SizeSS)
                     .align(Alignment.CenterVertically),
                 onClick = onClickButton,
             ) {
@@ -572,7 +569,7 @@ fun <T> InputOption(
     Column(
         modifier = Modifier
             .wrapContentWidth()
-            .padding(top = 4.dp)
+            .padding(top = Theme.SizeSS)
     ) {
         OutlinedTextField(
             value = items.first { it.value == state.value }.label,
@@ -625,8 +622,8 @@ fun InputCheck(
                 role = Role.Checkbox,
                 onValueChange = { state.value = !state.value }
             )
-            .padding(16.dp)
-            .padding(top = 4.dp)
+            .padding(Theme.SizeM)
+            .padding(top = Theme.SizeS)
             .fillMaxWidth()
     ) {
         Checkbox(
@@ -638,7 +635,7 @@ fun InputCheck(
             text = title,
             Modifier
                 .weight(1f)
-                .padding(start = 8.dp)
+                .padding(start = Theme.SizeS)
         )
     }
 }

@@ -1,18 +1,24 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
 
 /**
@@ -22,13 +28,16 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsS
 internal fun MainNavHost(
     navController: NavHostController = rememberNavController(),
     onOpenFile: (List<Uri>) -> Unit,
+    onCloseApp: () -> Unit,
 ) {
     NavHost(
         navController = navController,
         startDestination = HomeScreenName,
     ) {
         // Home Screen
-        composable(HomeScreenName) {
+        composable(
+            route = HomeScreenName,
+        ) {
             HomeScreen(
                 onOpenFile = { uris ->
                     onOpenFile(uris)
@@ -57,7 +66,7 @@ internal fun MainNavHost(
             ),
         ) {
             HostScreen(
-                onClickBack = {
+                onNavigateBack = {
                     navController.popBackStack()
                 },
                 onSelectItem = {
@@ -124,27 +133,59 @@ internal fun MainNavHost(
         }
 
         // Settings Screen
-        composable(SettingsScreenName) {
+        composable(
+            route = SettingsScreenName,
+        ) {
             SettingsScreen(
-                onClickBack = {
+                onNavigateBack = {
                     navController.popBackStack()
                 }
             )
+        }
+
+        // Send Screen
+        composable(
+            route = SendScreenName,
+            deepLinks = listOf(
+                navDeepLink { action = Intent.ACTION_SEND },
+                navDeepLink { action = Intent.ACTION_SEND_MULTIPLE },
+            )
+        ) { navBackStackEntry ->
+            @Suppress("DEPRECATION")
+            val uriList = remember {
+                navBackStackEntry.arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)?.let { intent ->
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        (intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)?.let { listOf(it) })
+                            ?: (intent.getParcelableArrayExtra(Intent.EXTRA_STREAM, Uri::class.java)?.toList())
+                    } else {
+                        (intent.getParcelableExtra<Uri?>(Intent.EXTRA_STREAM)?.let { listOf(it) })
+                            ?: (intent.getParcelableArrayListExtra<Uri?>(Intent.EXTRA_STREAM)?.toList())
+                    }
+                }
+            }
+
+            if (uriList.isNullOrEmpty()) {
+                navController.navigate(route = HomeScreenName)
+            } else {
+                SendScreen(
+                    uriList = uriList,
+                    onNavigateFinish = {
+                        onCloseApp()
+                    }
+                )
+            }
         }
     }
 }
 
 private const val HomeScreenName = "home"
 private const val EditScreenRouteName = "edit"
-
 private const val HostScreenName = "host"
 private const val FolderScreenName = "folder"
 private const val SettingsScreenName = "settings"
+private const val SendScreenName = "send"
 
 const val HostScreenParamId = "id"
 const val EditScreenParamHost = "host"
 const val EditScreenParamId = "id"
 const val FolderScreenParamUri = "uri"
-
-private const val FolderScreenResultKey = FolderScreenName + "_result"
-

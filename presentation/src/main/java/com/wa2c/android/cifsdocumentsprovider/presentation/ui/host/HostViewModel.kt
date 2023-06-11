@@ -96,7 +96,7 @@ class HostViewModel @Inject constructor(
             runCatching {
                 hostRepository.stopDiscovery()
             }.onFailure {
-                _navigationEvent.emit(HostNav.NetworkError(it))
+                //_navigationEvent.emit(HostNav.NetworkError(it))
             }
             _isLoading.value = false
         }

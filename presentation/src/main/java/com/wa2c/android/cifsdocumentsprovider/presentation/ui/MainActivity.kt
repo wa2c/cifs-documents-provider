@@ -9,6 +9,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.DisposableEffect
+import androidx.core.util.Consumer
+import androidx.navigation.compose.rememberNavController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
@@ -27,17 +30,29 @@ class MainActivity : AppCompatActivity() {
     /** Main View Model */
     private val mainViewModel by viewModels<MainViewModel>()
 
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //processIntent(intent)
         setContent {
             val isDark = mainViewModel.uiThemeFlow.isDark() // FIXME
+            val navController = rememberNavController()
+
+            DisposableEffect(navController) {
+                val consumer = Consumer<Intent> {
+                    navController.handleDeepLink(it)
+                }
+                this@MainActivity.addOnNewIntentListener(consumer)
+                onDispose {
+                    this@MainActivity.removeOnNewIntentListener(consumer)
+                }
+            }
+
             Theme.AppTheme(
                 darkTheme = isDark
             ) {
                 MainNavHost(
-                    onOpenFile = { startApp(it) }
+                    navController = navController,
+                    onOpenFile = { startApp(it) },
+                    onCloseApp = { finishApp() }
                 )
             }
         }
@@ -66,20 +81,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        //processIntent(intent)
+    private fun finishApp() {
+        finishAffinity()
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                return true
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        when (item.itemId) {
+//            android.R.id.home -> {
+//                onBackPressedDispatcher.onBackPressed()
+//                return true
+//            }
+//        }
+//        return super.onOptionsItemSelected(item)
+//    }
 
 //    /**
 //     * Branch by intent

@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,7 +26,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,7 +50,10 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -63,7 +64,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
-    onClickBack: () -> Unit
+    onNavigateBack: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
@@ -82,7 +83,7 @@ fun SettingsScreen(
         },
         useAsLocal = useAsLocal.value,
         onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
-        onClickBack = { onClickBack() }
+        onClickBack = { onNavigateBack() }
     )
 }
 
@@ -105,9 +106,7 @@ private fun SettingsScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
-                colors=  TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
+                colors = AppTopAppBarColors(),
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
@@ -236,7 +235,7 @@ private fun TitleItem(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp)
-            .padding(horizontal = 8.dp, vertical = 8.dp)
+            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeS)
     ) {
         Text(
             text = text,
@@ -247,7 +246,7 @@ private fun TitleItem(
 
         )
     }
-    Divider(thickness = 1.dp, color = Theme.DividerColor)
+    DividerNormal()
 }
 
 @Composable
@@ -260,7 +259,7 @@ private fun SettingsItem(
             .fillMaxWidth()
             .heightIn(64.dp)
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
     ) {
         Text(
             text = text,
@@ -268,7 +267,7 @@ private fun SettingsItem(
                 .align(alignment = Alignment.CenterVertically)
         )
     }
-    Divider(thickness = 0.2.dp, color = Theme.DividerColor)
+    DividerThin()
 }
 
 @Composable
@@ -282,7 +281,7 @@ private fun SettingsCheckItem(
             .fillMaxWidth()
             .heightIn(64.dp)
             .clickable(enabled = true, onClick = { onCheckedChange(!checked) })
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
     ) {
         Text(
             text = text,
@@ -296,7 +295,7 @@ private fun SettingsCheckItem(
             onCheckedChange = onCheckedChange,
         )
     }
-    Divider(thickness = 0.2.dp, color = Theme.DividerColor)
+    DividerThin()
 }
 
 

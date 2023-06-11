@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -27,7 +26,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -47,6 +45,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
@@ -88,7 +88,6 @@ fun HomeScreen(
     
     LaunchedEffect(Unit) {
         viewModel.navigationEvent.collect { event ->
-            //onNavigate(it, navController)
             when (event) {
                 is HomeNav.Edit -> {
                     event.connection?.let(onClickEdit)
@@ -148,16 +147,14 @@ fun HomeScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
-                colors=  TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
+                colors = AppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = { onClickMenuOpenFile() }
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_share),
-                            contentDescription = stringResource(id = R.string.home_open_file)
+                            contentDescription = stringResource(id = R.string.home_open_file),
                         )
                     }
                     IconButton(
@@ -225,7 +222,7 @@ fun ConnectionList(
     ) {
         items(items = connectionList, { it }) { connection ->
             ReorderableItem(state, key = connection) { isDragging ->
-                val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
+                val elevation = animateDpAsState(if (isDragging) Theme.SizeM else 0.dp)
                 ConnectionItem(
                     connection = connection,
                     modifier = Modifier
@@ -234,7 +231,7 @@ fun ConnectionList(
                     onClick = { onClickItem(connection) },
                 )
             }
-            Divider(thickness = 0.5.dp, color = Theme.DividerColor)
+            DividerThin()
         }
     }
 }
@@ -249,7 +246,7 @@ private fun ConnectionItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
     ) {
         Row(
             modifier = Modifier
@@ -266,7 +263,7 @@ private fun ConnectionItem(
                 text = stringResource(id = connection.storage.labelRes),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
-                    .padding(start = 8.dp)
+                    .padding(start = Theme.SizeS)
                     .align(alignment = Alignment.CenterVertically)
                 ,
             )

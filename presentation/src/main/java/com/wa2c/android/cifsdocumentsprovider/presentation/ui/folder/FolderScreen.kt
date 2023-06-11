@@ -18,17 +18,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -44,6 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -94,9 +94,7 @@ fun FolderScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.host_title)) },
-                colors=  TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                ),
+                colors = AppTopAppBarColors(),
                 actions = {
                     LoadingIconButton(
                         contentDescription = stringResource(id = R.string.folder_reload_button),
@@ -138,17 +136,17 @@ fun FolderScreenContainer(
                                 cifsFile = file,
                                 onClick = { onClickItem(file) },
                             )
-                            Divider(thickness = 0.5.dp, color = Theme.DividerColor)
+                            DividerThin()
                         }
                     }
                 }
             }
 
-            Divider(thickness = 1.dp, color = Theme.DividerColor)
+            DividerNormal()
 
             Column(
                 modifier = Modifier
-                    .padding(8.dp),
+                    .padding(Theme.SizeS),
             ) {
                 Text(
                     text = currentFile?.uri?.toString() ?: "",
@@ -158,10 +156,10 @@ fun FolderScreenContainer(
                 )
                 Button(
                     onClick = onClickSet,
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(Theme.SizeSS),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp)
+                        .padding(top = Theme.SizeS)
                 ) {
                     Text(text = stringResource(id = R.string.folder_set))
                 }
@@ -178,7 +176,7 @@ private fun FolderItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeSS)
             .clickable(enabled = true, onClick = onClick)
     ) {
         Icon(
@@ -190,7 +188,7 @@ private fun FolderItem(
             text = cifsFile.name,
             fontSize = 15.sp,
             modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(start = Theme.SizeS)
         )
 
     }
