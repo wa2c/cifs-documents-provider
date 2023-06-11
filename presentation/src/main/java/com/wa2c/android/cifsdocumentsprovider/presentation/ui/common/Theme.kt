@@ -16,10 +16,13 @@ object Theme {
 
     private val DarkColors = darkColorScheme(
         primary = Color(0xFFFF9800),
+        onPrimary = Color(0xFFFFFFFF),
     )
     private val LightColors = lightColorScheme(
         primary = Color(0xFFFF9800),
+        onPrimary = Color(0xFFFFFFFF),
     )
+
 
 //    private val Typography = Typography(
 //    )

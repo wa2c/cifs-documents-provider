@@ -76,20 +76,20 @@ class SendFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
-            setContent {
-                Theme.AppTheme(
-                    darkTheme = mainViewModel.uiThemeFlow.isDark()
-                ) {
-                    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
-                    SendScreen(
-                        sendDataList = sendDataList.value,
-                        onClickCancel = { viewModel.onClickCancel(it) },
-                        onClickRetry = { viewModel.onClickRetry(it) },
-                        onClickRemove = { viewModel.onClickRemove(it) },
-                        onClickCancelAll = { viewModel.onClickCancelAll() },
-                    )
-                }
-            }
+//            setContent {
+//                Theme.AppTheme(
+//                    darkTheme = mainViewModel.uiThemeFlow.isDark()
+//                ) {
+//                    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
+//                    SendScreenContainer(
+//                        sendDataList = sendDataList.value,
+//                        onClickCancel = { viewModel.onClickCancel(it) },
+//                        onClickRetry = { viewModel.onClickRetry(it) },
+//                        onClickRemove = { viewModel.onClickRemove(it) },
+//                        onClickCancelAll = { viewModel.onClickCancelAll() },
+//                    )
+//                }
+//            }
         }
     }
 
@@ -130,6 +130,19 @@ class SendFragment: Fragment() {
 
         viewModel.let { vm ->
             vm.navigationEvent.collectIn(viewLifecycleOwner, observer = ::onNavigate)
+//            vm.sendDataList.collectIn(viewLifecycleOwner, state = Lifecycle.State.CREATED) { data ->
+//                if (data == null) return@collectIn
+//                val list = vm.sendDataList.value
+//
+//                val countIncomplete = list.count { it.state.isFinished || it.state.inProgress }
+//                val countAll = countIncomplete + list.count { it.state.isReady }
+//                notification.updateProgress(data, countIncomplete, countAll)
+//
+//                val index = list.indexOfLast { it == data }
+//                if (index < 0) return@collectIn
+//                adapter.notifyItemChanged(index)
+//                updateCancelButton()
+//            }
         }
 
         // NOTE: Required activity context for file URI access. (SecurityException occurred if not)
