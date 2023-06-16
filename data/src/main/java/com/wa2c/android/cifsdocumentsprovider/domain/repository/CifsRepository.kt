@@ -2,10 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.map
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -23,7 +19,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -140,16 +135,6 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             getClient(dto).getFile(dto)
-        }
-    }
-
-    /**
-     * Get children CIFS files from uri.
-     */
-    suspend fun getFileChildren(connection: CifsConnection, uri: String): List<CifsFile> {
-        return withContext(dispatcher) {
-            val dto = CifsClientDto(connection, uri)
-            getClient(dto).getChildren(dto)
         }
     }
 

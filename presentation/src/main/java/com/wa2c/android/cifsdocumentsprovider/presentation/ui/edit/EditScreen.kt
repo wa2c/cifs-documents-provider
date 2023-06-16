@@ -73,9 +73,11 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
@@ -99,6 +101,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 fun EditScreen(
     viewModel: EditViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    selectedHost: String? = null,
+    selectedFile: CifsFile? = null,
     onNavigateBack: (update: Boolean) -> Unit,
     onNavigateSearchHost: (CifsConnection?) -> Unit,
     onNavigateSelectFolder: (CifsConnection) -> Unit,
@@ -106,6 +110,9 @@ fun EditScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val showDeleteDialog = remember { mutableStateOf(false) }
+
+    selectedHost?.let { viewModel.host.value = selectedHost }
+    selectedFile?.let { viewModel.folder.value = selectedFile.uri.pathFragment }
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -123,6 +130,7 @@ fun EditScreen(
         onClickDelete = { showDeleteDialog.value = true },
         safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
+        isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
@@ -147,28 +155,7 @@ fun EditScreen(
         }
     }
 
-    // isBusy
-    val isBusy = viewModel.isBusy.collectAsStateWithLifecycle()
-    if (isBusy.value) {
-        val interactionSource = remember { MutableInteractionSource() }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Theme.LoadingBackgroundColor)
-                .clickable(
-                    indication = null,
-                    interactionSource = interactionSource,
-                    onClick = {}
-                ),
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.Center)
-            )
-        }
-    }
-
-    LaunchedEffect(snackbarHostState) {
+    LaunchedEffect(Unit) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             scope.showPopup(
                 snackbarHostState = snackbarHostState,
@@ -229,6 +216,7 @@ private fun EditScreenContainer(
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
+    isBusy: Boolean,
     connectionResult: ConnectionResult?,
     onClickBack: () -> Unit,
     onClickDelete: () -> Unit,
@@ -443,7 +431,6 @@ private fun EditScreenContainer(
                     modifier = Modifier
                         .padding(Theme.ScreenMargin)
                 ) {
-
                     OutlinedButton(
                         onClick = onClickCheckConnection,
                         shape = RoundedCornerShape(Theme.SizeSS),
@@ -476,8 +463,27 @@ private fun EditScreenContainer(
                 }
 
             }
-        }
 
+            // isBusy
+            if (isBusy) {
+                val interactionSource = remember { MutableInteractionSource() }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Theme.LoadingBackgroundColor)
+                        .clickable(
+                            indication = null,
+                            interactionSource = interactionSource,
+                            onClick = {}
+                        ),
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -667,6 +673,7 @@ private fun EditScreenPreview() {
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
             extensionState = mutableStateOf(false),
+            isBusy = false,
             connectionResult = null,
             onClickBack = {},
             onClickDelete = {},

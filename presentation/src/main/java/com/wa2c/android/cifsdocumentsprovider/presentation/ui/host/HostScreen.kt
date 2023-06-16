@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,7 +22,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +63,7 @@ fun HostScreen(
     viewModel: HostViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: () -> Unit,
-    onSelectItem: (String?) -> Unit,
+    onSelectItem: (isInit: Boolean, host: String) -> Unit,
     onSetManually: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -107,25 +105,30 @@ fun HostScreen(
 
     // Confirmation dialog
     selectedHost.value?.let { host ->
-        if (host.hostName == host.ipAddress) {
+        if (host.hostName != host.ipAddress) {
             CommonDialog(
                 confirmButtons = listOf(
                     DialogButton(label = stringResource(id = R.string.host_select_host_name)) {
-                        onSelectItem(host.hostName)
+                        onSelectItem(viewModel.isInit, host.hostName)
+                        selectedHost.value = null
                     },
                     DialogButton(label = stringResource(id = R.string.host_select_ip_address)) {
-                        onSelectItem(host.ipAddress)
+                        onSelectItem(viewModel.isInit, host.ipAddress)
+                        selectedHost.value = null
                     }
                 ),
                 dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
                     selectedHost.value = null
                 },
-                onDismiss = { selectedHost.value = null }
+                onDismiss = {
+                    selectedHost.value = null
+                }
             ) {
                 Text(stringResource(id = R.string.host_select_confirmation_message))
             }
         } else {
-            onSelectItem(host.hostName)
+            onSelectItem(viewModel.isInit, host.hostName)
+            selectedHost.value = null
         }
     }
 

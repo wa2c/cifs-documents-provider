@@ -3,7 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
@@ -41,8 +41,6 @@ class FolderViewModel @Inject constructor(
     private val _currentFile = MutableStateFlow<CifsFile?>(null)
     val currentFile: StateFlow<CifsFile?> = _currentFile
 
-    private lateinit var cifsConnection: CifsConnection
-
     init {
         launch {
             val file = cifsRepository.getFile(paramUri) ?: return@launch
@@ -69,7 +67,7 @@ class FolderViewModel @Inject constructor(
 
         launch {
             val uri = currentFile.value?.parentUri ?: return@launch
-            val file = cifsRepository.getFile(cifsConnection, uri.toString()) ?: return@launch
+            val file = cifsRepository.getFile(uri.toString()) ?: return@launch
             loadList(file)
         }
         return true
@@ -94,12 +92,13 @@ class FolderViewModel @Inject constructor(
     private suspend fun loadList(file: CifsFile) {
         _isLoading.value = true
         runCatching {
-            cifsRepository.getFileChildren(cifsConnection, file.uri.toString())
+            cifsRepository.getFileChildren(file.uri.toString())
         }.onSuccess { list ->
             _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
             _currentFile.value = file
             _isLoading.value = false
         }.onFailure {
+            logE(it)
             _fileList.value = emptyList()
             _currentFile.value = file
             _isLoading.value = false
