@@ -45,6 +45,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
@@ -180,13 +181,7 @@ fun HomeScreenContainer(
                 )
             }
         },
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                (data.visuals as? MessageSnackbarVisual)?.let {
-                    AppSnackbar(message = it.popupMessage)
-                }
-            }
-        }
+        snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
             modifier = Modifier

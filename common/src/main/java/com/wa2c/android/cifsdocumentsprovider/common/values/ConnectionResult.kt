@@ -4,14 +4,19 @@ package com.wa2c.android.cifsdocumentsprovider.common.values
  * Server connection result
  */
 sealed class ConnectionResult {
+
+    abstract val cause: Throwable?
+
     /** Success */
-    object Success: ConnectionResult()
+    object Success: ConnectionResult() {
+        override val cause: Throwable? = null
+    }
     /** Warning */
     data class Warning(
-        val cause: Throwable = RuntimeException()
+        override val cause: Throwable = RuntimeException()
     ): ConnectionResult()
     /** Failure */
     data class Failure(
-        val cause: Throwable = RuntimeException()
+        override val cause: Throwable = RuntimeException()
     ): ConnectionResult()
 }

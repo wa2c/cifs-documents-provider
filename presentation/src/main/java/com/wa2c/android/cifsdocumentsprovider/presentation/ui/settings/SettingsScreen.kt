@@ -49,6 +49,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
@@ -126,13 +127,7 @@ private fun SettingsScreenContainer(
                 }
             )
         },
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                (data.visuals as? MessageSnackbarVisual)?.let {
-                    AppSnackbar(message = it.popupMessage)
-                }
-            }
-        }
+        snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
             modifier = Modifier

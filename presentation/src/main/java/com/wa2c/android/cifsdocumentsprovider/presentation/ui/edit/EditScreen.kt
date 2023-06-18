@@ -80,10 +80,12 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
@@ -191,7 +193,7 @@ fun EditScreen(
                     PopupMessage.Resource(
                         res = result.messageRes,
                         type = result.messageType,
-                        error = null
+                        error = result.cause
                     )
                 }
             )
@@ -257,9 +259,7 @@ private fun EditScreenContainer(
                 title = { Text(stringResource(id = R.string.host_title)) },
                 colors = AppTopAppBarColors(),
                 actions = {
-                    IconButton(
-                        onClick = onClickDelete
-                    ) {
+                    IconButton(onClick = onClickDelete) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_delete),
                             contentDescription = stringResource(id = R.string.edit_delete_button),
@@ -273,13 +273,7 @@ private fun EditScreenContainer(
                 },
             )
         },
-        snackbarHost = {
-            SnackbarHost(snackbarHostState) { data ->
-                (data.visuals as? MessageSnackbarVisual)?.let {
-                    AppSnackbar(message = it.popupMessage)
-                }
-            }
-        }
+        snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(
             modifier = Modifier
