@@ -103,13 +103,14 @@ fun EditScreen(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     selectedHost: String? = null,
     selectedFile: CifsFile? = null,
-    onNavigateBack: (update: Boolean) -> Unit,
+    onNavigateBack: () -> Unit,
     onNavigateSearchHost: (CifsConnection?) -> Unit,
     onNavigateSelectFolder: (CifsConnection) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val showDeleteDialog = remember { mutableStateOf(false) }
+    val showBackConfirmationDialog = remember { mutableStateOf(false) }
 
     selectedHost?.let { viewModel.host.value = selectedHost }
     selectedFile?.let { viewModel.folder.value = selectedFile.uri.pathFragment }
@@ -126,7 +127,13 @@ fun EditScreen(
         passwordState = viewModel.password.collectAsMutableState(),
         anonymousState = viewModel.anonymous.collectAsMutableState(),
         folderState = viewModel.folder.collectAsMutableState(),
-        onClickBack = { onNavigateBack(false) },
+        onClickBack = {
+            if (viewModel.isChanged) {
+                showBackConfirmationDialog.value = true
+            } else {
+                onNavigateBack()
+            }
+        },
         onClickDelete = { showDeleteDialog.value = true },
         safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
@@ -138,7 +145,7 @@ fun EditScreen(
         onClickSave = { viewModel.onClickSave() },
     )
 
-    // Sort dialog
+    // Delete dialog
     if (showDeleteDialog.value) {
         CommonDialog(
             confirmButtons = listOf(
@@ -149,9 +156,30 @@ fun EditScreen(
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
                 showDeleteDialog.value = false
             },
-            onDismiss = { showDeleteDialog.value = false }
+            onDismiss = {
+                showDeleteDialog.value = false
+            }
         ) {
             Text(stringResource(id = R.string.edit_delete_confirmation_message))
+        }
+    }
+
+    // Back confirmation dialog
+    if (showBackConfirmationDialog.value) {
+        CommonDialog(
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    onNavigateBack()
+                },
+            ),
+            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                showBackConfirmationDialog.value = false
+            },
+            onDismiss = {
+                showBackConfirmationDialog.value = false
+            }
+        ) {
+            Text(stringResource(id = R.string.edit_back_confirmation_message))
         }
     }
 
@@ -171,12 +199,10 @@ fun EditScreen(
 
         viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
             when (event) {
-                is EditNav.Back -> onNavigateBack(false)
+                is EditNav.Back -> onNavigateBack()
                 is EditNav.SearchHost -> { onNavigateSearchHost(event.connection) }
                 is EditNav.SelectFolder -> { onNavigateSelectFolder(event.connection) }
-                is EditNav.Success -> {
-                    onNavigateBack(true)
-                }
+                is EditNav.Success -> { onNavigateBack() }
                 is EditNav.Failure -> {
                     val messageRes = if (event.error is IllegalArgumentException) {
                         R.string.edit_save_duplicate_message // URI duplicated

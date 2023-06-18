@@ -40,8 +40,9 @@ class EditViewModel @Inject constructor(
 
     init {
         launch {
-            val connection = paramId?.let { cifsRepository.getConnection(paramId) } ?: CifsConnection.createFromHost(paramHost ?: "")
-            initConnection = connection
+            val connection = paramId?.let {
+                cifsRepository.getConnection(paramId).also { initConnection = it }
+            } ?: CifsConnection.createFromHost(paramHost ?: "")
             deployCifsConnection(connection)
         }
     }
@@ -86,6 +87,10 @@ class EditViewModel @Inject constructor(
     /** True if adding new settings */
     val isNew: Boolean
         get() = currentId == CifsConnection.NEW_ID
+
+    /** True if data changed */
+    val isChanged: Boolean
+        get() = initConnection == null || initConnection != createCifsConnection(false)
 
     /** Init connection */
     private var initConnection: CifsConnection? = null

@@ -63,7 +63,7 @@ fun HostScreen(
     viewModel: HostViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: () -> Unit,
-    onSelectItem: (isInit: Boolean, host: String) -> Unit,
+    onSelectItem: (host: String) -> Unit,
     onSetManually: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,11 +109,11 @@ fun HostScreen(
             CommonDialog(
                 confirmButtons = listOf(
                     DialogButton(label = stringResource(id = R.string.host_select_host_name)) {
-                        onSelectItem(viewModel.isInit, host.hostName)
+                        onSelectItem(host.hostName)
                         selectedHost.value = null
                     },
                     DialogButton(label = stringResource(id = R.string.host_select_ip_address)) {
-                        onSelectItem(viewModel.isInit, host.ipAddress)
+                        onSelectItem(host.ipAddress)
                         selectedHost.value = null
                     }
                 ),
@@ -127,7 +127,7 @@ fun HostScreen(
                 Text(stringResource(id = R.string.host_select_confirmation_message))
             }
         } else {
-            onSelectItem(viewModel.isInit, host.hostName)
+            onSelectItem(host.hostName)
             selectedHost.value = null
         }
     }

@@ -72,6 +72,7 @@ internal fun MainNavHost(
                 },
             ),
         ) { backStackEntry ->
+            // BackStack
             val selectedHost = backStackEntry.savedStateHandle.getStateFlow<String?>(HostScreenResultKey, null).collectAsState(null).value?.also {
                 backStackEntry.savedStateHandle.remove<String?>(HostScreenResultKey)
             }
@@ -104,13 +105,13 @@ internal fun MainNavHost(
                     defaultValue = null
                 },
             ),
-        ) {
+        ) { backStackEntry ->
             HostScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onSelectItem = { isInit, host ->
-                    if (isInit) {
+                onSelectItem = { host ->
+                    if (backStackEntry.arguments?.getString(HostScreenParamId) == null) {
                         navController.navigate(route = EditScreenRouteName + "?host=${host}", navOptions = navOptions {
                             this.popUpTo(HomeScreenName)
                         })
@@ -202,8 +203,8 @@ private const val FolderScreenName = "folder"
 private const val SettingsScreenName = "settings"
 private const val SendScreenName = "send"
 
-const val HostScreenResultKey = "host_result"
-const val FolderScreenResultKey = "folder_result"
+private const val HostScreenResultKey = "host_result"
+private const val FolderScreenResultKey = "folder_result"
 
 const val HostScreenParamId = "id"
 const val EditScreenParamHost = "host"
