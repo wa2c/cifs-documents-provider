@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.view.KeyEvent
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,9 +53,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -71,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import autofill
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
@@ -228,7 +236,7 @@ fun EditScreen(
 /**
  * Edit Screen
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun EditScreenContainer(
     snackbarHostState: SnackbarHostState,
@@ -275,6 +283,14 @@ private fun EditScreenContainer(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+
+//        val autofillNodePassword = AutofillNode(
+//            autofillTypes = listOf(AutofillType.Password),
+//            onFill = { }
+//        )
+//        //val autofill = LocalAutofill.current
+//        LocalAutofillTree.current += autofillNodePassword
+
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -355,6 +371,7 @@ private fun EditScreenContainer(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next,
                         ),
+                        autofillType = AutofillType.Username,
                     )
 
                     InputText(
@@ -365,7 +382,8 @@ private fun EditScreenContainer(
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Next,
-                        )
+                        ),
+                        autofillType = AutofillType.Password,
                     )
 
                     InputCheck(
@@ -505,6 +523,9 @@ private fun EditScreenContainer(
             }
         }
     }
+
+    // Back button
+    BackHandler { onClickBack() }
 }
 
 /**
@@ -521,6 +542,7 @@ fun InputText(
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
     ),
+    autofillType: AutofillType? = null,
     @DrawableRes iconResource: Int? = null,
     onClickButton: () -> Unit = {},
 ) {
@@ -554,6 +576,10 @@ fun InputText(
                     }
                     false
                 }
+                .autofill(
+                    autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
+                    onFill = { state.value = it }
+                )
         )
         iconResource?.let {res ->
             Button(
