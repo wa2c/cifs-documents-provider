@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -69,13 +68,14 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
+    val showLibraries = remember { mutableStateOf(false) }
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
         theme = theme.value,
         onSetUiTheme = {
             viewModel.setUiTheme(it)
-            AppCompatDelegate.setDefaultNightMode(theme.value.mode)
+            AppCompatDelegate.setDefaultNightMode(it.mode)
         },
         language = Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()),
         onSetLanguage = {
@@ -83,7 +83,17 @@ fun SettingsScreen(
         },
         useAsLocal = useAsLocal.value,
         onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
-        onClickBack = { onNavigateBack() }
+        showLibraries = showLibraries.value,
+        onClickLibraries = {
+            showLibraries.value = true
+        },
+        onClickBack = {
+            if (showLibraries.value) {
+                showLibraries.value = false
+            } else {
+                onNavigateBack()
+            }
+        }
     )
 }
 
@@ -100,6 +110,8 @@ private fun SettingsScreenContainer(
     onSetLanguage: (Language) -> Unit,
     useAsLocal: Boolean,
     onSetUseAsLocal: (Boolean) -> Unit,
+    showLibraries: Boolean,
+    onClickLibraries: () -> Unit,
     onClickBack: () -> Unit,
 ) {
     Scaffold(
@@ -108,7 +120,7 @@ private fun SettingsScreenContainer(
                 title = { Text(stringResource(id = R.string.app_name)) },
                 colors = AppTopAppBarColors(),
                 navigationIcon = {
-                    IconButton(onClick = onClickBack) {
+                    IconButton(onClick = { onClickBack() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
                     }
                 }
@@ -127,16 +139,31 @@ private fun SettingsScreenContainer(
                 .fillMaxHeight()
                 .padding(paddingValues)
         ) {
-            SettingsList(
-                theme = theme,
-                onSetUiTheme = onSetUiTheme,
-                language = language,
-                onSetLanguage = onSetLanguage,
-                useAsLocal = useAsLocal,
-                onSetUseAsLocal = onSetUseAsLocal,
-            )
+            if (showLibraries) {
+                // Libraries screen
+                LibrariesContainer(
+                    colors = LibraryDefaults.libraryColors(
+                        backgroundColor = MaterialTheme.colorScheme.background,
+                        contentColor = MaterialTheme.colorScheme.onBackground,
+                    ),
+                )
+            } else {
+                // Settings screen
+                SettingsList(
+                    theme = theme,
+                    onSetUiTheme = onSetUiTheme,
+                    language = language,
+                    onSetLanguage = onSetLanguage,
+                    useAsLocal = useAsLocal,
+                    onSetUseAsLocal = onSetUseAsLocal,
+                    onShowLibraries = { onClickLibraries() }
+                )
+            }
         }
     }
+
+    // Back button
+    BackHandler { onClickBack() }
 }
 
 /**
@@ -150,79 +177,62 @@ private fun SettingsList(
     onSetLanguage: (Language) -> Unit,
     useAsLocal: Boolean,
     onSetUseAsLocal: (Boolean) -> Unit,
+    onShowLibraries: () -> Unit,
 ) {
-    val showLibraries = remember { mutableStateOf(false) }
+    // Screen
+    Column {
+        // Settings Title
+        TitleItem(text = stringResource(id = R.string.settings_section_set))
 
-    // Back button
-    BackHandler(enabled = showLibraries.value) {
-        showLibraries.value = false
-    }
+        // UI Theme
+        SettingsSingleChoiceItem(
+            title = stringResource(id = R.string.settings_set_theme),
+            items = UiTheme.values().map { it.getLabel(LocalContext.current) }.toList(),
+            selectedIndex = UiTheme.values().indexOf(theme),
+        ) {
+            onSetUiTheme(UiTheme.findByIndexOrDefault(it))
+        }
 
-    if (showLibraries.value) {
-        // Libraries screen
-        LibrariesContainer(
-            modifier = Modifier.fillMaxSize(),
-            colors = LibraryDefaults.libraryColors(
-                backgroundColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-            ),
-        )
-    } else {
-        // Screen
-        Column {
-            // Settings Title
-            TitleItem(text = stringResource(id = R.string.settings_section_set))
+        // Language
+        SettingsSingleChoiceItem(
+            title = stringResource(id = R.string.settings_set_language),
+            items = Language.values().map { it.getLabel(LocalContext.current) }.toList(),
+            selectedIndex = Language.values().indexOf(language),
+        ) {
+            onSetLanguage(Language.findByIndexOrDefault(it))
+        }
 
-            // UI Theme
-            SettingsSingleChoiceItem(
-                title = stringResource(id = R.string.settings_set_theme),
-                items = UiTheme.values().map { it.getLabel(LocalContext.current) }.toList(),
-                selectedIndex = UiTheme.values().indexOf(theme),
-            ) {
-                onSetUiTheme(UiTheme.findByIndexOrDefault(it))
-            }
+        // Use Local
+        SettingsCheckItem(
+            text = stringResource(id = R.string.settings_set_use_as_local),
+            checked = useAsLocal,
+        ) {
+            onSetUseAsLocal(it)
+        }
 
-            // Language
-            SettingsSingleChoiceItem(
-                title = stringResource(id = R.string.settings_set_language),
-                items = Language.values().map { it.getLabel(LocalContext.current) }.toList(),
-                selectedIndex = Language.values().indexOf(language),
-            ) {
-                onSetLanguage(Language.findByIndexOrDefault(it))
-            }
+        // Information Title
+        TitleItem(text = stringResource(id = R.string.settings_section_info))
 
-            // Use Local
-            SettingsCheckItem(
-                text = stringResource(id = R.string.settings_set_use_as_local),
-                checked = useAsLocal,
-            ) {
-                onSetUseAsLocal(it)
-            }
+        val context = LocalContext.current
 
-            // Information Title
-            TitleItem(text = stringResource(id = R.string.settings_section_info))
+        // Libraries
+        SettingsItem(text = stringResource(id = R.string.settings_info_libraries)) {
+            onShowLibraries()
+        }
 
-            val context = LocalContext.current
+        // Contributors
+        SettingsItem(text = stringResource(id = R.string.settings_info_contributors)) {
+            context.openUrl("https://github.com/wa2c/cifs-documents-provider/graphs/contributors")
+        }
 
-            // Contributors
-            SettingsItem(text = stringResource(id = R.string.settings_info_contributors)) {
-                context.openUrl("https://github.com/wa2c/cifs-documents-provider/graphs/contributors")
-            }
-
-            // Libraries
-            SettingsItem(text = stringResource(id = R.string.settings_info_libraries)) {
-                showLibraries.value = true
-            }
-
-            // App
-            SettingsItem(text = stringResource(id = R.string.settings_info_app)) {
-                context.startActivity(
-                    Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.parse("package:" + context.packageName)
-                    )
+        // App
+        SettingsItem(text = stringResource(id = R.string.settings_info_app)) {
+            context.startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + context.packageName)
                 )
-            }
+            )
         }
     }
 }
