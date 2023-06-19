@@ -4,7 +4,6 @@ plugins {
     id(Deps.App.kotlinKaptPlugin)
     id(Deps.App.daggerHiltPlugin)
     id(Deps.App.parcelizePlugin)
-    id(Deps.Ui.navigationSafeargsPlugin)
     id(Deps.Util.licensePlugin)
 }
 
@@ -62,36 +61,26 @@ dependencies {
 
     // UI
 
+    // Compose
     val composeBom = platform(Deps.Ui.composeBom)
     implementation(composeBom)
     testImplementation(composeBom)
     androidTestImplementation(composeBom)
-
     implementation(Deps.Ui.composeUi)
     implementation(Deps.Ui.composeMaterial)
     implementation(Deps.Ui.composeUiPreview)
     debugImplementation(Deps.Ui.composeUiTooling)
     implementation(Deps.Ui.composeReorderable)
-
-    implementation(Deps.Ui.constraintLayout)
-    implementation(Deps.Ui.material)
-    implementation(Deps.Ui.activityKtx)
-    implementation(Deps.Ui.fragmentKtx)
+    implementation(Deps.Ui.systemUiController)
     // Lifecycle
-    implementation(Deps.Ui.lifecycleViewModel )
-    implementation(Deps.Ui.lifecycleRuntime)
     implementation(Deps.Ui.lifecycleViewModelCompose)
     implementation(Deps.Ui.lifecycleRuntimeCompose)
     // Navigation
-    implementation(Deps.Ui.navigationUi)
-    implementation(Deps.Ui.navigationFragmentKtx)
     implementation(Deps.Ui.navigationCompose)
     implementation(Deps.Ui.navigationComposeHilt)
 
     // Util
 
-    // Localization
-    implementation(Deps.Util.localization)
     // OSS License
     implementation(Deps.Util.license)
     implementation(Deps.Util.licenseCompose)

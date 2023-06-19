@@ -1,35 +1,26 @@
 package com.wa2c.android.cifsdocumentsprovider
 
+import android.app.Application
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
-import com.akexorcist.localizationactivity.BuildConfig
-import com.akexorcist.localizationactivity.ui.LocalizationApplication
 import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
+import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import java.util.*
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltAndroidApp
-class App: LocalizationApplication() {
+class App: Application() {
 
     @Inject
     lateinit var repository: AppRepository
-
-    override fun getDefaultLanguage(context: Context): Locale {
-        return Locale.getDefault()
-    }
 
     override fun onCreate() {
         super.onCreate()
         initLog(BuildConfig.DEBUG)
         runBlocking {
             repository.migrate()
-            AppCompatDelegate.setDefaultNightMode(repository.uiThemeFlow.first().mode) // Set theme
         }
     }
 }

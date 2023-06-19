@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -21,13 +20,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -47,16 +46,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.toast
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 /**
  * Settings Screen
@@ -67,6 +66,8 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
     val showLibraries = remember { mutableStateOf(false) }
@@ -87,6 +88,20 @@ fun SettingsScreen(
         showLibraries = showLibraries.value,
         onClickLibraries = {
             showLibraries.value = true
+        },
+        onStartIntent = { intent ->
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                scope.showPopup(
+                    snackbarHostState = snackbarHostState,
+                    popupMessage = PopupMessage.Resource(
+                        res = R.string.provider_error_message,
+                        type = PopupMessageType.Error,
+                        error = e
+                    )
+                )
+            }
         },
         onClickBack = {
             if (showLibraries.value) {
@@ -113,6 +128,7 @@ private fun SettingsScreenContainer(
     onSetUseAsLocal: (Boolean) -> Unit,
     showLibraries: Boolean,
     onClickLibraries: () -> Unit,
+    onStartIntent: (Intent) -> Unit,
     onClickBack: () -> Unit,
 ) {
     Scaffold(
@@ -151,7 +167,8 @@ private fun SettingsScreenContainer(
                     onSetLanguage = onSetLanguage,
                     useAsLocal = useAsLocal,
                     onSetUseAsLocal = onSetUseAsLocal,
-                    onShowLibraries = { onClickLibraries() }
+                    onShowLibraries = onClickLibraries,
+                    onStartIntent = onStartIntent,
                 )
             }
         }
@@ -173,7 +190,10 @@ private fun SettingsList(
     useAsLocal: Boolean,
     onSetUseAsLocal: (Boolean) -> Unit,
     onShowLibraries: () -> Unit,
+    onStartIntent: (Intent) -> Unit,
 ) {
+    val context = LocalContext.current
+
     // Screen
     Column {
         // Settings Title
@@ -182,7 +202,7 @@ private fun SettingsList(
         // UI Theme
         SettingsSingleChoiceItem(
             title = stringResource(id = R.string.settings_set_theme),
-            items = UiTheme.values().map { it.getLabel(LocalContext.current) }.toList(),
+            items = UiTheme.values().map { it.getLabel(context) }.toList(),
             selectedIndex = UiTheme.values().indexOf(theme),
         ) {
             onSetUiTheme(UiTheme.findByIndexOrDefault(it))
@@ -191,7 +211,7 @@ private fun SettingsList(
         // Language
         SettingsSingleChoiceItem(
             title = stringResource(id = R.string.settings_set_language),
-            items = Language.values().map { it.getLabel(LocalContext.current) }.toList(),
+            items = Language.values().map { it.getLabel(context) }.toList(),
             selectedIndex = Language.values().indexOf(language),
         ) {
             onSetLanguage(Language.findByIndexOrDefault(it))
@@ -208,7 +228,7 @@ private fun SettingsList(
         // Information Title
         TitleItem(text = stringResource(id = R.string.settings_section_info))
 
-        val context = LocalContext.current
+
 
         // Libraries
         SettingsItem(text = stringResource(id = R.string.settings_info_libraries)) {
@@ -217,12 +237,14 @@ private fun SettingsList(
 
         // Contributors
         SettingsItem(text = stringResource(id = R.string.settings_info_contributors)) {
-            context.openUrl("https://github.com/wa2c/cifs-documents-provider/graphs/contributors")
+            onStartIntent(
+                Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/wa2c/cifs-documents-provider/graphs/contributors"))
+            )
         }
 
         // App
         SettingsItem(text = stringResource(id = R.string.settings_info_app)) {
-            context.startActivity(
+            onStartIntent(
                 Intent(
                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                     Uri.parse("package:" + context.packageName)
@@ -405,13 +427,5 @@ private fun SettingsSingleChoiceItemPreview() {
             text = "Settings Item",
             checked = true,
         ) {}
-    }
-}
-
-private fun Context.openUrl(url: String) {
-    try {
-        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-    } catch (e: Exception) {
-        toast(R.string.provider_error_message)
     }
 }

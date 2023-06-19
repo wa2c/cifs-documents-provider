@@ -40,30 +40,20 @@ object Deps {
     }
 
     object Ui {
-        const val activityKtx = "androidx.activity:activity-ktx:1.7.1"
-        const val fragmentKtx = "androidx.fragment:fragment-ktx:1.5.7"
-        const val material = "com.google.android.material:material:1.8.0"
-        const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
-
         const val composeBom = "androidx.compose:compose-bom:2023.01.00"
         const val composeUi = "androidx.compose.ui:ui"
         const val composeMaterial = "androidx.compose.material3:material3"
         const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"
         const val composeUiTooling = "androidx.compose.ui:ui-tooling"
-
         const val composeReorderable = "org.burnoutcrew.composereorderable:reorderable:0.9.6"
+        const val systemUiController = "com.google.accompanist:accompanist-systemuicontroller:0.30.1"
 
         private const val lifeCycleVersion = "2.6.1"
-        const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
-        const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
         const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion"
         const val lifecycleRuntimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:$lifeCycleVersion"
 
         private const val navigationVersion = "2.5.3"
-        const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
-        const val navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-        const val navigationFragmentKtx = "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
         const val navigationCompose = "androidx.navigation:navigation-compose:$navigationVersion"
         const val navigationComposeHilt = "androidx.hilt:hilt-navigation-compose:1.0.0"
     }
@@ -90,7 +80,6 @@ object Deps {
 
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
-        const val localization = "com.akexorcist:localization:1.2.11"
         private const val licenseVersion = "10.6.3"
         const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
         const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"

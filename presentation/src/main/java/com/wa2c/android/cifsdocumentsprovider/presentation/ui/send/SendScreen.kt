@@ -22,7 +22,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -46,14 +45,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
 @Composable
@@ -66,7 +63,7 @@ fun SendScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
-    val showFinishDialog = remember { mutableStateOf(false) }
+    val showCloseDialog = remember { mutableStateOf(false) }
     val isFileBrowserShown = remember { mutableStateOf(false) }
 
     /** Single URI result launcher */
@@ -128,10 +125,10 @@ fun SendScreen(
         onClickRetry = { viewModel.onClickRetry(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
         onClickCancelAll = { viewModel.onClickCancelAll() },
-        onClickClose = { showFinishDialog.value = true },
+        onClickClose = { showCloseDialog.value = true },
     )
 
-    if (showFinishDialog.value) {
+    if (showCloseDialog.value) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -139,72 +136,15 @@ fun SendScreen(
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                showFinishDialog.value = false
+                showCloseDialog.value = false
             },
-            onDismiss = { showFinishDialog.value = false }
+            onDismiss = { showCloseDialog.value = false }
         ) {
             Text(stringResource(id = R.string.send_exit_confirmation_message))
         }
     }
 
 }
-
-//@Composable
-//fun ReceiveUri(
-//    viewModel: SendViewModel,
-//    onNavigateFinish: () -> Unit,
-//    onSendUri: (sourceUris: List<Uri>, targetUri: Uri) -> Unit,
-//) {
-//    val uriList = viewModel.receivedUriList.collectAsStateWithLifecycle().value
-//
-//    /** Single URI result launcher */
-//    val singleUriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
-//        if (uri == null) {
-//            onNavigateFinish()
-//            return@rememberLauncherForActivityResult
-//        }
-//
-//        val source = uriList.firstOrNull() ?: run {
-//            onNavigateFinish()
-//            return@rememberLauncherForActivityResult
-//        }
-//
-//        onSendUri(source, uri)
-//        //viewModel.sendUri(listOf(source), uri)
-//    }
-//
-//    /** Multiple URI result launcher */
-//    val multipleUriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-//        if (uri == null) {
-//            onNavigateFinish()
-//            return@rememberLauncherForActivityResult
-//        }
-//
-//        val source = uriList.toList().ifEmpty {
-//            onNavigateFinish()
-//            return@rememberLauncherForActivityResult
-//        }
-//
-//        onSendUri(source, uri)
-//        //viewModel.sendUri(source, uri)
-//    }
-//
-//
-//    when {
-//        uriList.size == 1 -> {
-//            // Single
-//            SideEffect {
-//                singleUriLauncher.launch(uriList.first().fileName)
-//            }
-//        }
-//        uriList.size > 1 -> {
-//            // Multiple
-//            SideEffect {
-//                multipleUriLauncher.launch(uriList.first())
-//            }
-//        }
-//    }
-//}
 
 /**
  * Send Screen

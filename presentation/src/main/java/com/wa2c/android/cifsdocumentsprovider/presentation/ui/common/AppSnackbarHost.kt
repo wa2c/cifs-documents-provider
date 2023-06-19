@@ -12,7 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -63,7 +62,7 @@ fun RowScope.MessageIcon(type: PopupMessageType?) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_check_ok),
                 contentDescription = "Success",
-                tint = colorResource(id = R.color.ic_check_ok),
+                tint = Theme.Colors.CheckOk,
                 modifier = Modifier
                     .padding(end = Theme.SizeM)
                     .align(Alignment.CenterVertically)
@@ -74,7 +73,7 @@ fun RowScope.MessageIcon(type: PopupMessageType?) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_check_wn),
                 contentDescription = "Warning",
-                tint = colorResource(id = R.color.ic_check_wn),
+                tint = Theme.Colors.CheckWn,
                 modifier = Modifier
                     .padding(end = Theme.SizeM)
                     .align(Alignment.CenterVertically)
@@ -85,7 +84,7 @@ fun RowScope.MessageIcon(type: PopupMessageType?) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_check_ng),
                 contentDescription = "Error",
-                tint = colorResource(id = R.color.ic_check_ng),
+                tint = Theme.Colors.CheckNg,
                 modifier = Modifier
                     .padding(end = Theme.SizeM)
                     .align(Alignment.CenterVertically)

@@ -55,11 +55,6 @@ dependencies {
 
     implementation(Deps.App.daggerHilt)
     kapt(Deps.App.daggerHiltCompiler)
-
-    // Util
-
-    // Localization
-    implementation(Deps.Util.localization)
 }
 
 kapt {

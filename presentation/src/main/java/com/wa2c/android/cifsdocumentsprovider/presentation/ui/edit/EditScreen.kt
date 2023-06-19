@@ -38,7 +38,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -53,15 +52,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -88,18 +82,15 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageSnackbarVisual
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
@@ -304,7 +295,7 @@ private fun EditScreenContainer(
                     Modifier
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
-                        .padding(Theme.ScreenMargin)
+                        .padding(Theme.Sizes.ScreenMargin)
                         .weight(1f)
                 ) {
                     InputText(
@@ -467,7 +458,7 @@ private fun EditScreenContainer(
 
                 Column(
                     modifier = Modifier
-                        .padding(Theme.ScreenMargin)
+                        .padding(Theme.Sizes.ScreenMargin)
                 ) {
                     OutlinedButton(
                         onClick = onClickCheckConnection,
@@ -508,7 +499,7 @@ private fun EditScreenContainer(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Theme.LoadingBackgroundColor)
+                        .background(Theme.Colors.LoadingBackground)
                         .clickable(
                             indication = null,
                             interactionSource = interactionSource,

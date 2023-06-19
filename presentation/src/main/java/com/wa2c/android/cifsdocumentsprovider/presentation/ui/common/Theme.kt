@@ -11,17 +11,74 @@ import androidx.compose.ui.unit.dp
 
 object Theme {
 
-    val DividerColor = Color(0xFFBDBDBD)
-    val LoadingBackgroundColor = Color(0x80000000)
-
     private val DarkColors = darkColorScheme(
         primary = Color(0xFFFF9800),
         onPrimary = Color(0xFFFFFFFF),
+
+// for debug
+//        onPrimaryContainer = Color.Red,
+//        inversePrimary = Color.Red,
+//        secondary = Color.Red,
+//        onSecondary = Color.Red,
+//        secondaryContainer = Color.Red,
+//        onSecondaryContainer = Color.Red,
+//        tertiary = Color.Red,
+//        onTertiary = Color.Red,
+//        tertiaryContainer = Color.Red,
+//        onTertiaryContainer = Color.Red,
+//        background =Color.Red,
+//        onBackground = Color.Red,
+//        surface = Color.Red,
+//        onSurface =Color.Red,
+//        surfaceVariant = Color.Red,
+//        onSurfaceVariant = Color.Red,
+//        surfaceTint = Color.Red,
+//        inverseSurface = Color.Red,
+//        inverseOnSurface = Color.Red,
+//        error = Color.Red,
+//        onError = Color.Red,
+//        errorContainer = Color.Red,
+//        onErrorContainer = Color.Red,
+//        outline = Color.Red,
+//        outlineVariant = Color.Red,
+//        scrim = Color.Red,
     )
     private val LightColors = lightColorScheme(
         primary = Color(0xFFFF9800),
         onPrimary = Color(0xFFFFFFFF),
     )
+
+    object Colors {
+        val StatusBackground = Color(0xFFF57C00)
+
+        /** Check result OK */
+        val CheckOk = Color(0xFF30C030)
+        /** Check result Warning */
+        val CheckWn = Color(0xFFC0C030)
+        /** Check result Ng */
+        val CheckNg = Color(0xFFC03030)
+
+        /** Divider */
+        val Divider = Color(0xFFBDBDBD)
+        /** Loading backgrouind */
+        val LoadingBackground = Color(0x80000000)
+    }
+
+    object Sizes {
+        val SS = 4.dp
+        val S = 8.dp
+        val M = 16.dp
+        val L = 24.dp
+        val LL = 32.dp
+
+        val ScreenMargin = SizeM
+
+    }
+
+
+    val SizeSS = 4.dp
+    val SizeS = 8.dp
+    val SizeM = 16.dp
 
 
 //    private val Typography = Typography(
@@ -54,14 +111,5 @@ object Theme {
             Surface(content = content)
         }
     }
-
-
-    val SizeSS = 4.dp
-    val SizeS = 8.dp
-    val SizeM = 16.dp
-    val SizeL = 24.dp
-    val SizeLL = 32.dp
-
-    val ScreenMargin = SizeM
 
 }
