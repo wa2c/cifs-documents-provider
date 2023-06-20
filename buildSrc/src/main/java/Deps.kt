@@ -40,7 +40,7 @@ object Deps {
     }
 
     object Ui {
-        const val composeBom = "androidx.compose:compose-bom:2023.01.00"
+        const val composeBom = "androidx.compose:compose-bom:2023.06.00"
         const val composeUi = "androidx.compose.ui:ui"
         const val composeMaterial = "androidx.compose.material3:material3"
         const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"

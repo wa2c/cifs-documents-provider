@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
 import android.os.Parcelable
 import androidx.annotation.StringRes
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarVisuals
@@ -75,7 +74,6 @@ enum class PopupMessageType {
     Error,
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 fun CoroutineScope.showPopup(snackbarHostState: SnackbarHostState, popupMessage: PopupMessage?) {
     launch {
         snackbarHostState.currentSnackbarData?.dismiss()

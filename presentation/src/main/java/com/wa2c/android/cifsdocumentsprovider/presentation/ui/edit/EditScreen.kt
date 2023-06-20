@@ -522,7 +522,7 @@ private fun EditScreenContainer(
 /**
  * Input text
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun InputText(
     title: String,
@@ -548,8 +548,8 @@ fun InputText(
             label = { Text(title) },
             enabled = enabled,
             placeholder = { Text(hint) },
-            onValueChange = {
-                state.value = if (keyboardOptions.keyboardType == KeyboardType.Number) it.filter { it.isDigit() } else it
+            onValueChange = { value ->
+                state.value = if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value
             },
             keyboardOptions = keyboardOptions,
             visualTransformation = if (keyboardOptions.keyboardType == KeyboardType.Password) {
@@ -595,7 +595,6 @@ fun InputText(
 /**
  * Input Option
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> InputOption(
     title: String,

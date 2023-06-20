@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.util.Consumer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -36,12 +37,7 @@ class MainActivity : AppCompatActivity() {
         AppCompatDelegate.setDefaultNightMode(mainViewModel.uiThemeFlow.value.mode) // Set theme
 
         setContent {
-            val isDark = mainViewModel.uiThemeFlow.isDark() // FIXME
-            val systemUiController = rememberSystemUiController()
-            systemUiController.setStatusBarColor(Theme.Colors.StatusBackground)
-
             val navController = rememberNavController()
-
             DisposableEffect(navController) {
                 val consumer = Consumer<Intent> {
                     navController.handleDeepLink(it)
@@ -52,8 +48,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(Theme.Colors.StatusBackground)
+
             Theme.AppTheme(
-                darkTheme = isDark
+                darkTheme = mainViewModel.uiThemeFlow.collectAsStateWithLifecycle().value.isDark()
             ) {
                 MainNavHost(
                     navController = navController,

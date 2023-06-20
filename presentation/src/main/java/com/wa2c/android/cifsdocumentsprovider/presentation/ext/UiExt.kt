@@ -3,8 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 import android.content.Context
 import android.text.format.DateUtils
 import android.text.format.Formatter
-import android.widget.Toast
-import androidx.annotation.StringRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -59,16 +57,6 @@ fun <T, K> StateFlow<T>.mapState(
         transform(it)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, transform(this.value))
 }
-
-
-/**
- * Show toast
- */
-fun Context.toast(@StringRes textId: Int) {
-    Toast.makeText(this, textId, Toast.LENGTH_SHORT).show()
-}
-
-
 
 /**
  * Summary Text
