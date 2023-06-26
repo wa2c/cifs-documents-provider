@@ -131,20 +131,15 @@ fun HostScreen(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
-            when (event) {
-                is HostNav.NetworkError -> {
-                    scope.showPopup(
-                        snackbarHostState = snackbarHostState,
-                        popupMessage = PopupMessage.Resource(
-                            res = R.string.host_error_network,
-                            type = PopupMessageType.Error,
-                            error = event.error
-                        )
-                    )
-                }
-                is HostNav.SelectItem -> TODO()
-            }
+        viewModel.result.collectIn(lifecycleOwner) {
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                popupMessage = PopupMessage.Resource(
+                    res = R.string.host_error_network,
+                    type = PopupMessageType.Error,
+                    error = it.exceptionOrNull()
+                )
+            )
         }
     }
 }

@@ -15,9 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -47,11 +47,17 @@ class EditViewModel @Inject constructor(
         }
     }
 
-    private val _navigationEvent = MutableSharedFlow<EditNav>()
-    val navigationEvent: SharedFlow<EditNav> = _navigationEvent
+    private val _navigateSearchHost = MutableSharedFlow<Result<CifsConnection>>()
+    val navigateSearchHost = _navigateSearchHost.asSharedFlow()
+
+    private val _navigateSelectFolder = MutableSharedFlow<Result<CifsConnection>>()
+    val navigateSelectFolder = _navigateSelectFolder.asSharedFlow()
+
+    private val _result = MutableSharedFlow<Result<Unit>>()
+    val result = _result.asSharedFlow()
 
     private val _isBusy = MutableStateFlow(false)
-    val isBusy: StateFlow<Boolean> = _isBusy
+    val isBusy = _isBusy.asStateFlow()
 
     var name = MutableStateFlow<String?>(null)
     var storage = MutableStateFlow<StorageType>(StorageType.default)
@@ -140,23 +146,26 @@ class EditViewModel @Inject constructor(
      * Check connection
      */
     fun onClickCheckConnection() {
-        _isBusy.value = true
         launch {
+            _isBusy.emit(true)
             runCatching {
                 _connectionResult.emit(null)
-                withContext(Dispatchers.IO) {
-                   createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
-                }
+               createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
             }.getOrNull().let {
                 _connectionResult.emit(it ?: ConnectionResult.Failure())
-                _isBusy.value = false
+                _isBusy.emit(false)
             }
         }
     }
 
     fun onClickSearchHost() {
         launch {
-            _navigationEvent.emit(EditNav.SearchHost(createCifsConnection(false)))
+            val result = createCifsConnection(false)?.let {
+                Result.success(it)
+            } ?: let {
+                Result.failure(Exception())
+            }
+            _navigateSearchHost.emit(result)
         }
     }
 
@@ -164,8 +173,8 @@ class EditViewModel @Inject constructor(
      * Select Folder Click
      */
     fun onClickSelectFolder() {
-        _isBusy.value = true
         launch {
+            _isBusy.emit(true)
             runCatching {
                 withContext(Dispatchers.IO) {
                     val folderConnection = createCifsConnection(false) ?: throw IOException()
@@ -173,7 +182,7 @@ class EditViewModel @Inject constructor(
                     // use target folder
                     val folderResult = cifsRepository.checkConnection(folderConnection)
                     if (folderResult is ConnectionResult.Success) {
-                        _navigationEvent.emit(EditNav.SelectFolder(folderConnection))
+                        _navigateSelectFolder.emit(Result.success(folderConnection))
                         return@withContext folderResult
                     } else if (folderResult is ConnectionResult.Failure) {
                         return@withContext folderResult
@@ -183,32 +192,15 @@ class EditViewModel @Inject constructor(
                     val rootConnection = folderConnection.copy(folder = null)
                     val rootResult = cifsRepository.checkConnection(rootConnection)
                     if (rootResult == ConnectionResult.Success) {
-                        _navigationEvent.emit(EditNav.SelectFolder(rootConnection))
+                        _navigateSelectFolder.emit(Result.success(folderConnection))
                         return@withContext folderResult // Show target folder warning
                     }
                     return@withContext rootResult
                 }
             }.getOrNull().let {
                 _connectionResult.emit(it ?: ConnectionResult.Failure())
-                _isBusy.value = false
+                _isBusy.emit(false)
             }
-        }
-    }
-
-    /**
-     * Set host result.
-     */
-    fun setHostResult(hostText: String?) {
-        host.value = hostText
-    }
-
-    /**
-     * Set folder result.
-     */
-    fun setFolderResult(path: String?) {
-        launch {
-            folder.value = path
-            _connectionResult.emit(if (path != null) ConnectionResult.Success else ConnectionResult.Failure())
         }
     }
 
@@ -217,15 +209,15 @@ class EditViewModel @Inject constructor(
      */
     fun onClickDelete() {
         launch {
+            _isBusy.emit(true)
             runCatching {
                 cifsRepository.deleteConnection(currentId)
             }.onSuccess {
-                //_navigationEvent.emit(EditNav.SaveResult(null))
-                _navigationEvent.emit(EditNav.Success)
-                _isBusy.value = false
+                _result.emit(Result.success(Unit))
+                _isBusy.emit(false)
             }.onFailure {
-                _navigationEvent.emit(EditNav.Failure(it))
-                _isBusy.value = false
+                _result.emit(Result.failure(it))
+                _isBusy.emit(false)
             }
         }
     }
@@ -234,8 +226,8 @@ class EditViewModel @Inject constructor(
      * Save Click
      */
     fun onClickSave() {
-        _isBusy.value = true
         launch {
+            _isBusy.emit(true)
             runCatching {
                 createCifsConnection(isNew)?.let { con ->
                     if (cifsRepository.loadConnection().filter { it.id != con.id }
@@ -248,12 +240,11 @@ class EditViewModel @Inject constructor(
                     initConnection = con
                 } ?: throw IOException()
             }.onSuccess {
-                //_navigationEvent.emit(EditNav.SaveResult(null))
-                _navigationEvent.emit(EditNav.Success)
-                _isBusy.value = false
+                _result.emit(Result.success(Unit))
+                _isBusy.emit(false)
             }.onFailure {
-                _navigationEvent.emit(EditNav.Failure(it))
-                _isBusy.value = false
+                _result.emit(Result.failure(it))
+                _isBusy.emit(false)
             }
         }
     }

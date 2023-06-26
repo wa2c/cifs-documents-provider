@@ -29,9 +29,6 @@ class FolderViewModel @Inject constructor(
 
     private val paramUri: String = checkNotNull(savedStateHandle[FolderScreenParamUri])
 
-    private val _navigationEvent = MutableSharedFlow<FolderNav>()
-    val navigationEvent: SharedFlow<FolderNav> = _navigationEvent
-
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -40,6 +37,9 @@ class FolderViewModel @Inject constructor(
 
     private val _currentFile = MutableStateFlow<CifsFile?>(null)
     val currentFile: StateFlow<CifsFile?> = _currentFile
+
+    private val _result = MutableSharedFlow<Result<Unit>>()
+    val result: SharedFlow<Result<Unit>> = _result
 
     init {
         launch {
@@ -60,6 +60,7 @@ class FolderViewModel @Inject constructor(
 
     /**
      * on up folder
+     * @return true if not root
      */
     fun onUpFolder(): Boolean {
         if (currentFile.value?.isRoot == true) return false
@@ -90,34 +91,26 @@ class FolderViewModel @Inject constructor(
      * Load list
      */
     private suspend fun loadList(file: CifsFile) {
-        _isLoading.value = true
+        _isLoading.emit(true)
         runCatching {
             cifsRepository.getFileChildren(file.uri.toString())
         }.onSuccess { list ->
-            _fileList.value = list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
-            _currentFile.value = file
-            _isLoading.value = false
+            _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
+            _currentFile.emit(file)
+            _isLoading.emit(false)
         }.onFailure {
-            logE(it)
-            _fileList.value = emptyList()
-            _currentFile.value = file
-            _isLoading.value = false
-        }
-    }
-
-    /**
-     * On click set
-     */
-    fun onClickSet() {
-        logD("onClickSetManually")
-        launch {
-            _navigationEvent.emit(FolderNav.SetFolder(currentFile.value))
+            _result.emit(Result.failure(it))
+            _fileList.emit(emptyList())
+            _currentFile.emit(file)
+            _isLoading.emit(false)
         }
     }
 
     override fun onCleared() {
-        runBlocking { cifsRepository.closeAllSessions() }
-        _isLoading.value = false
+        runBlocking {
+            cifsRepository.closeAllSessions()
+            _isLoading.emit(false)
+        }
         super.onCleared()
     }
 

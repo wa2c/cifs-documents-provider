@@ -32,9 +32,6 @@ class HostViewModel @Inject constructor(
     private val paramId: String? = savedStateHandle[HostScreenParamId]
     val isInit = paramId.isNullOrEmpty()
 
-    private val _navigationEvent = MutableSharedFlow<HostNav>()
-    val navigationEvent: SharedFlow<HostNav> = _navigationEvent
-
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
@@ -44,11 +41,15 @@ class HostViewModel @Inject constructor(
     private val _hostDataList = MutableStateFlow<List<HostData>>(mutableListOf())
     val hostDataList = _hostDataList.asStateFlow()
 
+    private val _result = MutableSharedFlow<Result<Unit>>()
+    val result: SharedFlow<Result<Unit>> = _result
+
+
     init {
         launch {
             hostRepository.hostFlow.collect {
                 if (it == null) {
-                    _isLoading.value = false
+                    _isLoading.emit(false)
                 } else {
                     setList(_hostDataList.value + it)
                 }
@@ -70,7 +71,7 @@ class HostViewModel @Inject constructor(
 
     fun sort(sortType: HostSortType) {
         launch {
-            _sortType.value = sortType
+            _sortType.emit(sortType)
             hostRepository.setSortType(sortType)
             setList(hostDataList.value)
         }
@@ -81,11 +82,12 @@ class HostViewModel @Inject constructor(
             runCatching {
                 hostRepository.stopDiscovery()
                 _hostDataList.emit(emptyList())
-                _isLoading.value = true
+                _isLoading.emit(true)
                 hostRepository.startDiscovery()
             }.onFailure {
-                _navigationEvent.emit(HostNav.NetworkError(it))
-                _isLoading.value = false
+                hostRepository.stopDiscovery()
+                _result.emit(Result.failure(it))
+                _isLoading.emit(false)
             }
         }
     }
@@ -98,7 +100,7 @@ class HostViewModel @Inject constructor(
             }.onFailure {
                 //_navigationEvent.emit(HostNav.NetworkError(it))
             }
-            _isLoading.value = false
+            _isLoading.emit(false)
         }
     }
 

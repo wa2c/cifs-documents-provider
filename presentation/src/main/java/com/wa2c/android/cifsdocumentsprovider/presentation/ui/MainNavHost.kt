@@ -44,13 +44,13 @@ internal fun MainNavHost(
                 onOpenFile = { uris ->
                     onOpenFile(uris)
                 },
-                onClickSettings = {
+                onNavigateSettings = {
                     navController.navigate(route = SettingsScreenName)
                 },
-                onClickEdit = { connection ->
+                onNavigateEdit = { connection ->
                     navController.navigate(route = EditScreenRouteName + "?$EditScreenParamId=${connection.id}")
                 },
-                onClickAdd = {
+                onNavigateHost = {
                     navController.navigate(route = HostScreenName)
                 }
             )

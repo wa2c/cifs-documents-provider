@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import android.content.res.Configuration
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
@@ -26,7 +27,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -39,12 +42,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 /**
  * Folder Screen
@@ -57,6 +64,7 @@ fun FolderScreen(
     onNavigateSet: (CifsFile) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val fileList = viewModel.fileList.collectAsStateWithLifecycle()
     val currentFile = viewModel.currentFile.collectAsStateWithLifecycle()
     val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
@@ -66,11 +74,24 @@ fun FolderScreen(
         fileList = fileList.value,
         currentFile = currentFile.value,
         isLoading = isLoading.value,
-        onClickBack = onNavigateBack,
+        onClickBack = { if (!viewModel.onUpFolder()) { onNavigateBack() } },
         onClickReload = { viewModel.onClickReload() },
         onClickItem = { viewModel.onSelectFolder(it) },
         onClickSet = { viewModel.currentFile.value?.let { onNavigateSet(it) } },
     )
+
+    LaunchedEffect(Unit) {
+        viewModel.result.collectIn(lifecycleOwner) {
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                popupMessage = PopupMessage.Resource(
+                    res = R.string.host_error_network,
+                    type = PopupMessageType.Error,
+                    error = it.exceptionOrNull()
+                )
+            )
+        }
+    }
 }
 
 /**
@@ -158,6 +179,9 @@ fun FolderScreenContainer(
             }
         }
     }
+
+    // Back button
+    BackHandler { onClickBack() }
 }
 
 @Composable
@@ -182,7 +206,6 @@ private fun FolderItem(
             modifier = Modifier
                 .padding(start = Theme.SizeS)
         )
-
     }
 }
 

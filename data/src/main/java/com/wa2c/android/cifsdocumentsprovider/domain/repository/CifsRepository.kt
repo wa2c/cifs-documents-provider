@@ -52,7 +52,7 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    suspend fun isExists(): Boolean {
+    suspend fun isConnectionExists(): Boolean {
         return withContext(dispatcher) {
             connectionSettingDao.getCount() > 0
         }

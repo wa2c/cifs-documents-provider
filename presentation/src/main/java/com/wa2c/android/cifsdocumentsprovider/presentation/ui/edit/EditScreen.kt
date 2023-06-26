@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -185,6 +186,17 @@ fun EditScreen(
     }
 
     LaunchedEffect(Unit) {
+        val showError = fun (@StringRes stringRes: Int, error: Throwable?) {
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                popupMessage = PopupMessage.Resource(
+                    res = stringRes,
+                    type = PopupMessageType.Error,
+                    error = error
+                )
+            )
+        }
+
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             scope.showPopup(
                 snackbarHostState = snackbarHostState,
@@ -198,27 +210,33 @@ fun EditScreen(
             )
         }
 
-        viewModel.navigationEvent.collectIn(lifecycleOwner) { event ->
-            when (event) {
-                is EditNav.Back -> onNavigateBack()
-                is EditNav.SearchHost -> { onNavigateSearchHost(event.connection) }
-                is EditNav.SelectFolder -> { onNavigateSelectFolder(event.connection) }
-                is EditNav.Success -> { onNavigateBack() }
-                is EditNav.Failure -> {
-                    val messageRes = if (event.error is IllegalArgumentException) {
-                        R.string.edit_save_duplicate_message // URI duplicated
-                    } else {
-                        R.string.edit_save_ng_message // Host empty
-                    }
-                    scope.showPopup(
-                        snackbarHostState = snackbarHostState,
-                        popupMessage = PopupMessage.Resource(
-                            res = messageRes,
-                            type = PopupMessageType.Error,
-                            error = event.error
-                        )
-                    )
+        viewModel.navigateSearchHost.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let { onNavigateSearchHost(it) }
+            } else {
+                showError(R.string.edit_save_ng_message, result.exceptionOrNull())
+            }
+        }
+
+        viewModel.navigateSelectFolder.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let { onNavigateSelectFolder(it) }
+            } else {
+                showError(R.string.provider_error_message, result.exceptionOrNull())
+            }
+        }
+
+        viewModel.result.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                onNavigateBack()
+            } else {
+                val error = result.exceptionOrNull()
+                val messageRes = if (error is IllegalArgumentException) {
+                    R.string.edit_save_duplicate_message // URI duplicated
+                } else {
+                    R.string.edit_save_ng_message // Host empty
                 }
+                showError(messageRes, result.exceptionOrNull())
             }
         }
     }
@@ -274,14 +292,6 @@ private fun EditScreenContainer(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-
-//        val autofillNodePassword = AutofillNode(
-//            autofillTypes = listOf(AutofillType.Password),
-//            onFill = { }
-//        )
-//        //val autofill = LocalAutofill.current
-//        LocalAutofillTree.current += autofillNodePassword
-
         Box(
             modifier = Modifier
                 .fillMaxHeight()

@@ -50,6 +50,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessag
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import kotlinx.coroutines.isActive
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
@@ -62,9 +63,9 @@ import org.burnoutcrew.reorderable.reorderable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
-    onClickSettings: () -> Unit,
-    onClickEdit: (CifsConnection) -> Unit,
-    onClickAdd: () -> Unit,
+    onNavigateSettings: () -> Unit,
+    onNavigateEdit: (CifsConnection) -> Unit,
+    onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -77,54 +78,35 @@ fun HomeScreen(
     HomeScreenContainer(
         snackbarHostState = snackbarHostState,
         connectionList = connectionList.value,
-        onClickItem = { viewModel.onClickItem(it) },
-        onClickAddItem = { viewModel.onClickAddItem() },
-        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
-        onClickMenuOpenFile = { fileOpenLauncher.launch(arrayOf("*/*")) },
-        onClickMenuSettings = { onClickSettings() }
-    )
-    
-    LaunchedEffect(Unit) {
-        viewModel.navigationEvent.collect { event ->
-            when (event) {
-                is HomeNav.Edit -> {
-                    event.connection?.let(onClickEdit)
-                }
-                is HomeNav.AddItem -> {
-                    onClickAdd()
-                }
-                is HomeNav.OpenFile -> {
-                    if (event.isSuccess) {
-                        // Open file
-                        try {
-                            fileOpenLauncher.launch(arrayOf("*/*"))
-                        } catch (e: Exception) {
-                            scope.showPopup(
-                                snackbarHostState = snackbarHostState,
-                                popupMessage = PopupMessage.Resource(
-                                    res = R.string.provider_error_message,
-                                    type = PopupMessageType.Error,
-                                    error = e,
-                                )
-                            )
-                        }
-                    } else {
-                        scope.showPopup(
-                            snackbarHostState = snackbarHostState,
-                            popupMessage = PopupMessage.Resource(
-                                res = R.string.home_open_file_ng_message,
-                                type = PopupMessageType.Warning,
-                            )
+        onClickMenuOpenFile = {
+            if (connectionList.value.isNotEmpty()) {
+                try {
+                    fileOpenLauncher.launch(arrayOf("*/*"))
+                } catch (e: Exception) {
+                    scope.showPopup(
+                        snackbarHostState = snackbarHostState,
+                        popupMessage = PopupMessage.Resource(
+                            res = R.string.provider_error_message,
+                            type = PopupMessageType.Error,
+                            error = e,
                         )
-                    }
+                    )
                 }
-                is HomeNav.OpenSettings -> {
-                    onClickSettings()
-                }
+            } else {
+                scope.showPopup(
+                    snackbarHostState = snackbarHostState,
+                    popupMessage = PopupMessage.Resource(
+                        res = R.string.home_open_file_ng_message,
+                        type = PopupMessageType.Warning,
+                    )
+                )
             }
-
-        }
-    }
+        },
+        onClickMenuSettings = { onNavigateSettings() },
+        onClickItem = { onNavigateEdit(it) },
+        onClickAddItem = { onNavigateHost() },
+        onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
+    )
 }
 
 /**
@@ -135,11 +117,11 @@ fun HomeScreen(
 fun HomeScreenContainer(
     snackbarHostState: SnackbarHostState,
     connectionList: List<CifsConnection>,
+    onClickMenuOpenFile: () -> Unit,
+    onClickMenuSettings: () -> Unit,
     onClickItem: (CifsConnection) -> Unit,
     onClickAddItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
-    onClickMenuOpenFile: () -> Unit,
-    onClickMenuSettings: () -> Unit,
 ) {
     Scaffold(
         topBar = {
