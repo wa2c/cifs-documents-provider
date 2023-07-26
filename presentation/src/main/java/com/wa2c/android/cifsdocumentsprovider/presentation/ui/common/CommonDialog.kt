@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
@@ -43,9 +45,8 @@ fun CommonDialog(
                     confirmButtons.forEach {
                         Button(
                             onClick = it.onClick,
-                            contentPadding = PaddingValues(Theme.SizeSS),
+                            contentPadding = PaddingValues(Theme.SizeS),
                             modifier = Modifier.padding(start = Theme.SizeS)
-
                         ) {
                             Text(it.label)
                         }
@@ -68,7 +69,35 @@ fun CommonDialog(
     )
 }
 
+/**
+ * Dialog button
+ */
 class DialogButton(
+    /** Button label */
     val label: String,
+    /** Click event */
     val onClick: () -> Unit
 )
+
+@Preview(
+    name = "Preview",
+    group = "Group",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+)
+@Composable
+private fun CommonDialogPreview() {
+    Theme.AppTheme {
+        CommonDialog(
+            title = "Title",
+            confirmButtons = listOf(
+                DialogButton(label = "Button1") { },
+                DialogButton(label = "Button2") { },
+            ),
+            dismissButton = DialogButton(label = "Cancel") { },
+            onDismiss = {},
+        ) {
+            Text("Dialog content text")
+        }
+    }
+}
