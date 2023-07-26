@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -20,16 +21,17 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 @Composable
 fun AppSnackbarHost(snackbarHostState: SnackbarHostState) = SnackbarHost(snackbarHostState) { data ->
     (data.visuals as? MessageSnackbarVisual)?.let {
-        AppSnackbar(message = it.popupMessage)
+        AppSnackbar(message = it.popupMessage) { data.dismiss() }
     } ?: run {
         Snackbar(snackbarData = data)
     }
 }
 
 @Composable
-fun AppSnackbar(message: PopupMessage) {
+private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
     Snackbar(
         modifier = Modifier
+            .clickable { onDismiss() }
             .padding(Theme.SizeS)
     ) {
         Row {

@@ -407,10 +407,8 @@ private fun EditScreenContainer(
 
                     // Option
 
-                    Text(
+                    SectionTitle(
                         text = stringResource(id = R.string.edit_option_title),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
                     )
 
                     InputCheck(
@@ -425,43 +423,26 @@ private fun EditScreenContainer(
 
                     // URI
 
-                    Text(
+                    SectionTitle(
                         text = stringResource(id = R.string.edit_connection_uri_title),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
                     )
 
-                    SelectionContainer {
-                        Text(
-                            text = getSmbUri(
-                                hostState.value,
-                                portState.value,
-                                folderState.value,
-                                true
-                            ),
-                            modifier = Modifier
-                                .padding(Theme.SizeS)
-                        )
-                    }
+                    UriText(uriText = getSmbUri(
+                        hostState.value,
+                        portState.value,
+                        folderState.value,
+                        true
+                    ))
 
-                    Text(
+                    SectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
                     )
 
-                    SelectionContainer {
-                        Text(
-                            text = getContentUri(
-                                hostState.value,
-                                portState.value,
-                                folderState.value
-                            ),
-                            modifier = Modifier
-                                .padding(Theme.SizeS)
-                        )
-                    }
-
+                    UriText(uriText = getContentUri(
+                        hostState.value,
+                        portState.value,
+                        folderState.value
+                    ))
                 }
 
                 DividerNormal()
@@ -500,7 +481,6 @@ private fun EditScreenContainer(
                         Text(text = stringResource(id = R.string.edit_save_button))
                     }
                 }
-
             }
 
             // isBusy
@@ -674,8 +654,7 @@ fun InputCheck(
                 role = Role.Checkbox,
                 onValueChange = { state.value = !state.value }
             )
-            .padding(Theme.SizeM)
-            .padding(top = Theme.SizeS)
+            .padding(Theme.SizeS)
             .fillMaxWidth()
     ) {
         Checkbox(
@@ -688,6 +667,32 @@ fun InputCheck(
             Modifier
                 .weight(1f)
                 .padding(start = Theme.SizeS)
+        )
+    }
+}
+
+@Composable
+private fun SectionTitle(
+    text: String,
+) {
+    Text(
+        text = text,
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier
+            .padding(top = Theme.SizeS)
+    )
+}
+
+@Composable
+private fun UriText(
+    uriText: String,
+) {
+    SelectionContainer {
+        Text(
+            text = uriText,
+            modifier = Modifier
+                .padding(Theme.SizeS)
         )
     }
 }

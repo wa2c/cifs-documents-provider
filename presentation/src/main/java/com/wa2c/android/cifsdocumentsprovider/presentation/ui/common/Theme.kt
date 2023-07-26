@@ -14,8 +14,11 @@ object Theme {
     private val DarkColors = darkColorScheme(
         primary = Color(0xFFFF9800),
         onPrimary = Color(0xFFFFFFFF),
+        onSurfaceVariant = Color(0xFF9F9F9F),
 
 // for debug
+//        primary = Color.Red,
+//        onPrimary = Color.Red,
 //        onPrimaryContainer = Color.Red,
 //        inversePrimary = Color.Red,
 //        secondary = Color.Red,
@@ -46,6 +49,7 @@ object Theme {
     private val LightColors = lightColorScheme(
         primary = Color(0xFFFF9800),
         onPrimary = Color(0xFFFFFFFF),
+        onSurfaceVariant = Color(0xFF606060),
     )
 
     object Colors {
