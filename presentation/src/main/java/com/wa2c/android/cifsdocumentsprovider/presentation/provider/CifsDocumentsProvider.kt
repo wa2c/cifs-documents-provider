@@ -97,7 +97,12 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 documentId?.let {
                     val uri = getCifsUri(it)
-                    val file = cifsRepository.getFile(uri) ?: return@let
+                    val file = try {
+                        cifsRepository.getFile(uri)
+                    } catch (e: Exception) {
+                        logE(e)
+                        null
+                    } ?: return@let
                     includeFile(cursor, file)
                 }
             }

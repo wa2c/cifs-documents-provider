@@ -654,7 +654,7 @@ fun InputCheck(
                 role = Role.Checkbox,
                 onValueChange = { state.value = !state.value }
             )
-            .padding(Theme.SizeS)
+            .padding(Theme.SizeM)
             .fillMaxWidth()
     ) {
         Checkbox(
