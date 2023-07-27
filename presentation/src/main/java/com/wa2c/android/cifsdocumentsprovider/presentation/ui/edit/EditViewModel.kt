@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.UUID
@@ -178,6 +179,7 @@ class EditViewModel @Inject constructor(
             runCatching {
                 withContext(Dispatchers.IO) {
                     val folderConnection = createCifsConnection(false) ?: throw IOException()
+                    cifsRepository.saveTemporaryConnection(folderConnection)
 
                     // use target folder
                     val folderResult = cifsRepository.checkConnection(folderConnection)
@@ -247,5 +249,12 @@ class EditViewModel @Inject constructor(
                 _isBusy.emit(false)
             }
         }
+    }
+
+    override fun onCleared() {
+        runBlocking {
+            cifsRepository.saveTemporaryConnection(null)
+        }
+        super.onCleared()
     }
 }

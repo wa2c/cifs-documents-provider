@@ -10,8 +10,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
-import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -46,12 +46,17 @@ internal class AppPreferencesDataStore @Inject constructor(
     suspend fun setUiTheme(value: UiTheme) = dataStore.setValue(PREFKEY_UI_THEME, value.key)
 
     /** Use as local */
-    suspend fun getUseAsLocal(): Boolean = dataStore.getValue(PREFKEY_USE_AS_LOCAL) ?: false
-
     val useAsLocalFlow: Flow<Boolean> = dataStore.data.map { it[PREFKEY_USE_AS_LOCAL] ?: false  }
 
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = dataStore.setValue(PREFKEY_USE_AS_LOCAL, value)
+
+    /** Temporary connection */
+    val temporaryConnectionJsonFlow: Flow<String?> =  dataStore.data.map { it[PREFKEY_TEMPORARY_CONNECTION_JSON]?.let { ConnectionUtils.decrypt(it) } }
+
+    /** Temporary connection */
+    suspend fun setTemporaryConnectionJson(value: String?) = dataStore.setValue(PREFKEY_TEMPORARY_CONNECTION_JSON, value?.let { ConnectionUtils.encrypt(it) })
+
 
 
     /**
@@ -77,6 +82,7 @@ internal class AppPreferencesDataStore @Inject constructor(
         private val PREFKEY_HOST_SORT_TYPE = intPreferencesKey("prefkey_host_sort_type")
         private val PREFKEY_UI_THEME = stringPreferencesKey("prefkey_ui_theme")
         private val PREFKEY_USE_AS_LOCAL = booleanPreferencesKey("prefkey_use_as_local")
+        private val PREFKEY_TEMPORARY_CONNECTION_JSON = stringPreferencesKey("prefkey_temporary_connection_json")
     }
 
 }

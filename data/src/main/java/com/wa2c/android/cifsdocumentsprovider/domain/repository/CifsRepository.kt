@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.decodeJson
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.encodeJson
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -10,8 +12,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
-import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toModel
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toEntity
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toModel
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
@@ -20,6 +22,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.Date
@@ -59,7 +62,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     /**
-     * Get connection
+     * Load connections
      */
     suspend fun loadConnection(): List<CifsConnection>  {
         return withContext(dispatcher) {
@@ -80,6 +83,25 @@ class CifsRepository @Inject internal constructor(
                 connection.toEntity(sortOrder = order + 1, modifiedDate = Date())
             }
             connectionSettingDao.insert(entity)
+        }
+    }
+
+
+    /**
+     * Load temporary connection
+     */
+    suspend fun loadTemporaryConnection(): CifsConnection?  {
+        return withContext(dispatcher) {
+            appPreferences.temporaryConnectionJsonFlow.firstOrNull()?.decodeJson()
+        }
+    }
+
+    /**
+     * Save temporary connection
+     */
+    suspend fun saveTemporaryConnection(connection: CifsConnection?) {
+        withContext(dispatcher) {
+            appPreferences.setTemporaryConnectionJson(connection?.encodeJson())
         }
     }
 

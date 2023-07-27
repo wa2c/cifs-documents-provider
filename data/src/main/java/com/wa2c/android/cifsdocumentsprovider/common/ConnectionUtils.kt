@@ -1,8 +1,9 @@
-package com.wa2c.android.cifsdocumentsprovider.data.db
+package com.wa2c.android.cifsdocumentsprovider.common
 
 import android.annotation.SuppressLint
 import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
+import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -15,7 +16,7 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Json Converter
  */
-internal object AppDbConverter {
+internal object ConnectionUtils {
 
     /**
      * Convert model to data.
@@ -46,11 +47,11 @@ internal object AppDbConverter {
         ignoreUnknownKeys = true
     }
 
-    private fun CifsConnection.encodeJson(): String {
+    fun CifsConnection.encodeJson(): String {
         return formatter.encodeToString(this)
     }
 
-    private fun String.decodeJson(): CifsConnection {
+    fun String.decodeJson(): CifsConnection {
         return formatter.decodeFromString(this)
     }
 
@@ -65,7 +66,7 @@ internal object AppDbConverter {
     /**
      * Encrypt key.
      */
-    private fun encrypt(originalString: String): String {
+    fun encrypt(originalString: String): String {
         val originalBytes = originalString.toByteArray()
         val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
@@ -79,7 +80,7 @@ internal object AppDbConverter {
     /**
      * Decrypt key.
      */
-    private fun decrypt(encryptBytesBase64String: String): String {
+    fun decrypt(encryptBytesBase64String: String): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
         val secretKeyBytes = SECRET_KEY.toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)

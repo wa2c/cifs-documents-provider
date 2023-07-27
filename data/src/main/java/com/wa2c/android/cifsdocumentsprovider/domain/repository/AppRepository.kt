@@ -23,7 +23,6 @@ class AppRepository @Inject internal constructor(
 
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
-    suspend fun getUseAsLocal(): Boolean = appPreferences.getUseAsLocal()
 
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = appPreferences.setUseAsLocal(value)

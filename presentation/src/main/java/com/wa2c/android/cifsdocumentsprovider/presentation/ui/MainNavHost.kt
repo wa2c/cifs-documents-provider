@@ -87,10 +87,10 @@ internal fun MainNavHost(
                     navController.popBackStack()
                 },
                 onNavigateSearchHost = {
-                    navController.navigate("$HostScreenName?$HostScreenParamId=${it?.id ?: ""}")
+                    navController.navigate(route = "$HostScreenName?$HostScreenParamId=${it?.id ?: ""}")
                 },
                 onNavigateSelectFolder = {
-                    navController.navigate("$FolderScreenName?$FolderScreenParamUri=${it.folderSmbUri}")
+                    navController.navigate(route = FolderScreenName)
                 },
             )
         }
@@ -99,7 +99,7 @@ internal fun MainNavHost(
         composable(
             route = "$HostScreenName?$HostScreenParamId={$HostScreenParamId}",
             arguments = listOf(
-                navArgument(EditScreenParamId) {
+                navArgument(HostScreenParamId) {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -130,14 +130,7 @@ internal fun MainNavHost(
 
         // Folder Screen
         composable(
-            route = "$FolderScreenName?$FolderScreenParamUri={$FolderScreenParamUri}",
-            arguments = listOf(
-                navArgument(FolderScreenParamUri) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
+            route = FolderScreenName,
         ) {
             FolderScreen(
                 onNavigateBack = {
@@ -209,4 +202,3 @@ private const val FolderScreenResultKey = "folder_result"
 const val HostScreenParamId = "id"
 const val EditScreenParamHost = "host"
 const val EditScreenParamId = "id"
-const val FolderScreenParamUri = "uri"

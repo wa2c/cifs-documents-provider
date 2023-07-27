@@ -2,10 +2,10 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.FolderScreenParamUri
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,7 +25,10 @@ class FolderViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val paramUri: String = checkNotNull(savedStateHandle[FolderScreenParamUri])
+    private val temporaryConnection: CifsConnection = runBlocking {
+        cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+    }
+
 
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -41,7 +44,27 @@ class FolderViewModel @Inject constructor(
 
     init {
         launch {
-            loadList(paramUri)
+            _isLoading.emit(true)
+            runCatching {
+                try {
+                    cifsRepository.getFile(temporaryConnection) ?: throw IllegalStateException()
+                } catch (e: Exception) {
+                    _result.emit(Result.failure(e))
+                    if (!temporaryConnection.folder.isNullOrEmpty()) {
+                        cifsRepository.getFile(temporaryConnection.copy(folder = null))
+                    } else {
+                        null
+                    }
+                } ?: throw IllegalStateException()
+            }.onSuccess { file ->
+                loadList(file)
+            }.onFailure {
+                _result.emit(Result.failure(it))
+                _fileList.emit(emptyList())
+                _currentFile.emit(null)
+                _isLoading.emit(false)
+            }
+
         }
     }
 
@@ -65,7 +88,9 @@ class FolderViewModel @Inject constructor(
 
         launch {
             val uri = currentFile.value?.parentUri ?: return@launch
-            loadList(uri.toString())
+            cifsRepository.getFile(uri.toString())?.let {
+                loadList(it)
+            }
         }
         return true
     }
@@ -80,23 +105,6 @@ class FolderViewModel @Inject constructor(
 
         launch {
             loadList(file)
-        }
-    }
-
-    /**
-     * Load list
-     */
-    private suspend fun loadList(uri: String) {
-        _isLoading.emit(true)
-        runCatching {
-            cifsRepository.getFile(uri) ?: throw IllegalArgumentException()
-        }.onSuccess { file ->
-            loadList(file)
-        }.onFailure {
-            _result.emit(Result.failure(it))
-            _fileList.emit(emptyList())
-            _currentFile.emit(null)
-            _isLoading.emit(false)
         }
     }
 
