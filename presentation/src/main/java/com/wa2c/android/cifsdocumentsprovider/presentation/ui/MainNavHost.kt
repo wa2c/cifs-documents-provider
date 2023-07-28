@@ -15,7 +15,6 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
@@ -76,13 +75,13 @@ internal fun MainNavHost(
             val selectedHost = backStackEntry.savedStateHandle.getStateFlow<String?>(HostScreenResultKey, null).collectAsState(null).value?.also {
                 backStackEntry.savedStateHandle.remove<String?>(HostScreenResultKey)
             }
-            val selectedFile = backStackEntry.savedStateHandle.getStateFlow<CifsFile?>(FolderScreenResultKey, null).collectAsState(null).value?.also {
-                backStackEntry.savedStateHandle.remove<String?>(FolderScreenResultKey)
+            val selectedUri = backStackEntry.savedStateHandle.getStateFlow<Uri?>(FolderScreenResultKey, null).collectAsState(null).value?.also {
+                backStackEntry.savedStateHandle.remove<Uri?>(FolderScreenResultKey)
             }
 
             EditScreen(
                 selectedHost = selectedHost,
-                selectedFile = selectedFile,
+                selectedUri = selectedUri,
                 onNavigateBack = {
                     navController.popBackStack()
                 },

@@ -62,6 +62,15 @@ class CifsRepository @Inject internal constructor(
     }
 
     /**
+     * Get connection
+     */
+    suspend fun getConnection(id: String): CifsConnection? {
+        return withContext(dispatcher) {
+            connectionSettingDao.getEntity(id)?.toModel()
+        }
+    }
+
+    /**
      * Load connections
      */
     suspend fun loadConnection(): List<CifsConnection>  {
@@ -108,11 +117,9 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get connection from URI
      */
-    private suspend fun getClientDto(uriText: String): CifsClientDto? {
-        return withContext(dispatcher) {
-            connectionSettingDao.getEntityByUri(uriText)?.toModel()?.let {
-                CifsClientDto(it, uriText)
-            }
+    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): CifsClientDto? {
+        return connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
+            connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { CifsClientDto(it, uriText) }
         }
     }
 
@@ -134,28 +141,13 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    suspend fun getConnection(id: String): CifsConnection? {
-        return withContext(dispatcher) {
-            connectionSettingDao.getEntity(id)?.toModel()
-        }
-    }
 
     /**
-     * Get CIFS File from connection.`
+     * Get CIFS File
      */
-    suspend fun getFile(connection: CifsConnection, uri: String? = null): CifsFile? {
+    suspend fun getFile(uri: String?, connection: CifsConnection? = null): CifsFile? {
         return withContext(dispatcher) {
-            val dto = CifsClientDto(connection, uri)
-            getClient(dto).getFile(dto)
-        }
-    }
-
-    /**
-     * Get CIFS File from uri.
-     */
-    suspend fun getFile(uri: String): CifsFile? {
-        return withContext(dispatcher) {
-            val dto = getClientDto(uri) ?: return@withContext null
+            val dto = getClientDto(uri, connection) ?: return@withContext null
             getClient(dto).getFile(dto)
         }
     }
@@ -163,9 +155,9 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get children CIFS files from uri.
      */
-    suspend fun getFileChildren(uri: String): List<CifsFile> {
+    suspend fun getFileChildren(uri: String?, connection: CifsConnection? = null): List<CifsFile> {
         return withContext(dispatcher) {
-            val dto = getClientDto(uri) ?: return@withContext emptyList()
+            val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
             getClient(dto).getChildren(dto)
         }
     }

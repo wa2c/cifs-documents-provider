@@ -152,8 +152,10 @@ class EditViewModel @Inject constructor(
             runCatching {
                 _connectionResult.emit(null)
                createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
-            }.getOrNull().let {
-                _connectionResult.emit(it ?: ConnectionResult.Failure())
+            }.fold(
+                onSuccess = { _connectionResult.emit(it ?: ConnectionResult.Failure()) },
+                onFailure = { _connectionResult.emit(ConnectionResult.Failure(it)) }
+            ).also {
                 _isBusy.emit(false)
             }
         }
@@ -177,30 +179,17 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                withContext(Dispatchers.IO) {
-                    val folderConnection = createCifsConnection(false) ?: throw IOException()
+                val folderConnection = createCifsConnection(false) ?: throw IOException()
+                val result = cifsRepository.checkConnection(folderConnection)
+                if (result !is ConnectionResult.Failure) {
                     cifsRepository.saveTemporaryConnection(folderConnection)
-
-                    // use target folder
-                    val folderResult = cifsRepository.checkConnection(folderConnection)
-                    if (folderResult is ConnectionResult.Success) {
-                        _navigateSelectFolder.emit(Result.success(folderConnection))
-                        return@withContext folderResult
-                    } else if (folderResult is ConnectionResult.Failure) {
-                        return@withContext folderResult
-                    }
-
-                    // use root folder
-                    val rootConnection = folderConnection.copy(folder = null)
-                    val rootResult = cifsRepository.checkConnection(rootConnection)
-                    if (rootResult == ConnectionResult.Success) {
-                        _navigateSelectFolder.emit(Result.success(folderConnection))
-                        return@withContext folderResult // Show target folder warning
-                    }
-                    return@withContext rootResult
+                    _navigateSelectFolder.emit(Result.success(folderConnection))
+                } else {
+                    _connectionResult.emit(result)
                 }
-            }.getOrNull().let {
-                _connectionResult.emit(it ?: ConnectionResult.Failure())
+            }.onFailure {
+                _connectionResult.emit(ConnectionResult.Failure(cause = it))
+            }.also {
                 _isBusy.emit(false)
             }
         }

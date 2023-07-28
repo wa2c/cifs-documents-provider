@@ -61,23 +61,23 @@ fun FolderScreen(
     viewModel: FolderViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: () -> Unit,
-    onNavigateSet: (CifsFile) -> Unit,
+    onNavigateSet: (Uri) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val fileList = viewModel.fileList.collectAsStateWithLifecycle()
-    val currentFile = viewModel.currentFile.collectAsStateWithLifecycle()
+    val currentUri = viewModel.currentUri.collectAsStateWithLifecycle()
     val isLoading = viewModel.isLoading.collectAsStateWithLifecycle()
 
     FolderScreenContainer(
         snackbarHostState = snackbarHostState,
         fileList = fileList.value,
-        currentFile = currentFile.value,
+        currentUri = currentUri.value,
         isLoading = isLoading.value,
         onClickBack = { if (!viewModel.onUpFolder()) { onNavigateBack() } },
         onClickReload = { viewModel.onClickReload() },
         onClickItem = { viewModel.onSelectFolder(it) },
-        onClickSet = { viewModel.currentFile.value?.let { onNavigateSet(it) } },
+        onClickSet = { viewModel.currentUri.value.let { onNavigateSet(it) } },
     )
 
     LaunchedEffect(Unit) {
@@ -102,7 +102,7 @@ fun FolderScreen(
 fun FolderScreenContainer(
     snackbarHostState: SnackbarHostState,
     fileList: List<CifsFile>,
-    currentFile: CifsFile?,
+    currentUri: Uri,
     isLoading: Boolean,
     onClickBack: () -> Unit,
     onClickReload: () -> Unit,
@@ -162,7 +162,7 @@ fun FolderScreenContainer(
                     .padding(Theme.SizeS),
             ) {
                 Text(
-                    text = currentFile?.uri?.toString() ?: "",
+                    text = currentUri.toString(),
                     maxLines = 1,
                     modifier = Modifier
                         .horizontalScroll(rememberScrollState())
@@ -246,13 +246,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 )
             ),
-            currentFile = CifsFile(
-                name = "",
-                uri = Uri.parse("smb://example/test"),
-                size = 0,
-                lastModified = 0,
-                isDirectory = true,
-            ),
+            currentUri = Uri.EMPTY,
             isLoading = false,
             onClickBack = {},
             onClickReload = {},

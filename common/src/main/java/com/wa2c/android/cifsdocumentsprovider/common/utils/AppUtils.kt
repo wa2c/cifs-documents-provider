@@ -83,6 +83,21 @@ val Uri.fileName: String
         // Path is not encoded for URI. So file name including '#' occurs errors with lastPathSegment.
     }
 
+/**
+ * Get parent uri ( last character = '/' )
+ */
+val Uri.parentUri: Uri?
+    get() {
+        if (pathSegments.isEmpty()) return null
+        val uriText = toString()
+            .let { if (it.last() == URI_SEPARATOR) it.substring(0, it.length - 1) else it }
+        return try { Uri.parse(uriText.substring(0, uriText.lastIndexOf(URI_SEPARATOR) + 1)) } catch (e: Exception) { null }
+    }
+
+
+/** True if root */
+val Uri.isRoot: Boolean
+    get() = (parentUri == null)
 
 /** True if invalid file name */
 val String.isInvalidFileName: Boolean

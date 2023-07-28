@@ -120,7 +120,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 cifsRepository.loadConnection().forEach { connection ->
                     try {
-                        val file = cifsRepository.getFile(connection) ?: return@forEach
+                        val file = cifsRepository.getFile(null, connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
                     } catch (e: Exception) {
                         logE(e)

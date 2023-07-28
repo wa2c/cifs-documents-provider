@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.net.Uri
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -80,7 +81,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
@@ -104,7 +104,7 @@ fun EditScreen(
     viewModel: EditViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     selectedHost: String? = null,
-    selectedFile: CifsFile? = null,
+    selectedUri: Uri? = null,
     onNavigateBack: () -> Unit,
     onNavigateSearchHost: (CifsConnection?) -> Unit,
     onNavigateSelectFolder: (CifsConnection) -> Unit,
@@ -115,7 +115,7 @@ fun EditScreen(
     val showBackConfirmationDialog = remember { mutableStateOf(false) }
 
     selectedHost?.let { viewModel.host.value = selectedHost }
-    selectedFile?.let { viewModel.folder.value = selectedFile.uri.pathFragment }
+    selectedUri?.let { viewModel.folder.value = it.pathFragment }
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
