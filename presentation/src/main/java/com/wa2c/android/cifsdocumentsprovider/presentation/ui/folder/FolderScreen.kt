@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.utils.isRoot
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -74,9 +75,10 @@ fun FolderScreen(
         fileList = fileList.value,
         currentUri = currentUri.value,
         isLoading = isLoading.value,
-        onClickBack = { if (!viewModel.onUpFolder()) { onNavigateBack() } },
+        onClickBack = { onNavigateBack() },
         onClickReload = { viewModel.onClickReload() },
         onClickItem = { viewModel.onSelectFolder(it) },
+        onClickUp = { viewModel.onUpFolder() },
         onClickSet = { viewModel.currentUri.value.let { onNavigateSet(it) } },
     )
 
@@ -92,6 +94,9 @@ fun FolderScreen(
             )
         }
     }
+
+    // Back button
+    BackHandler { if (!viewModel.onUpFolder()) { onNavigateBack() } }
 }
 
 /**
@@ -107,12 +112,13 @@ fun FolderScreenContainer(
     onClickBack: () -> Unit,
     onClickReload: () -> Unit,
     onClickItem: (CifsFile) -> Unit,
+    onClickUp: () -> Unit,
     onClickSet: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = R.string.host_title)) },
+                title = { Text(stringResource(id = R.string.folder_title)) },
                 colors = AppTopAppBarColors(),
                 actions = {
                     LoadingIconButton(
@@ -144,6 +150,14 @@ fun FolderScreenContainer(
                     exit = fadeOut(),
                 ) {
                     LazyColumn {
+                        if (!currentUri.isRoot) {
+                            item {
+                                UpFolderItem(
+                                    onClick = onClickUp
+                                )
+                                DividerThin()
+                            }
+                        }
                         items(items = fileList) { file ->
                             FolderItem(
                                 cifsFile = file,
@@ -165,7 +179,7 @@ fun FolderScreenContainer(
                     text = currentUri.toString(),
                     maxLines = 1,
                     modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
+                        .horizontalScroll(ScrollState(Int.MAX_VALUE))
                 )
                 Button(
                     onClick = onClickSet,
@@ -179,9 +193,30 @@ fun FolderScreenContainer(
             }
         }
     }
+}
 
-    // Back button
-    BackHandler { onClickBack() }
+@Composable
+private fun UpFolderItem(
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeSS)
+            .clickable(enabled = true, onClick = onClick)
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_folder_up),
+            "Folder",
+            modifier = Modifier.size(40.dp),
+        )
+        Text(
+            text = "..",
+            fontSize = 15.sp,
+            modifier = Modifier
+                .padding(start = Theme.SizeS)
+        )
+    }
 }
 
 @Composable
@@ -251,6 +286,7 @@ private fun FolderScreenContainerPreview() {
             onClickBack = {},
             onClickReload = {},
             onClickItem = {},
+            onClickUp = {},
             onClickSet = {},
         )
     }

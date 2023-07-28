@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -63,7 +64,6 @@ class FolderViewModel @Inject constructor(
      * @return true if not root
      */
     fun onUpFolder(): Boolean {
-        if (isLoading.value) return true
         val uri = currentUri.value.parentUri ?: return false
         launch {
             loadList(uri)
@@ -76,8 +76,6 @@ class FolderViewModel @Inject constructor(
      * Reload current folder
      */
     fun onClickReload() {
-        if (isLoading.value) return
-
         launch {
             loadList(currentUri.value)
         }
@@ -89,15 +87,14 @@ class FolderViewModel @Inject constructor(
     private suspend fun loadList(uri: Uri) {
         _isLoading.emit(true)
         runCatching {
+            _currentUri.emit(uri)
             cifsRepository.getFileChildren(uri.toString(), temporaryConnection)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
-            _currentUri.emit(uri)
-            _isLoading.emit(false)
         }.onFailure {
-            _result.emit(Result.failure(it))
             _fileList.emit(emptyList())
-            _currentUri.emit(uri)
+            _result.emit(Result.failure(it))
+        }.also {
             _isLoading.emit(false)
         }
     }
