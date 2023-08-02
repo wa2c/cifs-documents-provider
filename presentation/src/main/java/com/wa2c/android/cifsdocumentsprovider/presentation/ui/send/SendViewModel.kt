@@ -11,10 +11,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScop
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -28,11 +27,10 @@ class SendViewModel @Inject constructor(
     private val sendRepository: SendRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = MutableSharedFlow<SendNav>()
-    val navigationEvent: Flow<SendNav> = _navigationEvent
-
     private val _sendDataList = MutableStateFlow<List<SendData>>(emptyList())
     val sendDataList = _sendDataList.asStateFlow()
+
+    val existsConfirmation = sendDataList.map { list -> list.any { it.state == SendDataState.CONFIRM } }
 
     /** Send job */
     private var sendJob: Job? = null
@@ -40,18 +38,11 @@ class SendViewModel @Inject constructor(
     /**
      * Send URI
      */
-    fun sendUri(sourceUris: List<Uri>, targetUri: Uri) {
+    fun sendUri(sourceUriList: List<Uri>, targetUri: Uri) {
         logD("sendUri")
         launch {
-            val inputList = sendRepository.getSendDataList(sourceUris, targetUri)
+            val inputList = sendRepository.getSendDataList(sourceUriList, targetUri)
             _sendDataList.emit(sendDataList.value + inputList)
-
-            val existsDataSet = inputList.filter { it.state == SendDataState.OVERWRITE }.toSet()
-            if (existsDataSet.isEmpty()) {
-                startSendJob()
-            } else {
-                _navigationEvent.emit(SendNav.ConfirmOverwrite(existsDataSet))
-            }
         }
     }
 
@@ -121,15 +112,15 @@ class SendViewModel @Inject constructor(
         sendJob = null
     }
 
-    /**
-     * Update state to READY
-     */
-    fun updateToReady(targetData: Set<SendData>) {
-        logD("onClickCancel")
+    fun updateConfirmation(isReady: Boolean) {
+        logD("updateConfirmation")
         launch {
-            val targetIds = targetData.map { it.id }
             val list = sendDataList.value.map { data ->
-                if (targetIds.contains(data.id)) data.copy(state = SendDataState.READY) else data
+                if (data.state == SendDataState.CONFIRM) {
+                    data.copy(state = if (isReady) SendDataState.READY else SendDataState.OVERWRITE)
+                } else {
+                    data
+                }
             }
             _sendDataList.emit(list)
             startSendJob()

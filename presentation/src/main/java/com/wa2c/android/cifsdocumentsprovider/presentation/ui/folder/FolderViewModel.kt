@@ -34,11 +34,11 @@ class FolderViewModel @Inject constructor(
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
-    val fileList: StateFlow<List<CifsFile>> = _fileList
-
     private val _currentUri = MutableStateFlow<Uri>(temporaryConnection.folderSmbUri.toUri())
     val currentUri: StateFlow<Uri> = _currentUri
+
+    private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
+    val fileList: StateFlow<List<CifsFile>> = _fileList
 
     private val _result = MutableSharedFlow<Result<Unit>>()
     val result: SharedFlow<Result<Unit>> = _result

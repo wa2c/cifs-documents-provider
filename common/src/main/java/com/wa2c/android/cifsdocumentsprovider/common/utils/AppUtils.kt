@@ -3,7 +3,11 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 import android.net.Uri
 import android.provider.DocumentsContract
 import android.webkit.MimeTypeMap
-import com.wa2c.android.cifsdocumentsprovider.common.values.*
+import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import java.nio.file.Paths
 
 /**
@@ -76,11 +80,16 @@ val Uri.pathFragment: String
  */
 val Uri.fileName: String
     get() = run {
-        val path = pathFragment.trimEnd(URI_SEPARATOR)
-        val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
-        return path.substring(startIndex)
+        Uri.decode(pathFragment.lastPath).lastPath
         // FIXME:
         // Path is not encoded for URI. So file name including '#' occurs errors with lastPathSegment.
+    }
+
+private val String.lastPath: String
+    get() = run {
+        val path = trimEnd(URI_SEPARATOR)
+        val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
+        substring(startIndex)
     }
 
 /**

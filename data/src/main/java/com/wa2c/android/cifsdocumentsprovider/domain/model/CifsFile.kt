@@ -4,7 +4,6 @@ import android.net.Uri
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import kotlinx.parcelize.Parcelize
 
 /**

@@ -41,7 +41,7 @@ internal class DataSender @Inject constructor(
                     targetUri = targetUri,
                 ).let {
                     if (existsTarget(it)) {
-                        it.copy(state = SendDataState.OVERWRITE)
+                        it.copy(state = SendDataState.CONFIRM)
                     } else {
                         it
                     }

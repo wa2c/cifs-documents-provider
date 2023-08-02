@@ -26,10 +26,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     // NOTE: Use AppCompatActivity (not ComponentActivity) for Language
 
-    /** View Model */
-    private val sendViewModel by viewModels<SendViewModel>()
     /** Main View Model */
     private val mainViewModel by viewModels<MainViewModel>()
+
+    /** View Model */
+    private val sendViewModel by viewModels<SendViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +57,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 MainNavHost(
                     navController = navController,
+                    sendViewModel = sendViewModel,
                     onOpenFile = { startApp(it) },
                     onCloseApp = { finishApp() }
                 )

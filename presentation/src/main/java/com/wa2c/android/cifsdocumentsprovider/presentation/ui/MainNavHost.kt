@@ -11,7 +11,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
@@ -19,7 +18,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.receive.ReceiveFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendScreen
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
 
 /**
@@ -27,7 +28,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsS
  */
 @Composable
 internal fun MainNavHost(
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
+    sendViewModel: SendViewModel,
     onOpenFile: (List<Uri>) -> Unit,
     onCloseApp: () -> Unit,
 ) {
@@ -72,12 +74,16 @@ internal fun MainNavHost(
             ),
         ) { backStackEntry ->
             // BackStack
-            val selectedHost = backStackEntry.savedStateHandle.getStateFlow<String?>(HostScreenResultKey, null).collectAsState(null).value?.also {
-                backStackEntry.savedStateHandle.remove<String?>(HostScreenResultKey)
-            }
-            val selectedUri = backStackEntry.savedStateHandle.getStateFlow<Uri?>(FolderScreenResultKey, null).collectAsState(null).value?.also {
-                backStackEntry.savedStateHandle.remove<Uri?>(FolderScreenResultKey)
-            }
+            val selectedHost =
+                backStackEntry.savedStateHandle.getStateFlow<String?>(HostScreenResultKey, null)
+                    .collectAsState(null).value?.also {
+                    backStackEntry.savedStateHandle.remove<String?>(HostScreenResultKey)
+                }
+            val selectedUri =
+                backStackEntry.savedStateHandle.getStateFlow<Uri?>(FolderScreenResultKey, null)
+                    .collectAsState(null).value?.also {
+                    backStackEntry.savedStateHandle.remove<Uri?>(FolderScreenResultKey)
+                }
 
             EditScreen(
                 selectedHost = selectedHost,
@@ -111,11 +117,16 @@ internal fun MainNavHost(
                 },
                 onSelectItem = { host ->
                     if (backStackEntry.arguments?.getString(HostScreenParamId) == null) {
-                        navController.navigate(route = EditScreenRouteName + "?host=${host}", navOptions = navOptions {
-                            this.popUpTo(HomeScreenName)
-                        })
+                        navController.navigate(
+                            route = EditScreenRouteName + "?host=${host}",
+                            navOptions = navOptions {
+                                this.popUpTo(HomeScreenName)
+                            })
                     } else {
-                        navController.previousBackStackEntry?.savedStateHandle?.set(HostScreenResultKey, host)
+                        navController.previousBackStackEntry?.savedStateHandle?.set(
+                            HostScreenResultKey,
+                            host
+                        )
                         navController.popBackStack()
                     }
                 },
@@ -133,7 +144,7 @@ internal fun MainNavHost(
         ) {
             FolderScreen(
                 onNavigateBack = {
-                     navController.popBackStack()
+                    navController.popBackStack()
                 },
                 onNavigateSet = {
                     navController.previousBackStackEntry?.savedStateHandle?.set(FolderScreenResultKey, it)
@@ -156,33 +167,55 @@ internal fun MainNavHost(
         // Send Screen
         composable(
             route = SendScreenName,
+        ) {
+            SendScreen(
+                viewModel = sendViewModel,
+                onNavigateFinish = {
+                    onCloseApp()
+                }
+            )
+        }
+
+        // Receive File
+        composable(
+            route = ReceiveFileName,
             deepLinks = listOf(
                 navDeepLink { action = Intent.ACTION_SEND },
                 navDeepLink { action = Intent.ACTION_SEND_MULTIPLE },
             )
-        ) { navBackStackEntry ->
+        ) { backStackEntry ->
             @Suppress("DEPRECATION")
             val uriList = remember {
-                navBackStackEntry.arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)?.let { intent ->
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        (intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)?.let { listOf(it) })
-                            ?: (intent.getParcelableArrayExtra(Intent.EXTRA_STREAM, Uri::class.java)?.toList())
-                    } else {
-                        (intent.getParcelableExtra<Uri?>(Intent.EXTRA_STREAM)?.let { listOf(it) })
-                            ?: (intent.getParcelableArrayListExtra<Uri?>(Intent.EXTRA_STREAM)?.toList())
+                backStackEntry.arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)
+                    ?.let { intent ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            (intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                                ?.let { listOf(it) })
+                                ?: (intent.getParcelableArrayExtra(
+                                    Intent.EXTRA_STREAM,
+                                    Uri::class.java
+                                )?.toList())
+                        } else {
+                            (intent.getParcelableExtra<Uri?>(Intent.EXTRA_STREAM)
+                                ?.let { listOf(it) })
+                                ?: (intent.getParcelableArrayListExtra<Uri?>(Intent.EXTRA_STREAM)
+                                    ?.toList())
+                        }
                     }
-                }
-            }
+            } ?: emptyList()
 
-            if (uriList.isNullOrEmpty()) {
-                navController.navigate(route = HomeScreenName)
-            } else {
-                SendScreen(
-                    uriList = uriList,
-                    onNavigateFinish = {
-                        onCloseApp()
-                    }
-                )
+            ReceiveFile(
+                uriList = uriList,
+                onNavigateFinish = {
+                    navController.navigate(route = SendScreenName, navOptions = navOptions {
+                        this.popUpTo(SendScreenName)
+                    })
+                }
+            ) {
+                navController.navigate(route = SendScreenName, navOptions = navOptions {
+                    this.popUpTo(SendScreenName)
+                })
+                sendViewModel.sendUri(sourceUriList = uriList, targetUri = it)
             }
         }
     }
@@ -194,6 +227,7 @@ private const val HostScreenName = "host"
 private const val FolderScreenName = "folder"
 private const val SettingsScreenName = "settings"
 private const val SendScreenName = "send"
+private const val ReceiveFileName = "receive"
 
 private const val HostScreenResultKey = "host_result"
 private const val FolderScreenResultKey = "folder_result"

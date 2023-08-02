@@ -74,6 +74,7 @@ val SendDataState.labelRes: Int
     @StringRes
     get() = when (this) {
         SendDataState.READY -> R.string.send_state_ready
+        SendDataState.CONFIRM -> R.string.send_state_overwrite
         SendDataState.OVERWRITE -> R.string.send_state_overwrite
         SendDataState.PROGRESS -> R.string.send_state_cancel
         SendDataState.SUCCESS -> R.string.send_state_success

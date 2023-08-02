@@ -2,8 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
 import android.content.res.Configuration
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -55,68 +52,15 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
 @Composable
 fun SendScreen(
-    viewModel: SendViewModel = hiltViewModel(),
+    viewModel: SendViewModel = hiltViewModel(viewModelStoreOwner = LocalContext.current as ComponentActivity),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    uriList: List<Uri>,
-    onNavigateFinish: () -> Unit
+    onNavigateFinish: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
     val showCloseDialog = remember { mutableStateOf(false) }
-    val isFileBrowserShown = remember { mutableStateOf(false) }
-
-    /** Single URI result launcher */
-    val singleUriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
-        isFileBrowserShown.value = false
-        if (uri == null) {
-            onNavigateFinish()
-            return@rememberLauncherForActivityResult
-        }
-
-        val source = uriList.firstOrNull() ?: run {
-            onNavigateFinish()
-            return@rememberLauncherForActivityResult
-        }
-
-        viewModel.sendUri(listOf(source), uri)
-    }
-
-    /** Multiple URI result launcher */
-    val multipleUriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-        isFileBrowserShown.value = false
-        if (uri == null) {
-            onNavigateFinish()
-            return@rememberLauncherForActivityResult
-        }
-
-        val source = uriList.toList().ifEmpty {
-            onNavigateFinish()
-            return@rememberLauncherForActivityResult
-        }
-
-        viewModel.sendUri(source, uri)
-    }
-
-
-    if (uriList.isNotEmpty() && !isFileBrowserShown.value) {
-        when {
-            uriList.size == 1 -> {
-                // Single
-                SideEffect {
-                    singleUriLauncher.launch(uriList.first().fileName)
-                    isFileBrowserShown.value = true
-                }
-            }
-            uriList.size > 1 -> {
-                // Multiple
-                SideEffect {
-                    multipleUriLauncher.launch(uriList.first())
-                    isFileBrowserShown.value = false
-                }
-            }
-        }
-    }
+    val showOverwriteDialog = viewModel.existsConfirmation.collectAsStateWithLifecycle(initialValue = false)
 
     SendScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -128,6 +72,26 @@ fun SendScreen(
         onClickClose = { showCloseDialog.value = true },
     )
 
+    // Overwrite confirmation
+    if (showOverwriteDialog.value) {
+        CommonDialog(
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    viewModel.updateConfirmation(true)
+                },
+            ),
+            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                viewModel.updateConfirmation(false)
+            },
+            onDismiss = {
+                viewModel.updateConfirmation(false)
+            },
+        ) {
+            Text(stringResource(id = R.string.send_overwrite_confirmation_message))
+        }
+    }
+
+    // Exit confirmation
     if (showCloseDialog.value) {
         CommonDialog(
             confirmButtons = listOf(
@@ -138,12 +102,13 @@ fun SendScreen(
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
                 showCloseDialog.value = false
             },
-            onDismiss = { showCloseDialog.value = false }
+            onDismiss = {
+                showCloseDialog.value = false
+            }
         ) {
             Text(stringResource(id = R.string.send_exit_confirmation_message))
         }
     }
-
 }
 
 /**

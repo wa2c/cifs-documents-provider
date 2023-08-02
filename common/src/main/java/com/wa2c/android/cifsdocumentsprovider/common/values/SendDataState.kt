@@ -6,6 +6,8 @@ package com.wa2c.android.cifsdocumentsprovider.common.values
 enum class SendDataState {
     /** In ready */
     READY,
+    /** In confirmation */
+    CONFIRM,
     /** In overwriting */
     OVERWRITE,
     /** In progress */
