@@ -8,12 +8,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.util.Consumer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
+import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
@@ -28,9 +31,10 @@ class MainActivity : AppCompatActivity() {
 
     /** Main View Model */
     private val mainViewModel by viewModels<MainViewModel>()
-
     /** View Model */
     private val sendViewModel by viewModels<SendViewModel>()
+    /** Send Notification */
+    private val notification: SendNotification by lazy { SendNotification(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +66,12 @@ class MainActivity : AppCompatActivity() {
                     onCloseApp = { finishApp() }
                 )
             }
+
+            LaunchedEffect(notification) {
+                sendViewModel.sendDataList.collectIn(this@MainActivity) {
+                    notification.updateProgress(it)
+                }
+            }
         }
     }
 
@@ -92,4 +102,9 @@ class MainActivity : AppCompatActivity() {
         finishAffinity()
     }
 
+    override fun onDestroy() {
+        sendViewModel.onClickCancelAll()
+        notification.close()
+        super.onDestroy()
+    }
 }

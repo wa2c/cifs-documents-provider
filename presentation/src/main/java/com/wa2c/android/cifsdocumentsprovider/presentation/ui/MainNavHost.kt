@@ -37,6 +37,14 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = HomeScreenName,
     ) {
+        // Navigate SendScreen if sending
+        if (sendViewModel.sendDataList.value.isNotEmpty()) {
+            navController.navigate(route = SendScreenName, navOptions = navOptions {
+                this.popUpTo(SendScreenName)
+            })
+            return@NavHost
+        }
+
         // Home Screen
         composable(
             route = HomeScreenName,

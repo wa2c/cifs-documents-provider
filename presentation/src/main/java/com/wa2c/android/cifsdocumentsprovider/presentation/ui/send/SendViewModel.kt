@@ -13,7 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -29,8 +28,6 @@ class SendViewModel @Inject constructor(
 
     private val _sendDataList = MutableStateFlow<List<SendData>>(emptyList())
     val sendDataList = _sendDataList.asStateFlow()
-
-    val existsConfirmation = sendDataList.map { list -> list.any { it.state == SendDataState.CONFIRM } }
 
     /** Send job */
     private var sendJob: Job? = null
@@ -112,12 +109,12 @@ class SendViewModel @Inject constructor(
         sendJob = null
     }
 
-    fun updateConfirmation(isReady: Boolean) {
+    fun onStartSend(toReadyConfirm: Boolean) {
         logD("updateConfirmation")
         launch {
             val list = sendDataList.value.map { data ->
                 if (data.state == SendDataState.CONFIRM) {
-                    data.copy(state = if (isReady) SendDataState.READY else SendDataState.OVERWRITE)
+                    data.copy(state = if (toReadyConfirm) SendDataState.READY else SendDataState.OVERWRITE)
                 } else {
                     data
                 }

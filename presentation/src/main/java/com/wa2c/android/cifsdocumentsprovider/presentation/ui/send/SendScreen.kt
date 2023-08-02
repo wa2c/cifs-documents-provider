@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +28,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
@@ -57,14 +57,14 @@ fun SendScreen(
     onNavigateFinish: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle()
+
+    val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle().value
     val showCloseDialog = remember { mutableStateOf(false) }
-    val showOverwriteDialog = viewModel.existsConfirmation.collectAsStateWithLifecycle(initialValue = false)
+    val showOverwriteDialog = sendDataList.any { it.state == SendDataState.CONFIRM }
 
     SendScreenContainer(
         snackbarHostState = snackbarHostState,
-        sendDataList = sendDataList.value,
+        sendDataList = sendDataList,
         onClickCancel = { viewModel.onClickCancel(it) },
         onClickRetry = { viewModel.onClickRetry(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
@@ -73,22 +73,24 @@ fun SendScreen(
     )
 
     // Overwrite confirmation
-    if (showOverwriteDialog.value) {
+    if (showOverwriteDialog) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
-                    viewModel.updateConfirmation(true)
+                    viewModel.onStartSend(true)
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                viewModel.updateConfirmation(false)
+                viewModel.onStartSend(false)
             },
             onDismiss = {
-                viewModel.updateConfirmation(false)
+                viewModel.onStartSend(false)
             },
         ) {
             Text(stringResource(id = R.string.send_overwrite_confirmation_message))
         }
+    } else {
+        viewModel.onStartSend(true)
     }
 
     // Exit confirmation
@@ -184,6 +186,9 @@ fun SendScreenContainer(
             }
         }
     }
+
+    // Back button
+    BackHandler { onClickClose() }
 }
 
 @Composable
