@@ -60,7 +60,7 @@ fun SendScreen(
 
     val sendDataList = viewModel.sendDataList.collectAsStateWithLifecycle().value
     val showCloseDialog = remember { mutableStateOf(false) }
-    val showOverwriteDialog = sendDataList.any { it.state == SendDataState.CONFIRM }
+    val confirmCount = sendDataList.count { it.state == SendDataState.CONFIRM }
 
     SendScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -73,7 +73,7 @@ fun SendScreen(
     )
 
     // Overwrite confirmation
-    if (showOverwriteDialog) {
+    if (confirmCount > 0) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -87,7 +87,7 @@ fun SendScreen(
                 viewModel.onStartSend(false)
             },
         ) {
-            Text(stringResource(id = R.string.send_overwrite_confirmation_message))
+            Text(stringResource(id = R.string.send_overwrite_confirmation_message, confirmCount))
         }
     } else {
         viewModel.onStartSend(true)

@@ -102,13 +102,17 @@ class SendViewModel @Inject constructor(
     private suspend fun cancelAll() {
         logD("cancelAll")
         val list = sendDataList.value.map {
-            if (it.state.isCancelable) it.copy(state = SendDataState.CANCEL) else it
+            if (it.state.isCancelable) it.copy(state = SendDataState.CANCEL, progressSize = 0L) else it
         }
         _sendDataList.emit(list)
         sendJob?.cancel()
         sendJob = null
     }
 
+    /**
+     * Start send job
+     * @param toReadyConfirm confirm
+     */
     fun onStartSend(toReadyConfirm: Boolean) {
         logD("updateConfirmation")
         launch {
@@ -127,7 +131,7 @@ class SendViewModel @Inject constructor(
     fun onClickCancel(sendData: SendData) {
         logD("onClickCancel")
         launch {
-            updateList(sendData.copy(state = SendDataState.CANCEL))
+            updateList(sendData.copy(state = SendDataState.CANCEL, progressSize = 0))
             startSendJob()
         }
     }
