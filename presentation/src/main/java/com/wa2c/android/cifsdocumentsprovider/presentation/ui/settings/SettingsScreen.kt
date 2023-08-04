@@ -134,7 +134,7 @@ private fun SettingsScreenContainer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = R.string.app_name)) },
+                title = { Text(stringResource(id = R.string.settings_title)) },
                 colors = AppTopAppBarColors(),
                 navigationIcon = {
                     IconButton(onClick = { onClickBack() }) {

@@ -318,7 +318,7 @@ internal class SmbjClient constructor(
         val isDirectory = this.fileInformation.standardInformation.isDirectory
         val uri = this.uncPath.uncPathToUri(isDirectory)?.toUri() ?: return null
         return CifsFile(
-            name = uri.fileName ?: "",
+            name = uri.fileName,
             uri = uri,
             size = this.fileInformation.standardInformation.endOfFile,
             lastModified = this.fileInformation.basicInformation.changeTime.toEpochMillis(),
