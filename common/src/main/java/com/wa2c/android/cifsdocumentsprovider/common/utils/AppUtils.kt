@@ -79,11 +79,7 @@ val Uri.pathFragment: String
  * Get file name (last segment)
  */
 val Uri.fileName: String
-    get() = run {
-        Uri.decode(pathFragment.lastPath).lastPath
-        // FIXME:
-        // Path is not encoded for URI. So file name including '#' occurs errors with lastPathSegment.
-    }
+    get() = Uri.decode(pathFragment.lastPath).lastPath
 
 private val String.lastPath: String
     get() = run {
@@ -124,12 +120,7 @@ fun String.appendSeparator(): String {
 /** Append child entry */
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
-    val nnn = Uri.withAppendedPath(Uri.parse(this), name).toString()
-    logD(nnn)
-    val nn2 = this + name
-    return nn2
-    //return nnn
-    //return this + name
+    return this + name
 }
 
 /** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */
