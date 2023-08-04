@@ -49,6 +49,7 @@ class SendNotification constructor(
      * Update notification progress
      */
     fun updateProgress(sendDataList: List<SendData>) {
+        if (sendDataList.isEmpty()) return
         val countCurrent = sendDataList.count { it.state.isFinished || it.state.inProgress }
         val countAll = countCurrent + sendDataList.count { it.state.isReady }
         val sendData = sendDataList.firstOrNull { it.state == SendDataState.PROGRESS }
