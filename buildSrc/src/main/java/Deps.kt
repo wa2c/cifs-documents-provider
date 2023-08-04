@@ -17,18 +17,18 @@ object Deps {
 
         const val appPlugin = "com.android.application"
         const val libraryPlugin = "com.android.library"
-        const val gradlePluginClasspath = "com.android.tools.build:gradle:8.0.1"
-        const val core = "androidx.core:core-ktx:1.10.0"
+        const val gradlePluginClasspath = "com.android.tools.build:gradle:8.1.0"
+        const val core = "androidx.core:core-ktx:1.10.1"
         const val appcompat = "androidx.appcompat:appcompat:1.6.1"
 
         const val kotlinAndroidPlugin = "org.jetbrains.kotlin.android"
         const val kotlinKaptPlugin = "kotlin-kapt"
         const val kotlinPluginClasspath = "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
-        private const val coroutineVersion = "1.6.4"
+        private const val coroutineVersion = "1.7.3"
         const val coroutine = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${coroutineVersion}"
 
-        private const val daggerVersion = "2.45"
+        private const val daggerVersion = "2.47"
         const val daggerHiltPlugin = "dagger.hilt.android.plugin"
         const val daggerHiltPluginClasspath = "com.google.dagger:hilt-android-gradle-plugin:$daggerVersion"
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
@@ -40,7 +40,7 @@ object Deps {
     }
 
     object Ui {
-        const val composeBom = "androidx.compose:compose-bom:2023.06.00"
+        const val composeBom = "androidx.compose:compose-bom:2023.06.01"
         const val composeUi = "androidx.compose.ui:ui"
         const val composeMaterial = "androidx.compose.material3:material3"
         const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"
@@ -52,14 +52,14 @@ object Deps {
         const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion"
         const val lifecycleRuntimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:$lifeCycleVersion"
 
-        private const val navigationVersion = "2.5.3"
+        private const val navigationVersion = "2.6.0"
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
         const val navigationCompose = "androidx.navigation:navigation-compose:$navigationVersion"
         const val navigationComposeHilt = "androidx.hilt:hilt-navigation-compose:1.0.0"
     }
 
     object Data {
-        private const val roomVersion = "2.5.1"
+        private const val roomVersion = "2.5.2"
         const val roomCompiler = "androidx.room:room-compiler:$roomVersion"
         const val roomKtx = "androidx.room:room-ktx:$roomVersion"
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
@@ -69,7 +69,7 @@ object Deps {
         const val kotlinParcelizePlugin = "kotlin-parcelize"
         const val kotlinSerializationPlugin = "kotlinx-serialization"
         const val kotlinxSerializationClasspath = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
-        const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0"
+        const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.9"
         const val smbj = "com.hierynomus:smbj:0.11.5"
@@ -80,7 +80,7 @@ object Deps {
 
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
-        private const val licenseVersion = "10.6.3"
+        private const val licenseVersion = "10.8.3"
         const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
         const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"
         const val license = "com.mikepenz:aboutlibraries:${licenseVersion}"

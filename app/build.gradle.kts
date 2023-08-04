@@ -40,11 +40,6 @@ android {
             languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
         }
     }
-
-    buildFeatures {
-        dataBinding = true
-    }
-
 }
 
 dependencies {

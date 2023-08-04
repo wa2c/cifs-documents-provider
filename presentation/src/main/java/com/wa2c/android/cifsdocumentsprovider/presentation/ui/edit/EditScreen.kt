@@ -273,7 +273,7 @@ private fun EditScreenContainer(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(id = R.string.host_title)) },
+                title = { Text(stringResource(id = R.string.edit_title)) },
                 colors = AppTopAppBarColors(),
                 actions = {
                     IconButton(onClick = onClickDelete) {
