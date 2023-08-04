@@ -19,14 +19,13 @@ data class SendData(
     val sourceUri: Uri,
     /** Target URI (File or Directory URI) */
     val targetUri: Uri,
-) {
     /** Send start time. */
-    var startTime: Long = 0
+    val startTime: Long = 0,
     /** Send progress size. */
-    var progressSize: Long = 0
+    val progressSize: Long = 0,
     /** True if success */
-    var state: SendDataState = SendDataState.READY
-
+    val state: SendDataState = SendDataState.READY,
+) {
     /** Progress percentage */
     val progress: Int
         get() = if (progressSize > 0) (progressSize * 100 / size).toInt() else 0
@@ -39,10 +38,4 @@ data class SendData(
     val bps: Long
         get() = (elapsedTime / 1000).let { if (it > 0) { progressSize / it } else { 0 } }
 
-    /**
-     * Cancel
-     */
-    fun cancel() {
-        state = SendDataState.CANCEL
-    }
 }

@@ -14,13 +14,13 @@ enum class HostSortType(
     companion object {
 
         /** Default sort type */
-        val DEFAULT = DetectionAscend
+        val default = DetectionAscend
 
         /**
          * Find soft type or default (TimeAscend).
          */
-        fun findByValueOrDefault(value: Int): HostSortType {
-            return values().firstOrNull { it.intValue == value } ?: DEFAULT
+        fun findByValueOrDefault(value: Int?): HostSortType {
+            return values().firstOrNull { it.intValue == value } ?: default
         }
 
     }

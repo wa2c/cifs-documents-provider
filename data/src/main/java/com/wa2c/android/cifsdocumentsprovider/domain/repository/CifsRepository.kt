@@ -2,11 +2,9 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.map
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.decodeJson
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.encodeJson
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -14,47 +12,40 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toEntity
-import com.wa2c.android.cifsdocumentsprovider.data.db.AppDbConverter.toModel
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toEntity
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toModel
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferences
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * CIFS Repository
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject internal constructor(
     private val jCifsClient: JCifsClient,
     private val smbjClient: SmbjClient,
-    private val appPreferences: AppPreferences,
+    private val appPreferences: AppPreferencesDataStore,
     private val connectionSettingDao: ConnectionSettingDao,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
     /** Use as local */
-    val useAsLocal: Boolean
-        get() = appPreferences.useAsLocal
+    val useAsLocalFlow = appPreferences.useAsLocalFlow
 
-    /**
-     * Connection flow
-     */
-    val connectionFlow: Flow<PagingData<CifsConnection>> = Pager(
-        PagingConfig(pageSize = Int.MAX_VALUE, initialLoadSize = Int.MAX_VALUE)
-    ) {
-        connectionSettingDao.getPagingSource()
-    }.flow.map { pagingData ->
-        pagingData.map { it.toModel() }
+    /** Connection flow */
+    val connectionListFlow = connectionSettingDao.getList().map { list ->
+        list.map { it.toModel() }
     }
 
     private fun getClient(dto: CifsClientDto): CifsClientInterface {
@@ -64,16 +55,27 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    suspend fun isExists(): Boolean {
-        return connectionSettingDao.getCount() > 0
+    suspend fun isConnectionExists(): Boolean {
+        return withContext(dispatcher) {
+            connectionSettingDao.getCount() > 0
+        }
     }
 
     /**
      * Get connection
      */
+    suspend fun getConnection(id: String): CifsConnection? {
+        return withContext(dispatcher) {
+            connectionSettingDao.getEntity(id)?.toModel()
+        }
+    }
+
+    /**
+     * Load connections
+     */
     suspend fun loadConnection(): List<CifsConnection>  {
         return withContext(dispatcher) {
-            connectionSettingDao.getList().map { it.toModel() }
+            connectionSettingDao.getList().first().map { it.toModel() }
         }
     }
 
@@ -93,14 +95,31 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
+
+    /**
+     * Load temporary connection
+     */
+    suspend fun loadTemporaryConnection(): CifsConnection?  {
+        return withContext(dispatcher) {
+            appPreferences.temporaryConnectionJsonFlow.firstOrNull()?.decodeJson()
+        }
+    }
+
+    /**
+     * Save temporary connection
+     */
+    suspend fun saveTemporaryConnection(connection: CifsConnection?) {
+        withContext(dispatcher) {
+            appPreferences.setTemporaryConnectionJson(connection?.encodeJson())
+        }
+    }
+
     /**
      * Get connection from URI
      */
-    private suspend fun getClientDto(uriText: String): CifsClientDto? {
-        return withContext(dispatcher) {
-            connectionSettingDao.getEntityByUri(uriText)?.toModel()?.let {
-                CifsClientDto(it, uriText)
-            }
+    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): CifsClientDto? {
+        return connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
+            connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { CifsClientDto(it, uriText) }
         }
     }
 
@@ -122,22 +141,13 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    /**
-     * Get CIFS File from connection.`
-     */
-    suspend fun getFile(connection: CifsConnection, uri: String? = null): CifsFile? {
-        return withContext(dispatcher) {
-            val dto = CifsClientDto(connection, uri)
-            getClient(dto).getFile(dto)
-        }
-    }
 
     /**
-     * Get CIFS File from uri.
+     * Get CIFS File
      */
-    suspend fun getFile(uri: String): CifsFile? {
+    suspend fun getFile(uri: String?, connection: CifsConnection? = null): CifsFile? {
         return withContext(dispatcher) {
-            val dto = getClientDto(uri) ?: return@withContext null
+            val dto = getClientDto(uri, connection) ?: return@withContext null
             getClient(dto).getFile(dto)
         }
     }
@@ -145,19 +155,9 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get children CIFS files from uri.
      */
-    suspend fun getFileChildren(connection: CifsConnection, uri: String): List<CifsFile> {
+    suspend fun getFileChildren(uri: String?, connection: CifsConnection? = null): List<CifsFile> {
         return withContext(dispatcher) {
-            val dto = CifsClientDto(connection, uri)
-            getClient(dto).getChildren(dto)
-        }
-    }
-
-    /**
-     * Get children CIFS files from uri.
-     */
-    suspend fun getFileChildren(uri: String): List<CifsFile> {
-        return withContext(dispatcher) {
-            val dto = getClientDto(uri) ?: return@withContext emptyList()
+            val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
             getClient(dto).getChildren(dto)
         }
     }

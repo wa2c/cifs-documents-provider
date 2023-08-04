@@ -69,20 +69,17 @@ dependencies {
     kapt(Deps.Data.roomCompiler)
     implementation(Deps.Data.roomKtx)
     implementation(Deps.Data.roomPaging)
+    // DataStore
+    implementation(Deps.Data.dataStore)
     // Json
     implementation(Deps.Data.kotlinxSerializationJson)
     // SMB
     implementation(Deps.Data.jcifsNg)
     implementation(Deps.Data.smbj)
     implementation(Deps.Data.smbjRpc)
-    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
+    implementation(Deps.Data.guava) // to avoid conflict
     // Android Network Tools
     implementation(Deps.Data.networkTools)
-
-    // Util
-
-    // Paging
-    implementation(Deps.Data.pagingKtx)
 
     // Test
 

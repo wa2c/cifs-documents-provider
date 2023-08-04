@@ -1,23 +1,28 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamHost
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -25,17 +30,36 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class EditViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val cifsRepository: CifsRepository
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val _navigationEvent = MutableSharedFlow<EditNav>()
-    val navigationEvent: SharedFlow<EditNav> = _navigationEvent
+    private val paramId: String? = savedStateHandle[EditScreenParamId]
+    private val paramHost: String? = savedStateHandle[EditScreenParamHost]
+
+    init {
+        launch {
+            val connection = paramId?.let {
+                cifsRepository.getConnection(paramId).also { initConnection = it }
+            } ?: CifsConnection.createFromHost(paramHost ?: "")
+            deployCifsConnection(connection)
+        }
+    }
+
+    private val _navigateSearchHost = MutableSharedFlow<Result<CifsConnection>>()
+    val navigateSearchHost = _navigateSearchHost.asSharedFlow()
+
+    private val _navigateSelectFolder = MutableSharedFlow<Result<CifsConnection>>()
+    val navigateSelectFolder = _navigateSelectFolder.asSharedFlow()
+
+    private val _result = MutableSharedFlow<Result<Unit>>()
+    val result = _result.asSharedFlow()
 
     private val _isBusy = MutableStateFlow(false)
-    val isBusy: StateFlow<Boolean> = _isBusy
+    val isBusy = _isBusy.asStateFlow()
 
     var name = MutableStateFlow<String?>(null)
-    var storageIndex = MutableStateFlow<Int?>(null)
+    var storage = MutableStateFlow<StorageType>(StorageType.default)
     var domain = MutableStateFlow<String?>(null)
     var host = MutableStateFlow<String?>(null)
     var port = MutableStateFlow<String?>(null)
@@ -44,25 +68,14 @@ class EditViewModel @Inject constructor(
     var user = MutableStateFlow<String?>(null)
     var password = MutableStateFlow<String?>(null)
     var anonymous = MutableStateFlow<Boolean>(false)
+
     var extension = MutableStateFlow<Boolean>(false)
     var safeTransfer = MutableStateFlow<Boolean>(false)
 
-    val connectionUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        getSmbUri(host, port, folder, true)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-    val providerUri: StateFlow<String> = combine(host, port, folder) { host, port, folder ->
-        getContentUri(host, port, folder)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
-
-    private val selectedStorage: StorageType?
-        get() = storageIndex.value?.let { storageTypes.getOrNull(it) }
-
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
-    val connectionResultNotify: SharedFlow<ConnectionResult?> = _connectionResult
     val connectionResult = channelFlow<ConnectionResult?> {
         launch { _connectionResult.collect { send(it) } }
-        launch { storageIndex.collect { send(null) } }
+        launch { storage.collect { send(null) } }
         launch { domain.collect { send(null) } }
         launch { host.collect { send(null) } }
         launch { port.collect { send(null) } }
@@ -80,51 +93,12 @@ class EditViewModel @Inject constructor(
     val isNew: Boolean
         get() = currentId == CifsConnection.NEW_ID
 
+    /** True if data changed */
+    val isChanged: Boolean
+        get() = initConnection == null || initConnection != createCifsConnection(false)
+
     /** Init connection */
     private var initConnection: CifsConnection? = null
-
-    /** True if initialized */
-    private var initialized: Boolean = false
-
-    /** Storage types */
-    val storageTypes: List<StorageType> get() = StorageType.values().toList()
-
-    /**
-     * Initialize
-     */
-    fun initialize(connection: CifsConnection?) {
-        if (initialized) return
-        initConnection = if (connection == null || connection.isNew) null else connection
-        deployCifsConnection(connection)
-        initialized = true
-    }
-
-    /**
-     * Save connection
-     */
-    private suspend fun save() {
-        createCifsConnection(isNew)?.let { con ->
-            if (cifsRepository.loadConnection().filter { it.id != con.id }
-                    .any { it.folderSmbUri == con.folderSmbUri }) {
-                // Duplicate URI
-                throw IllegalArgumentException()
-            }
-            cifsRepository.saveConnection(con)
-            currentId = con.id
-            initConnection = con
-        } ?: run {
-            throw IOException()
-        }
-    }
-
-    /**
-     * Delete connection
-     */
-    private fun delete() {
-        launch {
-            cifsRepository.deleteConnection(currentId)
-        }
-    }
 
     /**
      * Deploy connection data.
@@ -132,7 +106,7 @@ class EditViewModel @Inject constructor(
     private fun deployCifsConnection(connection: CifsConnection?) {
         currentId = connection?.id ?: CifsConnection.NEW_ID
         name.value = connection?.name
-        storageIndex.value = connection?.storage?.let { storageTypes.indexOf(it) }
+        storage.value = connection?.storage ?: StorageType.default
         domain.value = connection?.domain
         host.value = connection?.host
         port.value = connection?.port
@@ -153,7 +127,7 @@ class EditViewModel @Inject constructor(
         return CifsConnection(
             id = if (generateId) UUID.randomUUID().toString() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
-            storage = selectedStorage ?: StorageType.default,
+            storage = storage.value,
             domain = domain.value?.ifEmpty { null },
             host = host.value?.ifEmpty { null } ?: return null,
             port = port.value?.ifEmpty { null },
@@ -171,22 +145,28 @@ class EditViewModel @Inject constructor(
      * Check connection
      */
     fun onClickCheckConnection() {
-        _isBusy.value = true
         launch {
+            _isBusy.emit(true)
             runCatching {
-                withContext(Dispatchers.IO) {
-                   createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
-                }
-            }.getOrNull().let {
-                _connectionResult.emit(it ?: ConnectionResult.Failure())
-                _isBusy.value = false
+                _connectionResult.emit(null)
+               createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
+            }.fold(
+                onSuccess = { _connectionResult.emit(it ?: ConnectionResult.Failure()) },
+                onFailure = { _connectionResult.emit(ConnectionResult.Failure(it)) }
+            ).also {
+                _isBusy.emit(false)
             }
         }
     }
 
     fun onClickSearchHost() {
         launch {
-            _navigationEvent.emit(EditNav.SelectHost(createCifsConnection(false)))
+            val result = createCifsConnection(false)?.let {
+                Result.success(it)
+            } ?: let {
+                Result.failure(Exception())
+            }
+            _navigateSearchHost.emit(result)
         }
     }
 
@@ -194,51 +174,22 @@ class EditViewModel @Inject constructor(
      * Select Folder Click
      */
     fun onClickSelectFolder() {
-        _isBusy.value = true
         launch {
+            _isBusy.emit(true)
             runCatching {
-                withContext(Dispatchers.IO) {
-                    val folderConnection = createCifsConnection(false) ?: throw IOException()
-
-                    // use target folder
-                    val folderResult = cifsRepository.checkConnection(folderConnection)
-                    if (folderResult is ConnectionResult.Success) {
-                        _navigationEvent.emit(EditNav.SelectFolder(folderConnection))
-                        return@withContext folderResult
-                    } else if (folderResult is ConnectionResult.Failure) {
-                        return@withContext folderResult
-                    }
-
-                    // use root folder
-                    val rootConnection = folderConnection.copy(folder = null)
-                    val rootResult = cifsRepository.checkConnection(rootConnection)
-                    if (rootResult == ConnectionResult.Success) {
-                        _navigationEvent.emit(EditNav.SelectFolder(rootConnection))
-                        return@withContext folderResult // Show target folder warning
-                    }
-                    return@withContext rootResult
+                val folderConnection = createCifsConnection(false) ?: throw IOException()
+                val result = cifsRepository.checkConnection(folderConnection)
+                if (result !is ConnectionResult.Failure) {
+                    cifsRepository.saveTemporaryConnection(folderConnection)
+                    _navigateSelectFolder.emit(Result.success(folderConnection))
+                } else {
+                    _connectionResult.emit(result)
                 }
-            }.getOrNull().let {
-                _connectionResult.emit(it ?: ConnectionResult.Failure())
-                _isBusy.value = false
+            }.onFailure {
+                _connectionResult.emit(ConnectionResult.Failure(cause = it))
+            }.also {
+                _isBusy.emit(false)
             }
-        }
-    }
-
-    /**
-     * Set host result.
-     */
-    fun setHostResult(hostText: String?) {
-        host.value = hostText
-    }
-
-    /**
-     * Set folder result.
-     */
-    fun setFolderResult(path: String?) {
-        launch {
-            folder.value = path
-            _connectionResult.emit(if (path != null) ConnectionResult.Success else ConnectionResult.Failure())
         }
     }
 
@@ -247,41 +198,50 @@ class EditViewModel @Inject constructor(
      */
     fun onClickDelete() {
         launch {
-            delete()
-            _navigationEvent.emit(EditNav.Back())
+            _isBusy.emit(true)
+            runCatching {
+                cifsRepository.deleteConnection(currentId)
+            }.onSuccess {
+                _result.emit(Result.success(Unit))
+                _isBusy.emit(false)
+            }.onFailure {
+                _result.emit(Result.failure(it))
+                _isBusy.emit(false)
+            }
         }
     }
 
     /**
      * Save Click
      */
-    fun onClickAccept() {
-        _isBusy.value = true
+    fun onClickSave() {
         launch {
+            _isBusy.emit(true)
             runCatching {
-                save()
+                createCifsConnection(isNew)?.let { con ->
+                    if (cifsRepository.loadConnection().filter { it.id != con.id }
+                            .any { it.folderSmbUri == con.folderSmbUri }) {
+                        // Duplicate URI
+                        throw IllegalArgumentException()
+                    }
+                    cifsRepository.saveConnection(con)
+                    currentId = con.id
+                    initConnection = con
+                } ?: throw IOException()
             }.onSuccess {
-                _navigationEvent.emit(EditNav.SaveResult(null))
-                _isBusy.value = false
+                _result.emit(Result.success(Unit))
+                _isBusy.emit(false)
             }.onFailure {
-                if (it is IllegalArgumentException) {
-                    // URI duplicated
-                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_duplicate_message))
-                } else {
-                    // Host empty
-                    _navigationEvent.emit(EditNav.SaveResult(R.string.edit_save_ng_message))
-                }
-                _isBusy.value = false
+                _result.emit(Result.failure(it))
+                _isBusy.emit(false)
             }
         }
     }
 
-    /**
-     * Back Click
-     */
-    fun onClickBack() {
-        launch {
-            _navigationEvent.emit(EditNav.Back(initConnection == null || initConnection != createCifsConnection(false)))
+    override fun onCleared() {
+        runBlocking {
+            cifsRepository.saveTemporaryConnection(null)
         }
+        super.onCleared()
     }
 }

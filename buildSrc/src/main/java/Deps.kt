@@ -8,9 +8,10 @@ object Deps {
     const val compileSdkVersion = 33
     const val minSdkVersion = 26
     const val targetSdkVersion = compileSdkVersion
-    const val kotlinVersion = "1.8.21"
+    const val kotlinVersion = "1.8.20"
     const val javaVersion = 17
     val javaVersionEnum =  JavaVersion.VERSION_17
+    const val kotlinCompilerExtensionVersion = "1.4.6"
 
     object App {
 
@@ -33,24 +34,28 @@ object Deps {
         const val daggerHilt = "com.google.dagger:hilt-android:$daggerVersion"
         const val daggerHiltCompiler = "com.google.dagger:hilt-android-compiler:$daggerVersion"
 
+        const val parcelizePlugin = "kotlin-parcelize"
+
         const val documentFile = "androidx.documentfile:documentfile:1.0.1"
     }
 
     object Ui {
-        const val activityKtx = "androidx.activity:activity-ktx:1.7.1"
-        const val fragmentKtx = "androidx.fragment:fragment-ktx:1.5.7"
-        const val material = "com.google.android.material:material:1.8.0"
-        const val constraintLayout = "androidx.constraintlayout:constraintlayout:2.1.4"
+        const val composeBom = "androidx.compose:compose-bom:2023.06.00"
+        const val composeUi = "androidx.compose.ui:ui"
+        const val composeMaterial = "androidx.compose.material3:material3"
+        const val composeUiPreview = "androidx.compose.ui:ui-tooling-preview"
+        const val composeUiTooling = "androidx.compose.ui:ui-tooling"
+        const val composeReorderable = "org.burnoutcrew.composereorderable:reorderable:0.9.6"
+        const val systemUiController = "com.google.accompanist:accompanist-systemuicontroller:0.30.1"
 
         private const val lifeCycleVersion = "2.6.1"
-        const val lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
-        const val lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
+        const val lifecycleViewModelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:$lifeCycleVersion"
+        const val lifecycleRuntimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:$lifeCycleVersion"
 
         private const val navigationVersion = "2.5.3"
-        const val navigationSafeargsPlugin = "androidx.navigation.safeargs.kotlin"
         const val navigationPluginClasspath = "androidx.navigation:navigation-safe-args-gradle-plugin:$navigationVersion"
-        const val navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
-        const val navigationFragmentKtx = "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
+        const val navigationCompose = "androidx.navigation:navigation-compose:$navigationVersion"
+        const val navigationComposeHilt = "androidx.hilt:hilt-navigation-compose:1.0.0"
     }
 
     object Data {
@@ -59,8 +64,7 @@ object Deps {
         const val roomKtx = "androidx.room:room-ktx:$roomVersion"
         const val roomPaging = "androidx.room:room-paging:$roomVersion"
 
-        private const val pagingVersion = "3.1.1"
-        const val pagingKtx = "androidx.paging:paging-runtime-ktx:$pagingVersion"
+        const val dataStore = "androidx.datastore:datastore-preferences:1.0.0"
 
         const val kotlinParcelizePlugin = "kotlin-parcelize"
         const val kotlinSerializationPlugin = "kotlinx-serialization"
@@ -70,16 +74,17 @@ object Deps {
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.9"
         const val smbj = "com.hierynomus:smbj:0.11.5"
         const val smbjRpc = "com.rapid7.client:dcerpc:0.12.0"
+        const val guava = "com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava"
         const val networkTools = "com.github.stealthcopter:AndroidNetworkTools:0.4.5.3"
     }
 
     object Util {
         const val timber = "com.jakewharton.timber:timber:4.7.1" // TODO: Update after supporting Kotlin static call
-        const val localization = "com.akexorcist:localization:1.2.11"
         private const val licenseVersion = "10.6.3"
         const val licensePluginClassPath = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${licenseVersion}"
         const val licensePlugin = "com.mikepenz.aboutlibraries.plugin"
         const val license = "com.mikepenz:aboutlibraries:${licenseVersion}"
+        const val licenseCompose = "com.mikepenz:aboutlibraries-compose:${licenseVersion}"
     }
 
     object Test {

@@ -5,7 +5,11 @@ import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
-import android.os.*
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.HandlerThread
+import android.os.OperationCanceledException
+import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
@@ -14,11 +18,13 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.createCifsRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.PresentationModule
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.android.asCoroutineDispatcher
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
 
@@ -32,7 +38,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /** Storage Manager */
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
     /** Cifs Repository */
-    private val cifsRepository: CifsRepository by lazy { createCifsRepository(providerContext) }
+    private val cifsRepository: CifsRepository by lazy {
+        val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
+        val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
+        hiltEntryPoint.analyticsService()
+    }
 
     /** File handler */
     private val fileHandler: Handler = HandlerThread(this.javaClass.simpleName)
@@ -57,6 +67,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<String>?): Cursor {
+        val useAsLocal = runBlocking { cifsRepository.useAsLocalFlow.first() }
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
             it.newRow().apply {
@@ -70,7 +81,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_FLAGS,
                     DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
                             DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
-                            if (cifsRepository.useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
+                            if (useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
                 )
             }
         }
@@ -86,7 +97,12 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 documentId?.let {
                     val uri = getCifsUri(it)
-                    val file = cifsRepository.getFile(uri) ?: return@let
+                    val file = try {
+                        cifsRepository.getFile(uri)
+                    } catch (e: Exception) {
+                        logE(e)
+                        null
+                    } ?: return@let
                     includeFile(cursor, file)
                 }
             }
@@ -104,7 +120,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             runBlocking {
                 cifsRepository.loadConnection().forEach { connection ->
                     try {
-                        val file = cifsRepository.getFile(connection) ?: return@forEach
+                        val file = cifsRepository.getFile(null, connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
                     } catch (e: Exception) {
                         logE(e)
@@ -344,6 +360,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_FLAGS,
             DocumentsContract.Document.COLUMN_SIZE
         )
-
     }
+
+
 }

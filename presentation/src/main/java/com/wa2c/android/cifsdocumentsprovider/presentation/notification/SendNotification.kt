@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
@@ -47,8 +48,11 @@ class SendNotification constructor(
     /**
      * Update notification progress
      */
-    fun updateProgress(sendData: SendData, countCurrent: Int, countAll: Int) {
-        if (sendData.state.inProgress) {
+    fun updateProgress(sendDataList: List<SendData>) {
+        val countCurrent = sendDataList.count { it.state.isFinished || it.state.inProgress }
+        val countAll = countCurrent + sendDataList.count { it.state.isReady }
+        val sendData = sendDataList.firstOrNull { it.state == SendDataState.PROGRESS }
+        if (sendData != null) {
             notificationBuilder.setContentTitle(sendData.name)
             notificationBuilder.setContentText(sendData.getSummaryText(context))
             notificationBuilder.setSubText("[$countCurrent/$countAll]")

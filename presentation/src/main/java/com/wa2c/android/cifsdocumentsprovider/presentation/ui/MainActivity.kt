@@ -3,13 +3,22 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.MenuItem
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.navigation.fragment.NavHostFragment
-import com.akexorcist.localizationactivity.ui.LocalizationActivity
-import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.core.util.Consumer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendFragmentArgs
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
+import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -17,73 +26,85 @@ import dagger.hilt.android.AndroidEntryPoint
  * Main Activity
  */
 @AndroidEntryPoint
-class MainActivity : LocalizationActivity(R.layout.activity_main) {
+class MainActivity : AppCompatActivity() {
+    // NOTE: Use AppCompatActivity (not ComponentActivity) for Language
 
-    /** View Model */
-    private val sendViewModel by viewModels<SendViewModel>()
     /** Main View Model */
     private val mainViewModel by viewModels<MainViewModel>()
+    /** View Model */
+    private val sendViewModel by viewModels<SendViewModel>()
+    /** Send Notification */
+    private val notification: SendNotification by lazy { SendNotification(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        processIntent(intent)
 
-        mainViewModel.language.collectIn(this) {
-            setLanguage(it.code)
-        }
-        mainViewModel.updateLanguage() // Initialize Language
-    }
+        AppCompatDelegate.setDefaultNightMode(mainViewModel.uiThemeFlow.value.mode) // Set theme
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        processIntent(intent)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                onBackPressedDispatcher.onBackPressed()
-                return true
+        setContent {
+            val navController = rememberNavController()
+            DisposableEffect(navController) {
+                val consumer = Consumer<Intent> {
+                    navController.handleDeepLink(it)
+                }
+                this@MainActivity.addOnNewIntentListener(consumer)
+                onDispose {
+                    this@MainActivity.removeOnNewIntentListener(consumer)
+                }
             }
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
-    /**
-     * Branch by intent
-     */
-    private fun processIntent(intent: Intent?) {
-        when (intent?.action) {
-            Intent.ACTION_SEND -> {
-                val uri: Uri? = intent.getParcelableExtra(Intent.EXTRA_STREAM)
-                startFragment(uri?.let { listOf(it) } ?: emptyList())
+            val systemUiController = rememberSystemUiController()
+            systemUiController.setStatusBarColor(Theme.Colors.StatusBackground)
+
+            Theme.AppTheme(
+                darkTheme = mainViewModel.uiThemeFlow.collectAsStateWithLifecycle().value.isDark()
+            ) {
+                MainNavHost(
+                    navController = navController,
+                    sendViewModel = sendViewModel,
+                    onOpenFile = { startApp(it) },
+                    onCloseApp = { finishApp() }
+                )
             }
-            Intent.ACTION_SEND_MULTIPLE -> {
-                val uriList: List<Uri> = intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM) ?: emptyList()
-                startFragment(uriList)
-            }
-            else -> {
-                startFragment()
+
+            LaunchedEffect(notification) {
+                sendViewModel.sendDataList.collectIn(this@MainActivity) {
+                    notification.updateProgress(it)
+                }
             }
         }
     }
 
-    /**
-     * Start fragment
-     */
-    private fun startFragment(sendUri: List<Uri> = emptyList()) {
-        val navHostFragment = (supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment)
-        val graph = navHostFragment.navController.navInflater.inflate(R.navigation.nav_graph)
-
-        if (sendUri.isEmpty() && sendViewModel.sendDataList.value.isEmpty()) {
-            // Normal
-            graph.setStartDestination(R.id.mainFragment)
-            navHostFragment.navController.graph = graph
+    private fun startApp(uris: List<Uri>) {
+        if (uris.isEmpty()) {
+            return
+        } else if (uris.size == 1) {
+            // Single
+            val uri = uris.first()
+            val shareIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                type = uri.toString().mimeType
+            }
+            startActivity(Intent.createChooser(shareIntent, null))
         } else {
-            // Send
-            graph.setStartDestination(R.id.sendFragment)
-            navHostFragment.navController.setGraph(graph, SendFragmentArgs(sendUri.toTypedArray()).toBundle())
+            // Multiple
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND_MULTIPLE
+                putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+                type = "*/*"
+            }
+            startActivity(Intent.createChooser(shareIntent, null))
         }
     }
 
+    private fun finishApp() {
+        finishAffinity()
+    }
+
+    override fun onDestroy() {
+        sendViewModel.onClickCancelAll()
+        notification.close()
+        super.onDestroy()
+    }
 }

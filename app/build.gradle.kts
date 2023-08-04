@@ -14,7 +14,7 @@ android {
     namespace = Deps.namespaceBase
 
     defaultConfig {
-        applicationId = "com.wa2c.android.cifsdocumentsprovider"
+        applicationId = Deps.namespaceBase
         minSdk = Deps.minSdkVersion
         targetSdk = Deps.targetSdkVersion
         versionCode = 17
@@ -55,11 +55,6 @@ dependencies {
 
     implementation(Deps.App.daggerHilt)
     kapt(Deps.App.daggerHiltCompiler)
-
-    // Util
-
-    // Localization
-    implementation(Deps.Util.localization)
 }
 
 kapt {
