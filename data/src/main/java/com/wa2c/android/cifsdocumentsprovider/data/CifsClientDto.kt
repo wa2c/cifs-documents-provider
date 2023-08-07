@@ -14,26 +14,32 @@ internal data class CifsClientDto(
     private val inputUri: String? = null,
 ) {
     /** URI */
-    val uri: String = inputUri ?: connection.folderSmbUri
+    val uri: String
+        get() = inputUri ?: connection.folderSmbUri
 
     /** Share name */
-    val shareName: String = uri
+    val shareName: String
+        get() =  uri
         .substringAfter(URI_START, "")
         .substringAfter(URI_SEPARATOR, "")
         .substringBefore(URI_SEPARATOR)
 
     /** Share path */
-    val sharePath: String = uri
+    val sharePath: String
+        get() = uri
         .substringAfter(URI_START, "")
         .substringAfter(URI_SEPARATOR, "")
         .substringAfter(URI_SEPARATOR)
 
-    val name: String = sharePath
+    val name: String
+        get() = sharePath
         .substringAfterLast(URI_SEPARATOR)
 
     /** True if this is root */
-    val isRoot: Boolean = shareName.isEmpty()
+    val isRoot: Boolean
+        get() = shareName.isEmpty()
 
     /** True if this is share root */
-    val isShareRoot: Boolean = shareName.isNotEmpty() && sharePath.isEmpty()
+    val isShareRoot: Boolean
+        get() = shareName.isNotEmpty() && sharePath.isEmpty()
 }

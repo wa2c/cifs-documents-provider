@@ -39,20 +39,9 @@ internal class JCifsClient constructor(
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
             try { oldValue?.close() } catch (e: Exception) { logE(e) }
             super.entryRemoved(evicted, key, oldValue, newValue)
-            logD("CIFSContext Removed: ${key?.name}")
+            logD("CIFSContext Removed: $key")
         }
     }
-    /** SMB File cache */
-    private val smbFileCache = object : LruCache<String, SmbFile>(100) {
-        override fun entryRemoved(evicted: Boolean, key: String?, oldValue: SmbFile?, newValue: SmbFile?) {
-            if (!evicted) { try { oldValue?.close() } catch (e: Exception) { logE(e) } }
-            super.entryRemoved(evicted, key, oldValue, newValue)
-            logD("SMBFile Removed: $key")
-        }
-    }
-
-    /** CIFS File cache */
-    private val cifsFileCache = LruCache<String, CifsFile>(1000)
 
     /**
      * Get auth by user. Anonymous if user and password are empty.
@@ -77,6 +66,7 @@ internal class JCifsClient constructor(
                 else -> it.withCredentials(NtlmPasswordAuthenticator(connection.domain, connection.user, connection.password, null))
             }
         }
+        logD("CIFSContext Created: $context")
         return CIFSContextWrapper(context).also {
             contextCache.put(connection, it)
         }
@@ -89,8 +79,6 @@ internal class JCifsClient constructor(
         return SmbFile(uri, cifsContext).apply {
             connectTimeout = CONNECTION_TIMEOUT
             readTimeout = READ_TIMEOUT
-        }.also { file ->
-            smbFileCache.put(uri, file)
         }
     }
 
@@ -101,11 +89,9 @@ internal class JCifsClient constructor(
         return withContext(dispatcher) {
             try {
                 val context = (if (forced) null else contextCache[dto.connection]) ?: getCifsContext(dto.connection)
-                val file = (if (forced) null else smbFileCache[dto.uri]) ?: getSmbFile(context, dto.uri)
-                file
+                getSmbFile(context, dto.uri)
             } catch (e: Exception) {
                 logE(e)
-                removeFileCache(dto.uri)
                 null
             }
         }
@@ -131,7 +117,6 @@ internal class JCifsClient constructor(
                 }
             } finally {
                 contextCache.remove(dto.connection)
-                smbFileCache.remove(dto.uri)
             }
         }
     }
@@ -148,7 +133,7 @@ internal class JCifsClient constructor(
      */
     override suspend fun getChildren(dto: CifsClientDto, forced: Boolean): List<CifsFile> {
         return getSmbFile(dto, forced)?.listFiles()?.mapNotNull {
-            getSmbFile(dto.copy(inputUri = it.url.toString()), forced)?.toCifsFile()
+            it.toCifsFile()
         } ?: emptyList()
     }
 
@@ -159,20 +144,15 @@ internal class JCifsClient constructor(
     override suspend fun createFile(dto: CifsClientDto, mimeType: String?): CifsFile? {
         return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
-            try {
-                getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
-                    if (optimizedUri.isDirectoryUri) {
-                        // Directory
-                        it.mkdir()
-                    } else {
-                        // File
-                        it.createNewFile()
-                    }
-                    it.toCifsFile()
+            getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
+                if (optimizedUri.isDirectoryUri) {
+                    // Directory
+                    it.mkdir()
+                } else {
+                    // File
+                    it.createNewFile()
                 }
-            } catch (e: Exception) {
-                removeFileCache(optimizedUri)
-                throw e
+                it.toCifsFile()
             }
         }
     }
@@ -185,18 +165,10 @@ internal class JCifsClient constructor(
         targetDto: CifsClientDto,
     ): CifsFile? {
         return withContext(dispatcher) {
-            try {
-                val source = getSmbFile(sourceDto) ?: return@withContext null
-                val target = getSmbFile(targetDto) ?: return@withContext null
-                source.copyTo(target)
-                smbFileCache.put(targetDto.uri, target)
-                target.toCifsFile()
-            } catch (e: Exception) {
-                removeFileCache(targetDto.uri)
-                throw e
-            } finally {
-                removeFileCache(sourceDto.uri)
-            }
+            val source = getSmbFile(sourceDto) ?: return@withContext null
+            val target = getSmbFile(targetDto) ?: return@withContext null
+            source.copyTo(target)
+            target.toCifsFile()
         }
     }
 
@@ -208,18 +180,10 @@ internal class JCifsClient constructor(
         targetDto: CifsClientDto,
     ): CifsFile? {
         return withContext(dispatcher) {
-            try {
-                val sourceFile = getSmbFile(sourceDto) ?: return@withContext null
-                val targetFile = getSmbFile(targetDto) ?: return@withContext null
-                sourceFile.renameTo(targetFile)
-                smbFileCache.put(targetDto.uri, targetFile)
-                targetFile.toCifsFile()
-            } catch (e: Exception) {
-                removeFileCache(targetDto.uri)
-                throw e
-            } finally {
-                removeFileCache(sourceDto.uri)
-            }
+            val sourceFile = getSmbFile(sourceDto) ?: return@withContext null
+            val targetFile = getSmbFile(targetDto) ?: return@withContext null
+            sourceFile.renameTo(targetFile)
+            targetFile.toCifsFile()
         }
     }
 
@@ -230,14 +194,10 @@ internal class JCifsClient constructor(
         dto: CifsClientDto,
     ): Boolean {
         return withContext(dispatcher) {
-            try {
-                getSmbFile(dto)?.let {
-                    it.delete()
-                    true
-                } ?: false
-            } finally {
-                removeFileCache(dto.uri)
-            }
+            getSmbFile(dto)?.let {
+                it.delete()
+                true
+            } ?: false
         }
     }
 
@@ -268,7 +228,6 @@ internal class JCifsClient constructor(
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
             val onFileRelease = fun() {
-                smbFileCache.remove(dto.uri)
                 contextCache.remove(dto.connection)
             }
 
@@ -282,16 +241,6 @@ internal class JCifsClient constructor(
 
     override suspend fun close() {
         contextCache.evictAll()
-        smbFileCache.evictAll()
-        cifsFileCache.evictAll()
-    }
-
-    /**
-     * Remove file cache
-     */
-    private fun removeFileCache(uri: String) {
-        smbFileCache.remove(uri)
-        cifsFileCache.remove(uri)
     }
 
     /**
@@ -299,7 +248,7 @@ internal class JCifsClient constructor(
      */
     private suspend fun SmbFile.toCifsFile(): CifsFile {
         val urlText = url.toString()
-        return cifsFileCache[urlText] ?: withContext(dispatcher) {
+        return withContext(dispatcher) {
             val isDir = urlText.isDirectoryUri || isDirectory
             CifsFile(
                 name = name.trim('/'),
@@ -308,8 +257,6 @@ internal class JCifsClient constructor(
                 lastModified = lastModified,
                 isDirectory = isDir,
             )
-        }.also {
-            cifsFileCache.put(urlText, it)
         }
     }
 
