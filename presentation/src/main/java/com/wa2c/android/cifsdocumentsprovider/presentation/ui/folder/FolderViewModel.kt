@@ -87,7 +87,6 @@ class FolderViewModel @Inject constructor(
     private suspend fun loadList(uri: Uri) {
         _isLoading.emit(true)
         runCatching {
-            _currentUri.emit(uri)
             cifsRepository.getFileChildren(uri.toString(), temporaryConnection)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
@@ -95,6 +94,7 @@ class FolderViewModel @Inject constructor(
             _fileList.emit(emptyList())
             _result.emit(Result.failure(it))
         }.also {
+            _currentUri.emit(uri)
             _isLoading.emit(false)
         }
     }
