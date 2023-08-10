@@ -10,7 +10,6 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -101,7 +100,6 @@ class FolderViewModel @Inject constructor(
 
     override fun onCleared() {
         runBlocking {
-            cifsRepository.closeAllSessions()
             _isLoading.emit(false)
         }
         super.onCleared()

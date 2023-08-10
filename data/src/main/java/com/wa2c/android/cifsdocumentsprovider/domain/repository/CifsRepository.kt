@@ -11,6 +11,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
@@ -21,6 +22,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -120,8 +122,7 @@ class CifsRepository @Inject internal constructor(
     private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): CifsClientDto? {
         return  withContext(dispatcher) {
             connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toModel()
-                    ?.let { CifsClientDto(it, uriText) }
+                connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { CifsClientDto(it, uriText) }
             }
         }
     }
@@ -237,8 +238,9 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get ProxyFileDescriptorCallback
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun getCallback(uri: String, mode: AccessMode): ProxyFileDescriptorCallback? {
-        return withContext(dispatcher) {
+        return withContext(dispatcher.limitedParallelism(FILE_OPEN_LIMIT)) {
             val dto = getClientDto(uri) ?: return@withContext null
             getClient(dto).getFileDescriptor(dto, mode) ?: return@withContext null
         }

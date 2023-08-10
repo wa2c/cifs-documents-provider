@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
@@ -39,12 +40,17 @@ internal class JCifsClient constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): CifsClientInterface {
 
-    /** CIFS Context cache */
-    private val contextCache = object : LruCache<CifsConnection, CIFSContext>(10) {
+    /** Session cache */
+    private val contextCache = object : LruCache<CifsConnection, CIFSContext>(FILE_OPEN_LIMIT) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
-            try { oldValue?.close() } catch (e: Exception) { logE(e) }
+            try {
+                oldValue?.close()
+                logD("Session Disconnected: ${key?.name}")
+            } catch (e: Exception) {
+                logE(e)
+            }
             super.entryRemoved(evicted, key, oldValue, newValue)
-            logD("CIFSContext Removed: $key")
+            logD("Session Removed: $key")
         }
     }
 
@@ -233,9 +239,8 @@ internal class JCifsClient constructor(
     override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
-            val onFileRelease = fun() {
+            val onFileRelease = fun () {
                 try { file.close() } catch (e: Exception) { logE(e) }
-                contextCache.remove(dto.connection)
             }
 
             if (dto.connection.safeTransfer) {

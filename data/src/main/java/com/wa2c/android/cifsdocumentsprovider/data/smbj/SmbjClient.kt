@@ -24,12 +24,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.*
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
 
 /**
  * SMBJ Client
@@ -38,8 +38,8 @@ internal class SmbjClient constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): CifsClientInterface {
 
-    /** CIFS Context cache */
-    private val sessionCache = object : LruCache<CifsConnection, Session>(10) {
+    /** Session cache */
+    private val sessionCache = object : LruCache<CifsConnection, Session>(FILE_OPEN_LIMIT) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: Session?, newValue: Session?) {
             try {
                 if (oldValue?.connection?.isConnected == true) {
@@ -284,10 +284,8 @@ internal class SmbjClient constructor(
         return withContext(dispatcher) {
             val diskShare = openDiskShare(dto)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)
-            val onFileRelease = fun() {
+            val onFileRelease = fun () {
                 diskFile.closeSilently()
-                diskFile.diskShare.takeIf { it.isConnected }?.close()
-                sessionCache.remove(dto.connection)
             }
 
             if (dto.connection.safeTransfer) {

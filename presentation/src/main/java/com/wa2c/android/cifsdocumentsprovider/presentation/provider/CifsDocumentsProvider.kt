@@ -26,6 +26,7 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
 import java.nio.file.Paths
 
 /**
@@ -90,6 +91,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryDocument(documentId: String?, projection: Array<String>?): Cursor {
+        logD("queryDocument: documentId=$documentId")
         val cursor = MatrixCursor(projection.toProjection())
         if (documentId.isRoot()) {
             // Root
@@ -117,6 +119,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         projection: Array<String>?,
         sortOrder: String?
     ): Cursor {
+        logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
         if (parentDocumentId.isRoot()) {
             runBlocking {
@@ -167,6 +170,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor {
+        logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
@@ -187,6 +191,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         mimeType: String?,
         displayName: String
     ): String? {
+        logD("createDocument: parentDocumentId=$parentDocumentId, displayName=$displayName")
         return runOnFileHandler {
             val documentId = Paths.get(parentDocumentId, displayName).toString()
             val uri = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
@@ -199,6 +204,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun deleteDocument(documentId: String?) {
+        logD("deleteDocument: documentId=$documentId")
         if (documentId == null) throw OperationCanceledException()
         runOnFileHandler {
              cifsRepository.deleteFile(getCifsUri(documentId))
@@ -206,6 +212,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun renameDocument(documentId: String?, displayName: String?): String? {
+        logD("renameDocument: documentId=$documentId, displayName=$displayName")
         if (documentId == null || displayName == null) return null
         return runOnFileHandler {
             cifsRepository.renameFile(getCifsFileUri(documentId), displayName)?.documentId
@@ -213,6 +220,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String? {
+        logD("copyDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
        return runOnFileHandler {
             cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
@@ -224,6 +232,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         sourceParentDocumentId: String?,
         targetParentDocumentId: String?
     ): String? {
+        logD("moveDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
         return runOnFileHandler {
             cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
@@ -231,6 +240,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun removeDocument(documentId: String?, parentDocumentId: String?) {
+        logD("removeDocument: documentId=$documentId")
         deleteDocument(documentId)
     }
 

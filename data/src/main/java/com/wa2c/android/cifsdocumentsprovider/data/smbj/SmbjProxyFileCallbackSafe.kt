@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 class SmbjProxyFileCallbackSafe(
     private val file: File,
     private val mode: AccessMode,
-    private val onFileReleased: () -> Unit,
+    private val onFileRelease: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
@@ -58,7 +58,7 @@ class SmbjProxyFileCallbackSafe(
         logD("onRelease: ${file.uncPath}")
         processFileIo {
             logD("release begin")
-            onFileReleased()
+            onFileRelease()
             logD("release end")
         }
     }
