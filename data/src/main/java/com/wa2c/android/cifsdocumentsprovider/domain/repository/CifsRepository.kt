@@ -5,6 +5,8 @@ import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.decodeJson
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.encodeJson
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toEntity
+import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -12,8 +14,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toEntity
-import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toModel
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
@@ -118,8 +118,11 @@ class CifsRepository @Inject internal constructor(
      * Get connection from URI
      */
     private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): CifsClientDto? {
-        return connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
-            connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { CifsClientDto(it, uriText) }
+        return  withContext(dispatcher) {
+            connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
+                connectionSettingDao.getEntityByUri(uri)?.toModel()
+                    ?.let { CifsClientDto(it, uriText) }
+            }
         }
     }
 

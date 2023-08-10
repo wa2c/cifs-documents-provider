@@ -41,13 +41,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val cifsRepository: CifsRepository by lazy {
         val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
         val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
-        hiltEntryPoint.analyticsService()
+        hiltEntryPoint.getCifsRepository()
     }
 
     /** File handler */
-    private val fileHandler: Handler = HandlerThread(this.javaClass.simpleName)
+    private val fileHandler: Handler by lazy {
+        HandlerThread(this.javaClass.simpleName)
             .apply { start() }
             .let { Handler(it.looper) }
+    }
 
     /**
      * Run on fileHandler
