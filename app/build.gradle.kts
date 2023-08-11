@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":data"))
 
+    implementation(Deps.App.appcompat)
     implementation(Deps.App.daggerHilt)
     kapt(Deps.App.daggerHiltCompiler)
 }
