@@ -41,7 +41,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
@@ -164,7 +164,7 @@ fun HostScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.host_title)) },
-                colors = AppTopAppBarColors(),
+                colors = getAppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = { onClickSort() }

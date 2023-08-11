@@ -232,7 +232,7 @@ internal class BackgroundBufferReader(
         val data: ByteArray,
     ) {
         /** Data absolute end position */
-        val endStreamPosition = streamPosition + length
+        private val endStreamPosition = streamPosition + length
 
         private fun isIn(p: Long): Boolean {
             return p in streamPosition..endStreamPosition

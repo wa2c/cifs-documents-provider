@@ -1,3 +1,5 @@
+package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
+
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode

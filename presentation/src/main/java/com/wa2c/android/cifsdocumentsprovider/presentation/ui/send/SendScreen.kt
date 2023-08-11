@@ -43,7 +43,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
@@ -131,7 +131,7 @@ fun SendScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.send_title)) },
-                colors = AppTopAppBarColors(),
+                colors = getAppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = { onClickClose() }

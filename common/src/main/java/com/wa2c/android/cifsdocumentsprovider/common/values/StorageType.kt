@@ -12,7 +12,7 @@ enum class StorageType(
     SMBJ("SMBJ");
 
     companion object {
-        val default: StorageType get() = JCIFS
+        val default: StorageType = JCIFS
 
         /**
          * Find storage type.

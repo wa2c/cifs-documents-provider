@@ -45,7 +45,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
@@ -119,7 +119,7 @@ fun FolderScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.folder_title)) },
-                colors = AppTopAppBarColors(),
+                colors = getAppTopAppBarColors(),
                 actions = {
                     LoadingIconButton(
                         contentDescription = stringResource(id = R.string.folder_reload_button),

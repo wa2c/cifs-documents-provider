@@ -47,7 +47,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
@@ -135,7 +135,7 @@ private fun SettingsScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.settings_title)) },
-                colors = AppTopAppBarColors(),
+                colors = getAppTopAppBarColors(),
                 navigationIcon = {
                     IconButton(onClick = { onClickBack() }) {
                         Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")

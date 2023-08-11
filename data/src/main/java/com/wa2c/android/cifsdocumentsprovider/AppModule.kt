@@ -6,10 +6,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import dagger.Module
 import dagger.Provides
-import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent

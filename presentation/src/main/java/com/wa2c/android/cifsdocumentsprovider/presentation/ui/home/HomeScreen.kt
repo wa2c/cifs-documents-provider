@@ -26,7 +26,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -44,13 +43,12 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
-import kotlinx.coroutines.isActive
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
@@ -127,7 +125,7 @@ fun HomeScreenContainer(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.app_name)) },
-                colors = AppTopAppBarColors(),
+                colors = getAppTopAppBarColors(),
                 actions = {
                     IconButton(
                         onClick = { onClickMenuOpenFile() }
@@ -196,7 +194,7 @@ fun ConnectionList(
     ) {
         items(items = connectionList, { it }) { connection ->
             ReorderableItem(state, key = connection) { isDragging ->
-                val elevation = animateDpAsState(if (isDragging) Theme.SizeM else 0.dp)
+                val elevation = animateDpAsState(if (isDragging) Theme.SizeM else 0.dp, label = "")
                 ConnectionItem(
                     connection = connection,
                     modifier = Modifier

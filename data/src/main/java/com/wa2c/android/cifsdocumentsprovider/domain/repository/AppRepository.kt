@@ -1,9 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 

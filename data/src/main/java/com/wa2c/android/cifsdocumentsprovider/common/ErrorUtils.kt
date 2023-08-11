@@ -10,7 +10,7 @@ import java.io.IOException
  * Proxy Callback process
  */
 @Throws(ErrnoException::class)
-fun <T> CoroutineScope.processFileIo(process: () -> T): T {
+internal fun <T> processFileIo(process: () -> T): T {
     return try {
          process()
     } catch (e: IOException) {
