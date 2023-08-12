@@ -85,23 +85,16 @@ internal class JCifsClient constructor(
     }
 
     /**
-     * Get SMB file.
-     */
-    private fun getSmbFile(cifsContext: CIFSContext, uri: String): SmbFile {
-        return SmbFile(uri, cifsContext).apply {
-            connectTimeout = CONNECTION_TIMEOUT
-            readTimeout = READ_TIMEOUT
-        }
-    }
-
-    /**
      * Get SMB file
      */
     private suspend fun getSmbFile(dto: CifsClientDto, forced: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
                 val context = (if (forced) null else contextCache[dto.connection]) ?: getCifsContext(dto.connection)
-                getSmbFile(context, dto.uri)
+                SmbFile(dto.uri, context).apply {
+                    connectTimeout = CONNECTION_TIMEOUT
+                    readTimeout = READ_TIMEOUT
+                }
             } catch (e: Exception) {
                 logE(e)
                 null
@@ -115,7 +108,7 @@ internal class JCifsClient constructor(
     override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getSmbFile(dto, true)?.list()
+                getSmbFile(dto, true)?.use { it.list() }
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -144,8 +137,10 @@ internal class JCifsClient constructor(
      * Get children CifsFile list
      */
     override suspend fun getChildren(dto: CifsClientDto, forced: Boolean): List<CifsFile> {
-        return getSmbFile(dto, forced)?.listFiles()?.mapNotNull { smbFile ->
-            smbFile.use { it.toCifsFile() }
+        return getSmbFile(dto, forced)?.use { parent ->
+            parent.listFiles()?.mapNotNull { child ->
+                child.use { it.toCifsFile() }
+            }
         } ?: emptyList()
     }
 
@@ -177,10 +172,12 @@ internal class JCifsClient constructor(
         targetDto: CifsClientDto,
     ): CifsFile? {
         return withContext(dispatcher) {
-            val source = getSmbFile(sourceDto) ?: return@withContext null
-            val target = getSmbFile(targetDto) ?: return@withContext null
-            source.copyTo(target)
-            target.toCifsFile()
+            getSmbFile(sourceDto)?.use { source ->
+                getSmbFile(targetDto)?.use { target ->
+                    source.copyTo(target)
+                    target.toCifsFile()
+                }
+            }
         }
     }
 
@@ -192,10 +189,12 @@ internal class JCifsClient constructor(
         targetDto: CifsClientDto,
     ): CifsFile? {
         return withContext(dispatcher) {
-            val sourceFile = getSmbFile(sourceDto) ?: return@withContext null
-            val targetFile = getSmbFile(targetDto) ?: return@withContext null
-            sourceFile.renameTo(targetFile)
-            targetFile.toCifsFile()
+            getSmbFile(sourceDto)?.use { source ->
+                getSmbFile(targetDto)?.use { target ->
+                    source.renameTo(target)
+                    target.toCifsFile()
+                }
+            }
         }
     }
 
@@ -206,7 +205,7 @@ internal class JCifsClient constructor(
         dto: CifsClientDto,
     ): Boolean {
         return withContext(dispatcher) {
-            getSmbFile(dto)?.let {
+            getSmbFile(dto)?.use {
                 it.delete()
                 true
             } ?: false
