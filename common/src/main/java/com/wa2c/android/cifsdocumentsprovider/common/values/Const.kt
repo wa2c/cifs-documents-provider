@@ -14,4 +14,4 @@ const val CONNECTION_TIMEOUT = 10000
 const val READ_TIMEOUT = 10000
 const val BUFFER_SIZE = 1024 * 1024
 const val CACHE_TIMEOUT = 300 * 1000
-const val FILE_OPEN_LIMIT = 10
+const val FILE_OPEN_LIMIT = 20

@@ -280,18 +280,19 @@ internal class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val diskShare = openDiskShare(dto)
             val diskFile = openDiskFile(diskShare, dto.sharePath, mode == AccessMode.R)
-            val onFileRelease = fun () {
+            val release = fun () {
                 diskFile.closeSilently()
+                onFileRelease()
             }
 
             if (dto.connection.safeTransfer) {
-                SmbjProxyFileCallbackSafe(diskFile, mode, onFileRelease)
+                SmbjProxyFileCallbackSafe(diskFile, mode, release)
             } else {
-                SmbjProxyFileCallback(diskFile, mode, onFileRelease)
+                SmbjProxyFileCallback(diskFile, mode, release)
             }
         }
     }

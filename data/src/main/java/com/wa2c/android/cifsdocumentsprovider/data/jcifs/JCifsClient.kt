@@ -235,17 +235,18 @@ internal class JCifsClient constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
-            val onFileRelease = fun () {
+            val release = fun () {
                 try { file.close() } catch (e: Exception) { logE(e) }
+                onFileRelease()
             }
 
             if (dto.connection.safeTransfer) {
-                JCifsProxyFileCallbackSafe(file, mode, onFileRelease)
+                JCifsProxyFileCallbackSafe(file, mode, release)
             } else {
-                JCifsProxyFileCallback(file, mode, onFileRelease)
+                JCifsProxyFileCallback(file, mode, release)
             }
         }
     }

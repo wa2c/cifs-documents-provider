@@ -25,7 +25,7 @@ internal interface CifsClientInterface {
 
     suspend fun moveFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): CifsFile?
 
-    suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode): ProxyFileDescriptorCallback?
+    suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback?
 
     suspend fun close()
 
