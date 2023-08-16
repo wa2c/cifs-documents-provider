@@ -35,7 +35,6 @@ import javax.inject.Singleton
 /**
  * CIFS Repository
  */
-@Suppress("BlockingMethodInNonBlockingContext")
 @Singleton
 class CifsRepository @Inject internal constructor(
     private val jCifsClient: JCifsClient,
@@ -54,6 +53,14 @@ class CifsRepository @Inject internal constructor(
 
     /** File blocking queue */
     private val fileBlockingQueue = ArrayBlockingQueue<CifsClientDto>(FILE_OPEN_LIMIT)
+    private fun addBlockingQueue(dto: CifsClientDto) {
+        fileBlockingQueue.put(dto)
+        logD("Queue added: size=${fileBlockingQueue.count()}")
+    }
+    private fun removeBlockingQueue(dto: CifsClientDto) {
+        fileBlockingQueue.remove(dto)
+        logD("Queue removed: size=${fileBlockingQueue.count()}")
+    }
 
     private fun getClient(dto: CifsClientDto): CifsClientInterface {
         return when (dto.connection.storage) {
@@ -166,10 +173,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext null
             try {
-                fileBlockingQueue.put(dto)
+                addBlockingQueue(dto)
                 getClient(dto).getFile(dto)
             } finally {
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
             }
         }
     }
@@ -182,10 +189,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
             try {
-                fileBlockingQueue.put(dto)
+                addBlockingQueue(dto)
                 getClient(dto).getChildren(dto)
             } finally {
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
             }
         }
     }
@@ -198,10 +205,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             try {
-                fileBlockingQueue.put(dto)
+                addBlockingQueue(dto)
                 getClient(dto).createFile(dto, mimeType)
             } finally {
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
             }
         }
     }
@@ -214,10 +221,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext false
             try {
-                fileBlockingQueue.put(dto)
+                addBlockingQueue(dto)
                 getClient(dto).deleteFile(dto)
             } finally {
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
             }
         }
     }
@@ -236,12 +243,12 @@ class CifsRepository @Inject internal constructor(
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             try {
-                fileBlockingQueue.put(sourceDto)
-                fileBlockingQueue.put(targetDto)
+                addBlockingQueue(sourceDto)
+                addBlockingQueue(targetDto)
                 getClient(sourceDto).renameFile(sourceDto, targetDto)
             } finally {
-                fileBlockingQueue.remove(sourceDto)
-                fileBlockingQueue.remove(targetDto)
+                removeBlockingQueue(sourceDto)
+                removeBlockingQueue(targetDto)
             }
         }
     }
@@ -255,12 +262,12 @@ class CifsRepository @Inject internal constructor(
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             try {
-                fileBlockingQueue.put(sourceDto)
-                fileBlockingQueue.put(targetDto)
+                addBlockingQueue(sourceDto)
+                addBlockingQueue(targetDto)
                 getClient(sourceDto).copyFile(sourceDto, targetDto)
             } finally {
-                fileBlockingQueue.remove(sourceDto)
-                fileBlockingQueue.remove(targetDto)
+                removeBlockingQueue(sourceDto)
+                removeBlockingQueue(targetDto)
             }
         }
     }
@@ -274,12 +281,12 @@ class CifsRepository @Inject internal constructor(
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             try {
-                fileBlockingQueue.put(sourceDto)
-                fileBlockingQueue.put(targetDto)
+                addBlockingQueue(sourceDto)
+                addBlockingQueue(targetDto)
                 getClient(sourceDto).moveFile(sourceDto, targetDto)
             } finally {
-                fileBlockingQueue.remove(sourceDto)
-                fileBlockingQueue.remove(targetDto)
+                removeBlockingQueue(sourceDto)
+                removeBlockingQueue(targetDto)
             }
         }
     }
@@ -292,10 +299,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = CifsClientDto(connection)
             try {
-                fileBlockingQueue.put(dto)
+                addBlockingQueue(dto)
                 getClient(dto).checkConnection(dto)
             } finally {
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
             }
         }
     }
@@ -307,17 +314,15 @@ class CifsRepository @Inject internal constructor(
         logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
-            fileBlockingQueue.put(dto)
-            logD("queue size=${fileBlockingQueue.count()}")
+            addBlockingQueue(dto)
             try {
                 getClient(dto).getFileDescriptor(dto, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
-                    fileBlockingQueue.remove(dto)
-                    logD("queue size=${fileBlockingQueue.count()}")
+                    removeBlockingQueue(dto)
                 } ?: return@withContext null
             } catch (e: Exception) {
                 logE(e)
-                fileBlockingQueue.remove(dto)
+                removeBlockingQueue(dto)
                 throw e
             }
         }
