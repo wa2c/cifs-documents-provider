@@ -9,6 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toEntity
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.toModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
@@ -71,6 +72,7 @@ class CifsRepository @Inject internal constructor(
      * Get connection
      */
     suspend fun getConnection(id: String): CifsConnection? {
+        logD("getConnection: id=$id")
         return withContext(dispatcher) {
             connectionSettingDao.getEntity(id)?.toModel()
         }
@@ -80,6 +82,7 @@ class CifsRepository @Inject internal constructor(
      * Load connections
      */
     suspend fun loadConnection(): List<CifsConnection>  {
+        logD("loadConnection")
         return withContext(dispatcher) {
             connectionSettingDao.getList().first().map { it.toModel() }
         }
@@ -89,6 +92,7 @@ class CifsRepository @Inject internal constructor(
      * Save connection
      */
     suspend fun saveConnection(connection: CifsConnection) {
+        logD("saveConnection: connection=$connection")
         withContext(dispatcher) {
             val existsEntity = connectionSettingDao.getEntity(connection.id)
             val entity = existsEntity?.let {
@@ -106,6 +110,7 @@ class CifsRepository @Inject internal constructor(
      * Load temporary connection
      */
     suspend fun loadTemporaryConnection(): CifsConnection?  {
+        logD("loadTemporaryConnection")
         return withContext(dispatcher) {
             appPreferences.temporaryConnectionJsonFlow.firstOrNull()?.decodeJson()
         }
@@ -115,6 +120,7 @@ class CifsRepository @Inject internal constructor(
      * Save temporary connection
      */
     suspend fun saveTemporaryConnection(connection: CifsConnection?) {
+        logD("saveTemporaryConnection: connection=$connection")
         withContext(dispatcher) {
             appPreferences.setTemporaryConnectionJson(connection?.encodeJson())
         }
@@ -135,6 +141,7 @@ class CifsRepository @Inject internal constructor(
      * Delete connection
      */
     suspend fun deleteConnection(id: String) {
+        logD("deleteConnection: id=$id")
         withContext(dispatcher) {
             connectionSettingDao.delete(id)
         }
@@ -144,6 +151,7 @@ class CifsRepository @Inject internal constructor(
      * Move connections order
      */
     suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
         withContext(dispatcher) {
             connectionSettingDao.move(fromPosition, toPosition)
         }
@@ -154,6 +162,7 @@ class CifsRepository @Inject internal constructor(
      * Get CIFS File
      */
     suspend fun getFile(uri: String?, connection: CifsConnection? = null): CifsFile? {
+        logD("getFile: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext null
             try {
@@ -169,6 +178,7 @@ class CifsRepository @Inject internal constructor(
      * Get children CIFS files from uri.
      */
     suspend fun getFileChildren(uri: String?, connection: CifsConnection? = null): List<CifsFile> {
+        logD("getFileChildren: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
             try {
@@ -184,6 +194,7 @@ class CifsRepository @Inject internal constructor(
      * Create new file.
      */
     suspend fun createFile(uri: String, mimeType: String?): CifsFile? {
+        logD("createFile: uri=$uri, mimeType=$mimeType")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             try {
@@ -199,6 +210,7 @@ class CifsRepository @Inject internal constructor(
      * Delete a file.
      */
     suspend fun deleteFile(uri: String): Boolean {
+        logD("deleteFile: uri=$uri")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext false
             try {
@@ -214,6 +226,7 @@ class CifsRepository @Inject internal constructor(
      * Rename file
      */
     suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
+        logD("renameFile: sourceUri=$sourceUri, newName=$newName")
         return withContext(dispatcher) {
             val targetUri = if (newName.contains('/', false)) {
                 newName.trimEnd('/') + '/' + Uri.parse(sourceUri).fileName
@@ -237,6 +250,7 @@ class CifsRepository @Inject internal constructor(
      * Copy file
      */
     suspend fun copyFile(sourceUri: String, targetUri: String): CifsFile? {
+        logD("copyFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
@@ -255,6 +269,7 @@ class CifsRepository @Inject internal constructor(
      * Move file
      */
     suspend fun moveFile(sourceUri: String, targetUri: String): CifsFile? {
+        logD("moveFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
@@ -289,14 +304,19 @@ class CifsRepository @Inject internal constructor(
      * Get ProxyFileDescriptorCallback
      */
     suspend fun getCallback(uri: String, mode: AccessMode): ProxyFileDescriptorCallback? {
+        logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             fileBlockingQueue.put(dto)
+            logD("queue size=${fileBlockingQueue.count()}")
             try {
                 getClient(dto).getFileDescriptor(dto, mode) {
+                    logD("releaseCallback: uri=$uri, mode=$mode")
                     fileBlockingQueue.remove(dto)
+                    logD("queue size=${fileBlockingQueue.count()}")
                 } ?: return@withContext null
             } catch (e: Exception) {
+                logE(e)
                 fileBlockingQueue.remove(dto)
                 throw e
             }
@@ -307,6 +327,7 @@ class CifsRepository @Inject internal constructor(
      * Close all sessions.
      */
     suspend fun closeAllSessions() {
+        logD("closeAllSessions")
         withContext(dispatcher) {
             fileBlockingQueue.clear()
             jCifsClient.close()
