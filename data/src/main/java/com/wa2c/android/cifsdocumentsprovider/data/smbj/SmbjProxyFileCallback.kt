@@ -60,7 +60,7 @@ class SmbjProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return processFileIo {
+        return processFileIo(coroutineContext) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 getInputStream(offset).readNBytes(data, 0, size).also {
                     position += it
@@ -76,7 +76,7 @@ class SmbjProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return processFileIo {
+        return processFileIo(coroutineContext) {
             file.writeAsync(data, offset, 0, size)
             size
         }
@@ -90,7 +90,7 @@ class SmbjProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onRelease() {
         logD("onRelease: ${file.uncPath}")
-        processFileIo {
+        processFileIo(coroutineContext) {
             logD("release begin")
             try { bufferedInputStream?.close() } catch (e: Exception) { logE(e) }
             onFileRelease()

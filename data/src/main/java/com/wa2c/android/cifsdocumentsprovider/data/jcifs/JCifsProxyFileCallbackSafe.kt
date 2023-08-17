@@ -39,11 +39,11 @@ internal class JCifsProxyFileCallbackSafe(
         get() = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSize: Long by lazy { processFileIo { access.length() } }
+    private val fileSize: Long by lazy { processFileIo(coroutineContext) { access.length() } }
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
-        processFileIo {
+        processFileIo(coroutineContext) {
             smbFile.openRandomAccess(mode.smbMode).also {
                 isAccessOpened = true
             }
@@ -57,7 +57,7 @@ internal class JCifsProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return processFileIo {
+        return processFileIo(coroutineContext) {
             access.seek(offset)
             access.read(data, 0, size)
         }
@@ -66,7 +66,7 @@ internal class JCifsProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return processFileIo {
+        return processFileIo(coroutineContext) {
             access.seek(offset)
             access.write(data, 0, size)
             size
@@ -80,7 +80,7 @@ internal class JCifsProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onRelease() {
-        processFileIo {
+        processFileIo(coroutineContext) {
             if (isAccessOpened) access.close()
             onFileRelease()
         }

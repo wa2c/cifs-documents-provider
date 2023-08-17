@@ -3,16 +3,19 @@ package com.wa2c.android.cifsdocumentsprovider.common
 import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.runBlocking
 import java.io.IOException
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Proxy Callback process
  */
 @Throws(ErrnoException::class)
-internal fun <T> processFileIo(process: () -> T): T {
+internal fun <T> processFileIo(context: CoroutineContext, process: suspend () -> T): T {
     return try {
-         process()
+        runBlocking(context = context) {
+            process()
+        }
     } catch (e: IOException) {
         logE(e)
         if (e.cause is ErrnoException) {
