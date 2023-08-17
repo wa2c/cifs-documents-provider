@@ -55,9 +55,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -74,7 +76,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
@@ -87,7 +88,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
@@ -96,7 +96,11 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 @Composable
@@ -270,6 +274,8 @@ private fun EditScreenContainer(
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -312,6 +318,7 @@ private fun EditScreenContainer(
                         title = stringResource(id = R.string.edit_name_title),
                         hint = stringResource(id = R.string.edit_name_hint),
                         state = nameState,
+                        focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Next,
@@ -323,12 +330,14 @@ private fun EditScreenContainer(
                         items = StorageType.values()
                             .map { OptionItem(it, stringResource(id = it.labelRes)) },
                         state = storageState,
+                        focusManager = focusManager,
                     )
 
                     InputText(
                         title = stringResource(id = R.string.edit_domain_title),
                         hint = stringResource(id = R.string.edit_domain_hint),
                         state = domainState,
+                        focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next,
@@ -339,6 +348,7 @@ private fun EditScreenContainer(
                         title = stringResource(id = R.string.edit_host_title),
                         hint = stringResource(id = R.string.edit_host_hint),
                         state = hostState,
+                        focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next,
@@ -352,6 +362,7 @@ private fun EditScreenContainer(
                         title = stringResource(id = R.string.edit_port_title),
                         hint = stringResource(id = R.string.edit_port_hint),
                         state = portState,
+                        focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next,
@@ -361,12 +372,14 @@ private fun EditScreenContainer(
                     InputCheck(
                         title = stringResource(id = R.string.edit_enable_dfs_label),
                         state = enableDfsState,
+                        focusManager = focusManager,
                     )
 
                     InputText(
                         title = stringResource(id = R.string.edit_user_title),
                         hint = stringResource(id = R.string.edit_user_hint),
                         state = userState,
+                        focusManager = focusManager,
                         enabled = !anonymousState.value,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
@@ -379,6 +392,7 @@ private fun EditScreenContainer(
                         title = stringResource(id = R.string.edit_password_title),
                         hint = stringResource(id = R.string.edit_password_hint),
                         state = passwordState,
+                        focusManager = focusManager,
                         enabled = !anonymousState.value,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
@@ -390,12 +404,14 @@ private fun EditScreenContainer(
                     InputCheck(
                         title = stringResource(id = R.string.edit_anonymous_label),
                         state = anonymousState,
+                        focusManager = focusManager,
                     )
 
                     InputText(
                         title = stringResource(id = R.string.edit_folder_title),
                         hint = stringResource(id = R.string.edit_folder_hint),
                         state = folderState,
+                        focusManager = focusManager,
                         iconResource = R.drawable.ic_folder,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
@@ -414,11 +430,13 @@ private fun EditScreenContainer(
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_safe_transfer_label),
                         state = safeTransferState,
+                        focusManager = focusManager,
                     )
 
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
                         state = extensionState,
+                        focusManager = focusManager,
                     )
 
                     // URI
@@ -518,6 +536,7 @@ fun InputText(
     title: String,
     hint: String,
     state: MutableState<String?>,
+    focusManager: FocusManager,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         keyboardType = KeyboardType.Text,
@@ -527,7 +546,6 @@ fun InputText(
     @DrawableRes iconResource: Int? = null,
     onClickButton: () -> Unit = {},
 ) {
-    val focusManager = LocalFocusManager.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -551,16 +569,13 @@ fun InputText(
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)
-                .onKeyEvent {
-                    if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER || it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_TAB) {
-                        focusManager.moveFocus(FocusDirection.Next)
-                    }
-                    false
-                }
+                .moveFocusOnEnter(focusManager)
+                .moveFocusOnTab(focusManager)
                 .autofill(
                     autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
                     onFill = { state.value = it }
                 )
+            ,
         )
         iconResource?.let {res ->
             Button(
@@ -570,7 +585,21 @@ fun InputText(
                 modifier = Modifier
                     .size(52.dp, 52.dp)
                     .padding(top = Theme.SizeSS, start = Theme.SizeSS)
-                    .align(Alignment.CenterVertically),
+                    .align(Alignment.CenterVertically)
+                    .moveFocusOnEnter(focusManager)
+                    .moveFocusOnTab(focusManager)
+                    .onPreviewKeyEvent {
+                        when (it.nativeKeyEvent.keyCode) {
+                            KeyEvent.KEYCODE_SPACE -> {
+                                if (it.type == KeyEventType.KeyUp) onClickButton()
+                                true
+                            }
+                            else -> {
+                                false
+                            }
+                        }
+                    }
+                ,
                 onClick = onClickButton,
             ) {
                 Icon(
@@ -590,13 +619,11 @@ fun <T> InputOption(
     title: String,
     items: List<OptionItem<T>>,
     state: MutableState<T>,
+    focusManager: FocusManager,
     enabled: Boolean = true,
 ) {
-
-    Icons.Filled.KeyboardArrowUp
     var expanded by remember { mutableStateOf(false) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
-    val focusManager = LocalFocusManager.current
     
     Column(
         modifier = Modifier
@@ -622,6 +649,7 @@ fun <T> InputOption(
                 focusManager.clearFocus()
             },
             modifier = Modifier
+                .moveFocusOnEnter(focusManager)
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
@@ -630,7 +658,6 @@ fun <T> InputOption(
                     onClick = {
                         state.value = item.value
                         expanded = false
-                        focusManager.clearFocus()
                     }
                 )
             }
@@ -645,6 +672,7 @@ fun <T> InputOption(
 fun InputCheck(
     title: String,
     state: MutableState<Boolean>,
+    focusManager: FocusManager,
     enabled: Boolean = true,
 ) {
     Row(
@@ -656,6 +684,18 @@ fun InputCheck(
             )
             .padding(Theme.SizeM)
             .fillMaxWidth()
+            .moveFocusOnEnter(focusManager)
+            .onPreviewKeyEvent {
+                when (it.nativeKeyEvent.keyCode) {
+                    KeyEvent.KEYCODE_SPACE -> {
+                        if (it.type == KeyEventType.KeyUp) state.value = !state.value
+                        true
+                    }
+                    else -> {
+                        false
+                    }
+                }
+            }
     ) {
         Checkbox(
             checked = state.value,
