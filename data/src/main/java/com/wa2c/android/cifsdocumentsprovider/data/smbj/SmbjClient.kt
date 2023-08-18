@@ -24,9 +24,11 @@ import com.wa2c.android.cifsdocumentsprovider.common.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.*
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import kotlinx.coroutines.*
@@ -35,11 +37,12 @@ import kotlinx.coroutines.*
  * SMBJ Client
  */
 internal class SmbjClient constructor(
+    private val appPreferences: AppPreferencesDataStore,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): CifsClientInterface {
 
     /** Session cache */
-    private val sessionCache = object : LruCache<CifsConnection, Session>(FILE_OPEN_LIMIT) {
+    private val sessionCache = object : LruCache<CifsConnection, Session>(appPreferences.openFileLimitFlow.getFirst()) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: Session?, newValue: Session?) {
             try {
                 if (oldValue?.connection?.isConnected == true) {
@@ -55,7 +58,7 @@ internal class SmbjClient constructor(
     }
 
     /** DiskShare cache */
-    private val diskShareCache = object : LruCache<CifsConnection, DiskShare>(FILE_OPEN_LIMIT) {
+    private val diskShareCache = object : LruCache<CifsConnection, DiskShare>(OPEN_FILE_LIMIT_DEFAULT) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: DiskShare?, newValue: DiskShare?) {
             try {
                 if (oldValue?.isConnected == true) {

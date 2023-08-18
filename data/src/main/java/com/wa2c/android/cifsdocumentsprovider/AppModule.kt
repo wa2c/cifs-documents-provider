@@ -53,16 +53,20 @@ internal object AppModule {
     /** CifsClient */
     @Singleton
     @Provides
-    fun provideJcifsClient(): JCifsClient {
-        return JCifsClient()
+    fun provideJcifsClient(
+        preferences: AppPreferencesDataStore,
+    ): JCifsClient {
+        return JCifsClient(preferences)
     }
 
 
     /** CifsClient */
     @Singleton
     @Provides
-    fun provideSmbjClient(): SmbjClient {
-        return SmbjClient()
+    fun provideSmbjClient(
+        preferences: AppPreferencesDataStore,
+    ): SmbjClient {
+        return SmbjClient(preferences)
     }
 }
 

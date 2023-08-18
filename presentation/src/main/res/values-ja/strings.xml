@@ -74,6 +74,7 @@
     <string name="settings_section_set">設定</string>
     <string name="settings_set_theme">テーマ</string>
     <string name="settings_set_language">言語</string>
+    <string name="settings_open_file_limit">開けるファイル上限\n(アプリの再起動が必要)</string>
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
     <string name="settings_section_info">情報</string>
     <string name="settings_info_contributors">貢献者</string>

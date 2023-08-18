@@ -22,6 +22,12 @@ class SettingsViewModel @Inject constructor(
     /** UI Theme */
     fun setUiTheme(value: UiTheme) = launch { appRepository.setUiTheme(value) }
 
+    /** Open file limit */
+    val openFileLimitFlow = appRepository.openFileLimitFlow
+
+    /** Open file limit */
+    fun setOpenFileLimit(value: Int) = launch { appRepository.setOpenFileLimit(value) }
+
     /** Use as local */
     val useAsLocalFlow = appRepository.useAsLocalFlow
 

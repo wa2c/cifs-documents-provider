@@ -73,7 +73,8 @@
     <string name="settings_section_set">设置</string>
     <string name="settings_set_theme">主题</string>
     <string name="settings_set_language">语言</string>
-    <string name="settings_set_use_as_local">用作本地存储\n(需要重启设备)</string>
+    <string name="settings_open_file_limit">打开文件限制</string>
+    <string name="settings_set_use_as_local">用作本地存储\n(需要重新启动应用程序)</string>
     <string name="settings_section_info">" 信息"</string>
     <string name="settings_info_contributors">" 贡献者"</string>
     <string name="settings_info_libraries">图书馆</string>

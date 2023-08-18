@@ -19,6 +19,12 @@ class AppRepository @Inject internal constructor(
     /** UI Theme */
     suspend fun setUiTheme(value: UiTheme) = appPreferences.setUiTheme(value)
 
+    /** Open File limit */
+    val openFileLimitFlow = appPreferences.openFileLimitFlow
+
+    /** Open File limit */
+    suspend fun setOpenFileLimit(value: Int) = appPreferences.setOpenFileLimit(value)
+
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
 

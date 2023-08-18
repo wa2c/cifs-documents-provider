@@ -13,10 +13,11 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import jcifs.CIFSContext
@@ -37,11 +38,12 @@ import java.util.Properties
  * jCIFS-ng Client
  */
 internal class JCifsClient constructor(
+    private val appPreferences: AppPreferencesDataStore,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): CifsClientInterface {
 
     /** Session cache */
-    private val contextCache = object : LruCache<CifsConnection, CIFSContext>(FILE_OPEN_LIMIT) {
+    private val contextCache = object : LruCache<CifsConnection, CIFSContext>(appPreferences.openFileLimitFlow.getFirst()) {
         override fun entryRemoved(evicted: Boolean, key: CifsConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
             try {
                 oldValue?.close()

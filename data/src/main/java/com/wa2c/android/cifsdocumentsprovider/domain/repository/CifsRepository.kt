@@ -12,13 +12,13 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.FILE_OPEN_LIMIT
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
 import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
 import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
@@ -52,7 +52,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     /** File blocking queue */
-    private val fileBlockingQueue = ArrayBlockingQueue<CifsClientDto>(FILE_OPEN_LIMIT)
+    private val fileBlockingQueue = ArrayBlockingQueue<CifsClientDto>(appPreferences.openFileLimitFlow.getFirst())
     private fun addBlockingQueue(dto: CifsClientDto) {
         fileBlockingQueue.put(dto)
         logD("Queue added: size=${fileBlockingQueue.count()}")
@@ -60,6 +60,14 @@ class CifsRepository @Inject internal constructor(
     private fun removeBlockingQueue(dto: CifsClientDto) {
         fileBlockingQueue.remove(dto)
         logD("Queue removed: size=${fileBlockingQueue.count()}")
+    }
+    private suspend fun <T> runFileBlocking(dto: CifsClientDto, process: suspend () -> T): T {
+        return try {
+            addBlockingQueue(dto)
+            process()
+        } finally {
+            removeBlockingQueue(dto)
+        }
     }
 
     private fun getClient(dto: CifsClientDto): CifsClientInterface {
@@ -172,11 +180,8 @@ class CifsRepository @Inject internal constructor(
         logD("getFile: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext null
-            try {
-                addBlockingQueue(dto)
+            runFileBlocking(dto) {
                 getClient(dto).getFile(dto)
-            } finally {
-                removeBlockingQueue(dto)
             }
         }
     }
@@ -188,11 +193,8 @@ class CifsRepository @Inject internal constructor(
         logD("getFileChildren: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
-            try {
-                addBlockingQueue(dto)
+            runFileBlocking(dto) {
                 getClient(dto).getChildren(dto)
-            } finally {
-                removeBlockingQueue(dto)
             }
         }
     }
@@ -204,11 +206,8 @@ class CifsRepository @Inject internal constructor(
         logD("createFile: uri=$uri, mimeType=$mimeType")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
-            try {
-                addBlockingQueue(dto)
+            runFileBlocking(dto) {
                 getClient(dto).createFile(dto, mimeType)
-            } finally {
-                removeBlockingQueue(dto)
             }
         }
     }
@@ -220,11 +219,8 @@ class CifsRepository @Inject internal constructor(
         logD("deleteFile: uri=$uri")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext false
-            try {
-                addBlockingQueue(dto)
+            runFileBlocking(dto) {
                 getClient(dto).deleteFile(dto)
-            } finally {
-                removeBlockingQueue(dto)
             }
         }
     }
@@ -242,13 +238,10 @@ class CifsRepository @Inject internal constructor(
             }
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
-            try {
-                addBlockingQueue(sourceDto)
-                addBlockingQueue(targetDto)
-                getClient(sourceDto).renameFile(sourceDto, targetDto)
-            } finally {
-                removeBlockingQueue(sourceDto)
-                removeBlockingQueue(targetDto)
+            runFileBlocking(sourceDto) {
+                runFileBlocking(targetDto) {
+                    getClient(sourceDto).renameFile(sourceDto, targetDto)
+                }
             }
         }
     }
@@ -261,13 +254,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
-            try {
-                addBlockingQueue(sourceDto)
-                addBlockingQueue(targetDto)
-                getClient(sourceDto).copyFile(sourceDto, targetDto)
-            } finally {
-                removeBlockingQueue(sourceDto)
-                removeBlockingQueue(targetDto)
+            runFileBlocking(sourceDto) {
+                runFileBlocking(targetDto) {
+                    getClient(sourceDto).copyFile(sourceDto, targetDto)
+                }
             }
         }
     }
@@ -280,13 +270,10 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
             val targetDto = getClientDto(targetUri) ?: return@withContext null
-            try {
-                addBlockingQueue(sourceDto)
-                addBlockingQueue(targetDto)
-                getClient(sourceDto).moveFile(sourceDto, targetDto)
-            } finally {
-                removeBlockingQueue(sourceDto)
-                removeBlockingQueue(targetDto)
+            runFileBlocking(sourceDto) {
+                runFileBlocking(targetDto) {
+                    getClient(sourceDto).moveFile(sourceDto, targetDto)
+                }
             }
         }
     }
@@ -298,11 +285,8 @@ class CifsRepository @Inject internal constructor(
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(dispatcher) {
             val dto = CifsClientDto(connection)
-            try {
-                addBlockingQueue(dto)
+            runFileBlocking(dto) {
                 getClient(dto).checkConnection(dto)
-            } finally {
-                removeBlockingQueue(dto)
             }
         }
     }

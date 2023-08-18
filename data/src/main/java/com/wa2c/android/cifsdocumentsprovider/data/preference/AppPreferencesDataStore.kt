@@ -11,11 +11,14 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,6 +48,12 @@ internal class AppPreferencesDataStore @Inject constructor(
     /** UI Theme */
     suspend fun setUiTheme(value: UiTheme) = dataStore.setValue(PREFKEY_UI_THEME, value.key)
 
+    /** Open File limit */
+    val openFileLimitFlow: Flow<Int> = dataStore.data.map { it[PREFKEY_OPEN_FILE_LIMIT] ?: OPEN_FILE_LIMIT_DEFAULT }
+
+    /** Open File limit */
+    suspend fun setOpenFileLimit(value: Int) = dataStore.setValue(PREFKEY_OPEN_FILE_LIMIT, value)
+
     /** Use as local */
     val useAsLocalFlow: Flow<Boolean> = dataStore.data.map { it[PREFKEY_USE_AS_LOCAL] ?: false  }
 
@@ -52,11 +61,10 @@ internal class AppPreferencesDataStore @Inject constructor(
     suspend fun setUseAsLocal(value: Boolean) = dataStore.setValue(PREFKEY_USE_AS_LOCAL, value)
 
     /** Temporary connection */
-    val temporaryConnectionJsonFlow: Flow<String?> =  dataStore.data.map { it[PREFKEY_TEMPORARY_CONNECTION_JSON]?.let { ConnectionUtils.decrypt(it) } }
+    val temporaryConnectionJsonFlow: Flow<String?> = dataStore.data.map { it[PREFKEY_TEMPORARY_CONNECTION_JSON]?.let { ConnectionUtils.decrypt(it) } }
 
     /** Temporary connection */
     suspend fun setTemporaryConnectionJson(value: String?) = dataStore.setValue(PREFKEY_TEMPORARY_CONNECTION_JSON, value?.let { ConnectionUtils.encrypt(it) })
-
 
 
     /**
@@ -71,6 +79,13 @@ internal class AppPreferencesDataStore @Inject constructor(
 
     companion object {
 
+        /**
+         * Get first value.
+         */
+        fun <T> Flow<T>.getFirst(): T {
+            return runBlocking { this@getFirst.first() }
+        }
+
         private suspend fun <T> DataStore<Preferences>.getValue(key: Preferences.Key<T>): T? {
             return data.map { preferences -> preferences[key] }.firstOrNull()
         }
@@ -81,6 +96,7 @@ internal class AppPreferencesDataStore @Inject constructor(
 
         private val PREFKEY_HOST_SORT_TYPE = intPreferencesKey("prefkey_host_sort_type")
         private val PREFKEY_UI_THEME = stringPreferencesKey("prefkey_ui_theme")
+        private val PREFKEY_OPEN_FILE_LIMIT = intPreferencesKey("prefkey_open_file_limit")
         private val PREFKEY_USE_AS_LOCAL = booleanPreferencesKey("prefkey_use_as_local")
         private val PREFKEY_TEMPORARY_CONNECTION_JSON = stringPreferencesKey("prefkey_temporary_connection_json")
     }
