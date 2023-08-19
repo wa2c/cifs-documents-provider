@@ -42,7 +42,7 @@ internal class BackgroundBufferWriter(
     /** Buffer queue capacity  */
     private val queueCapacity: Int = DEFAULT_CAPACITY,
     /** Background writing */
-    private val writeBackground: (start: Long, array: ByteArray, off: Int, len: Int) -> Unit
+    private val writeBackground: suspend CoroutineScope.(start: Long, array: ByteArray, off: Int, len: Int) -> Unit
 ): CoroutineScope, Closeable {
 
     /** Data buffer queue */

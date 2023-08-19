@@ -44,7 +44,7 @@ internal class BackgroundBufferReader(
     /** Buffer queue capacity  */
     private val queueCapacity: Int = DEFAULT_CAPACITY,
     /** Background reading */
-    private val readBackgroundAsync: (start: Long, array: ByteArray, off: Int, len: Int) -> Int
+    private val readBackgroundAsync: CoroutineScope.(start: Long, array: ByteArray, off: Int, len: Int) -> Int
 ): Closeable, CoroutineScope {
 
     /** Dummy queue item. */

@@ -44,7 +44,6 @@ class SmbjProxyFileCallbackSafe(
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
             file.write(data, offset, 0, size)
-            size
         }
     }
     

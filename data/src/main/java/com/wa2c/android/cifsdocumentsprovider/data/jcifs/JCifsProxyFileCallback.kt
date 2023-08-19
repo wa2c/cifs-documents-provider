@@ -45,7 +45,7 @@ internal class JCifsProxyFileCallback(
         get() = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSeize: Long by lazy { processFileIo(coroutineContext) { smbFile.length() } }
+    private val fileSize: Long by lazy { processFileIo(coroutineContext) { smbFile.length() } }
 
     private var reader: BackgroundBufferReader? = null
 
@@ -62,7 +62,7 @@ internal class JCifsProxyFileCallback(
             logD("Writer released")
         }
 
-        return reader ?: BackgroundBufferReader(coroutineContext, fileSeize) { start, array, off, len ->
+        return reader ?: BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
             smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
                 access.seek(start)
                 access.read(array, off, len)
@@ -93,22 +93,18 @@ internal class JCifsProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
-        return fileSeize
+        return fileSize
     }
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return processFileIo(coroutineContext) {
-            getReader().readBuffer(offset, size, data)
-        }
+        return getReader().readBuffer(offset, size, data)
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return processFileIo(coroutineContext) {
-            getWriter().writeBuffer(offset, size, data)
-        }
+        return getWriter().writeBuffer(offset, size, data)
     }
 
     @Throws(ErrnoException::class)
