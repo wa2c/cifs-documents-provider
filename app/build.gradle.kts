@@ -17,8 +17,8 @@ android {
         applicationId = Deps.namespaceBase
         minSdk = Deps.minSdkVersion
         targetSdk = Deps.targetSdkVersion
-        versionCode = 19
-        versionName = "1.8.0-beta2"
+        versionCode = 20
+        versionName = "1.8.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
