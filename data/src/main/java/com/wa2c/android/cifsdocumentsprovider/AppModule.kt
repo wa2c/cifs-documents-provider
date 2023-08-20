@@ -3,9 +3,10 @@ package com.wa2c.android.cifsdocumentsprovider
 import android.app.NotificationManager
 import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
-import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
-import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageClientManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,6 +14,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -49,24 +52,13 @@ internal object AppModule {
         @ApplicationContext context: Context
     ): AppPreferencesDataStore = AppPreferencesDataStore(context)
 
-
-    /** CifsClient */
+    /** StorageClientManager */
     @Singleton
     @Provides
-    fun provideJcifsClient(
+    fun provideStorageClientManager(
         preferences: AppPreferencesDataStore,
-    ): JCifsClient {
-        return JCifsClient(preferences)
-    }
-
-
-    /** CifsClient */
-    @Singleton
-    @Provides
-    fun provideSmbjClient(
-        preferences: AppPreferencesDataStore,
-    ): SmbjClient {
-        return SmbjClient(preferences)
+    ): StorageClientManager {
+        return StorageClientManager(runBlocking { preferences.openFileLimitFlow.first() })
     }
 }
 

@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.common
+package com.wa2c.android.cifsdocumentsprovider.data.storage
 
 import android.system.ErrnoException
 import android.system.OsConstants
@@ -12,7 +12,7 @@ import kotlin.coroutines.CoroutineContext
  * Proxy Callback process
  */
 @Throws(ErrnoException::class)
-internal fun <T> processFileIo(context: CoroutineContext, process: suspend CoroutineScope.() -> T): T {
+fun <T> processFileIo(context: CoroutineContext, process: suspend CoroutineScope.() -> T): T {
     return try {
         runBlocking(context = context) {
             process()
@@ -27,10 +27,10 @@ internal fun <T> processFileIo(context: CoroutineContext, process: suspend Corou
     }
 }
 
-///**
-// * Get throwable cause.
-// */
-//fun Throwable.getCause(): Throwable {
-//    val c = cause
-//    return c?.getCause() ?: return this
-//}
+/**
+ * Get throwable cause.
+ */
+fun Throwable.getCause(): Throwable {
+    val c = cause
+    return c?.getCause() ?: return this
+}
