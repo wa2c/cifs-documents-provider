@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = Deps.compileSdkVersion
-    namespace = "${Deps.namespaceBase}.data.storage.jcifsng"
+    namespace = "${Deps.namespaceBase}.data.storage.entity"
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
@@ -38,12 +38,10 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":data:storage:entity"))
 
     implementation(Deps.App.core)
     implementation(Deps.App.appcompat)
     implementation(Deps.App.coroutine)
-    implementation(Deps.Data.jcifsNg)
 
     testImplementation(Deps.Test.junit)
     androidTestImplementation(Deps.Test.junitExt)

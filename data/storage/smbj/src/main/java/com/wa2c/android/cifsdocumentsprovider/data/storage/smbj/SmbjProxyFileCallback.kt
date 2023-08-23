@@ -6,8 +6,8 @@ import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.storage.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.processFileIo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,7 +29,10 @@ class SmbjProxyFileCallback(
     private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
 
     private val readerLazy = lazy {
-        BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
+        BackgroundBufferReader(
+            coroutineContext,
+            fileSize
+        ) { start, array, off, len ->
             file.read(array, start, off, len)
         }
     }
@@ -63,7 +66,9 @@ class SmbjProxyFileCallback(
         logD("onRelease: ${file.uncPath}")
         processFileIo(coroutineContext) {
             logD("release begin")
-            if (readerLazy.isInitialized()) { reader.close() }
+            if (readerLazy.isInitialized()) {
+                reader.close()
+            }
             onFileRelease()
             logD("release end")
         }

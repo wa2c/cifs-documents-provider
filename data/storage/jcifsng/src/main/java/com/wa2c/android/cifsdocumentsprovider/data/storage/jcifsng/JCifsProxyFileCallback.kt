@@ -22,9 +22,9 @@ import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.storage.BackgroundBufferWriter
-import com.wa2c.android.cifsdocumentsprovider.data.storage.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.BackgroundBufferWriter
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +45,11 @@ internal class JCifsProxyFileCallback(
         get() = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSize: Long by lazy { processFileIo(coroutineContext) { smbFile.length() } }
+    private val fileSize: Long by lazy {
+        processFileIo(
+            coroutineContext
+        ) { smbFile.length() }
+    }
 
     private var reader: BackgroundBufferReader? = null
 
@@ -62,7 +66,10 @@ internal class JCifsProxyFileCallback(
             logD("Writer released")
         }
 
-        return reader ?: BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
+        return reader ?: BackgroundBufferReader(
+            coroutineContext,
+            fileSize
+        ) { start, array, off, len ->
             smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
                 access.seek(start)
                 access.read(array, off, len)
@@ -80,8 +87,11 @@ internal class JCifsProxyFileCallback(
             logD("Reader released")
         }
 
-        return writer ?: BackgroundBufferWriter(coroutineContext) { start, array, off, len ->
-            (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
+        return writer ?: BackgroundBufferWriter(
+            coroutineContext
+        ) { start, array, off, len ->
+            (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE)
+                .also { outputAccess = it }).let { access ->
                 access.seek(start)
                 access.write(array, off, len)
             }
@@ -118,7 +128,11 @@ internal class JCifsProxyFileCallback(
         processFileIo(coroutineContext) {
             reader?.close()
             writer?.close()
-            try { outputAccess?.close() } catch (e: Exception) { logE(e) }
+            try {
+                outputAccess?.close()
+            } catch (e: Exception) {
+                logE(e)
+            }
             onFileRelease()
         }
     }

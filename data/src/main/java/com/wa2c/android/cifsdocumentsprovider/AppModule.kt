@@ -3,10 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider
 import android.app.NotificationManager
 import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.data.db.AppDatabase
-import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageClientManager
-import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

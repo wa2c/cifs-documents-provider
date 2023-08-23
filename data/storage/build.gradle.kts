@@ -38,6 +38,7 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":data:storage:entity"))
     implementation(project(":data:storage:jcifsng"))
     implementation(project(":data:storage:smbj"))
 

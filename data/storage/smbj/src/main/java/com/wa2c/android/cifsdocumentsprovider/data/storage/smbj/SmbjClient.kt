@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.smbj
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import androidx.core.net.toUri
 import com.hierynomus.msdtyp.AccessMask
 import com.hierynomus.mserref.NtStatus
 import com.hierynomus.msfscc.FileAttributes
@@ -32,11 +31,10 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.uncPathToUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
-import com.wa2c.android.cifsdocumentsprovider.data.storage.CifsClientDto
-import com.wa2c.android.cifsdocumentsprovider.data.storage.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageConnection
-import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageFile
-import com.wa2c.android.cifsdocumentsprovider.data.storage.getCause
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.getCause
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -84,27 +82,27 @@ class SmbjClient constructor(
     /**
      * Get session
      */
-    private fun getSession(dto: CifsClientDto, forced: Boolean = false): Session {
-        return if (!forced) { sessionCache[dto.connection]?.takeIf { it.connection.isConnected } } else { null } ?: let {
+    private fun getSession(dto: StorageConnection, forced: Boolean = false): Session {
+        return if (!forced) { sessionCache[dto]?.takeIf { it.connection.isConnected } } else { null } ?: let {
             val config = SmbConfig.builder()
-                .withDfsEnabled(dto.connection.enableDfs)
+                .withDfsEnabled(dto.enableDfs)
                 .build()
             val client = SMBClient(config)
-            val port = dto.connection.port?.toIntOrNull()
-            val connection = port?.let { client.connect(dto.connection.host, it) } ?: client.connect(dto.connection.host)
+            val port = dto.port?.toIntOrNull()
+            val connection = port?.let { client.connect(dto.host, it) } ?: client.connect(dto.host)
 
             val context = when {
-                dto.connection.isAnonymous -> AuthenticationContext.anonymous() // Anonymous
-                dto.connection.isGuest -> AuthenticationContext.guest() // Guest if empty username
+                dto.isAnonymous -> AuthenticationContext.anonymous() // Anonymous
+                dto.isGuest -> AuthenticationContext.guest() // Guest if empty username
                 else -> AuthenticationContext(
-                    dto.connection.user,
-                    (dto.connection.password ?: "").toCharArray(),
-                    dto.connection.domain
+                    dto.user,
+                    (dto.password ?: "").toCharArray(),
+                    dto.domain
                 )
             }
 
             connection.authenticate(context).also {
-                sessionCache.put(dto.connection, it)
+                sessionCache.put(dto, it)
             }
         }
     }
@@ -112,10 +110,10 @@ class SmbjClient constructor(
     /**
      * Get DiskShare
      */
-    private fun <T> useDiskShare(dto: CifsClientDto, forced: Boolean = false, process: (DiskShare) -> T): T {
-        val diskShare = if (!forced) { diskShareCache[dto.connection]?.takeIf { it.isConnected } } else { null } ?: let {
+    private fun <T> useDiskShare(dto: StorageConnection, forced: Boolean = false, process: (DiskShare) -> T): T {
+        val diskShare = if (!forced) { diskShareCache[dto]?.takeIf { it.isConnected } } else { null } ?: let {
             (getSession(dto, forced).connectShare(dto.shareName) as DiskShare).also {
-                diskShareCache.put(dto.connection, it)
+                diskShareCache.put(dto, it)
             }
         }
         return process(diskShare)
@@ -147,7 +145,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun checkConnection(dto: CifsClientDto): ConnectionResult {
+    override suspend fun checkConnection(dto: StorageConnection): ConnectionResult {
         return withContext(dispatcher) {
             try {
                 getChildren(dto, true)
@@ -172,7 +170,7 @@ class SmbjClient constructor(
                 }
             } finally {
                 try {
-                    sessionCache.remove(dto.connection)
+                    sessionCache.remove(dto)
                 } catch (e: Exception) {
                     logE(e)
                 }
@@ -180,11 +178,11 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFile(dto: CifsClientDto, forced: Boolean): StorageFile {
+    override suspend fun getFile(dto: StorageConnection, forced: Boolean): StorageFile {
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 StorageFile(
-                    dto.connection.name,
+                    dto.name,
                     dto.uri,
                     0,
                     0,
@@ -199,7 +197,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getChildren(dto: CifsClientDto, forced: Boolean): List<StorageFile> {
+    override suspend fun getChildren(dto: StorageConnection, forced: Boolean): List<StorageFile> {
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 // Root
@@ -240,9 +238,9 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun createFile(dto: CifsClientDto, mimeType: String?): StorageFile {
+    override suspend fun createFile(dto: StorageConnection, mimeType: String?): StorageFile {
         return withContext(dispatcher) {
-            val optimizedUri = dto.uri.optimizeUri(if (dto.connection.extension) mimeType else null)
+            val optimizedUri = dto.uri.optimizeUri(if (dto.extension) mimeType else null)
             useDiskShare(dto) { diskShare ->
                 if (optimizedUri.isDirectoryUri) {
                     diskShare.mkdir(dto.sharePath)
@@ -256,7 +254,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun copyFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): StorageFile? {
+    override suspend fun copyFile(sourceDto: StorageConnection, targetDto: StorageConnection): StorageFile? {
         return withContext(dispatcher) {
             useDiskShare(sourceDto) { diskShare ->
                 useDiskShare(targetDto) { targetDiskShare ->
@@ -276,7 +274,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun renameFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): StorageFile? {
+    override suspend fun renameFile(sourceDto: StorageConnection, targetDto: StorageConnection): StorageFile? {
         return withContext(dispatcher) {
             useDiskShare(sourceDto) { diskShare ->
                 openDiskFile(diskShare, sourceDto.sharePath, false).use { diskEntry ->
@@ -287,7 +285,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun deleteFile(dto: CifsClientDto): Boolean {
+    override suspend fun deleteFile(dto: StorageConnection): Boolean {
         return withContext(dispatcher) {
             useDiskShare(dto) { diskShare ->
                 diskShare.rm(dto.sharePath)
@@ -296,7 +294,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun moveFile(sourceDto: CifsClientDto, targetDto: CifsClientDto): StorageFile? {
+    override suspend fun moveFile(sourceDto: StorageConnection, targetDto: StorageConnection): StorageFile? {
         return withContext(dispatcher) {
             copyFile(sourceDto, targetDto).also {
                 deleteFile(sourceDto)
@@ -304,7 +302,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFileDescriptor(dto: CifsClientDto, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(dto: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val diskFile = useDiskShare(dto) { openDiskFile(it, dto.sharePath, mode == AccessMode.R) }
             val release = fun () {
@@ -312,7 +310,7 @@ class SmbjClient constructor(
                 onFileRelease()
             }
 
-            if (dto.connection.safeTransfer) {
+            if (dto.safeTransfer) {
                 SmbjProxyFileCallbackSafe(diskFile, mode, release)
             } else {
                 SmbjProxyFileCallback(diskFile, mode, release)

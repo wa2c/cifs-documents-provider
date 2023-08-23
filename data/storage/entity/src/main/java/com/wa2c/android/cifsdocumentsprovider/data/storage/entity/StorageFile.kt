@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data.storage
+package com.wa2c.android.cifsdocumentsprovider.data.storage.entity
 
 /**
  * CIFS File

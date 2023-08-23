@@ -39,7 +39,7 @@ android {
 dependencies {
 
     implementation(project(":common"))
-    implementation(project(":data:storage"))
+    implementation(project(":data:storage:entity"))
 
     implementation(Deps.App.core)
     implementation(Deps.App.appcompat)

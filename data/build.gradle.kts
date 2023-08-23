@@ -54,6 +54,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage"))
+    implementation(project(":data:storage:entity"))
 
     // App
 

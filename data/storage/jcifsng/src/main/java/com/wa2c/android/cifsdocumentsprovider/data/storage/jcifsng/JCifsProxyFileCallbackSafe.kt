@@ -20,7 +20,7 @@ import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.*
@@ -39,7 +39,11 @@ internal class JCifsProxyFileCallbackSafe(
         get() = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSize: Long by lazy { processFileIo(coroutineContext) { access.length() } }
+    private val fileSize: Long by lazy {
+        processFileIo(
+            coroutineContext
+        ) { access.length() }
+    }
 
     private var isAccessOpened = false
     private val access: SmbRandomAccessFile by lazy {
@@ -57,7 +61,9 @@ internal class JCifsProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return processFileIo(coroutineContext) {
+        return processFileIo(
+            coroutineContext
+        ) {
             access.seek(offset)
             access.read(data, 0, size)
         }
@@ -66,7 +72,9 @@ internal class JCifsProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return processFileIo(coroutineContext) {
+        return processFileIo(
+            coroutineContext
+        ) {
             access.seek(offset)
             access.write(data, 0, size)
             size

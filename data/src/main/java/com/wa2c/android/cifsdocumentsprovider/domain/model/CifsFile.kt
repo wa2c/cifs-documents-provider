@@ -5,7 +5,7 @@ import android.os.Parcelable
 import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
 import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
-import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -28,7 +28,7 @@ data class CifsFile(
         get() = getDocumentId(this.uri.host, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
 
     companion object {
-        fun StorageFile.toModel(): CifsFile {
+        fun com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile.toModel(): CifsFile {
             return CifsFile(
                 name = name,
                 uri = uri.toUri(),
