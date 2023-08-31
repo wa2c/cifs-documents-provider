@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk = Deps.compileSdkVersion
-    namespace = "${Deps.namespaceBase}.data.storage.jcifsng"
+    namespace = "${Deps.namespaceBase}.data.storage.interfaces"
 
     defaultConfig {
         minSdk = Deps.minSdkVersion
@@ -38,10 +38,6 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":data:storage:interfaces"))
-
-    implementation(Deps.App.coroutine)
-    implementation(Deps.Data.jcifsNg)
 
     testImplementation(Deps.Test.junit)
 }

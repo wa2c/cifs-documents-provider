@@ -12,10 +12,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.getCause
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext
@@ -36,11 +34,11 @@ import java.util.Properties
 class JCifsClient constructor(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): CifsClientInterface {
+): StorageClient {
 
     /** Session cache */
-    private val contextCache = object : LruCache<com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, CIFSContext>(openFileLimit) {
-        override fun entryRemoved(evicted: Boolean, key: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
+    private val contextCache = object : LruCache<com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, CIFSContext>(openFileLimit) {
+        override fun entryRemoved(evicted: Boolean, key: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
             try {
                 oldValue?.close()
                 logD("Session Disconnected: ${key?.name}")
@@ -56,7 +54,7 @@ class JCifsClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getCifsContext(
-        connection: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
+        connection: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
     ): CIFSContext {
         val property = Properties().apply {
             setProperty("jcifs.smb.client.minVersion", "SMB202")
@@ -85,7 +83,7 @@ class JCifsClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, forced: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
                 val context = (if (forced) null else contextCache[dto]) ?: getCifsContext(dto)
@@ -103,7 +101,7 @@ class JCifsClient constructor(
     /**
      * Check setting connectivity.
      */
-    override suspend fun checkConnection(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection): ConnectionResult {
+    override suspend fun checkConnection(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection): ConnectionResult {
         return withContext(dispatcher) {
             try {
                 getSmbFile(dto, true)?.use { it.list() }
@@ -127,14 +125,14 @@ class JCifsClient constructor(
     /**
      * Get CifsFile
      */
-    override suspend fun getFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, forced: Boolean): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile? {
+    override suspend fun getFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
         return getSmbFile(dto, forced)?.use { it.toCifsFile() }
     }
 
     /**
      * Get children CifsFile list
      */
-    override suspend fun getChildren(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, forced: Boolean): List<com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile> {
+    override suspend fun getChildren(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean): List<com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile> {
         return getSmbFile(dto, forced)?.use { parent ->
             parent.listFiles()?.mapNotNull { child ->
                 child.use { it.toCifsFile() }
@@ -146,7 +144,7 @@ class JCifsClient constructor(
     /**
      * Create new CifsFile.
      */
-    override suspend fun createFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, mimeType: String?): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile? {
+    override suspend fun createFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, mimeType: String?): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
         return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.extension) mimeType else null)
             getSmbFile(dto.copy(inputUri = optimizedUri))?.use {
@@ -166,9 +164,9 @@ class JCifsClient constructor(
      * Copy CifsFile
      */
     override suspend fun copyFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile? {
+        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(sourceDto)?.use { source ->
                 getSmbFile(targetDto)?.use { target ->
@@ -183,9 +181,9 @@ class JCifsClient constructor(
      * Rename file
      */
     override suspend fun renameFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile? {
+        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(sourceDto)?.use { source ->
                 getSmbFile(targetDto)?.use { target ->
@@ -200,7 +198,7 @@ class JCifsClient constructor(
      * Delete file
      */
     override suspend fun deleteFile(
-        dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
+        dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
     ): Boolean {
         return withContext(dispatcher) {
             getSmbFile(dto)?.use {
@@ -214,9 +212,9 @@ class JCifsClient constructor(
      * Move file
      */
     override suspend fun moveFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile? {
+        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
         return withContext(dispatcher) {
             if (sourceDto == targetDto) {
                 // Same connection
@@ -233,7 +231,7 @@ class JCifsClient constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
             val release = fun () {
@@ -256,11 +254,11 @@ class JCifsClient constructor(
     /**
      * Convert SmbFile to CifsFile
      */
-    private suspend fun SmbFile.toCifsFile(): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile {
+    private suspend fun SmbFile.toCifsFile(): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile {
         val urlText = url.toString()
         return withContext(dispatcher) {
             val isDir = urlText.isDirectoryUri || isDirectory
-            com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile(
+            com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile(
                 name = name.trim('/'),
                 uri = urlText,
                 size = if (isDir || !isFile) 0 else length(),

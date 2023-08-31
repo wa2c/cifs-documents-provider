@@ -38,14 +38,11 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":data:storage:entity"))
+    implementation(project(":data:storage:interfaces"))
     implementation(project(":data:storage:jcifsng"))
     implementation(project(":data:storage:smbj"))
 
-    implementation(Deps.App.core)
-    implementation(Deps.App.appcompat)
     implementation(Deps.App.coroutine)
 
     testImplementation(Deps.Test.junit)
-    androidTestImplementation(Deps.Test.junitExt)
 }

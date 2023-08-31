@@ -31,10 +31,10 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.uncPathToUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageFile
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.getCause
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 class SmbjClient constructor(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): CifsClientInterface {
+): StorageClient {
 
     /** Session cache */
     private val sessionCache = object : LruCache<StorageConnection, Session>(openFileLimit) {

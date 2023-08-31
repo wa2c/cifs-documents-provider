@@ -54,7 +54,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage"))
-    implementation(project(":data:storage:entity"))
+    implementation(project(":data:storage:interfaces"))
 
     // App
 
@@ -75,11 +75,6 @@ dependencies {
     implementation(Deps.Data.dataStore)
     // Json
     implementation(Deps.Data.kotlinxSerializationJson)
-    // SMB
-    implementation(Deps.Data.jcifsNg)
-    implementation(Deps.Data.smbj)
-    implementation(Deps.Data.smbjRpc)
-    implementation(Deps.Data.guava) // to avoid conflict
     // Android Network Tools
     implementation(Deps.Data.networkTools)
 

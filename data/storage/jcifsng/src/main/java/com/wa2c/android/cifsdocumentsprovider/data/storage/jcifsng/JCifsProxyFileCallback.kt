@@ -22,9 +22,9 @@ import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.BackgroundBufferWriter
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferWriter
+import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.CoroutineScope

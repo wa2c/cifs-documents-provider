@@ -15,9 +15,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageClientManager
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection.Companion.toDto
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
@@ -51,16 +49,16 @@ class CifsRepository @Inject internal constructor(
     }
 
     /** File blocking queue */
-    private val fileBlockingQueue = ArrayBlockingQueue<com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection>(appPreferences.openFileLimitFlow.getFirst())
-    private fun addBlockingQueue(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection) {
+    private val fileBlockingQueue = ArrayBlockingQueue<com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection>(appPreferences.openFileLimitFlow.getFirst())
+    private fun addBlockingQueue(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection) {
         fileBlockingQueue.put(dto)
         logD("Queue added: size=${fileBlockingQueue.count()}")
     }
-    private fun removeBlockingQueue(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection) {
+    private fun removeBlockingQueue(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection) {
         fileBlockingQueue.remove(dto)
         logD("Queue removed: size=${fileBlockingQueue.count()}")
     }
-    private suspend fun <T> runFileBlocking(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection, process: suspend () -> T): T {
+    private suspend fun <T> runFileBlocking(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, process: suspend () -> T): T {
         return try {
             addBlockingQueue(dto)
             process()
@@ -69,7 +67,7 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    private fun getClient(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface {
+    private fun getClient(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient {
         return storageClientManager.getClient(dto.storage)
     }
 
@@ -140,7 +138,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get connection from URI
      */
-    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): com.wa2c.android.cifsdocumentsprovider.data.storage.entity.StorageConnection? {
+    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection? {
         return  withContext(dispatcher) {
             connection?.let { connection.toDto(uriText) } ?: uriText?.let { uri ->
                 connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { it.toDto(uriText) }

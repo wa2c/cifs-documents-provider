@@ -37,12 +37,9 @@ android {
 }
 
 dependencies {
-
     implementation(project(":common"))
-    implementation(project(":data:storage:entity"))
+    implementation(project(":data:storage:interfaces"))
 
-    implementation(Deps.App.core)
-    implementation(Deps.App.appcompat)
     implementation(Deps.App.coroutine)
 
     implementation(Deps.Data.smbj)
@@ -50,5 +47,4 @@ dependencies {
     implementation(Deps.Data.guava) // to avoid conflict
 
     testImplementation(Deps.Test.junit)
-    androidTestImplementation(Deps.Test.junitExt)
 }

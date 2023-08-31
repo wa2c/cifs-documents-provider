@@ -1,7 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.data.storage.entity.CifsClientInterface
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 
@@ -21,7 +21,7 @@ class StorageClientManager(
     /**
      * Get client
      */
-    fun getClient(type: StorageType): CifsClientInterface {
+    fun getClient(type: StorageType): StorageClient {
         return when (type) {
             StorageType.JCIFS -> jCifsClient.value
             StorageType.SMBJ -> smbjClient.value
