@@ -2,7 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 
 /**
@@ -13,7 +13,7 @@ class StorageClientManager(
 ) {
 
     /** JCifs-ng client */
-    private val jCifsClient = lazy { JCifsClient(fileOpenLimit) }
+    private val jCifsNgClient = lazy { JCifsNgClient(fileOpenLimit) }
 
     /** SMBJ client */
     private val smbjClient = lazy { SmbjClient(fileOpenLimit) }
@@ -23,7 +23,7 @@ class StorageClientManager(
      */
     fun getClient(type: StorageType): StorageClient {
         return when (type) {
-            StorageType.JCIFS -> jCifsClient.value
+            StorageType.JCIFS -> jCifsNgClient.value
             StorageType.SMBJ -> smbjClient.value
         }
     }
@@ -32,8 +32,8 @@ class StorageClientManager(
      * Close clients
      */
     suspend fun closeClient() {
-        if (jCifsClient.isInitialized()) jCifsClient.value.close()
-        if (jCifsClient.isInitialized()) smbjClient.value.close()
+        if (jCifsNgClient.isInitialized()) jCifsNgClient.value.close()
+        if (jCifsNgClient.isInitialized()) smbjClient.value.close()
     }
 
 }
