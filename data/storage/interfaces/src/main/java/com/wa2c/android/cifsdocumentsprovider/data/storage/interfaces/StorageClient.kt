@@ -7,9 +7,9 @@ interface StorageClient {
 
     suspend fun checkConnection(dto: StorageConnection): ConnectionResult
 
-    suspend fun getFile(dto: StorageConnection, forced: Boolean = false): StorageFile?
+    suspend fun getFile(dto: StorageConnection, ignoreCache: Boolean = false): StorageFile?
 
-    suspend fun getChildren(dto: StorageConnection, forced: Boolean = false): List<StorageFile>
+    suspend fun getChildren(dto: StorageConnection, ignoreCache: Boolean = false): List<StorageFile>
 
     suspend fun createFile(dto: StorageConnection, mimeType: String?): StorageFile?
 

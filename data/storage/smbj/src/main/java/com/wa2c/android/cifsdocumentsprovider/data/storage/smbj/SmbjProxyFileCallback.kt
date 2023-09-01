@@ -29,10 +29,7 @@ class SmbjProxyFileCallback(
     private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
 
     private val readerLazy = lazy {
-        BackgroundBufferReader(
-            coroutineContext,
-            fileSize
-        ) { start, array, off, len ->
+        BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
             file.read(array, start, off, len)
         }
     }
@@ -46,14 +43,18 @@ class SmbjProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return reader.readBuffer(offset, size, data)
+        return processFileIo(coroutineContext) {
+            reader.readBuffer(offset, size, data)
+        }
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        file.writeAsync(data, offset, 0, size)
-        return size
+        return processFileIo(coroutineContext) {
+            file.writeAsync(data, offset, 0, size)
+            size
+        }
     }
     
     @Throws(ErrnoException::class)

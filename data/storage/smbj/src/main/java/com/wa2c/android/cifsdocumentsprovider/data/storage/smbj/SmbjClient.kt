@@ -178,7 +178,7 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFile(dto: StorageConnection, forced: Boolean): StorageFile {
+    override suspend fun getFile(dto: StorageConnection, ignoreCache: Boolean): StorageFile {
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 StorageFile(
@@ -189,19 +189,19 @@ class SmbjClient constructor(
                     true,
                 )
             } else {
-                useDiskShare(dto, forced) { diskShare ->
+                useDiskShare(dto, ignoreCache) { diskShare ->
                     val info = diskShare.getFileInformation(dto.sharePath)
-                    info.toCifsFile(dto.uri)
+                    info.toStorageFile(dto.uri)
                 }
             }
         }
     }
 
-    override suspend fun getChildren(dto: StorageConnection, forced: Boolean): List<StorageFile> {
+    override suspend fun getChildren(dto: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
         return withContext(dispatcher) {
             if (dto.isRoot) {
                 // Root
-                val session = getSession(dto, forced)
+                val session = getSession(dto, ignoreCache)
                 val transport = SMBTransportFactories.SRVSVC.getTransport(session)
                 val serverService = ServerService(transport)
                 serverService.shares0
@@ -217,7 +217,7 @@ class SmbjClient constructor(
                     }
             } else {
                 // Shared folder
-                useDiskShare(dto, forced) { diskShare ->
+                useDiskShare(dto, ignoreCache) { diskShare ->
                     diskShare.list(dto.sharePath)
                         .filter { !it.fileName.isInvalidFileName }
                         .map { info ->
@@ -250,7 +250,7 @@ class SmbjClient constructor(
                         f.fileInformation
                     }
                 }
-            }.toCifsFile(optimizedUri)
+            }.toStorageFile(optimizedUri)
         }
     }
 
@@ -264,7 +264,7 @@ class SmbjClient constructor(
                             sourceEntry.inputStream.use { input ->
                                 targetEntry.outputStream.use { output ->
                                     input.copyTo(output)
-                                    targetEntry.toCifsFile()
+                                    targetEntry.toStorageFile()
                                 }
                             }
                         }
@@ -279,7 +279,7 @@ class SmbjClient constructor(
             useDiskShare(sourceDto) { diskShare ->
                 openDiskFile(diskShare, sourceDto.sharePath, false).use { diskEntry ->
                     diskEntry.rename(targetDto.name)
-                    diskEntry.toCifsFile()
+                    diskEntry.toStorageFile()
                 }
             }
         }
@@ -324,7 +324,7 @@ class SmbjClient constructor(
         sessionCache.evictAll()
     }
 
-    private fun FileAllInformation.toCifsFile(uriText: String): StorageFile {
+    private fun FileAllInformation.toStorageFile(uriText: String): StorageFile {
         return StorageFile(
             name = uriText.fileName,
             uri = uriText,
@@ -334,7 +334,7 @@ class SmbjClient constructor(
         )
     }
 
-    private fun DiskEntry.toCifsFile(): StorageFile? {
+    private fun DiskEntry.toStorageFile(): StorageFile? {
         val isDirectory = this.fileInformation.standardInformation.isDirectory
         val uri = this.uncPath.uncPathToUri(isDirectory) ?: return null
         return StorageFile(

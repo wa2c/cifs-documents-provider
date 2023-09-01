@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
+package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
@@ -14,12 +14,11 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
-import jcifs.CIFSContext
-import jcifs.config.PropertyConfiguration
-import jcifs.context.BaseContext
-import jcifs.context.CIFSContextWrapper
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
+import jcifs.Config
 import jcifs.smb.NtStatus
-import jcifs.smb.NtlmPasswordAuthenticator
+import jcifs.smb.NtlmPasswordAuthentication
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,7 +28,7 @@ import java.util.Properties
 
 
 /**
- * jCIFS-ng Client
+ * JCIFS Client
  */
 class JCifsClient constructor(
     private val openFileLimit: Int,
@@ -37,10 +36,9 @@ class JCifsClient constructor(
 ): StorageClient {
 
     /** Session cache */
-    private val contextCache = object : LruCache<com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, CIFSContext>(openFileLimit) {
-        override fun entryRemoved(evicted: Boolean, key: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection?, oldValue: CIFSContext?, newValue: CIFSContext?) {
+    private val contextCache = object : LruCache<StorageConnection, NtlmPasswordAuthentication>(openFileLimit) {
+        override fun entryRemoved(evicted: Boolean, key: StorageConnection?, oldValue: NtlmPasswordAuthentication?, newValue: NtlmPasswordAuthentication?) {
             try {
-                oldValue?.close()
                 logD("Session Disconnected: ${key?.name}")
             } catch (e: Exception) {
                 logE(e)
@@ -53,29 +51,29 @@ class JCifsClient constructor(
     /**
      * Get auth by user. Anonymous if user and password are empty.
      */
-    private fun getCifsContext(
-        connection: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-    ): CIFSContext {
+    private fun getAuthentication(
+        connection: StorageConnection,
+        ignoreCache: Boolean,
+    ): NtlmPasswordAuthentication {
+        // FIXME
         val property = Properties().apply {
-            setProperty("jcifs.smb.client.minVersion", "SMB202")
-            setProperty("jcifs.smb.client.maxVersion", "SMB311")
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
-            setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
+            setProperty("jcifs.smb.client.soTimeout", CONNECTION_TIMEOUT.toString())
             setProperty("jcifs.smb.client.attrExpirationPeriod", CACHE_TIMEOUT.toString())
             setProperty("jcifs.smb.client.dfs.disabled", (!connection.enableDfs).toString())
-            setProperty("jcifs.smb.client.ipcSigningEnforced", (!connection.user.isNullOrEmpty() && connection.user != "guest").toString())
-            setProperty("jcifs.smb.client.guestUsername", "cifs-documents-provider")
+            //setProperty("jcifs.smb.client.ipcSigningEnforced", (!connection.user.isNullOrEmpty() && connection.user != "guest").toString())
+            //setProperty("jcifs.smb.client.guestUsername", "cifs-documents-provider")
         }
+        Config.setProperties(property)
 
-        val context = BaseContext(PropertyConfiguration(property)).let {
-            when {
-                connection.isAnonymous -> it.withAnonymousCredentials() // Anonymous
-                connection.isGuest -> it.withGuestCrendentials() // Guest if empty username
-                else -> it.withCredentials(NtlmPasswordAuthenticator(connection.domain, connection.user, connection.password, null))
-            }
+        if (!ignoreCache) { contextCache[connection]?.let { return it } }
+        val authentication = when {
+            connection.isAnonymous -> NtlmPasswordAuthentication.ANONYMOUS // Anonymous
+            connection.isGuest -> NtlmPasswordAuthentication( "?", "GUEST", "" ) // Guest if empty username
+            else -> NtlmPasswordAuthentication(connection.domain, connection.user, connection.password)
         }
-        logD("CIFSContext Created: $context")
-        return CIFSContextWrapper(context).also {
+        logD("NtlmPasswordAuthentication Created: $authentication")
+        return authentication.also {
             contextCache.put(connection, it)
         }
     }
@@ -83,11 +81,11 @@ class JCifsClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(dto: StorageConnection, ignoreCache: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val context = (if (forced) null else contextCache[dto]) ?: getCifsContext(dto)
-                SmbFile(dto.uri, context).apply {
+                val authentication = getAuthentication(dto, ignoreCache)
+                SmbFile(dto.uri, authentication).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }
@@ -101,10 +99,10 @@ class JCifsClient constructor(
     /**
      * Check setting connectivity.
      */
-    override suspend fun checkConnection(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection): ConnectionResult {
+    override suspend fun checkConnection(dto: StorageConnection): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getSmbFile(dto, true)?.use { it.list() }
+                getSmbFile(dto, true)?.list()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -123,31 +121,30 @@ class JCifsClient constructor(
     }
 
     /**
-     * Get CifsFile
+     * Get StorageFile
      */
-    override suspend fun getFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
-        return getSmbFile(dto, forced)?.use { it.toCifsFile() }
+    override suspend fun getFile(dto: StorageConnection, ignoreCache: Boolean): StorageFile? {
+        return getSmbFile(dto, ignoreCache)?.toStorageFile()
     }
 
     /**
-     * Get children CifsFile list
+     * Get children StorageFile list
      */
-    override suspend fun getChildren(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, forced: Boolean): List<com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile> {
-        return getSmbFile(dto, forced)?.use { parent ->
-            parent.listFiles()?.mapNotNull { child ->
-                child.use { it.toCifsFile() }
-            }
+    override suspend fun getChildren(dto: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
+        val parent = getSmbFile(dto, ignoreCache) ?: return emptyList()
+        return parent.listFiles()?.mapNotNull {child ->
+            child.toStorageFile()
         } ?: emptyList()
     }
 
 
     /**
-     * Create new CifsFile.
+     * Create new StorageFile.
      */
-    override suspend fun createFile(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, mimeType: String?): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
+    override suspend fun createFile(dto: StorageConnection, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
             val optimizedUri = dto.uri.optimizeUri(if (dto.extension) mimeType else null)
-            getSmbFile(dto.copy(inputUri = optimizedUri))?.use {
+            getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
                 if (optimizedUri.isDirectoryUri) {
                     // Directory
                     it.mkdir()
@@ -155,25 +152,23 @@ class JCifsClient constructor(
                     // File
                     it.createNewFile()
                 }
-                it.toCifsFile()
+                it.toStorageFile()
             }
         }
     }
 
     /**
-     * Copy CifsFile
+     * Copy StorageFile
      */
     override suspend fun copyFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
+        sourceDto: StorageConnection,
+        targetDto: StorageConnection,
+    ): StorageFile? {
         return withContext(dispatcher) {
-            getSmbFile(sourceDto)?.use { source ->
-                getSmbFile(targetDto)?.use { target ->
-                    source.copyTo(target)
-                    target.toCifsFile()
-                }
-            }
+            val source = getSmbFile(sourceDto) ?: return@withContext null
+            val target = getSmbFile(targetDto) ?: return@withContext null
+            source.copyTo(target)
+            target.toStorageFile()
         }
     }
 
@@ -181,16 +176,14 @@ class JCifsClient constructor(
      * Rename file
      */
     override suspend fun renameFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
+        sourceDto: StorageConnection,
+        targetDto: StorageConnection,
+    ): StorageFile? {
         return withContext(dispatcher) {
-            getSmbFile(sourceDto)?.use { source ->
-                getSmbFile(targetDto)?.use { target ->
-                    source.renameTo(target)
-                    target.toCifsFile()
-                }
-            }
+            val source = getSmbFile(sourceDto) ?: return@withContext null
+            val target = getSmbFile(targetDto) ?: return@withContext null
+            source.renameTo(target)
+            target.toStorageFile()
         }
     }
 
@@ -198,13 +191,11 @@ class JCifsClient constructor(
      * Delete file
      */
     override suspend fun deleteFile(
-        dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
+        dto: StorageConnection,
     ): Boolean {
         return withContext(dispatcher) {
-            getSmbFile(dto)?.use {
-                it.delete()
-                true
-            } ?: false
+            getSmbFile(dto)?.delete() ?: return@withContext false
+            true
         }
     }
 
@@ -212,9 +203,9 @@ class JCifsClient constructor(
      * Move file
      */
     override suspend fun moveFile(
-        sourceDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-        targetDto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection,
-    ): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile? {
+        sourceDto: StorageConnection,
+        targetDto: StorageConnection,
+    ): StorageFile? {
         return withContext(dispatcher) {
             if (sourceDto == targetDto) {
                 // Same connection
@@ -231,11 +222,10 @@ class JCifsClient constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(dto: com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(dto: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(dto) ?: return@withContext null
             val release = fun () {
-                try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }
 
@@ -252,13 +242,13 @@ class JCifsClient constructor(
     }
 
     /**
-     * Convert SmbFile to CifsFile
+     * Convert SmbFile to StorageFile
      */
-    private suspend fun SmbFile.toCifsFile(): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile {
+    private suspend fun SmbFile.toStorageFile(): StorageFile {
         val urlText = url.toString()
         return withContext(dispatcher) {
             val isDir = urlText.isDirectoryUri || isDirectory
-            com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile(
+            StorageFile(
                 name = name.trim('/'),
                 uri = urlText,
                 size = if (isDir || !isFile) 0 else length(),

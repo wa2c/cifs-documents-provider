@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
+package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
@@ -46,9 +46,7 @@ internal class JCifsProxyFileCallback(
 
     /** File size */
     private val fileSize: Long by lazy {
-        processFileIo(
-            coroutineContext
-        ) { smbFile.length() }
+        processFileIo(coroutineContext) { smbFile.length() }
     }
 
     private var reader: BackgroundBufferReader? = null
@@ -58,46 +56,49 @@ internal class JCifsProxyFileCallback(
     private var outputAccess: SmbRandomAccessFile? = null
 
     private fun getReader(): BackgroundBufferReader {
-        writer?.let {
-            outputAccess?.close()
-            outputAccess = null
-            it.close()
-            writer = null
-            logD("Writer released")
-        }
-
-        return reader ?: BackgroundBufferReader(
-            coroutineContext,
-            fileSize
-        ) { start, array, off, len ->
-            smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
-                access.seek(start)
-                access.read(array, off, len)
+        return processFileIo(coroutineContext) {
+            writer?.let {
+                outputAccess?.close()
+                outputAccess = null
+                it.close()
+                writer = null
+                logD("Writer released")
             }
-        }.also {
-            reader = it
-            logD("Reader created")
+
+            reader ?: BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
+                processFileIo(context = coroutineContext) {
+                    val access = SmbRandomAccessFile(smbFile, AccessMode.R.smbMode)
+                    try {
+                        access.seek(start)
+                        access.read(array, off, len)
+                    } finally {
+                        access.close()
+                    }
+                }
+            }.also {
+                reader = it
+                logD("Reader created")
+            }
         }
     }
 
     private fun getWriter(): BackgroundBufferWriter {
-        reader?.let {
-            it.close()
-            reader = null
-            logD("Reader released")
-        }
-
-        return writer ?: BackgroundBufferWriter(
-            coroutineContext
-        ) { start, array, off, len ->
-            (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE)
-                .also { outputAccess = it }).let { access ->
-                access.seek(start)
-                access.write(array, off, len)
+        return processFileIo(coroutineContext) {
+            reader?.let {
+                it.close()
+                reader = null
+                logD("Reader released")
             }
-        }.also {
-            writer = it
-            logD("Writer created")
+
+            writer ?: BackgroundBufferWriter(coroutineContext) { start, array, off, len ->
+                (outputAccess ?: SmbRandomAccessFile(smbFile, AccessMode.W.smbMode).also { outputAccess = it }).let { access ->
+                    access.seek(start)
+                    access.write(array, off, len)
+                }
+            }.also {
+                writer = it
+                logD("Writer created")
+            }
         }
     }
 
@@ -108,13 +109,17 @@ internal class JCifsProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return getReader().readBuffer(offset, size, data)
+        return processFileIo(coroutineContext) {
+            getReader().readBuffer(offset, size, data)
+        }
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return getWriter().writeBuffer(offset, size, data)
+        return processFileIo(coroutineContext) {
+            getWriter().writeBuffer(offset, size, data)
+        }
     }
 
     @Throws(ErrnoException::class)

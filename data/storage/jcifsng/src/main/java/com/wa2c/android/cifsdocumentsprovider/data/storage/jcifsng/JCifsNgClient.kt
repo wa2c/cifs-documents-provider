@@ -31,7 +31,7 @@ import java.util.Properties
 
 
 /**
- * jCIFS-ng Client
+ * JCIFS-ng Client
  */
 class JCifsNgClient constructor(
     private val openFileLimit: Int,
@@ -57,7 +57,10 @@ class JCifsNgClient constructor(
      */
     private fun getCifsContext(
         connection: StorageConnection,
+        ignoreCache: Boolean,
     ): CIFSContext {
+        if (!ignoreCache) { contextCache[connection]?.let { return it } }
+
         val property = Properties().apply {
             setProperty("jcifs.smb.client.minVersion", "SMB202")
             setProperty("jcifs.smb.client.maxVersion", "SMB311")
@@ -85,11 +88,11 @@ class JCifsNgClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(dto: StorageConnection, forced: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(dto: StorageConnection, ignoreCache: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val context = (if (forced) null else contextCache[dto]) ?: getCifsContext(dto)
-                SmbFile(dto.uri, context).apply {
+                val connection = getCifsContext(dto, ignoreCache)
+                SmbFile(dto.uri, connection).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }
@@ -125,26 +128,26 @@ class JCifsNgClient constructor(
     }
 
     /**
-     * Get CifsFile
+     * Get StorageFile
      */
-    override suspend fun getFile(dto: StorageConnection, forced: Boolean): StorageFile? {
-        return getSmbFile(dto, forced)?.use { it.toCifsFile() }
+    override suspend fun getFile(dto: StorageConnection, ignoreCache: Boolean): StorageFile? {
+        return getSmbFile(dto, ignoreCache)?.use { it.toStorageFile() }
     }
 
     /**
-     * Get children CifsFile list
+     * Get children StorageFile list
      */
-    override suspend fun getChildren(dto: StorageConnection, forced: Boolean): List<StorageFile> {
-        return getSmbFile(dto, forced)?.use { parent ->
+    override suspend fun getChildren(dto: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
+        return getSmbFile(dto, ignoreCache)?.use { parent ->
             parent.listFiles()?.mapNotNull { child ->
-                child.use { it.toCifsFile() }
+                child.use { it.toStorageFile() }
             }
         } ?: emptyList()
     }
 
 
     /**
-     * Create new CifsFile.
+     * Create new StorageFile.
      */
     override suspend fun createFile(dto: StorageConnection, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
@@ -157,13 +160,13 @@ class JCifsNgClient constructor(
                     // File
                     it.createNewFile()
                 }
-                it.toCifsFile()
+                it.toStorageFile()
             }
         }
     }
 
     /**
-     * Copy CifsFile
+     * Copy StorageFile
      */
     override suspend fun copyFile(
         sourceDto: StorageConnection,
@@ -173,7 +176,7 @@ class JCifsNgClient constructor(
             getSmbFile(sourceDto)?.use { source ->
                 getSmbFile(targetDto)?.use { target ->
                     source.copyTo(target)
-                    target.toCifsFile()
+                    target.toStorageFile()
                 }
             }
         }
@@ -190,7 +193,7 @@ class JCifsNgClient constructor(
             getSmbFile(sourceDto)?.use { source ->
                 getSmbFile(targetDto)?.use { target ->
                     source.renameTo(target)
-                    target.toCifsFile()
+                    target.toStorageFile()
                 }
             }
         }
@@ -254,9 +257,9 @@ class JCifsNgClient constructor(
     }
 
     /**
-     * Convert SmbFile to CifsFile
+     * Convert SmbFile to StorageFile
      */
-    private suspend fun SmbFile.toCifsFile(): StorageFile {
+    private suspend fun SmbFile.toStorageFile(): StorageFile {
         val urlText = url.toString()
         return withContext(dispatcher) {
             val isDir = urlText.isDirectoryUri || isDirectory

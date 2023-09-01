@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
+package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
@@ -27,7 +27,7 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Proxy File Callback for jCIFS-ng (Normal IO)
+ * Proxy File Callback for jCIFS (Normal IO)
  */
 internal class JCifsProxyFileCallbackSafe(
     private val smbFile: SmbFile,
@@ -40,19 +40,16 @@ internal class JCifsProxyFileCallbackSafe(
 
     /** File size */
     private val fileSize: Long by lazy {
-        processFileIo(
-            coroutineContext
-        ) { access.length() }
+        processFileIo(coroutineContext) { access.length() }
     }
 
-    private var isAccessOpened = false
-    private val access: SmbRandomAccessFile by lazy {
+    private val accessLazy: Lazy<SmbRandomAccessFile> = lazy {
         processFileIo(coroutineContext) {
-            smbFile.openRandomAccess(mode.smbMode).also {
-                isAccessOpened = true
-            }
+            SmbRandomAccessFile(smbFile, mode.smbMode)
         }
     }
+
+    private val access: SmbRandomAccessFile get() = accessLazy.value
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {
@@ -61,9 +58,7 @@ internal class JCifsProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
-        return processFileIo(
-            coroutineContext
-        ) {
+        return processFileIo(coroutineContext) {
             access.seek(offset)
             access.read(data, 0, size)
         }
@@ -72,9 +67,7 @@ internal class JCifsProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
-        return processFileIo(
-            coroutineContext
-        ) {
+        return processFileIo(coroutineContext) {
             access.seek(offset)
             access.write(data, 0, size)
             size
@@ -89,7 +82,7 @@ internal class JCifsProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onRelease() {
         processFileIo(coroutineContext) {
-            if (isAccessOpened) access.close()
+            if (accessLazy.isInitialized()) access.close()
             onFileRelease()
         }
     }
