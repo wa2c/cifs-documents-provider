@@ -16,11 +16,11 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
-import jcifs.Config
-import jcifs.smb.NtStatus
-import jcifs.smb.NtlmPasswordAuthentication
-import jcifs.smb.SmbException
-import jcifs.smb.SmbFile
+import jcifs.legacy.Config
+import jcifs.legacy.smb.NtStatus
+import jcifs.legacy.smb.NtlmPasswordAuthentication
+import jcifs.legacy.smb.SmbException
+import jcifs.legacy.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -38,6 +38,7 @@ class JCifsClient constructor(
     /** Session cache */
     private val contextCache = object : LruCache<StorageConnection, NtlmPasswordAuthentication>(openFileLimit) {
         override fun entryRemoved(evicted: Boolean, key: StorageConnection?, oldValue: NtlmPasswordAuthentication?, newValue: NtlmPasswordAuthentication?) {
+
             try {
                 logD("Session Disconnected: ${key?.name}")
             } catch (e: Exception) {

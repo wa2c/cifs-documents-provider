@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage:interfaces"))
+    implementation(project(":data:storage:jcifs"))
     implementation(project(":data:storage:jcifsng"))
     implementation(project(":data:storage:smbj"))
 

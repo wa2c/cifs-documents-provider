@@ -25,8 +25,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferReader
 import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferWriter
 import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
-import jcifs.smb.SmbFile
-import jcifs.smb.SmbRandomAccessFile
+import jcifs.legacy.smb.SmbFile
+import jcifs.legacy.smb.SmbRandomAccessFile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

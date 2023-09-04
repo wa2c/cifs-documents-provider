@@ -21,8 +21,8 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
-import jcifs.smb.SmbFile
-import jcifs.smb.SmbRandomAccessFile
+import jcifs.legacy.smb.SmbFile
+import jcifs.legacy.smb.SmbRandomAccessFile
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 

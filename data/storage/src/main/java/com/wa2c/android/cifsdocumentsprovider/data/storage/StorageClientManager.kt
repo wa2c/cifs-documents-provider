@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 
@@ -18,6 +19,9 @@ class StorageClientManager(
     /** SMBJ client */
     private val smbjClient = lazy { SmbjClient(fileOpenLimit) }
 
+    /** JCIFS client */
+    private val jCifsClient = lazy { JCifsClient(fileOpenLimit) }
+
     /**
      * Get client
      */
@@ -25,6 +29,7 @@ class StorageClientManager(
         return when (type) {
             StorageType.JCIFS -> jCifsNgClient.value
             StorageType.SMBJ -> smbjClient.value
+            StorageType.JCIFS_LEGACY -> jCifsClient.value
         }
     }
 

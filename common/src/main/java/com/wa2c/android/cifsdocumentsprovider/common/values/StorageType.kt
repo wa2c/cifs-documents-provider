@@ -10,8 +10,8 @@ enum class StorageType(
     JCIFS("JCIFS"),
     /** SMBJ */
     SMBJ("SMBJ"),
-//    /** JCIFS */
-//    JCIFS_LEGACY("JCIFS_LEGACY"),
+    /** JCIFS */
+    JCIFS_LEGACY("JCIFS_LEGACY"),
     ;
 
     companion object {
