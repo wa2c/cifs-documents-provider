@@ -117,6 +117,7 @@ fun EditScreen(
     val scope = rememberCoroutineScope()
     val showDeleteDialog = remember { mutableStateOf(false) }
     val showBackConfirmationDialog = remember { mutableStateOf(false) }
+    val storageType = viewModel.storage.collectAsMutableState()
 
     selectedHost?.let { viewModel.host.value = selectedHost }
     selectedUri?.let { viewModel.folder.value = it.pathFragment }
@@ -124,7 +125,7 @@ fun EditScreen(
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
         nameState = viewModel.name.collectAsMutableState(),
-        storageState = viewModel.storage.collectAsMutableState(),
+        storageState = storageType,
         domainState = viewModel.domain.collectAsMutableState(),
         hostState = viewModel.host.collectAsMutableState(),
         portState = viewModel.port.collectAsMutableState(),
@@ -141,7 +142,7 @@ fun EditScreen(
             }
         },
         onClickDelete = { showDeleteDialog.value = true },
-        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+        safeTransferState = if (storageType.value == StorageType.JCIFS_LEGACY) null else viewModel.safeTransfer.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
         isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
@@ -263,7 +264,7 @@ private fun EditScreenContainer(
     passwordState: MutableState<String?>,
     anonymousState: MutableState<Boolean>,
     folderState: MutableState<String?>,
-    safeTransferState: MutableState<Boolean>,
+    safeTransferState: MutableState<Boolean>?,
     extensionState: MutableState<Boolean>,
     isBusy: Boolean,
     connectionResult: ConnectionResult?,
@@ -427,11 +428,13 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_option_title),
                     )
 
-                    InputCheck(
-                        title = stringResource(id = R.string.edit_option_safe_transfer_label),
-                        state = safeTransferState,
-                        focusManager = focusManager,
-                    )
+                    if (safeTransferState != null) {
+                        InputCheck(
+                            title = stringResource(id = R.string.edit_option_safe_transfer_label),
+                            state = safeTransferState,
+                            focusManager = focusManager,
+                        )
+                    }
 
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
