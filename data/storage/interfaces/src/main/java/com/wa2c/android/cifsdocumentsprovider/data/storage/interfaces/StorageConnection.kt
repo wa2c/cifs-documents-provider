@@ -35,7 +35,7 @@ data class StorageConnection(
 
     /** URI */
     val uri: String
-        get() = inputUri ?: getSmbUri(host, port, null, true)
+        get() = inputUri ?: getSmbUri(host, port, folder, true)
 
     /** Share name */
     val shareName: String

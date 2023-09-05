@@ -23,7 +23,14 @@
  */
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.util.concurrent.ArrayBlockingQueue
 import kotlin.coroutines.CoroutineContext
@@ -33,14 +40,14 @@ import kotlin.math.min
  * BackgroundBufferReader
  */
 class BackgroundBufferReader(
-    /** Coroutine context */
-    override val coroutineContext: CoroutineContext,
     /** Whole data Size */
     private val streamSize: Long,
     /** Buffer unit size */
     private val bufferSize: Int = DEFAULT_BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = DEFAULT_CAPACITY,
+    /** Coroutine context */
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + Job(),
     /** Background reading */
     private val readBackgroundAsync: CoroutineScope.(start: Long, array: ByteArray, off: Int, len: Int) -> Int
 ): Closeable, CoroutineScope {
@@ -60,7 +67,7 @@ class BackgroundBufferReader(
     /**
      * Reading cycle task
      */
-    private val readingCycleTask = launch(Dispatchers.IO) {
+    private val readingCycleTask = launch(coroutineContext) {
         logD("[CYCLE] Begin: streamSize=$streamSize, bufferSize=$bufferSize")
         var startPosition = 0L
         var currentCyclePosition = 0L
@@ -106,7 +113,7 @@ class BackgroundBufferReader(
      * @param readSize Read data size.
      */
     private fun readAsync(streamPosition: Long, readSize: Int): Deferred<DataBuffer> {
-        return async (Dispatchers.IO) {
+        return async (coroutineContext) {
             val data = ByteArray(readSize)
             val size = readBackgroundAsync(streamPosition, data, 0, readSize)
             val remain = readSize - size
@@ -179,7 +186,7 @@ class BackgroundBufferReader(
         } else {
             for (i in 0..queueCapacity) {
                 dataBufferQueue.take()?.takeIf { it != dummyQueueItem }?.let {
-                    runBlocking { try { it.await() } catch (e: Exception) { null } }?.let {
+                    runBlocking { it.await() }?.let {
                         logD("Next buffer: startPosition=${it.streamPosition}, length=${it.length} ")
                         currentDataBuffer = it
                         return it

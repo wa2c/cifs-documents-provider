@@ -35,8 +35,7 @@ internal class JCifsNgProxyFileCallbackSafe(
     private val onFileRelease: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + Job()
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
 
     /** File size */
     private val fileSize: Long by lazy {

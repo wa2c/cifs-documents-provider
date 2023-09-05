@@ -23,7 +23,12 @@
  */
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.nio.ByteBuffer
 import java.util.concurrent.ArrayBlockingQueue
@@ -33,16 +38,15 @@ import kotlin.coroutines.CoroutineContext
  * BackgroundBufferReader
  */
 class BackgroundBufferWriter(
-    /** Coroutine context */
-    override val coroutineContext: CoroutineContext,
     /** Buffer unit size */
     private val bufferSize: Int = DEFAULT_BUFFER_SIZE,
     /** Buffer queue capacity  */
     private val queueCapacity: Int = DEFAULT_CAPACITY,
+    /** Coroutine context */
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + Job(),
     /** Background writing */
     private val writeBackground: suspend CoroutineScope.(start: Long, array: ByteArray, off: Int, len: Int) -> Unit
 ): CoroutineScope, Closeable {
-
     /** Data buffer queue */
     private val dataBufferQueue = ArrayBlockingQueue<WriteDataBuffer>(queueCapacity)
     /** Current data buffer */
@@ -51,7 +55,7 @@ class BackgroundBufferWriter(
     /**
      * Writing cycle task
      */
-    private val writingCycleTask = async(Dispatchers.IO) {
+    private val writingCycleTask = async(coroutineContext) {
         logD("[CYCLE] Begin: bufferSize=$bufferSize")
         while (isActive) {
             try {

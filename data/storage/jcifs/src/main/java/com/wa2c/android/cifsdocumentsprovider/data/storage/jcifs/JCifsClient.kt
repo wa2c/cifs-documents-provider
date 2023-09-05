@@ -230,11 +230,7 @@ class JCifsClient constructor(
                 onFileRelease()
             }
 
-            if (dto.safeTransfer) {
-                JCifsProxyFileCallbackSafe(file, mode, release)
-            } else {
-                JCifsProxyFileCallback(file, mode, release)
-            }
+            JCifsProxyFileCallbackSafe(file, mode, release)
         }
     }
 

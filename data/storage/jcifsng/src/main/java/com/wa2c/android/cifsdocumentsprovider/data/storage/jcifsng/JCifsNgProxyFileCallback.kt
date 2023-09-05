@@ -41,8 +41,7 @@ internal class JCifsNgProxyFileCallback(
     private val onFileRelease: () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.IO + Job()
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
 
     /** File size */
     private val fileSize: Long by lazy {
@@ -65,7 +64,7 @@ internal class JCifsNgProxyFileCallback(
                 logD("Writer released")
             }
 
-            reader ?: BackgroundBufferReader(coroutineContext, fileSize) { start, array, off, len ->
+            reader ?: BackgroundBufferReader(fileSize) { start, array, off, len ->
                 smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
                     access.seek(start)
                     access.read(array, off, len)
@@ -85,9 +84,8 @@ internal class JCifsNgProxyFileCallback(
                 logD("Reader released")
             }
 
-            writer ?: BackgroundBufferWriter(coroutineContext) { start, array, off, len ->
-                (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE)
-                    .also { outputAccess = it }).let { access ->
+            writer ?: BackgroundBufferWriter { start, array, off, len ->
+                (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
                     access.seek(start)
                     access.write(array, off, len)
                 }
