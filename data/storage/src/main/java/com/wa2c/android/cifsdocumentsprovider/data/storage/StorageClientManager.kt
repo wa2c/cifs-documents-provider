@@ -38,7 +38,8 @@ class StorageClientManager(
      */
     suspend fun closeClient() {
         if (jCifsNgClient.isInitialized()) jCifsNgClient.value.close()
-        if (jCifsNgClient.isInitialized()) smbjClient.value.close()
+        if (smbjClient.isInitialized()) smbjClient.value.close()
+        if (jCifsClient.isInitialized()) jCifsClient.value.close()
     }
 
 }
