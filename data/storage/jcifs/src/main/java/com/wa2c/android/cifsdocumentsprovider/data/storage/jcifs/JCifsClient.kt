@@ -38,14 +38,8 @@ class JCifsClient constructor(
     /** Session cache */
     private val contextCache = object : LruCache<StorageConnection, NtlmPasswordAuthentication>(openFileLimit) {
         override fun entryRemoved(evicted: Boolean, key: StorageConnection?, oldValue: NtlmPasswordAuthentication?, newValue: NtlmPasswordAuthentication?) {
-
-            try {
-                logD("Session Disconnected: ${key?.name}")
-            } catch (e: Exception) {
-                logE(e)
-            }
             super.entryRemoved(evicted, key, oldValue, newValue)
-            logD("Session Removed: $key")
+            logD("NtlmPasswordAuthentication Removed: $key")
         }
     }
 
@@ -82,11 +76,11 @@ class JCifsClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(dto: StorageConnection, ignoreCache: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(connection: StorageConnection, ignoreCache: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val authentication = getAuthentication(dto, ignoreCache)
-                SmbFile(dto.uri, authentication).apply {
+                val authentication = getAuthentication(connection, ignoreCache)
+                SmbFile(connection.uri, authentication).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }
@@ -100,10 +94,10 @@ class JCifsClient constructor(
     /**
      * Check setting connectivity.
      */
-    override suspend fun checkConnection(dto: StorageConnection): ConnectionResult {
+    override suspend fun checkConnection(connection: StorageConnection): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getSmbFile(dto, true)?.list()
+                getSmbFile(connection, true)?.list()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -116,7 +110,7 @@ class JCifsClient constructor(
                     ConnectionResult.Failure(c)
                 }
             } finally {
-                contextCache.remove(dto)
+                contextCache.remove(connection)
             }
         }
     }
@@ -124,15 +118,15 @@ class JCifsClient constructor(
     /**
      * Get StorageFile
      */
-    override suspend fun getFile(dto: StorageConnection, ignoreCache: Boolean): StorageFile? {
-        return getSmbFile(dto, ignoreCache)?.toStorageFile()
+    override suspend fun getFile(connection: StorageConnection, ignoreCache: Boolean): StorageFile? {
+        return getSmbFile(connection, ignoreCache)?.toStorageFile()
     }
 
     /**
      * Get children StorageFile list
      */
-    override suspend fun getChildren(dto: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
-        val parent = getSmbFile(dto, ignoreCache) ?: return emptyList()
+    override suspend fun getChildren(connection: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
+        val parent = getSmbFile(connection, ignoreCache) ?: return emptyList()
         return parent.listFiles()?.mapNotNull {child ->
             child.toStorageFile()
         } ?: emptyList()
@@ -142,10 +136,10 @@ class JCifsClient constructor(
     /**
      * Create new StorageFile.
      */
-    override suspend fun createFile(dto: StorageConnection, mimeType: String?): StorageFile? {
+    override suspend fun createFile(connection: StorageConnection, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = dto.uri.optimizeUri(if (dto.extension) mimeType else null)
-            getSmbFile(dto.copy(inputUri = optimizedUri))?.let {
+            val optimizedUri = connection.uri.optimizeUri(if (connection.extension) mimeType else null)
+            getSmbFile(connection.copy(inputUri = optimizedUri))?.let {
                 if (optimizedUri.isDirectoryUri) {
                     // Directory
                     it.mkdir()
@@ -162,12 +156,12 @@ class JCifsClient constructor(
      * Copy StorageFile
      */
     override suspend fun copyFile(
-        sourceDto: StorageConnection,
-        targetDto: StorageConnection,
+        sourceConnection: StorageConnection,
+        targetConnection: StorageConnection,
     ): StorageFile? {
         return withContext(dispatcher) {
-            val source = getSmbFile(sourceDto) ?: return@withContext null
-            val target = getSmbFile(targetDto) ?: return@withContext null
+            val source = getSmbFile(sourceConnection) ?: return@withContext null
+            val target = getSmbFile(targetConnection) ?: return@withContext null
             source.copyTo(target)
             target.toStorageFile()
         }
@@ -177,12 +171,12 @@ class JCifsClient constructor(
      * Rename file
      */
     override suspend fun renameFile(
-        sourceDto: StorageConnection,
-        targetDto: StorageConnection,
+        sourceConnection: StorageConnection,
+        targetConnection: StorageConnection,
     ): StorageFile? {
         return withContext(dispatcher) {
-            val source = getSmbFile(sourceDto) ?: return@withContext null
-            val target = getSmbFile(targetDto) ?: return@withContext null
+            val source = getSmbFile(sourceConnection) ?: return@withContext null
+            val target = getSmbFile(targetConnection) ?: return@withContext null
             source.renameTo(target)
             target.toStorageFile()
         }
@@ -192,10 +186,10 @@ class JCifsClient constructor(
      * Delete file
      */
     override suspend fun deleteFile(
-        dto: StorageConnection,
+        connection: StorageConnection,
     ): Boolean {
         return withContext(dispatcher) {
-            getSmbFile(dto)?.delete() ?: return@withContext false
+            getSmbFile(connection)?.delete() ?: return@withContext false
             true
         }
     }
@@ -204,17 +198,17 @@ class JCifsClient constructor(
      * Move file
      */
     override suspend fun moveFile(
-        sourceDto: StorageConnection,
-        targetDto: StorageConnection,
+        sourceConnection: StorageConnection,
+        targetConnection: StorageConnection,
     ): StorageFile? {
         return withContext(dispatcher) {
-            if (sourceDto == targetDto) {
+            if (sourceConnection == targetConnection) {
                 // Same connection
-                renameFile(sourceDto, targetDto)
+                renameFile(sourceConnection, targetConnection)
             } else {
                 // Different connection
-                copyFile(sourceDto, targetDto)?.also {
-                    deleteFile(sourceDto)
+                copyFile(sourceConnection, targetConnection)?.also {
+                    deleteFile(sourceConnection)
                 }
             }
         }
@@ -223,9 +217,9 @@ class JCifsClient constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(dto: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getSmbFile(dto) ?: return@withContext null
+            val file = getSmbFile(connection) ?: return@withContext null
             val release = fun () {
                 onFileRelease()
             }
