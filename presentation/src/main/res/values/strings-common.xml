@@ -10,7 +10,8 @@
     <string name="enum_language_sk">Slovenský</string>
     <string name="enum_language_zh_rcn">简体中文</string>
 
-    <string name="enum_storage_jcifs">SMB (jcifs-ng)</string>
-    <string name="enum_storage_smbj">SMB (SMBJ)</string>
+    <string name="enum_storage_jcifsng">SMB2,3 (JCIFS-NG)</string>
+    <string name="enum_storage_smbj">SMB2,3 (SMBJ)</string>
+    <string name="enum_storage_jcifs">SMB1 (JCIFS)</string>
 
 </resources>

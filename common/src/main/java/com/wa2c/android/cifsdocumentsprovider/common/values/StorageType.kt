@@ -9,7 +9,10 @@ enum class StorageType(
     /** JCIFS-NG */
     JCIFS("JCIFS"),
     /** SMBJ */
-    SMBJ("SMBJ");
+    SMBJ("SMBJ"),
+    /** JCIFS */
+    JCIFS_LEGACY("JCIFS_LEGACY"),
+    ;
 
     companion object {
         val default: StorageType = JCIFS

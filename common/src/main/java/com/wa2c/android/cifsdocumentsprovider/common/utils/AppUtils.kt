@@ -78,8 +78,14 @@ val Uri.pathFragment: String
 /**
  * Get file name (last segment)
  */
+val String.fileName: String
+    get() = Uri.decode(lastPath).lastPath
+
+/**
+ * Get file name (last segment)
+ */
 val Uri.fileName: String
-    get() = Uri.decode(pathFragment.lastPath).lastPath
+    get() = pathFragment.fileName
 
 private val String.lastPath: String
     get() = run {

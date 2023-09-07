@@ -37,6 +37,9 @@ object Deps {
         const val parcelizePlugin = "kotlin-parcelize"
 
         const val documentFile = "androidx.documentfile:documentfile:1.0.1"
+
+        const val jarJarClaspath = "ru.tinkoff.gradle:jarjar:1.1.0"
+        const val jarJarPlugin = "ru.tinkoff.gradle.jarjar"
     }
 
     object Ui {
@@ -71,6 +74,8 @@ object Deps {
         const val kotlinxSerializationClasspath = "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         const val kotlinxSerializationJson = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 
+        const val jcifs = "jcifs:jcifs:1.3.17"
+        const val jcifsJar = "jcifs-1.3.17.jar"
         const val jcifsNg = "eu.agno3.jcifs:jcifs-ng:2.1.9"
         const val smbj = "com.hierynomus:smbj:0.11.5"
         const val smbjRpc = "com.rapid7.client:dcerpc:0.12.0"

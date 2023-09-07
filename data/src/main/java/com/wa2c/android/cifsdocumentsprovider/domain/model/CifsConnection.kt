@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -50,6 +49,27 @@ data class CifsConnection(
     companion object {
 
         const val NEW_ID = ""
+
+        fun CifsConnection.toDto(inputUri: String?): com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection {
+            return com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection(
+                id = id,
+                name = name,
+                storage = storage,
+                domain = domain,
+                host = host,
+                port = port,
+                enableDfs = enableDfs,
+                folder = folder,
+                user = user,
+                password = password,
+                anonymous = anonymous,
+                extension = extension,
+                safeTransfer = safeTransfer,
+
+                inputUri = inputUri,
+            )
+        }
+
 
         /**
          * Create from host

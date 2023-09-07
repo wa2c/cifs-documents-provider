@@ -85,6 +85,7 @@ val SendDataState.labelRes: Int
 val StorageType.labelRes: Int
     @StringRes
     get() = when (this) {
-        StorageType.JCIFS -> R.string.enum_storage_jcifs
+        StorageType.JCIFS -> R.string.enum_storage_jcifsng
         StorageType.SMBJ -> R.string.enum_storage_smbj
+        StorageType.JCIFS_LEGACY ->R.string.enum_storage_jcifs
     }

@@ -12,16 +12,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClientDto
-import com.wa2c.android.cifsdocumentsprovider.data.CifsClientInterface
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
-import com.wa2c.android.cifsdocumentsprovider.data.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
-import com.wa2c.android.cifsdocumentsprovider.data.smbj.SmbjClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.StorageClientManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection.Companion.toDto
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile.Companion.toModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -37,8 +37,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CifsRepository @Inject internal constructor(
-    private val jCifsClient: JCifsClient,
-    private val smbjClient: SmbjClient,
+    private val storageClientManager: StorageClientManager,
     private val appPreferences: AppPreferencesDataStore,
     private val connectionSettingDao: ConnectionSettingDao,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
@@ -52,16 +51,16 @@ class CifsRepository @Inject internal constructor(
     }
 
     /** File blocking queue */
-    private val fileBlockingQueue = ArrayBlockingQueue<CifsClientDto>(appPreferences.openFileLimitFlow.getFirst())
-    private fun addBlockingQueue(dto: CifsClientDto) {
+    private val fileBlockingQueue = ArrayBlockingQueue<StorageConnection>(appPreferences.openFileLimitFlow.getFirst())
+    private fun addBlockingQueue(dto: StorageConnection) {
         fileBlockingQueue.put(dto)
         logD("Queue added: size=${fileBlockingQueue.count()}")
     }
-    private fun removeBlockingQueue(dto: CifsClientDto) {
+    private fun removeBlockingQueue(dto: StorageConnection) {
         fileBlockingQueue.remove(dto)
         logD("Queue removed: size=${fileBlockingQueue.count()}")
     }
-    private suspend fun <T> runFileBlocking(dto: CifsClientDto, process: suspend () -> T): T {
+    private suspend fun <T> runFileBlocking(dto: StorageConnection, process: suspend () -> T): T {
         return try {
             addBlockingQueue(dto)
             process()
@@ -70,11 +69,8 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    private fun getClient(dto: CifsClientDto): CifsClientInterface {
-        return when (dto.connection.storage) {
-            StorageType.JCIFS -> jCifsClient
-            StorageType.SMBJ -> smbjClient
-        }
+    private fun getClient(dto: StorageConnection): StorageClient {
+        return storageClientManager.getClient(dto.storage)
     }
 
     suspend fun isConnectionExists(): Boolean {
@@ -144,10 +140,10 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get connection from URI
      */
-    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): CifsClientDto? {
+    private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): StorageConnection? {
         return  withContext(dispatcher) {
-            connection?.let { CifsClientDto(connection, uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { CifsClientDto(it, uriText) }
+            connection?.let { connection.toDto(uriText) } ?: uriText?.let { uri ->
+                connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { it.toDto(uriText) }
             }
         }
     }
@@ -181,7 +177,7 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext null
             runFileBlocking(dto) {
-                getClient(dto).getFile(dto)
+                getClient(dto).getFile(dto)?.toModel()
             }
         }
     }
@@ -194,7 +190,7 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri, connection) ?: return@withContext emptyList()
             runFileBlocking(dto) {
-                getClient(dto).getChildren(dto)
+                getClient(dto).getChildren(dto).map { it.toModel() }
             }
         }
     }
@@ -207,7 +203,7 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
             runFileBlocking(dto) {
-                getClient(dto).createFile(dto, mimeType)
+                getClient(dto).createFile(dto, mimeType)?.toModel()
             }
         }
     }
@@ -240,7 +236,7 @@ class CifsRepository @Inject internal constructor(
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             runFileBlocking(sourceDto) {
                 runFileBlocking(targetDto) {
-                    getClient(sourceDto).renameFile(sourceDto, targetDto)
+                    getClient(sourceDto).renameFile(sourceDto, targetDto)?.toModel()
                 }
             }
         }
@@ -256,7 +252,7 @@ class CifsRepository @Inject internal constructor(
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             runFileBlocking(sourceDto) {
                 runFileBlocking(targetDto) {
-                    getClient(sourceDto).copyFile(sourceDto, targetDto)
+                    getClient(sourceDto).copyFile(sourceDto, targetDto)?.toModel()
                 }
             }
         }
@@ -272,7 +268,7 @@ class CifsRepository @Inject internal constructor(
             val targetDto = getClientDto(targetUri) ?: return@withContext null
             runFileBlocking(sourceDto) {
                 runFileBlocking(targetDto) {
-                    getClient(sourceDto).moveFile(sourceDto, targetDto)
+                    getClient(sourceDto).moveFile(sourceDto, targetDto)?.toModel()
                 }
             }
         }
@@ -284,7 +280,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(dispatcher) {
-            val dto = CifsClientDto(connection)
+            val dto = connection.toDto(null)
             runFileBlocking(dto) {
                 getClient(dto).checkConnection(dto)
             }
@@ -319,8 +315,7 @@ class CifsRepository @Inject internal constructor(
         logD("closeAllSessions")
         withContext(dispatcher) {
             fileBlockingQueue.clear()
-            jCifsClient.close()
-            smbjClient.close()
+            storageClientManager.closeClient()
         }
     }
 
