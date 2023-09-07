@@ -53,6 +53,6 @@ dependencies {
     testImplementation(Deps.Test.junit)
 }
 
-jarJar {
-    rules = mapOf(Deps.Data.jcifsJar to "jcifs.** jcifs.legacy.@1")
-}
+//jarJar {
+//    rules = mapOf(Deps.Data.jcifsJar to "jcifs.** jcifs.legacy.@1")
+//}
