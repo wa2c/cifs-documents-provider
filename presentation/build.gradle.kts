@@ -52,40 +52,41 @@ dependencies {
 
     // App
 
-    implementation(Deps.App.core)
-    implementation(Deps.App.appcompat)
-    implementation(Deps.App.coroutine)
-    implementation(Deps.App.daggerHilt)
-    kapt(Deps.App.daggerHiltCompiler)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+
 
     // UI
 
     // Compose
-    val composeBom = platform(Deps.Ui.composeBom)
+    val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
     testImplementation(composeBom)
     androidTestImplementation(composeBom)
-    implementation(Deps.Ui.composeUi)
-    implementation(Deps.Ui.composeMaterial)
-    implementation(Deps.Ui.composeUiPreview)
-    debugImplementation(Deps.Ui.composeUiTooling)
-    implementation(Deps.Ui.composeReorderable)
-    implementation(Deps.Ui.systemUiController)
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+    implementation(libs.reorderable)
+    implementation(libs.accompanist.systemuicontroller)
     // Lifecycle
-    implementation(Deps.Ui.lifecycleViewModelCompose)
-    implementation(Deps.Ui.lifecycleRuntimeCompose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     // Navigation
-    implementation(Deps.Ui.navigationCompose)
-    implementation(Deps.Ui.navigationComposeHilt)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     // Util
 
     // OSS License
-    implementation(Deps.Util.license)
-    implementation(Deps.Util.licenseCompose)
+    implementation(libs.aboutlibraries)
+    implementation(libs.aboutlibraries.compose)
 
     // Test
 
-    testImplementation(Deps.Test.junit)
-    androidTestImplementation(Deps.Test.junitExt)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
 }

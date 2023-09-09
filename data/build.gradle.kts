@@ -58,28 +58,27 @@ dependencies {
 
     // App
 
-    implementation(Deps.App.core)
-    implementation(Deps.App.appcompat)
-    implementation(Deps.App.coroutine)
-    implementation(Deps.App.daggerHilt)
-    kapt(Deps.App.daggerHiltCompiler)
-    implementation(Deps.App.documentFile)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.documentfile)
 
     // Data
 
     // Room
-    kapt(Deps.Data.roomCompiler)
-    implementation(Deps.Data.roomKtx)
-    implementation(Deps.Data.roomPaging)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
     // DataStore
-    implementation(Deps.Data.dataStore)
+    implementation(libs.androidx.datastore.preferences)
     // Json
-    implementation(Deps.Data.kotlinxSerializationJson)
+    implementation(libs.kotlinx.serialization.json)
     // Android Network Tools
-    implementation(Deps.Data.networkTools)
+    implementation(libs.androidnetworktools)
 
     // Test
 
-    testImplementation(Deps.Test.junit)
-    androidTestImplementation(Deps.Test.junitExt)
+    testImplementation(libs.junit)
 }

@@ -40,11 +40,11 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage:interfaces"))
 
-    implementation(Deps.App.coroutine)
+    implementation(libs.kotlinx.coroutines.android)
 
-    implementation(Deps.Data.smbj)
-    implementation(Deps.Data.smbjRpc)
-    implementation(Deps.Data.guava) // to avoid conflict
+    implementation(libs.smbj)
+    implementation(libs.dcerpc)
+    implementation(libs.listenablefuture) // to avoid conflict
 
-    testImplementation(Deps.Test.junit)
+    testImplementation(libs.junit)
 }

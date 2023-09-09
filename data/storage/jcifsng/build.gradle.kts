@@ -40,8 +40,8 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage:interfaces"))
 
-    implementation(Deps.App.coroutine)
-    implementation(Deps.Data.jcifsNg)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.jcifs.ng)
 
-    testImplementation(Deps.Test.junit)
+    testImplementation(libs.junit)
 }

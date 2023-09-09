@@ -48,9 +48,9 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":data"))
 
-    implementation(Deps.App.appcompat)
-    implementation(Deps.App.daggerHilt)
-    kapt(Deps.App.daggerHiltCompiler)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 }
 
 kapt {

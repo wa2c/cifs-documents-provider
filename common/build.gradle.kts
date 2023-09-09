@@ -36,6 +36,6 @@ android {
 }
 
 dependencies {
-    implementation(Deps.App.coroutine)
-    implementation(Deps.Util.timber)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.timber)
 }

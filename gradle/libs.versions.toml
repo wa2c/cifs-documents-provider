@@ -1,0 +1,69 @@
+[versions]
+aboutlibraries = "10.8.3"
+accompanistSystemuicontroller = "0.30.1"
+androidnetworktools = "0.4.5.3"
+androidx-junit = "1.1.5"
+appcompat = "1.6.1"
+androidxComposeBom = "2023.06.01"
+core-ktx = "1.10.1"
+datastorePreferences = "1.0.0"
+dcerpc = "0.12.0"
+documentfile = "1.0.1"
+hilt-android = "2.47"
+hiltNavigationCompose = "1.0.0"
+jcifs = "1.3.17"
+jcifsNg = "2.1.9"
+junit = "4.13.2"
+kotlinxCoroutinesAndroid = "1.7.3"
+kotlinxSerializationJson = "1.5.1"
+lifecycleRuntimeCompose = "2.6.1"
+lifecycleViewmodelCompose = "2.6.1"
+listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
+material3 = "1.1.1"
+navigationCompose = "2.6.0"
+reorderable = "0.9.6"
+roomCompiler = "2.5.2"
+smbj = "0.11.5"
+timber = "4.7.1"
+ui = "1.3.3"
+uiToolingPreview = "1.3.3"
+
+[libraries]
+aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutlibraries" }
+aboutlibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlibraries" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
+androidnetworktools = { module = "com.github.stealthcopter:androidnetworktools", version.ref = "androidnetworktools" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
+androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomCompiler" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomCompiler" }
+androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+dcerpc = { module = "com.rapid7.client:dcerpc", version.ref = "dcerpc" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
+jcifs =  { module = "jcifs:jcifs", version.ref = "jcifs" }
+jcifs-ng = { module = "eu.agno3.jcifs:jcifs-ng", version.ref = "jcifsNg" }
+junit = { module = "junit:junit", version.ref = "junit" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+listenablefuture = { module = "com.google.guava:listenablefuture", version.ref = "listenablefuture" }
+reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
+smbj = { module = "com.hierynomus:smbj", version.ref = "smbj" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+
+[plugins]
+
+[bundles]
+

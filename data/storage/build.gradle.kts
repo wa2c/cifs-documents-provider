@@ -43,7 +43,7 @@ dependencies {
     implementation(project(":data:storage:jcifsng"))
     implementation(project(":data:storage:smbj"))
 
-    implementation(Deps.App.coroutine)
+    implementation(libs.kotlinx.coroutines.android)
 
-    testImplementation(Deps.Test.junit)
+    testImplementation(libs.junit)
 }

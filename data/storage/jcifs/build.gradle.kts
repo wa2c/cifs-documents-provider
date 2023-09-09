@@ -42,7 +42,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":data:storage:interfaces"))
 
-    implementation(Deps.App.coroutine)
+    implementation(libs.kotlinx.coroutines.android)
 
     // rename package name (avoid conflict with jcifs-ng)
     // TODO fix build dependency (copy generated jar file in lib directory until resolved)
@@ -50,7 +50,7 @@ dependencies {
     // implementation(fileTree(mapOf("dir" to "./build/libs", "include" to arrayOf("*.jar"))))
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
 
-    testImplementation(Deps.Test.junit)
+    testImplementation(libs.junit)
 }
 
 //jarJar {
