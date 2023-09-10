@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    compileSdk = Deps.compileSdkVersion
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
     namespace = "${Deps.namespaceBase}.data.storage.jcifs"
 
     defaultConfig {
-        minSdk = Deps.minSdkVersion
+        minSdk = libs.versions.androidMinSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

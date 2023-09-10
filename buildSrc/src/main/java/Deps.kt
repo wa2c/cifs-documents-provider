@@ -92,10 +92,5 @@ object Deps {
         const val licenseCompose = "com.mikepenz:aboutlibraries-compose:${licenseVersion}"
     }
 
-    object Test {
-        const val junit = "junit:junit:4.13.2"
-        const val junitExt = "androidx.test.ext:junit:1.1.5"
-        const val espressoCore = "androidx.test.espresso:espresso-core:3.5.1"
-    }
 
 }

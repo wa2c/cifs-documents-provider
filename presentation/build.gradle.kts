@@ -1,18 +1,25 @@
 plugins {
-    id(Deps.App.libraryPlugin)
+    id("com.android.library")
     id(Deps.App.kotlinAndroidPlugin)
-    id(Deps.App.kotlinKaptPlugin)
+    //id(Deps.App.kotlinKaptPlugin)
+    //kotlin("kapt") version "1.9.10"
+    alias(libs.plugins.kapt)
     id(Deps.App.daggerHiltPlugin)
+    //alias(libs.plugins.hilt.android)
+    //id("com.google.dagger.hilt.android") version "2.44" apply false
     id(Deps.App.parcelizePlugin)
-    id(Deps.Util.licensePlugin)
+    //id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.20-Beta"
+    //alias(libs.plugins.parcelize)
+    alias(libs.plugins.aboutlibraries)
+
 }
 
 android {
-    compileSdk = Deps.compileSdkVersion
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
     namespace = "${Deps.namespaceBase}.presentation"
 
-    defaultConfig {
-        minSdk = Deps.minSdkVersion
+        defaultConfig {
+        minSdk = libs.versions.androidMinSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

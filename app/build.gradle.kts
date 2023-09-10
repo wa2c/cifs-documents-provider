@@ -1,12 +1,16 @@
 plugins {
     id(Deps.App.appPlugin)
     id(Deps.App.kotlinAndroidPlugin)
-    id(Deps.App.kotlinKaptPlugin)
+    //id(Deps.App.kotlinKaptPlugin)
+    //kotlin("kapt") version "1.9.10"
+    alias(libs.plugins.kapt)
     id(Deps.App.daggerHiltPlugin)
+    //alias(libs.plugins.hilt.android)
+    //id("com.google.dagger.hilt.android") version "2.44" apply false
 }
 
 android {
-    compileSdk = Deps.compileSdkVersion
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
     compileOptions {
         sourceCompatibility = Deps.javaVersionEnum
         targetCompatibility = Deps.javaVersionEnum
@@ -15,8 +19,8 @@ android {
 
     defaultConfig {
         applicationId = Deps.namespaceBase
-        minSdk = Deps.minSdkVersion
-        targetSdk = Deps.targetSdkVersion
+        minSdk = libs.versions.androidMinSdk.get().toInt()
+        targetSdk = libs.versions.androidCompileSdk.get().toInt()
         versionCode = 20
         versionName = "1.8.0"
 
