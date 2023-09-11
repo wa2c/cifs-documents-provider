@@ -8,17 +8,17 @@ plugins {
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
     compileOptions {
-        sourceCompatibility = Deps.javaVersionEnum
-        targetCompatibility = Deps.javaVersionEnum
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    namespace = Deps.namespaceBase
+    namespace =   Deps.namespaceBase
 
     defaultConfig {
         applicationId = Deps.namespaceBase
         minSdk = libs.versions.androidMinSdk.get().toInt()
         targetSdk = libs.versions.androidCompileSdk.get().toInt()
-        versionCode = 20
-        versionName = "1.8.0"
+        versionCode = libs.versions.appVersionCode.get().toInt()
+        versionName = libs.versions.appVersionName.get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -37,7 +37,7 @@ android {
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
         }
     }
 }

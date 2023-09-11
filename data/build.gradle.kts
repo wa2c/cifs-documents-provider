@@ -36,13 +36,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = Deps.javaVersionEnum
-        targetCompatibility = Deps.javaVersionEnum
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
         }
     }
 

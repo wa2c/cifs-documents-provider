@@ -25,13 +25,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = Deps.javaVersionEnum
-        targetCompatibility = Deps.javaVersionEnum
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(Deps.javaVersion))
+            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
         }
     }
 
@@ -42,7 +42,7 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
-    // Used package renamed JCIFS jar file (TODO: change package name from original library on build)
+    // Used package renamed JCIFS jar file (TODO: change package name from original library on build. (e.g. jarjar, shadowJar))
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
 
     testImplementation(libs.junit)
