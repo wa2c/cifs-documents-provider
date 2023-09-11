@@ -1,25 +1,10 @@
 plugins {
-    id(Deps.App.libraryPlugin)
-    //alias(libs.plugins.android.application) apply false
-    id(Deps.App.kotlinAndroidPlugin)
-    //id(Deps.App.kotlinKaptPlugin)
-    //kotlin("kapt") version "1.9.10"
-    //id("org.jetbrains.kotlin.kapt") version "1.8.20"
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
-    //alias(libs.plugins.kapt)
-    //alias(libs.plugins.)
-//    id("dagger.hilt.android.plugin")
-    //id("com.google.dagger.hilt.android") version "2.44" apply false
-    //alias(libs.plugins.hilt.android) apply false
-    id(Deps.App.daggerHiltPlugin)
-    alias(libs.plugins.parcelize)
-    //id(Deps.Data.kotlinParcelizePlugin)
-    //id(Deps.Data.kotlinSerializationPlugin)
-    //kotlin("jvm") version "1.9.0"
-    //kotlin("plugin.serialization") version "1.9.0"
-    //`kotlin-dsl`
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
-    //id("org.jetbrains.kotlin.plugin.serialization") version "1.8.20"
 }
 
 android {

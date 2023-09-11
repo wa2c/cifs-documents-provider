@@ -1,12 +1,8 @@
 plugins {
-    id(Deps.App.appPlugin)
-    id(Deps.App.kotlinAndroidPlugin)
-    //id(Deps.App.kotlinKaptPlugin)
-    //kotlin("kapt") version "1.9.10"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
-    id(Deps.App.daggerHiltPlugin)
-    //alias(libs.plugins.hilt.android)
-    //id("com.google.dagger.hilt.android") version "2.44" apply false
+    alias(libs.plugins.hilt.android)
 }
 
 android {

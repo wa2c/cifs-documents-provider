@@ -1,15 +1,9 @@
 plugins {
-    id("com.android.library")
-    id(Deps.App.kotlinAndroidPlugin)
-    //id(Deps.App.kotlinKaptPlugin)
-    //kotlin("kapt") version "1.9.10"
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
-    id(Deps.App.daggerHiltPlugin)
-    //alias(libs.plugins.hilt.android)
-    //id("com.google.dagger.hilt.android") version "2.44" apply false
-    id(Deps.App.parcelizePlugin)
-    //id("org.jetbrains.kotlin.plugin.parcelize") version "1.9.20-Beta"
-    //alias(libs.plugins.parcelize)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.aboutlibraries)
 
 }

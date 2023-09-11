@@ -1,9 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 plugins {
-    //kotlin("kapt") version "1.9.10"
-    alias(libs.plugins.kapt)
-    //id("com.google.devtools.ksp") version "1.8.10-1.0.9" apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.kapt) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.aboutlibraries) apply false
+    alias(libs.plugins.hilt.android) apply false
 }
 
 buildscript {
@@ -14,14 +19,7 @@ buildscript {
         maven(url="https://plugins.gradle.org/m2/")
     }
     dependencies {
-        classpath(libs.gradle)
-        classpath(libs.kotlin.gradle.plugin)
-        classpath(libs.hilt.android.gradle.plugin)
-        classpath(libs.jarjar)
-
-        //classpath(libs.kotlin.serialization)
-        //classpath(libs.aboutlibraries.plugin)
-
+        //classpath(libs.jarjar)
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -32,6 +30,7 @@ allprojects {
         google()
         mavenCentral()
         maven(url = "https://jitpack.io")
+        maven(url = "https://plugins.gradle.org/m2/")
     }
 }
 

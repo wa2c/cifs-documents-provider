@@ -1,7 +1,6 @@
 plugins {
-    id(Deps.App.libraryPlugin)
-    id(Deps.App.kotlinAndroidPlugin)
-    id(Deps.App.jarJarPlugin)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
@@ -43,16 +42,8 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
-
-    // rename package name (avoid conflict with jcifs-ng)
-    // TODO fix build dependency (copy generated jar file in lib directory until resolved)
-    // jarJar(Deps.Data.jcifs)
-    // implementation(fileTree(mapOf("dir" to "./build/libs", "include" to arrayOf("*.jar"))))
+    // Used package renamed JCIFS jar file (TODO: change package name from original library on build)
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
 
     testImplementation(libs.junit)
 }
-
-//jarJar {
-//    rules = mapOf(Deps.Data.jcifsJar to "jcifs.** jcifs.legacy.@1")
-//}
