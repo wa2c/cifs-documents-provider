@@ -11,6 +11,7 @@ import androidx.room.RoomDatabase
         ConnectionSettingEntity::class,
     ],
     version = AppDatabase.DB_VERSION,
+    exportSchema = true,
     autoMigrations = [
         AutoMigration (from = 1, to = 2)
     ]

@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
@@ -22,10 +23,8 @@ android {
 
         buildConfigField("String", "K", "\"com.wa2c.android\"")
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
-            }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -72,8 +71,7 @@ dependencies {
 
     // Room
     implementation(libs.androidx.room.runtime)
-    //annotationProcessor(libs.androidx.room.compiler)
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.room.paging)
     // DataStore

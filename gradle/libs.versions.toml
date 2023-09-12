@@ -24,6 +24,7 @@ junit = "4.13.2"
 kotlin = "1.8.20"
 kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.5.1"
+ksp = "1.8.20-1.0.11"
 lifecycle = "2.6.2"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
 material3 = "1.1.1"
@@ -80,6 +81,7 @@ android-application = { id = "com.android.application", version.ref = "gradle" }
 android-library = { id = "com.android.library", version.ref = "gradle" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
