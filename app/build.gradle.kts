@@ -10,12 +10,11 @@ val javaVersion: JavaVersion by rootProject.extra
 
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    javaVersion.majorVersion
+    namespace = applicationId
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-    namespace = applicationId
 
     defaultConfig {
         applicationId = applicationId

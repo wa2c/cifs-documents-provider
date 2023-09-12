@@ -16,7 +16,7 @@ android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
     namespace = "${applicationId}.presentation"
 
-        defaultConfig {
+    defaultConfig {
         minSdk = libs.versions.androidMinSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -1,22 +1,22 @@
 [versions]
 appVersionName = "1.8.0"
 appVersionCode = "20"
-androidCompileSdk = "33"
+androidCompileSdk = "34"
 androidMinSdk = "26"
 
-androidGradlePlugin = "8.1.0"
 aboutlibraries = "10.8.3"
 accompanistSystemuicontroller = "0.30.1"
 androidnetworktools = "0.4.5.3"
-androidx-junit = "1.1.5"
+androidxJunit = "1.1.5"
+androixUi = "1.5.1"
 appcompat = "1.6.1"
-androidxComposeBom = "2023.06.01"
-core-ktx = "1.10.1"
+androidxComposeBom = "2023.09.00"
+coreKtx = "1.12.0"
 datastorePreferences = "1.0.0"
 dcerpc = "0.12.0"
 documentfile = "1.0.1"
-gradle = "8.1.0"
-hilt-android = "2.47"
+gradle = "8.1.1"
+hiltAndroid = "2.47"
 hiltNavigationCompose = "1.0.0"
 jcifs = "1.3.17"
 jcifsNg = "2.1.9"
@@ -24,18 +24,14 @@ junit = "4.13.2"
 kotlin = "1.8.20"
 kotlinxCoroutinesAndroid = "1.7.3"
 kotlinxSerializationJson = "1.5.1"
-lifecycleRuntimeCompose = "2.6.1"
-lifecycleViewmodelCompose = "2.6.1"
+lifecycle = "2.6.2"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
 material3 = "1.1.1"
-navigationCompose = "2.6.0"
+navigationCompose = "2.7.2"
 reorderable = "0.9.6"
-roomCompiler = "2.5.2"
-roomRuntime = "2.5.0"
+room = "2.5.2"
 smbj = "0.11.5"
 timber = "4.7.1" # TODO: Update after supporting Kotlin static call
-ui = "1.3.3"
-uiToolingPreview = "1.3.3"
 
 [libraries]
 aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutlibraries" }
@@ -44,29 +40,29 @@ aboutlibraries-plugin = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibr
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 androidnetworktools = { module = "com.github.stealthcopter:androidnetworktools", version.ref = "androidnetworktools" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
-androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "core-ktx" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
-androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
-androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-safe-args-gradle-plugin", version.ref = "navigationCompose" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
-androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomCompiler" }
-androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomCompiler" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
-androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
-androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingPreview" }
-androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "androixUi" }
+androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androixUi" }
+androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "androixUi" }
 dcerpc = { module = "com.rapid7.client:dcerpc", version.ref = "dcerpc" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt-android" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt-android" }
-hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt-android" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
+hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroid" }
 jcifs =  { module = "jcifs:jcifs", version.ref = "jcifs" }
 jcifs-ng = { module = "eu.agno3.jcifs:jcifs-ng", version.ref = "jcifsNg" }
 junit = { module = "junit:junit", version.ref = "junit" }
@@ -80,11 +76,11 @@ smbj = { module = "com.hierynomus:smbj", version.ref = "smbj" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 [plugins]
-android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+android-application = { id = "com.android.application", version.ref = "gradle" }
+android-library = { id = "com.android.library", version.ref = "gradle" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt-android" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
