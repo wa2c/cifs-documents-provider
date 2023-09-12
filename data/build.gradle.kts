@@ -7,9 +7,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+val applicationId: String by rootProject.extra
+val javaVersion: JavaVersion by rootProject.extra
+
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    namespace = "${Deps.namespaceBase}.data"
+    namespace = "${applicationId}.data"
 
     defaultConfig {
         minSdk = libs.versions.androidMinSdk.get().toInt()
@@ -36,8 +39,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
 
     kotlin {

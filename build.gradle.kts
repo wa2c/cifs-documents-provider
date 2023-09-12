@@ -1,5 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+// Global Definition
+val applicationId by extra ("com.wa2c.android.cifsdocumentsprovider")
+val javaVersion by extra (JavaVersion.VERSION_17)
+
 plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.android.application) apply false

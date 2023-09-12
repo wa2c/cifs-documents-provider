@@ -5,16 +5,19 @@ plugins {
     alias(libs.plugins.hilt.android)
 }
 
+val applicationId: String by rootProject.extra
+val javaVersion: JavaVersion by rootProject.extra
+
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = javaVersion
+        targetCompatibility = javaVersion
     }
-    namespace =   Deps.namespaceBase
+    namespace = applicationId
 
     defaultConfig {
-        applicationId = Deps.namespaceBase
+        applicationId = applicationId
         minSdk = libs.versions.androidMinSdk.get().toInt()
         targetSdk = libs.versions.androidCompileSdk.get().toInt()
         versionCode = libs.versions.appVersionCode.get().toInt()
