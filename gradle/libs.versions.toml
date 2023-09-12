@@ -1,10 +1,8 @@
 [versions]
 appVersionName = "1.8.0"
 appVersionCode = "20"
-
 androidCompileSdk = "33"
 androidMinSdk = "26"
-java = "17"
 
 androidGradlePlugin = "8.1.0"
 aboutlibraries = "10.8.3"

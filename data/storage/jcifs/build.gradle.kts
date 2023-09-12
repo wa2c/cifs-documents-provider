@@ -34,7 +34,7 @@ android {
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
+            languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
 

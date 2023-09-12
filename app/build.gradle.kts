@@ -10,6 +10,7 @@ val javaVersion: JavaVersion by rootProject.extra
 
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    javaVersion.majorVersion
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
@@ -40,7 +41,7 @@ android {
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(libs.versions.java.get().toInt()))
+            languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
 }
