@@ -1,6 +1,6 @@
 [versions]
-appVersionName = "1.8.0"
-appVersionCode = "20"
+appVersionName = "1.9.0"
+appVersionCode = "21"
 androidCompileSdk = "34"
 androidMinSdk = "26"
 
