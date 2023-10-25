@@ -25,6 +25,13 @@ allprojects {
     }
 }
 
+// For relocate JCIFS packages (fix if other way exists)
+buildscript {
+    dependencies {
+        classpath(libs.jarjar)
+    }
+}
+
 task("clean", Delete::class) {
     delete = setOf(rootProject.buildDir)
 }

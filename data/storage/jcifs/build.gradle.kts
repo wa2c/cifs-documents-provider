@@ -1,6 +1,9 @@
+import ru.tinkoff.gradle.jarjar.task.JarJarTask
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id(libs.plugins.jarjar.get().pluginId)
 }
 
 val applicationId: String by rootProject.extra
@@ -45,8 +48,17 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
-    // Used package renamed JCIFS jar file (TODO: change package name from original library on build. (e.g. jarjar, shadowJar))
-    implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
+
+    // JCIFS relocation
+    jarJar(libs.jcifs.legacy)
+    implementation(fileTree(mapOf("dir" to "build/libs", "include" to arrayOf("*.jar"))))
 
     testImplementation(libs.junit)
+}
+
+// relocate JCIFS
+tasks.withType<JarJarTask>().configureEach {
+    jarJar.jarJarDependency = libs.jcifs.legacy.get().toString()
+    jarJar.rules = mapOf(libs.jcifs.legacy.get().let { "${it.name}-${it.version}.jar" } to "jcifs.** jcifs.legacy.@1")
+    dependsOn("copyDebugJniLibsProjectAndLocalJars")
 }
