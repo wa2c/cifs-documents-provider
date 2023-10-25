@@ -60,6 +60,12 @@ internal class AppPreferencesDataStore @Inject constructor(
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = dataStore.setValue(PREFKEY_USE_AS_LOCAL, value)
 
+    /** Use foreground service to make the app resilient to closing by Android OS */
+    val useForegroundServiceFlow: Flow<Boolean> = dataStore.data.map { it[PREFKEY_USE_FOREGROUND_SERVICE] ?: false }
+
+    /** Use foreground service to make the app resilient to closing by Android OS */
+    suspend fun setUseForegroundService(value: Boolean) = dataStore.setValue(PREFKEY_USE_FOREGROUND_SERVICE, value)
+
     /** Temporary connection */
     val temporaryConnectionJsonFlow: Flow<String?> = dataStore.data.map { it[PREFKEY_TEMPORARY_CONNECTION_JSON]?.let { ConnectionUtils.decrypt(it) } }
 
@@ -98,6 +104,7 @@ internal class AppPreferencesDataStore @Inject constructor(
         private val PREFKEY_UI_THEME = stringPreferencesKey("prefkey_ui_theme")
         private val PREFKEY_OPEN_FILE_LIMIT = intPreferencesKey("prefkey_open_file_limit")
         private val PREFKEY_USE_AS_LOCAL = booleanPreferencesKey("prefkey_use_as_local")
+        private val PREFKEY_USE_FOREGROUND_SERVICE = booleanPreferencesKey("prefkey_use_foreground_service")
         private val PREFKEY_TEMPORARY_CONNECTION_JSON = stringPreferencesKey("prefkey_temporary_connection_json")
     }
 
