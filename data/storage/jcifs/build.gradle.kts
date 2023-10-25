@@ -57,8 +57,13 @@ dependencies {
 }
 
 // relocate JCIFS
-tasks.withType<JarJarTask>().configureEach {
+tasks.withType<JarJarTask> {
     jarJar.jarJarDependency = libs.jcifs.legacy.get().toString()
     jarJar.rules = mapOf(libs.jcifs.legacy.get().let { "${it.name}-${it.version}.jar" } to "jcifs.** jcifs.legacy.@1")
-    dependsOn("copyDebugJniLibsProjectAndLocalJars")
+}
+
+tasks.configureEach {
+    if (name == "copyDebugJniLibsProjectAndLocalJars") {
+        mustRunAfter("preJarJar")
+    }
 }
