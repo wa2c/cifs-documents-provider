@@ -22,6 +22,7 @@ allprojects {
         mavenCentral()
         maven(url = "https://jitpack.io")
         maven(url = "https://plugins.gradle.org/m2/")
+        maven(url = "https://repo.opennms.org/maven2/") // for jCIFS
     }
 }
 

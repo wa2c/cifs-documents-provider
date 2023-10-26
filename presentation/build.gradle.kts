@@ -51,6 +51,10 @@ android {
 
 }
 
+aboutLibraries {
+    configPath = "config"
+}
+
 dependencies {
     implementation(project(":common"))
     implementation(project(":data"))
