@@ -38,6 +38,12 @@ android {
         }
     }
 
+    signingConfigs  {
+        getByName("debug") {
+            storeFile = file("$rootDir/debug.keystore")
+        }
+    }
+
     kotlin {
         jvmToolchain {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
