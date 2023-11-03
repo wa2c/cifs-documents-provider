@@ -13,6 +13,8 @@ import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -22,12 +24,13 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.PresentationModule
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.service.ProviderService
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import java.nio.file.Paths
+import java.util.UUID
 
 /**
  * CIFS DocumentsProvider
@@ -36,8 +39,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Context */
     private val providerContext: Context by lazy { context!! }
+
     /** Storage Manager */
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
+
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
         val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
@@ -174,7 +179,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            cifsRepository.getCallback(uri, accessMode)
+            val name = uri.fileName
+            val fileOpenId = generateUUID()
+            cifsRepository.getCallback(uri, accessMode) {
+                ProviderService.stop(providerContext, fileOpenId)
+            }.also {
+                ProviderService.start(providerContext, fileOpenId, name)
+            }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
@@ -247,6 +258,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun shutdown() {
         logD("shutdown")
         runOnFileHandler { cifsRepository.closeAllSessions() }
+        ProviderService.close(providerContext)
         fileHandler.looper.quit()
     }
 

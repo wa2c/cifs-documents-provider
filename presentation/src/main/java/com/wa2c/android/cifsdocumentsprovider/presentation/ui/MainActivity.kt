@@ -17,7 +17,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
-import com.wa2c.android.cifsdocumentsprovider.presentation.foreground_service.RunningService
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
@@ -48,13 +47,6 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                 0)
         }
-        // from RunningService class, we check if the option is enabled,
-        // and only then activate the service, this is necessary since we can
-        // start the service either when the app open (here) or
-        // when device finishes booting.
-        val intent = Intent(applicationContext, RunningService::class.java)
-        intent.action = RunningService.Actions.START.toString()
-        startService(intent)
 
         AppCompatDelegate.setDefaultNightMode(mainViewModel.uiThemeFlow.value.mode) // Set theme
 

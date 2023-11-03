@@ -293,7 +293,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get ProxyFileDescriptorCallback
      */
-    suspend fun getCallback(uri: String, mode: AccessMode): ProxyFileDescriptorCallback? {
+    suspend fun getCallback(uri: String, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
             val dto = getClientDto(uri) ?: return@withContext null
@@ -301,6 +301,7 @@ class CifsRepository @Inject internal constructor(
             try {
                 getClient(dto).getFileDescriptor(dto, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
+                    onFileRelease()
                     removeBlockingQueue(dto)
                 } ?: return@withContext null
             } catch (e: Exception) {
