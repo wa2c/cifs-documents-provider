@@ -251,20 +251,20 @@ private fun SettingsList(
             onSetOpenFileLimit(it)
         }
 
-        // Use Local
-        SettingsCheckItem(
-            text = stringResource(id = R.string.settings_set_use_as_local),
-            checked = useAsLocal,
-        ) {
-            onSetUseAsLocal(it)
-        }
-
         // Use Foreground Service
         SettingsCheckItem(
             text = stringResource(R.string.settings_set_use_foreground_service),
             checked = useForegroundService,
         ) {
             onSetUseForegroundService(it)
+        }
+
+        // Use Local
+        SettingsCheckItem(
+            text = stringResource(id = R.string.settings_set_use_as_local),
+            checked = useAsLocal,
+        ) {
+            onSetUseAsLocal(it)
         }
 
         // Information Title

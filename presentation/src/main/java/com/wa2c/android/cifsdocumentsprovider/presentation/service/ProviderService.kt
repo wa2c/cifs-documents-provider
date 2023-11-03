@@ -25,7 +25,7 @@ class ProviderService : Service() {
         intent?.getStringExtra(KEY_TAG)?.let { tag ->
             when (intent.action) {
                 ProviderServiceActions.START.action-> {
-                    providerNotification.notify(tag, intent.getStringExtra(KEY_NAME) ?: "", this)
+                    providerNotification.notify(tag, intent.getStringExtra(KEY_FILE_URI) ?: "", this)
                 }
                 ProviderServiceActions.STOP.action-> {
                     providerNotification.cancel(tag, this)
@@ -46,16 +46,16 @@ class ProviderService : Service() {
 
     companion object {
         private const val KEY_TAG = "KEY_TAG"
-        private const val KEY_NAME = "KEY_NAME"
+        private const val KEY_FILE_URI = "KEY_FILE_URI"
 
         /**
          * Start service on file open.
          */
-        fun start(context: Context, tag: String, name: String) {
+        fun start(context: Context, tag: String, uri: String) {
             val intent = Intent(context, ProviderService::class.java).apply {
                 action = ProviderServiceActions.START.action
                 putExtra(KEY_TAG, tag)
-                putExtra(KEY_NAME, name)
+                putExtra(KEY_FILE_URI, uri)
             }
             ContextCompat.startForegroundService(context, intent)
         }

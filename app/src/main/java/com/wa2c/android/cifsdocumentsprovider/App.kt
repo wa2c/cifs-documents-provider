@@ -20,15 +20,6 @@ class App: Application() {
     override fun onCreate() {
         super.onCreate()
 
-        val channel = NotificationChannel(
-            "running_channel",
-            "Running Notification",
-            NotificationManager.IMPORTANCE_LOW
-        )
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
-
         initLog(BuildConfig.DEBUG)
         runBlocking {
             repository.migrate()

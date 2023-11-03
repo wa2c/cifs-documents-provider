@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_CHANNEL_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -21,15 +22,6 @@ class ProviderNotification constructor(
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    /** Notification Builder */
-    private val notificationBuilder: NotificationCompat.Builder by lazy {
-        NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-    }
-
     init {
         createChannel()
     }
@@ -37,18 +29,20 @@ class ProviderNotification constructor(
     /**
      * Notify notification
      */
-    fun notify(tag: String, name: String, service: Service) {
+    fun notify(tag: String, uri: String, service: Service) {
         if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) {
-            val notification = notificationBuilder
-                .setContentTitle("File Open")
-                .build()
+            // create foreground notification
+            val notification = createNotification(
+                title = context.getString(R.string.notification_title_provider),
+            )
             service.startForeground(NOTIFICATION_ID_PROVIDER, notification)
         }
 
-        val notification = notificationBuilder
-            .setContentTitle(name)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
+        // create file notification
+        val notification = createNotification(
+            title = uri.fileName,
+            content = uri,
+        )
         notificationManager.notify(tag, NOTIFICATION_ID_PROVIDER, notification)
     }
 
@@ -70,7 +64,7 @@ class ProviderNotification constructor(
         if (notificationManager.getNotificationChannel(NOTIFICATION_CHANNEL_ID_PROVIDER) != null) return
         NotificationChannel(
             NOTIFICATION_CHANNEL_ID_PROVIDER,
-            context.getString(R.string.notification_channel_name_send),
+            context.getString(R.string.notification_channel_name_provider),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             enableLights(false)
@@ -80,6 +74,20 @@ class ProviderNotification constructor(
         }.let {
             notificationManager.createNotificationChannel(it)
         }
+    }
+
+    /**
+     * Create notification
+     */
+    private fun createNotification(title: String, content: String? = null): Notification {
+        return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setPriority(if (content == null) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
+            .setContentTitle(title)
+            .setContentText(content)
+            .build()
     }
 
 }

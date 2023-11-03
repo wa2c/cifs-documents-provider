@@ -181,10 +181,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
             val name = uri.fileName
             val fileOpenId = generateUUID()
+            val useForegroundService = runBlocking { cifsRepository.useForegroundServiceFlow.first() }
             cifsRepository.getCallback(uri, accessMode) {
-                ProviderService.stop(providerContext, fileOpenId)
+                if (useForegroundService) {
+                    ProviderService.stop(providerContext, fileOpenId)
+                }
             }.also {
-                ProviderService.start(providerContext, fileOpenId, name)
+                if (useForegroundService) {
+                    ProviderService.start(providerContext, fileOpenId, uri)
+                }
             }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
