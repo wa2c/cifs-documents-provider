@@ -106,5 +106,6 @@
     <string name="enum_theme_default">Default</string>
     <string name="enum_theme_light">Light</string>
     <string name="enum_theme_dark">Dark</string>
+    <string name="settings_set_use_foreground_service">Use foreground service\n(App restart required)</string>
 
 </resources>

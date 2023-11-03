@@ -45,6 +45,9 @@ class CifsRepository @Inject internal constructor(
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
 
+    /** Use foreground service to make the app resilient to closing by Android OS */
+    val useForegroundServiceFlow = appPreferences.useForegroundServiceFlow
+
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
         list.map { it.toModel() }

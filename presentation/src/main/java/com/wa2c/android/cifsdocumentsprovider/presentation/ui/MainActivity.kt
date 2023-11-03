@@ -1,7 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 
+import android.Manifest
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -9,11 +11,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.core.app.ActivityCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.presentation.foreground_service.RunningService
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.SendNotification
@@ -38,6 +42,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // request notification permission for the first time if not enabled.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                0)
+        }
+        // from RunningService class, we check if the option is enabled,
+        // and only then activate the service, this is necessary since we can
+        // start the service either when the app open (here) or
+        // when device finishes booting.
+        val intent = Intent(applicationContext, RunningService::class.java)
+        intent.action = RunningService.Actions.START.toString()
+        startService(intent)
 
         AppCompatDelegate.setDefaultNightMode(mainViewModel.uiThemeFlow.value.mode) // Set theme
 
