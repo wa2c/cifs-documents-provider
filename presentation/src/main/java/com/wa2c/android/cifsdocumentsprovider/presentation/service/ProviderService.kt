@@ -25,10 +25,10 @@ class ProviderService : Service() {
         intent?.getStringExtra(KEY_TAG)?.let { tag ->
             when (intent.action) {
                 ProviderServiceActions.START.action-> {
-                    providerNotification.notify(tag, intent.getStringExtra(KEY_FILE_URI) ?: "", this)
+                    providerNotification.notify(this, tag, intent.getStringExtra(KEY_FILE_URI) ?: "")
                 }
                 ProviderServiceActions.STOP.action-> {
-                    providerNotification.cancel(tag, this)
+                    providerNotification.cancel(this, tag)
                 }
             }
         }
@@ -49,7 +49,7 @@ class ProviderService : Service() {
         private const val KEY_FILE_URI = "KEY_FILE_URI"
 
         /**
-         * Start service on file open.
+         * Start file
          */
         fun start(context: Context, tag: String, uri: String) {
             val intent = Intent(context, ProviderService::class.java).apply {
@@ -61,7 +61,7 @@ class ProviderService : Service() {
         }
 
         /**
-         * Stop service on file close.
+         * Stop file
          */
         fun stop(context: Context, tag: String) {
             val intent = Intent(context, ProviderService::class.java).apply {
@@ -71,6 +71,9 @@ class ProviderService : Service() {
             ContextCompat.startForegroundService(context, intent)
         }
 
+        /**
+         * Close service
+         */
         fun close(context: Context) {
             context.stopService(Intent(context, ProviderService::class.java))
         }

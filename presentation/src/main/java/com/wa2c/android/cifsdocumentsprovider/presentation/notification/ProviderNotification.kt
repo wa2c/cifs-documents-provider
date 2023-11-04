@@ -29,7 +29,7 @@ class ProviderNotification constructor(
     /**
      * Notify notification
      */
-    fun notify(tag: String, uri: String, service: Service) {
+    fun notify(service: Service, tag: String, uri: String) {
         if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) {
             // create foreground notification
             val notification = createNotification(
@@ -49,10 +49,12 @@ class ProviderNotification constructor(
     /**
      * Cancel notification
      */
-    fun cancel(tag: String, service: Service) {
-        notificationManager.cancel(tag, NOTIFICATION_ID_PROVIDER)
+    fun cancel(service: Service, tag: String) {
+        val notifications = notificationManager.activeNotifications.filter { it.id == NOTIFICATION_ID_PROVIDER }
+        if (!notifications.any { it.tag == tag }) return
 
-        if (notificationManager.activeNotifications.count { it.id == NOTIFICATION_ID_PROVIDER } <= 1) {
+        notificationManager.cancel(tag, NOTIFICATION_ID_PROVIDER)
+        if (notifications.size <= 2) {
             service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
         }
     }
@@ -84,7 +86,7 @@ class ProviderNotification constructor(
             .setAutoCancel(false)
             .setOngoing(true)
             .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(if (content == null) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(if (content == null) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN) // notification order
             .setContentTitle(title)
             .setContentText(content)
             .build()
