@@ -179,7 +179,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            val name = uri.fileName
             val fileOpenId = generateUUID()
             val useForegroundService = runBlocking { cifsRepository.useForegroundServiceFlow.first() }
             cifsRepository.getCallback(uri, accessMode) {
