@@ -13,7 +13,6 @@ import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -30,7 +29,7 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
-import java.util.UUID
+import kotlin.contracts.contract
 
 /**
  * CIFS DocumentsProvider
@@ -55,6 +54,22 @@ class CifsDocumentsProvider : DocumentsProvider() {
         HandlerThread(this.javaClass.simpleName)
             .apply { start() }
             .let { Handler(it.looper) }
+    }
+
+    private val openingFileMap = mutableMapOf<String, String>()
+
+    private fun startFile(fileOpenId: String, uri: String) {
+        if (openingFileMap.isEmpty()) {
+            ProviderService.start(providerContext)
+        }
+        openingFileMap[fileOpenId] = uri
+    }
+
+    private fun stopFile(fileOpenId: String) {
+        openingFileMap.remove(fileOpenId)
+        if (openingFileMap.isEmpty()) {
+            ProviderService.stop(providerContext)
+        }
     }
 
     /**
@@ -182,12 +197,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
             val fileOpenId = generateUUID()
             val useForegroundService = runBlocking { cifsRepository.useForegroundServiceFlow.first() }
             cifsRepository.getCallback(uri, accessMode) {
-                if (useForegroundService) {
-                    ProviderService.stop(providerContext, fileOpenId)
-                }
+                stopFile(fileOpenId)
             }.also {
                 if (useForegroundService) {
-                    ProviderService.start(providerContext, fileOpenId, uri)
+                    startFile(fileOpenId, uri)
                 }
             }
         }?.let { callback ->
@@ -262,7 +275,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun shutdown() {
         logD("shutdown")
         runOnFileHandler { cifsRepository.closeAllSessions() }
-        ProviderService.close(providerContext)
+        openingFileMap.clear()
+        ProviderService.stop(providerContext)
         fileHandler.looper.quit()
     }
 
@@ -360,7 +374,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /**
      * True if the document id is root.
      */
+    @OptIn(kotlin.contracts.ExperimentalContracts::class)
     private fun String?.isRoot(): Boolean {
+        contract {
+            returns(false) implies (this@isRoot != null)
+        }
         return (this.isNullOrEmpty() || this == ROOT_DOCUMENT_ID)
     }
 

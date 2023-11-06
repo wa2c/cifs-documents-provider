@@ -27,39 +27,6 @@ class ProviderNotification constructor(
     }
 
     /**
-     * Notify notification
-     */
-    fun notify(service: Service, tag: String, uri: String) {
-        if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) {
-            // create foreground notification
-            val notification = createNotification(
-                title = context.getString(R.string.notification_title_provider),
-            )
-            service.startForeground(NOTIFICATION_ID_PROVIDER, notification)
-        }
-
-        // create file notification
-        val notification = createNotification(
-            title = uri.fileName,
-            content = uri,
-        )
-        notificationManager.notify(tag, NOTIFICATION_ID_PROVIDER, notification)
-    }
-
-    /**
-     * Cancel notification
-     */
-    fun cancel(service: Service, tag: String) {
-        val notifications = notificationManager.activeNotifications.filter { it.id == NOTIFICATION_ID_PROVIDER }
-        if (!notifications.any { it.tag == tag }) return
-
-        notificationManager.cancel(tag, NOTIFICATION_ID_PROVIDER)
-        if (notifications.size <= 2) {
-            service.stopForeground(Service.STOP_FOREGROUND_REMOVE)
-        }
-    }
-
-    /**
      * Create notification channel
      */
     private fun createChannel() {
@@ -81,7 +48,7 @@ class ProviderNotification constructor(
     /**
      * Create notification
      */
-    private fun createNotification(title: String, content: String? = null): Notification {
+    fun createNotification(title: String, content: String? = null): Notification {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
             .setAutoCancel(false)
             .setOngoing(true)
