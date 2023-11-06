@@ -13,6 +13,9 @@ import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -56,11 +59,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
             .let { Handler(it.looper) }
     }
 
+    private val workManager: WorkManager by lazy { WorkManager.getInstance(providerContext) }
+
     private val openingFileMap = mutableMapOf<String, String>()
 
     private fun startFile(fileOpenId: String, uri: String) {
         if (openingFileMap.isEmpty()) {
-            ProviderService.start(providerContext)
+            val request = OneTimeWorkRequest.Builder(ProviderWorker::class.java).build()
+            workManager.enqueue(request)
         }
         openingFileMap[fileOpenId] = uri
     }
@@ -68,7 +74,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private fun stopFile(fileOpenId: String) {
         openingFileMap.remove(fileOpenId)
         if (openingFileMap.isEmpty()) {
-            ProviderService.stop(providerContext)
+            workManager.cancelAllWork()
         }
     }
 
@@ -195,11 +201,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
             val fileOpenId = generateUUID()
-            val useForegroundService = runBlocking { cifsRepository.useForegroundServiceFlow.first() }
             cifsRepository.getCallback(uri, accessMode) {
                 stopFile(fileOpenId)
             }.also {
-                if (useForegroundService) {
+                val keepForeground = runBlocking { cifsRepository.useForegroundServiceFlow.first() }
+                if (keepForeground) {
                     startFile(fileOpenId, uri)
                 }
             }
@@ -276,7 +282,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("shutdown")
         runOnFileHandler { cifsRepository.closeAllSessions() }
         openingFileMap.clear()
-        ProviderService.stop(providerContext)
+        workManager.cancelAllWork()
         fileHandler.looper.quit()
     }
 

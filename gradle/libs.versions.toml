@@ -34,6 +34,7 @@ reorderable = "0.9.6"
 room = "2.5.2"
 smbj = "0.11.5"
 timber = "4.7.1" # TODO: Update after supporting Kotlin static call
+workRuntimeKtx = "2.8.0"
 
 [libraries]
 aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutlibraries" }
@@ -60,6 +61,7 @@ androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "
 androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "androixUi" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androixUi" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "androixUi" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 dcerpc = { module = "com.rapid7.client:dcerpc", version.ref = "dcerpc" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
