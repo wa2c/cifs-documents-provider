@@ -23,9 +23,7 @@ class ProviderService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        val notification = providerNotification.createNotification(
-            title = getString(R.string.notification_title_provider)
-        )
+        val notification = providerNotification.createNotification()
         startForeground(NOTIFICATION_ID_PROVIDER, notification)
 
         return START_STICKY

@@ -26,7 +26,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.PresentationModule
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import com.wa2c.android.cifsdocumentsprovider.presentation.service.ProviderService
+import com.wa2c.android.cifsdocumentsprovider.presentation.notification.ProviderNotification
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
@@ -44,6 +44,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Storage Manager */
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
+
+    /** Notification */
+    private val providerNotification: ProviderNotification by lazy { ProviderNotification(providerContext) }
 
     /** Cifs Repository */
     private val cifsRepository: CifsRepository by lazy {
@@ -69,13 +72,21 @@ class CifsDocumentsProvider : DocumentsProvider() {
             workManager.enqueue(request)
         }
         openingFileMap[fileOpenId] = uri
+        updateNotification()
     }
 
     private fun stopFile(fileOpenId: String) {
         openingFileMap.remove(fileOpenId)
+        updateNotification()
         if (openingFileMap.isEmpty()) {
             workManager.cancelAllWork()
         }
+    }
+
+    private fun updateNotification() {
+        val fileNameList = openingFileMap.values.distinct().map { it.fileName }
+        logD("Open files: $fileNameList")
+        providerNotification.updateFiles(fileNameList)
     }
 
     /**

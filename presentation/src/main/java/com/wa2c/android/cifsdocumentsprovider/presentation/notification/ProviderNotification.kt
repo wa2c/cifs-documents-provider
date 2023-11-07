@@ -48,15 +48,27 @@ class ProviderNotification constructor(
     /**
      * Create notification
      */
-    fun createNotification(title: String, content: String? = null): Notification {
+    fun createNotification(list: List<String> = emptyList()): Notification {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
             .setAutoCancel(false)
             .setOngoing(true)
             .setSmallIcon(R.drawable.ic_notification)
-            .setPriority(if (content == null) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_MIN) // notification order
-            .setContentTitle(title)
-            .setContentText(content)
+            .setContentTitle(context.getString(R.string.notification_title_provider))
+            .setStyle(
+                NotificationCompat.InboxStyle().also { style ->
+                    list.forEach { style.addLine(it) }
+                }
+            )
             .build()
+    }
+
+    /**
+     * Update file list
+     */
+    fun updateFiles(list: List<String>) {
+        if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) return
+        val notification = createNotification(list)
+        notificationManager.notify(NOTIFICATION_ID_PROVIDER, notification)
     }
 
 }

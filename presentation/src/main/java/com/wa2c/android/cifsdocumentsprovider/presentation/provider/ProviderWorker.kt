@@ -4,9 +4,10 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_ID_PROVIDER
-import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.notification.ProviderNotification
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -19,19 +20,19 @@ class ProviderWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
-    private val providerNotification: ProviderNotification by lazy {
-        ProviderNotification(context)
-    }
+    private val providerNotification: ProviderNotification by lazy { ProviderNotification(context) }
 
     override suspend fun doWork(): Result {
-        return withContext(Dispatchers.Default) {
-            val notification = providerNotification.createNotification(
-                title = context.getString(R.string.notification_title_provider)
-            )
+        logD("ProviderWorker begin") // ignore
+        try {
+            val notification = providerNotification.createNotification()
             setForeground(ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification))
             delay(Long.MAX_VALUE) // keep foreground
-            Result.success()
+        } catch (e: CancellationException) {
+            // ignored
         }
+        logD("ProviderWorker end")
+        return Result.success()
     }
 
 }
