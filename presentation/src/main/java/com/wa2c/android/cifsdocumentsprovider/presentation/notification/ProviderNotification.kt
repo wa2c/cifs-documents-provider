@@ -3,10 +3,9 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.notification
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import androidx.work.ForegroundInfo
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_CHANNEL_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -43,12 +42,14 @@ class ProviderNotification constructor(
         }.let {
             notificationManager.createNotificationChannel(it)
         }
+
+
     }
 
     /**
      * Create notification
      */
-    fun createNotification(list: List<String> = emptyList()): Notification {
+    private fun createNotification(list: List<String> = emptyList()): Notification {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
             .setAutoCancel(false)
             .setOngoing(true)
@@ -60,6 +61,14 @@ class ProviderNotification constructor(
                 }
             )
             .build()
+    }
+
+    /**
+     * Create CoroutineWorker foreground info
+     */
+    fun getNotificationInfo(): ForegroundInfo {
+        val notification = createNotification()
+        return ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification)
     }
 
     /**
