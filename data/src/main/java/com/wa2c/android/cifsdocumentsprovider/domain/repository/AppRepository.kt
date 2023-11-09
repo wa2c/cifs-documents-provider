@@ -31,11 +31,11 @@ class AppRepository @Inject internal constructor(
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = appPreferences.setUseAsLocal(value)
 
-    /** Use foreground service to make the app resilient to closing by Android OS */
-    val useForegroundServiceFlow = appPreferences.useForegroundServiceFlow
+    /** Use foreground to make the app resilient to closing by Android OS */
+    val useForegroundFlow = appPreferences.useForegroundFlow
 
-    /** Use foreground service to make the app resilient to closing by Android OS */
-    suspend fun setUseForegroundService(value: Boolean) = appPreferences.setUseForegroundService(value)
+    /** Use foreground to make the app resilient to closing by Android OS */
+    suspend fun setUseForeground(value: Boolean) = appPreferences.setUseForeground(value)
 
     /**
      * Migrate

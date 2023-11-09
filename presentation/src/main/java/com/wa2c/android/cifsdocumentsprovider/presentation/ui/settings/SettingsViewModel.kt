@@ -31,13 +31,13 @@ class SettingsViewModel @Inject constructor(
     /** Use as local */
     val useAsLocalFlow = appRepository.useAsLocalFlow
 
-    /** Use foreground service to make the app resilient to closing by Android OS */
-    val useForegroundServiceFlow = appRepository.useForegroundServiceFlow
+    /** Use foreground to make the app resilient to closing by Android OS */
+    val useForegroundFlow = appRepository.useForegroundFlow
 
     /** Use as local */
     fun setUseAsLocal(value: Boolean) = launch { appRepository.setUseAsLocal(value) }
 
-    /** Use foreground service to make the app resilient to closing by Android OS */
-    fun setUseForegroundService(value: Boolean) = launch { appRepository.setUseForegroundService(value)}
+    /** Use foreground to make the app resilient to closing by Android OS */
+    fun setUseForeground(value: Boolean) = launch { appRepository.setUseForeground(value)}
 
 }

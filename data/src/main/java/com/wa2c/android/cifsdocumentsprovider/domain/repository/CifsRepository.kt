@@ -29,8 +29,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
@@ -50,9 +48,6 @@ class CifsRepository @Inject internal constructor(
     /** Use as local */
     val useAsLocalFlow = appPreferences.useAsLocalFlow
 
-    /** Use foreground service to make the app resilient to closing by Android OS */
-    val useForegroundServiceFlow = appPreferences.useForegroundServiceFlow
-
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
         list.map { it.toModel() }
@@ -64,7 +59,7 @@ class CifsRepository @Inject internal constructor(
 
     /** Show notification  */
     val showNotification: Flow<Boolean> = openUriList.map {
-        if(it.isNotEmpty() && appPreferences.useForegroundServiceFlow.first()) true
+        if(it.isNotEmpty() && appPreferences.useForegroundFlow.first()) true
         else false
     }
 
@@ -169,7 +164,7 @@ class CifsRepository @Inject internal constructor(
     private suspend fun getClientDto(uriText: String?, connection: CifsConnection? = null): StorageConnection? {
         return  withContext(dispatcher) {
             connection?.let { connection.toDto(uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toModel()?.let { it.toDto(uriText) }
+                connectionSettingDao.getEntityByUri(uri)?.toModel()?.toDto(uriText)
             }
         }
     }
