@@ -325,7 +325,7 @@ class CifsRepository @Inject internal constructor(
                 getClient(dto).getFileDescriptor(dto, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
                     onFileRelease()
-                    runBlocking { removeBlockingQueue(dto) }
+                    removeBlockingQueue(dto)
                 } ?: return@withContext null
             } catch (e: Exception) {
                 logE(e)

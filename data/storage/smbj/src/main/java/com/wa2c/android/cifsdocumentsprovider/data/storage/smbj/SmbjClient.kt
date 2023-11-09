@@ -302,10 +302,10 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val diskFile = useDiskShare(connection) { openDiskFile(it, connection.sharePath, mode == AccessMode.R) }
-            val release = fun () {
+            val release: suspend () -> Unit = {
                 diskFile.closeSilently()
                 onFileRelease()
             }

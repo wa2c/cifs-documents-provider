@@ -236,10 +236,10 @@ class JCifsNgClient constructor(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val file = getSmbFile(connection) ?: return@withContext null
-            val release = fun () {
+            val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }

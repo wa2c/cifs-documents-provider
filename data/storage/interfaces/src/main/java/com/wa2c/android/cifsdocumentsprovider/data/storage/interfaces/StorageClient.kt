@@ -21,7 +21,7 @@ interface StorageClient {
 
     suspend fun moveFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile?
 
-    suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback?
+    suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback?
 
     suspend fun close()
 
