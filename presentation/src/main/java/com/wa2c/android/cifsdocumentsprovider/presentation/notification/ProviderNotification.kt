@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_CHANNEL_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -57,7 +58,7 @@ class ProviderNotification constructor(
             .setContentTitle(context.getString(R.string.notification_title_provider))
             .setStyle(
                 NotificationCompat.InboxStyle().also { style ->
-                    list.forEach { style.addLine(it) }
+                    list.map { it.fileName }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
                 }
             )
             .build()
@@ -66,8 +67,8 @@ class ProviderNotification constructor(
     /**
      * Create CoroutineWorker foreground info
      */
-    fun getNotificationInfo(): ForegroundInfo {
-        val notification = createNotification()
+    fun getNotificationInfo(list: List<String>): ForegroundInfo {
+        val notification = createNotification(list)
         return ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification)
     }
 

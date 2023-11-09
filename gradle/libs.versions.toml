@@ -16,6 +16,7 @@ datastorePreferences = "1.0.0"
 dcerpc = "0.12.0"
 documentfile = "1.0.1"
 gradle = "8.1.1"
+guava = "27.0.1-android"
 hiltAndroid = "2.47"
 hiltNavigationCompose = "1.0.0"
 jarjar = "1.1.0"
@@ -64,6 +65,7 @@ androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 dcerpc = { module = "com.rapid7.client:dcerpc", version.ref = "dcerpc" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hiltAndroid" }

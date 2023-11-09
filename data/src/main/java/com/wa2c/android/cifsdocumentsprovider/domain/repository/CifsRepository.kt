@@ -23,9 +23,14 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection.Compan
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile.Companion.toModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.util.Date
 import java.util.concurrent.ArrayBlockingQueue
@@ -53,16 +58,34 @@ class CifsRepository @Inject internal constructor(
         list.map { it.toModel() }
     }
 
+    /** Connected file uri list */
+    private val _openUriList = MutableStateFlow<List<String>>(emptyList())
+    val openUriList = _openUriList.asStateFlow()
+
+    /** Show notification  */
+    val showNotification: Flow<Boolean> = openUriList.map {
+        if(it.isNotEmpty() && appPreferences.useForegroundServiceFlow.first()) true
+        else false
+    }
+
     /** File blocking queue */
     private val fileBlockingQueue = ArrayBlockingQueue<StorageConnection>(appPreferences.openFileLimitFlow.getFirst())
-    private fun addBlockingQueue(dto: StorageConnection) {
+
+    private suspend fun addBlockingQueue(dto: StorageConnection) {
         fileBlockingQueue.put(dto)
+        updateOpeningFiles()
         logD("Queue added: size=${fileBlockingQueue.count()}")
     }
-    private fun removeBlockingQueue(dto: StorageConnection) {
+    private suspend fun removeBlockingQueue(dto: StorageConnection) {
         fileBlockingQueue.remove(dto)
+        updateOpeningFiles()
         logD("Queue removed: size=${fileBlockingQueue.count()}")
     }
+
+    private suspend fun updateOpeningFiles() {
+        _openUriList.emit(fileBlockingQueue.map { it.uri })
+    }
+
     private suspend fun <T> runFileBlocking(dto: StorageConnection, process: suspend () -> T): T {
         return try {
             addBlockingQueue(dto)
@@ -302,7 +325,7 @@ class CifsRepository @Inject internal constructor(
                 getClient(dto).getFileDescriptor(dto, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
                     onFileRelease()
-                    removeBlockingQueue(dto)
+                    runBlocking { removeBlockingQueue(dto) }
                 } ?: return@withContext null
             } catch (e: Exception) {
                 logE(e)
@@ -319,6 +342,7 @@ class CifsRepository @Inject internal constructor(
         logD("closeAllSessions")
         withContext(dispatcher) {
             fileBlockingQueue.clear()
+            updateOpeningFiles()
             storageClientManager.closeClient()
         }
     }
