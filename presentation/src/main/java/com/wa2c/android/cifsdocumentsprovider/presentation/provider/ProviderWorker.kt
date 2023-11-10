@@ -28,9 +28,9 @@ class ProviderWorker(
 
     override suspend fun doWork(): Result {
         logD("ProviderWorker begin")
-        lifecycleOwner.start()
 
         try {
+            lifecycleOwner.start()
             lifecycleOwner.lifecycle.coroutineScope.launch {
                 cifsRepository.openUriList.collectIn(lifecycleOwner) { list ->
                     providerNotification.updateFiles(list)
@@ -40,9 +40,10 @@ class ProviderWorker(
             delay(Long.MAX_VALUE) // keep foreground
         } catch (e: CancellationException) {
             // ignored
+        } finally {
+            lifecycleOwner.stop()
         }
 
-        lifecycleOwner.stop()
         logD("ProviderWorker end")
         return Result.success()
     }

@@ -26,6 +26,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
@@ -59,9 +60,8 @@ class CifsRepository @Inject internal constructor(
 
     /** Show notification  */
     val showNotification: Flow<Boolean> = openUriList.map {
-        if(it.isNotEmpty() && appPreferences.useForegroundFlow.first()) true
-        else false
-    }
+        it.isNotEmpty() && appPreferences.useForegroundFlow.first()
+    }.distinctUntilChanged()
 
     /** File blocking queue */
     private val fileBlockingQueue = ArrayBlockingQueue<StorageConnection>(appPreferences.openFileLimitFlow.getFirst())

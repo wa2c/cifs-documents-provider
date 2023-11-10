@@ -95,7 +95,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         lifecycleOwner.start()
 
         lifecycleOwner.lifecycleScope.launch {
-            cifsRepository.showNotification.stateIn(this).collectIn(lifecycleOwner) {
+            cifsRepository.showNotification.collectIn(lifecycleOwner) {
                 updateWorker(it)
             }
         }
