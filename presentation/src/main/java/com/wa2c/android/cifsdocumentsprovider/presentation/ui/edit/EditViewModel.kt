@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -125,7 +126,7 @@ class EditViewModel @Inject constructor(
     private fun createCifsConnection(generateId: Boolean): CifsConnection? {
         val isAnonymous = anonymous.value
         return CifsConnection(
-            id = if (generateId) UUID.randomUUID().toString() else currentId,
+            id = if (generateId) generateUUID() else currentId,
             name = name.value?.ifEmpty { null } ?: host.value ?: return null,
             storage = storage.value,
             domain = domain.value?.ifEmpty { null },
