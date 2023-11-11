@@ -79,6 +79,7 @@ fun SettingsScreen(
     val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
     val openFileLimit = viewModel.openFileLimitFlow.collectAsStateWithLifecycle(OPEN_FILE_LIMIT_DEFAULT)
     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
+    val useForeground = viewModel.useForegroundFlow.collectAsStateWithLifecycle(false)
     val showLibraries = remember { mutableStateOf(false) }
 
     SettingsScreenContainer(
@@ -96,6 +97,8 @@ fun SettingsScreen(
         onSetOpenFileLimit = { viewModel.setOpenFileLimit(it) },
         useAsLocal = useAsLocal.value,
         onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
+        useForeground = useForeground.value,
+        onSetUseForeground = { viewModel.setUseForeground(it) },
         showLibraries = showLibraries.value,
         onClickLibraries = {
             showLibraries.value = true
@@ -139,6 +142,8 @@ private fun SettingsScreenContainer(
     onSetOpenFileLimit: (Int) -> Unit,
     useAsLocal: Boolean,
     onSetUseAsLocal: (Boolean) -> Unit,
+    useForeground: Boolean,
+    onSetUseForeground: (Boolean) -> Unit,
     showLibraries: Boolean,
     onClickLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
@@ -182,6 +187,8 @@ private fun SettingsScreenContainer(
                     onSetOpenFileLimit = onSetOpenFileLimit,
                     useAsLocal = useAsLocal,
                     onSetUseAsLocal = onSetUseAsLocal,
+                    useForeground = useForeground,
+                    onSetUseForeground = onSetUseForeground,
                     onShowLibraries = onClickLibraries,
                     onStartIntent = onStartIntent,
                 )
@@ -206,6 +213,8 @@ private fun SettingsList(
     onSetOpenFileLimit: (Int) -> Unit,
     useAsLocal: Boolean,
     onSetUseAsLocal: (Boolean) -> Unit,
+    useForeground: Boolean,
+    onSetUseForeground: (Boolean) -> Unit,
     onShowLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
 ) {
@@ -240,6 +249,14 @@ private fun SettingsList(
             value = openFileLimit,
         ) {
             onSetOpenFileLimit(it)
+        }
+
+        // Use Foreground Service
+        SettingsCheckItem(
+            text = stringResource(R.string.settings_set_use_foreground),
+            checked = useForeground,
+        ) {
+            onSetUseForeground(it)
         }
 
         // Use Local

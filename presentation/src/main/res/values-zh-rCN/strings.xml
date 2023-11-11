@@ -52,6 +52,7 @@
     <!-- Host Screen -->
     <string name="host_select_host_name">主机名</string>
     <string name="host_select_ip_address">IP地址</string>
+    <string name="host_select_confirmation_message">输入所选数据以编辑表单。</string>
     <string name="host_sort_button">排序</string>
     <string name="host_reload_button">重新加载</string>
     <string name="host_sort_type_detection_ascend">发现顺序（升序）</string>
@@ -73,7 +74,8 @@
     <string name="settings_section_set">设置</string>
     <string name="settings_set_theme">主题</string>
     <string name="settings_set_language">语言</string>
-    <string name="settings_open_file_limit">打开文件限制</string>
+    <string name="settings_open_file_limit">打开文件限制\n(需要重新启动应用程序)</string>
+    <string name="settings_set_use_foreground">打开文件时显示通知</string>
     <string name="settings_set_use_as_local">用作本地存储\n(需要重新启动应用程序)</string>
     <string name="settings_section_info">" 信息"</string>
     <string name="settings_info_contributors">" 贡献者"</string>
@@ -98,9 +100,10 @@
     <string name="provider_error_message">发生错误。</string>
 
     <!-- Notification -->
+    <string name="notification_channel_name_provider">文件打开</string>
+    <string name="notification_title_provider">打开文件</string>
     <string name="notification_channel_name_send">数据传输</string>
     <string name="notification_title_send_completed">成功</string>
-    <string name="host_select_confirmation_message">输入所选数据以编辑表单。</string>
 
     <!-- Theme Enum -->
     <string name="enum_theme_default">默认</string>

@@ -31,6 +31,12 @@ class AppRepository @Inject internal constructor(
     /** Use as local */
     suspend fun setUseAsLocal(value: Boolean) = appPreferences.setUseAsLocal(value)
 
+    /** Use foreground to make the app resilient to closing by Android OS */
+    val useForegroundFlow = appPreferences.useForegroundFlow
+
+    /** Use foreground to make the app resilient to closing by Android OS */
+    suspend fun setUseForeground(value: Boolean) = appPreferences.setUseForeground(value)
+
     /**
      * Migrate
      */

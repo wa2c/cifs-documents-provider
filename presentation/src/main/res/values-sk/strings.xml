@@ -75,6 +75,7 @@
     <string name="settings_set_theme">Téma</string>
     <string name="settings_set_language">Jazyk</string>
     <string name="settings_open_file_limit">Otvoriť limit súboru\n(Vyžaduje sa reštart aplikácie)</string>
+    <string name="settings_set_use_foreground">Pri otváraní súborov zobraziť upozornenia</string>
     <string name="settings_set_use_as_local">Použite ako miestne úložisko\n(Vyžaduje sa reštart zariadenia)</string>
     <string name="settings_section_info">Informácie</string>
     <string name="settings_info_contributors">Prispievatelia</string>
@@ -99,6 +100,8 @@
     <string name="provider_error_message">Vyskytla sa chyba.</string>
 
     <!-- Notification -->
+    <string name="notification_channel_name_provider">Súbor Otvorený</string>
+    <string name="notification_title_provider">Otváranie súborov</string>
     <string name="notification_channel_name_send">Prenos súborov</string>
     <string name="notification_title_send_completed">Dokončené</string>
 

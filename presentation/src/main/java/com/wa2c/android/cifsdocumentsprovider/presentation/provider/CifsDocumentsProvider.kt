@@ -13,6 +13,12 @@ import android.os.ParcelFileDescriptor
 import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.WorkQuery
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -20,14 +26,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
-import com.wa2c.android.cifsdocumentsprovider.presentation.PresentationModule
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
-import dagger.hilt.android.EntryPointAccessors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import java.nio.file.Paths
+import kotlin.contracts.contract
 
 /**
  * CIFS DocumentsProvider
@@ -36,20 +44,34 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Context */
     private val providerContext: Context by lazy { context!! }
+
     /** Storage Manager */
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
+
     /** Cifs Repository */
-    private val cifsRepository: CifsRepository by lazy {
-        val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
-        val hiltEntryPoint = EntryPointAccessors.fromApplication(providerContext, clazz)
-        hiltEntryPoint.getCifsRepository()
-    }
+    private val cifsRepository: CifsRepository by lazy { provideCifsRepository(providerContext) }
 
     /** File handler */
     private val fileHandler: Handler by lazy {
         HandlerThread(this.javaClass.simpleName)
             .apply { start() }
             .let { Handler(it.looper) }
+    }
+
+    /** WorkManager */
+    private val workManager: WorkManager by lazy { WorkManager.getInstance(providerContext) }
+
+    /** Update worker */
+    private fun updateWorker(showNotification: Boolean) {
+        if (showNotification) {
+            val work = workManager.getWorkInfos(WorkQuery.fromStates(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED)).get()
+            if (work.isEmpty()) {
+                val request = OneTimeWorkRequest.Builder(ProviderWorker::class.java).build()
+                workManager.enqueueUniqueWork("", ExistingWorkPolicy.REPLACE, request)
+            }
+        } else  {
+            workManager.cancelAllWork()
+        }
     }
 
     /**
@@ -65,7 +87,19 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
+    /** Lifecycle owner */
+    private val lifecycleOwner = CustomLifecycleOwner()
+
     override fun onCreate(): Boolean {
+        logD("onCreate")
+        lifecycleOwner.start()
+
+        lifecycleOwner.lifecycleScope.launch {
+            cifsRepository.showNotification.collectIn(lifecycleOwner) {
+                updateWorker(it)
+            }
+        }
+
         return true
     }
 
@@ -174,7 +208,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            cifsRepository.getCallback(uri, accessMode)
+            cifsRepository.getCallback(uri, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
@@ -246,7 +280,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     override fun shutdown() {
         logD("shutdown")
+        lifecycleOwner.stop()
         runOnFileHandler { cifsRepository.closeAllSessions() }
+        workManager.cancelAllWork()
         fileHandler.looper.quit()
     }
 
@@ -344,7 +380,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /**
      * True if the document id is root.
      */
+    @OptIn(kotlin.contracts.ExperimentalContracts::class)
     private fun String?.isRoot(): Boolean {
+        contract {
+            returns(false) implies (this@isRoot != null)
+        }
         return (this.isNullOrEmpty() || this == ROOT_DOCUMENT_ID)
     }
 

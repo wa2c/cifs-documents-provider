@@ -67,7 +67,6 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
 
-
     // UI
 
     // Compose
@@ -87,6 +86,9 @@ dependencies {
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
+    // Worker
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.guava) // to solve dependencies conflict
 
     // Util
 

@@ -9,6 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import java.nio.file.Paths
+import java.util.UUID
 
 /**
  * Renew collection elements.
@@ -152,4 +153,11 @@ fun String.optimizeUri(mimeType: String? = null): String {
         if (ext == this.mimeType) this
         else "$this.$ext"
     }
+}
+
+/**
+ * Generate UUID
+ */
+fun generateUUID(): String {
+    return UUID.randomUUID().toString()
 }

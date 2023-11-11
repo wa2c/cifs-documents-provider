@@ -21,15 +21,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 internal object AppModule {
 
-    /** Notification Manager */
-    @Singleton
-    @Provides
-    fun provideNotificationManager(
-        @ApplicationContext context: Context
-    ): NotificationManager {
-        return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    }
-
     /** AppDatabase */
     @Singleton
     @Provides

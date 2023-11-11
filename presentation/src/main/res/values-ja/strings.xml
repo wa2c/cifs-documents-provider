@@ -75,6 +75,7 @@
     <string name="settings_set_theme">テーマ</string>
     <string name="settings_set_language">言語</string>
     <string name="settings_open_file_limit">開けるファイル上限\n(アプリの再起動が必要)</string>
+    <string name="settings_set_use_foreground">ファイル利用時に通知を表示</string>
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
     <string name="settings_section_info">情報</string>
     <string name="settings_info_contributors">貢献者</string>
@@ -99,8 +100,11 @@
     <string name="provider_error_message">エラーが発生しました</string>
 
     <!-- Notification -->
+    <string name="notification_channel_name_provider">ファイルオープン</string>
+    <string name="notification_title_provider">ファイルを開いています</string>
     <string name="notification_channel_name_send">データ送信</string>
     <string name="notification_title_send_completed">完了しました</string>
+
 
     <!-- Theme Enum -->
     <string name="enum_theme_default">デフォルト</string>

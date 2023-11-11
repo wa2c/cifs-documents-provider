@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 class SmbjProxyFileCallback(
     private val file: File,
     private val mode: AccessMode,
-    private val onFileRelease: () -> Unit,
+    private val onFileRelease: suspend () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
