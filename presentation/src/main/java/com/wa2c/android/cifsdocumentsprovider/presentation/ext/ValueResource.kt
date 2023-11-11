@@ -62,6 +62,7 @@ fun Language.getLabel(context: Context): String {
     return when (this) {
         Language.ENGLISH -> R.string.enum_language_en
         Language.JAPANESE-> R.string.enum_language_ja
+        Language.ARABIC -> R.string.enum_language_ar
         Language.SLOVAK -> R.string.enum_language_sk
         Language.CHINESE -> R.string.enum_language_zh_rcn
     }.let {

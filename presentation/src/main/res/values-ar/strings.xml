@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_summary">.الوصول إلى المجلدات المشتركة</string>
+    <string name="dialog_accept">حسنا</string>
+    <string name="dialog_close">إغلاق</string>
+
+    <!-- Home Screen -->
+    <string name="home_open_file">فتح</string>
+    <string name="home_open_settings">الإعدادات</string>
+    <string name="home_open_file_ng_message">أضف أي إتصال</string>
+    <string name="home_add_connection_a11y">أضف</string>
+
+    <!-- Edit Screen -->
+    <string name="edit_title">إتصال</string>
+    <string name="edit_name_title">الإسم</string>
+    <string name="edit_name_hint">إسم المضيف إذا كان خاليا</string>
+    <string name="edit_storage_title">التخزين (نوع المكتبة)</string>
+    <string name="edit_domain_title">النطاق</string>
+    <string name="edit_domain_hint">الإدخال حسب الحاجة</string>
+    <string name="edit_host_title">المضيف</string>
+    <string name="edit_host_hint">عنوان ال ( آي بي ) للمضيف / الخادم</string>
+    <string name="edit_host_select_a11y">تصفح</string>
+    <string name="edit_port_title">بوابة</string>
+    <string name="edit_port_hint">أهمل إن كان خاليا</string>
+    <string name="edit_enable_dfs_label">فعّل - دي إف أس - ( نظام الملفات الموزعة )</string>
+    <string name="edit_folder_title">المجلد</string>
+    <string name="edit_folder_hint">\'/\' إذا كان خاليا</string>
+    <string name="edit_directory_search_a11y">تصفح</string>
+    <string name="edit_user_title">المستخدم</string>
+    <string name="edit_user_hint">باطل إذا كان مجهول</string>
+    <string name="edit_password_title">كلمة المرور</string>
+    <string name="edit_password_hint">باطل إذا كان مجهول</string>
+    <string name="edit_anonymous_label">مجهول</string>
+    <string name="edit_option_title">خيار</string>
+    <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
+    <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
+    <string name="edit_connection_uri_title">عنوان ال ( أس أم بي ) </string>
+    <string name="edit_provider_uri_title">عنوان التشارك</string>
+    <string name="edit_check_connection_button">فحص الاتصال</string>
+    <string name="edit_check_connection_ok_message">نجح الاتصال</string>
+    <string name="edit_check_connection_wn_message">الإعدادات فيها خطأ</string>
+    <string name="edit_check_connection_ng_message">فشل الإتصال</string>
+    <string name="edit_save_ng_message">أدخل المضيف ( الخادم )</string>
+    <string name="edit_save_duplicate_message">العنوان مكرر</string>
+    <string name="edit_save_button">حفظ</string>
+    <string name="edit_delete_button">حذف</string>
+    <string name="edit_back_confirmation_message">أهمل التغييرات؟</string>
+    <string name="edit_delete_confirmation_message">إحذف الإعدادات؟</string>
+
+    <!-- Host Screen -->
+    <string name="host_title">المضيف</string>
+    <string name="host_set_manually">تحديد يدويا</string>
+    <string name="host_select_confirmation_message">أدخل البيانات المختارة لتعديل عليها في الأنموذج</string>
+    <string name="host_select_host_name">إسم المضيف</string>
+    <string name="host_select_ip_address">عنوان ال ( آي بي )</string>
+    <string name="host_sort_button">فرز</string>
+    <string name="host_reload_button">إعادة تحميل</string>
+    <string name="host_sort_type_detection_ascend">تحرى (تصاعديا)</string>
+    <string name="host_sort_type_detection_descend">تحرى (تنازليا)</string>
+    <string name="host_sort_type_host_name_ascend">إسم المضيف (تصاعديا)</string>
+    <string name="host_sort_type_host_name_descend">إسم المضيف (تنازليا)</string>
+    <string name="host_sort_type_ip_address_ascend">عنوان ال ( آي بي ) (تصاعديا)</string>
+    <string name="host_sort_type_ip_address_descend">عنوان ال ( آي بي ) (تنازليا)</string>
+    <string name="host_error_network">@string/provider_error_message</string>
+
+    <!-- Folder Screen -->
+    <string name="folder_title">مجلد</string>
+    <string name="folder_set">حدد المجلد</string>
+    <string name="folder_reload_button">إعادة تحميل</string>
+    <string name="folder_list_empty">لا مجلدات فرعية</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_section_set">الإعدادات</string>
+    <string name="settings_set_theme">الهيئة</string>
+    <string name="settings_set_language">اللغة</string>
+    <string name="settings_open_file_limit">تحديد الملفات المفتوحة\n(يجب إعادة تشغيل التطبيق)</string>
+    <string name="settings_set_use_foreground">أظهر الإشعارات عند فتح الملفات</string>
+    <string name="settings_set_use_as_local">محاكاة الذاكرة المحلية\n(مطلوب إعادة تشغيل الجهاز)</string>
+    <string name="settings_section_info">معلومات</string>
+    <string name="settings_info_contributors">المساهمين</string>
+    <string name="settings_info_libraries">المكتبات</string>
+    <string name="settings_info_app">التطبيق</string>
+
+    <!-- Send Screen -->
+    <string name="send_title">نقل الملف</string>
+    <string name="send_close_button">إغلاق</string>
+    <string name="send_action_cancel">إلغاء</string>
+    <string name="send_action_retry">إعادة محاولة</string>
+    <string name="send_action_remove">إزالة</string>
+    <string name="send_state_ready">جاهز</string>
+    <string name="send_state_overwrite">الملف موجود</string>
+    <string name="send_state_success">نجاح</string>
+    <string name="send_state_failure">فشل</string>
+    <string name="send_state_cancel">ملغى</string>
+    <string name="send_exit_confirmation_message">إلغاء كل عمليات النقل و الخروج من التطبيق</string>
+    <string name="send_overwrite_confirmation_message">(استبدال الملفات) Overwrite %1$d files.</string>
+
+    <!-- DocumentsProvider -->
+    <string name="provider_error_message">حصل خطأ ما</string>
+
+    <!-- Notification -->
+    <string name="notification_channel_name_provider">فتح ملف</string>
+    <string name="notification_title_provider">عملية فتح الملف</string>
+    <string name="notification_channel_name_send">نقل البيانات</string>
+    <string name="notification_title_send_completed">تمام</string>
+
+    <!-- Theme Enum -->
+    <string name="enum_theme_default">الوضع الطبيعي</string>
+    <string name="enum_theme_light">نهاري</string>
+    <string name="enum_theme_dark">ليلي</string>
+
+</resources>

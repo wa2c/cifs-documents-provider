@@ -13,6 +13,8 @@ enum class Language(
     ENGLISH("en"),
     /** Japanese */
     JAPANESE("ja"),
+    /** Arabic */
+    ARABIC("ar"),
     /** Slovak */
     SLOVAK("sk"),
     /** Chinese */
