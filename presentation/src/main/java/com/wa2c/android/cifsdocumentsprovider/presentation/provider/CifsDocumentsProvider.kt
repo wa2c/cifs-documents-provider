@@ -5,6 +5,7 @@ import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
+import android.os.Build
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.HandlerThread
@@ -31,7 +32,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.nio.file.Paths
@@ -107,20 +107,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val useAsLocal = runBlocking { cifsRepository.useAsLocalFlow.first() }
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
-            it.newRow().apply {
-                add(DocumentsContract.Root.COLUMN_ROOT_ID, URI_AUTHORITY)
-                add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
-                add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
-                add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
-                add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
-                add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, Int.MAX_VALUE)
-                add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
-                add(DocumentsContract.Root.COLUMN_FLAGS,
-                    DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
-                            DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
-                            if (useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
-                )
-            }
+            includeRoot(it, useAsLocal)
         }
     }
 
@@ -129,7 +116,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         if (documentId.isRoot()) {
             // Root
-            includeRoot(cursor)
+            includeConnection(cursor)
         } else {
             // File / Directory
             runBlocking {
@@ -286,14 +273,49 @@ class CifsDocumentsProvider : DocumentsProvider() {
         fileHandler.looper.quit()
     }
 
-    private fun includeRoot(cursor: MatrixCursor) {
+    private fun Array<String>?.toRootProjection(): Array<String> {
+        return if (this.isNullOrEmpty()) {
+            DEFAULT_ROOT_PROJECTION
+        } else {
+            this
+        }
+    }
+
+    private fun Array<String>?.toProjection(): Array<String> {
+        return if (this.isNullOrEmpty()) {
+            DEFAULT_DOCUMENT_PROJECTION
+        } else {
+            this
+        }
+    }
+
+    private fun includeRoot(cursor: MatrixCursor, useAsLocal: Boolean) {
+        cursor.newRow().apply {
+            add(DocumentsContract.Root.COLUMN_ROOT_ID, URI_AUTHORITY)
+            add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
+            add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
+            add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
+            add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
+            add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, Int.MAX_VALUE)
+            add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
+            add(DocumentsContract.Root.COLUMN_FLAGS,
+                DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
+                        DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
+                        if (useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
+            )
+        }
+    }
+
+    private fun includeConnection(cursor: MatrixCursor) {
         cursor.newRow().let { row ->
             row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, ROOT_DOCUMENT_ID)
-            row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
-            row.add(DocumentsContract.Document.COLUMN_FLAGS, 0)
             row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
             row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, "/")
             row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, 0)
+            row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE)
+            }
         }
     }
 
@@ -318,7 +340,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
                         DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
-                                DocumentsContract.Document.FLAG_DIR_PREFERS_LAST_MODIFIED or
                                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_COPY or
                                 DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
@@ -361,22 +382,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return "smb://${documentId}"
     }
 
-    private fun Array<String>?.toRootProjection(): Array<String> {
-        return if (this.isNullOrEmpty()) {
-            DEFAULT_ROOT_PROJECTION
-        } else {
-            this
-        }
-    }
-
-    private fun Array<String>?.toProjection(): Array<String> {
-        return if (this.isNullOrEmpty()) {
-            DEFAULT_DOCUMENT_PROJECTION
-        } else {
-            this
-        }
-    }
-
     /**
      * True if the document id is root.
      */
@@ -413,6 +418,5 @@ class CifsDocumentsProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_SIZE
         )
     }
-
 
 }
