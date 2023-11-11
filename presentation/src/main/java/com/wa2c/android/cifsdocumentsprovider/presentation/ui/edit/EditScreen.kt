@@ -661,6 +661,7 @@ fun <T> InputOption(
                     onClick = {
                         state.value = item.value
                         expanded = false
+                        focusManager.clearFocus()
                     }
                 )
             }
