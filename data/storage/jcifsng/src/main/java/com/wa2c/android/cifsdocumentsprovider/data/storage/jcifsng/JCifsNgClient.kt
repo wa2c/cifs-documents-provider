@@ -56,9 +56,10 @@ class JCifsNgClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getCifsContext(
-        connection: StorageConnection,
+        inputConnection: StorageConnection,
         ignoreCache: Boolean,
     ): CIFSContext {
+        val connection = inputConnection.copy(inputUri = null) // TODO fix
         if (!ignoreCache) { contextCache[connection]?.let { return it } }
 
         val property = Properties().apply {
@@ -187,11 +188,12 @@ class JCifsNgClient constructor(
      */
     override suspend fun renameFile(
         sourceConnection: StorageConnection,
-        targetConnection: StorageConnection,
+        newName: String,
     ): StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(sourceConnection)?.use { source ->
-                getSmbFile(targetConnection)?.use { target ->
+                val targetUri = sourceConnection.uri.trimEnd('/').replaceAfterLast('/', newName)
+                getSmbFile(sourceConnection.copy(inputUri = targetUri))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()
                 }
@@ -223,7 +225,12 @@ class JCifsNgClient constructor(
         return withContext(dispatcher) {
             if (sourceConnection == targetConnection) {
                 // Same connection
-                renameFile(sourceConnection, targetConnection)
+                getSmbFile(sourceConnection)?.use { source ->
+                    getSmbFile(targetConnection)?.use { target ->
+                        source.renameTo(target)
+                        target.toStorageFile()
+                    }
+                }
             } else {
                 // Different connection
                 copyFile(sourceConnection, targetConnection)?.also {

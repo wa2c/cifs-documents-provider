@@ -248,17 +248,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
         logD("renameFile: sourceUri=$sourceUri, newName=$newName")
         return withContext(dispatcher) {
-            val targetUri = if (newName.contains('/', false)) {
-                newName.trimEnd('/') + '/' + Uri.parse(sourceUri).fileName
-            } else {
-                sourceUri.trimEnd('/').replaceAfterLast('/', newName)
-            }
             val sourceDto = getClientDto(sourceUri) ?: return@withContext null
-            val targetDto = getClientDto(targetUri) ?: return@withContext null
             runFileBlocking(sourceDto) {
-                runFileBlocking(targetDto) {
-                    getClient(sourceDto).renameFile(sourceDto, targetDto)?.toModel()
-                }
+                getClient(sourceDto).renameFile(sourceDto, newName)?.toModel()
             }
         }
     }

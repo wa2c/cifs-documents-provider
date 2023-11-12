@@ -82,7 +82,8 @@ class SmbjClient constructor(
     /**
      * Get session
      */
-    private fun getSession(dto: StorageConnection, forced: Boolean = false): Session {
+    private fun getSession(inputDto: StorageConnection, forced: Boolean = false): Session {
+        val dto = inputDto.copy(inputUri = null)  // TODO fix
         return if (!forced) { sessionCache[dto]?.takeIf { it.connection.isConnected } } else { null } ?: let {
             val config = SmbConfig.builder()
                 .withDfsEnabled(dto.enableDfs)
@@ -136,7 +137,7 @@ class SmbjClient constructor(
         } else {
             diskShare.openFile(
                 sharePath,
-                setOf(AccessMask.GENERIC_READ, AccessMask.GENERIC_WRITE),
+                setOf(AccessMask.GENERIC_READ, AccessMask.GENERIC_WRITE, AccessMask.DELETE),
                 setOf(FileAttributes.FILE_ATTRIBUTE_NORMAL),
                 SMB2ShareAccess.ALL,
                 SMB2CreateDisposition.FILE_OPEN_IF,
@@ -274,11 +275,11 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun renameFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile? {
+    override suspend fun renameFile(sourceConnection: StorageConnection, newName: String): StorageFile? {
         return withContext(dispatcher) {
             useDiskShare(sourceConnection) { diskShare ->
                 openDiskFile(diskShare, sourceConnection.sharePath, false).use { diskEntry ->
-                    diskEntry.rename(targetConnection.name)
+                    diskEntry.rename(newName)
                     diskEntry.toStorageFile()
                 }
             }

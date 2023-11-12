@@ -15,7 +15,7 @@ interface StorageClient {
 
     suspend fun copyFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile?
 
-    suspend fun renameFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile?
+    suspend fun renameFile(sourceConnection: StorageConnection, newName: String): StorageFile?
 
     suspend fun deleteFile(connection: StorageConnection): Boolean
 

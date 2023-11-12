@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -13,7 +14,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import jcifs.legacy.Config
@@ -47,9 +47,10 @@ class JCifsClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getAuthentication(
-        connection: StorageConnection,
+        inputConnection: StorageConnection,
         ignoreCache: Boolean,
     ): NtlmPasswordAuthentication {
+        val connection = inputConnection.copy(inputUri = null) // TODO fix
         // FIXME
         val property = Properties().apply {
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
@@ -172,11 +173,12 @@ class JCifsClient constructor(
      */
     override suspend fun renameFile(
         sourceConnection: StorageConnection,
-        targetConnection: StorageConnection,
+        newName: String,
     ): StorageFile? {
         return withContext(dispatcher) {
             val source = getSmbFile(sourceConnection) ?: return@withContext null
-            val target = getSmbFile(targetConnection) ?: return@withContext null
+            val targetUri = sourceConnection.uri.trimEnd('/').replaceAfterLast('/', newName)
+            val target = getSmbFile(sourceConnection.copy(inputUri = targetUri)) ?: return@withContext null
             source.renameTo(target)
             target.toStorageFile()
         }
@@ -204,7 +206,10 @@ class JCifsClient constructor(
         return withContext(dispatcher) {
             if (sourceConnection == targetConnection) {
                 // Same connection
-                renameFile(sourceConnection, targetConnection)
+                val source = getSmbFile(sourceConnection) ?: return@withContext null
+                val target = getSmbFile(targetConnection) ?: return@withContext null
+                source.renameTo(target)
+                target.toStorageFile()
             } else {
                 // Different connection
                 copyFile(sourceConnection, targetConnection)?.also {
