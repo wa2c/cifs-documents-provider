@@ -35,6 +35,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -82,39 +83,37 @@ class SmbjClient constructor(
     /**
      * Get session
      */
-    private fun getSession(inputDto: StorageConnection, forced: Boolean = false): Session {
-        val dto = inputDto.copy(inputUri = null)  // TODO fix
-        return if (!forced) { sessionCache[dto]?.takeIf { it.connection.isConnected } } else { null } ?: let {
+    private fun getSession(connection: StorageConnection, forced: Boolean = false): Session {
+        return if (!forced) { sessionCache[connection]?.takeIf { it.connection.isConnected } } else { null } ?: let {
             val config = SmbConfig.builder()
-                .withDfsEnabled(dto.enableDfs)
+                .withDfsEnabled(connection.enableDfs)
                 .build()
             val client = SMBClient(config)
-            val port = dto.port?.toIntOrNull()
-            val connection = port?.let { client.connect(dto.host, it) } ?: client.connect(dto.host)
+            val port = connection.port?.toIntOrNull()
 
             val context = when {
-                dto.isAnonymous -> AuthenticationContext.anonymous() // Anonymous
-                dto.isGuest -> AuthenticationContext.guest() // Guest if empty username
+                connection.isAnonymous -> AuthenticationContext.anonymous() // Anonymous
+                connection.isGuest -> AuthenticationContext.guest() // Guest if empty username
                 else -> AuthenticationContext(
-                    dto.user,
-                    (dto.password ?: "").toCharArray(),
-                    dto.domain
+                    connection.user,
+                    (connection.password ?: "").toCharArray(),
+                    connection.domain
                 )
             }
 
-            connection.authenticate(context).also {
-                sessionCache.put(dto, it)
-            }
+            (port?.let { client.connect(connection.host, it) } ?: client.connect(connection.host))
+                .authenticate(context).also { sessionCache.put(connection, it) }
         }
     }
 
     /**
      * Get DiskShare
      */
-    private fun <T> useDiskShare(dto: StorageConnection, forced: Boolean = false, process: (DiskShare) -> T): T {
-        val diskShare = if (!forced) { diskShareCache[dto]?.takeIf { it.isConnected } } else { null } ?: let {
-            (getSession(dto, forced).connectShare(dto.shareName) as DiskShare).also {
-                diskShareCache.put(dto, it)
+    private fun <T> useDiskShare(access: StorageAccess, forced: Boolean = false, process: (DiskShare) -> T): T {
+        val key = access.connection.copy(folder = access.shareName)
+        val diskShare = if (!forced) { diskShareCache[key]?.takeIf { it.isConnected } } else { null } ?: let {
+            (getSession(access.connection, forced).connectShare(access.shareName) as DiskShare).also {
+                diskShareCache.put(key, it)
             }
         }
         return process(diskShare)
@@ -146,10 +145,10 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun checkConnection(connection: StorageConnection): ConnectionResult {
+    override suspend fun checkConnection(access: StorageAccess): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(connection, true)
+                getChildren(access, true)
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -171,7 +170,7 @@ class SmbjClient constructor(
                 }
             } finally {
                 try {
-                    sessionCache.remove(connection)
+                    sessionCache.remove(access.connection)
                 } catch (e: Exception) {
                     logE(e)
                 }
@@ -179,30 +178,30 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun getFile(connection: StorageConnection, ignoreCache: Boolean): StorageFile {
+    override suspend fun getFile(access: StorageAccess, ignoreCache: Boolean): StorageFile {
         return withContext(dispatcher) {
-            if (connection.isRoot) {
+            if (access.isRoot) {
                 StorageFile(
-                    connection.name,
-                    connection.uri,
+                    access.connection.name,
+                    access.connection.smbUri,
                     0,
                     0,
                     true,
                 )
             } else {
-                useDiskShare(connection, ignoreCache) { diskShare ->
-                    val info = diskShare.getFileInformation(connection.sharePath)
-                    info.toStorageFile(connection.uri)
+                useDiskShare(access, ignoreCache) { diskShare ->
+                    val info = diskShare.getFileInformation(access.sharePath)
+                    info.toStorageFile(access.uri)
                 }
             }
         }
     }
 
-    override suspend fun getChildren(connection: StorageConnection, ignoreCache: Boolean): List<StorageFile> {
+    override suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean): List<StorageFile> {
         return withContext(dispatcher) {
-            if (connection.isRoot) {
+            if (access.isRoot) {
                 // Root
-                val session = getSession(connection, ignoreCache)
+                val session = getSession(access.connection, ignoreCache)
                 val transport = SMBTransportFactories.SRVSVC.getTransport(session)
                 val serverService = ServerService(transport)
                 serverService.shares0
@@ -210,7 +209,7 @@ class SmbjClient constructor(
                     .map { info ->
                         StorageFile(
                             name = info.netName,
-                            uri = connection.uri.appendChild(info.netName, true),
+                            uri = access.uri.appendChild(info.netName, true),
                             size = 0,
                             lastModified = 0,
                             isDirectory = true,
@@ -218,8 +217,8 @@ class SmbjClient constructor(
                     }
             } else {
                 // Shared folder
-                useDiskShare(connection, ignoreCache) { diskShare ->
-                    diskShare.list(connection.sharePath)
+                useDiskShare(access, ignoreCache) { diskShare ->
+                    diskShare.list(access.sharePath)
                         .filter { !it.fileName.isInvalidFileName }
                         .map { info ->
                             val isDirectory = EnumWithValue.EnumUtils.isSet(
@@ -228,7 +227,7 @@ class SmbjClient constructor(
                             )
                             StorageFile(
                                 name = info.fileName,
-                                uri = connection.uri.appendChild(info.fileName, isDirectory),
+                                uri = access.uri.appendChild(info.fileName, isDirectory),
                                 size = info.endOfFile,
                                 lastModified = info.changeTime.toEpochMillis(),
                                 isDirectory = isDirectory,
@@ -239,15 +238,15 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun createFile(connection: StorageConnection, mimeType: String?): StorageFile {
+    override suspend fun createFile(access: StorageAccess, mimeType: String?): StorageFile {
         return withContext(dispatcher) {
-            val optimizedUri = connection.uri.optimizeUri(if (connection.extension) mimeType else null)
-            useDiskShare(connection) { diskShare ->
+            val optimizedUri = access.uri.optimizeUri(if (access.connection.extension) mimeType else null)
+            useDiskShare(access) { diskShare ->
                 if (optimizedUri.isDirectoryUri) {
-                    diskShare.mkdir(connection.sharePath)
-                    diskShare.getFileInformation(connection.sharePath)
+                    diskShare.mkdir(access.sharePath)
+                    diskShare.getFileInformation(access.sharePath)
                 } else {
-                    openDiskFile(diskShare, connection.sharePath, false).use { f ->
+                    openDiskFile(diskShare, access.sharePath, false).use { f ->
                         f.fileInformation
                     }
                 }
@@ -255,12 +254,12 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun copyFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile? {
+    override suspend fun copyFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile? {
         return withContext(dispatcher) {
-            useDiskShare(sourceConnection) { diskShare ->
-                useDiskShare(targetConnection) { targetDiskShare ->
-                    openDiskFile(diskShare, sourceConnection.sharePath, true).use { sourceEntry ->
-                        openDiskFile(targetDiskShare, targetConnection.sharePath, false).use { targetEntry ->
+            useDiskShare(sourceAccess) { diskShare ->
+                useDiskShare(targetAccess) { targetDiskShare ->
+                    openDiskFile(diskShare, sourceAccess.sharePath, true).use { sourceEntry ->
+                        openDiskFile(targetDiskShare, targetAccess.sharePath, false).use { targetEntry ->
                             // Copy
                             sourceEntry.inputStream.use { input ->
                                 targetEntry.outputStream.use { output ->
@@ -275,10 +274,10 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun renameFile(sourceConnection: StorageConnection, newName: String): StorageFile? {
+    override suspend fun renameFile(access: StorageAccess, newName: String): StorageFile? {
         return withContext(dispatcher) {
-            useDiskShare(sourceConnection) { diskShare ->
-                openDiskFile(diskShare, sourceConnection.sharePath, false).use { diskEntry ->
+            useDiskShare(access) { diskShare ->
+                openDiskFile(diskShare, access.sharePath, false).use { diskEntry ->
                     diskEntry.rename(newName)
                     diskEntry.toStorageFile()
                 }
@@ -286,32 +285,32 @@ class SmbjClient constructor(
         }
     }
 
-    override suspend fun deleteFile(connection: StorageConnection): Boolean {
+    override suspend fun deleteFile(access: StorageAccess): Boolean {
         return withContext(dispatcher) {
-            useDiskShare(connection) { diskShare ->
-                diskShare.rm(connection.sharePath)
+            useDiskShare(access) { diskShare ->
+                diskShare.rm(access.sharePath)
             }
             true
         }
     }
 
-    override suspend fun moveFile(sourceConnection: StorageConnection, targetConnection: StorageConnection): StorageFile? {
+    override suspend fun moveFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile? {
         return withContext(dispatcher) {
-            copyFile(sourceConnection, targetConnection).also {
-                deleteFile(sourceConnection)
+            copyFile(sourceAccess, targetAccess).also {
+                deleteFile(sourceAccess)
             }
         }
     }
 
-    override suspend fun getFileDescriptor(connection: StorageConnection, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
-            val diskFile = useDiskShare(connection) { openDiskFile(it, connection.sharePath, mode == AccessMode.R) }
+            val diskFile = useDiskShare(access) { openDiskFile(it, access.sharePath, mode == AccessMode.R) }
             val release: suspend () -> Unit = {
                 diskFile.closeSilently()
                 onFileRelease()
             }
 
-            if (connection.safeTransfer) {
+            if (access.connection.safeTransfer) {
                 SmbjProxyFileCallbackSafe(diskFile, mode, release)
             } else {
                 SmbjProxyFileCallback(diskFile, mode, release)

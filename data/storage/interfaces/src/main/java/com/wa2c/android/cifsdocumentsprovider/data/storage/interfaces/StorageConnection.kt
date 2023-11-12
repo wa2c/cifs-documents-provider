@@ -23,8 +23,6 @@ data class StorageConnection(
     val anonymous: Boolean,
     val extension: Boolean,
     val safeTransfer: Boolean,
-
-    val inputUri: String? = null,
 ) {
     val isAnonymous: Boolean
         get() = anonymous
@@ -32,31 +30,12 @@ data class StorageConnection(
     val isGuest: Boolean
         get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
 
+    val smbUri: String
+        get() = getSmbUri(host, port, folder, true)
 
-    /** URI */
-    val uri: String
-        get() = inputUri ?: getSmbUri(host, port, folder, true)
-
-    /** Share name */
     val shareName: String
-        get() =  uri
+        get() = smbUri
             .substringAfter(URI_START, "")
             .substringAfter(URI_SEPARATOR, "")
             .substringBefore(URI_SEPARATOR)
-
-    /** Share path */
-    val sharePath: String
-        get() = uri
-            .substringAfter(URI_START, "")
-            .substringAfter(URI_SEPARATOR, "")
-            .substringAfter(URI_SEPARATOR)
-
-    /** True if this is root */
-    val isRoot: Boolean
-        get() = shareName.isEmpty()
-
-    /** True if this is share root */
-    val isShareRoot: Boolean
-        get() = shareName.isNotEmpty() && sharePath.isEmpty()
-
 }
