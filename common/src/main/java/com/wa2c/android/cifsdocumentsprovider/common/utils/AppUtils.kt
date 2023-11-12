@@ -92,7 +92,7 @@ private val String.lastPath: String
     get() = run {
         val path = trimEnd(URI_SEPARATOR)
         val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
-        substring(startIndex)
+        path.substring(startIndex)
     }
 
 /**
