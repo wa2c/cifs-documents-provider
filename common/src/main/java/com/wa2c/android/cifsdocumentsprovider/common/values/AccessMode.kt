@@ -14,7 +14,7 @@ enum class AccessMode(
 
     companion object {
         fun fromSafMode(mode: String): AccessMode {
-            return if (mode.equals(W.safMode, true)) W else R
+            return if (mode.contains(W.safMode, true)) W else R
         }
     }
 }
