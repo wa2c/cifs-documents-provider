@@ -138,7 +138,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun queryChildDocuments(
         parentDocumentId: String?,
         projection: Array<String>?,
-        sortOrder: String?
+        sortOrder: String?,
     ): Cursor {
         logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
@@ -181,7 +181,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun openDocumentThumbnail(
         documentId: String?,
         sizeHint: Point?,
-        signal: CancellationSignal?
+        signal: CancellationSignal?,
     ): AssetFileDescriptor? {
         return null
     }
@@ -189,7 +189,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun openDocument(
         documentId: String?,
         mode: String,
-        signal: CancellationSignal?
+        signal: CancellationSignal?,
     ): ParcelFileDescriptor {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
@@ -210,7 +210,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun createDocument(
         parentDocumentId: String,
         mimeType: String?,
-        displayName: String
+        displayName: String,
     ): String? {
         logD("createDocument: parentDocumentId=$parentDocumentId, displayName=$displayName")
         return runOnFileHandler {
@@ -251,7 +251,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun moveDocument(
         sourceDocumentId: String?,
         sourceParentDocumentId: String?,
-        targetParentDocumentId: String?
+        targetParentDocumentId: String?,
     ): String? {
         logD("moveDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId == null || targetParentDocumentId == null) return null
