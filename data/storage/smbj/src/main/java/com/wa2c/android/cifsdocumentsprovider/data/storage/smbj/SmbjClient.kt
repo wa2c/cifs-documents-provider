@@ -261,12 +261,8 @@ class SmbjClient constructor(
                     openDiskFile(diskShare, sourceAccess.sharePath, true).use { sourceEntry ->
                         openDiskFile(targetDiskShare, targetAccess.sharePath, false).use { targetEntry ->
                             // Copy
-                            sourceEntry.inputStream.use { input ->
-                                targetEntry.outputStream.use { output ->
-                                    input.copyTo(output)
-                                    targetEntry.toStorageFile()
-                                }
-                            }
+                            sourceEntry.remoteCopyTo(targetEntry)
+                            targetEntry.toStorageFile()
                         }
                     }
                 }
