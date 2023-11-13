@@ -33,9 +33,4 @@ data class StorageConnection(
     val smbUri: String
         get() = getSmbUri(host, port, folder, true)
 
-    val shareName: String
-        get() = smbUri
-            .substringAfter(URI_START, "")
-            .substringAfter(URI_SEPARATOR, "")
-            .substringBefore(URI_SEPARATOR)
 }
