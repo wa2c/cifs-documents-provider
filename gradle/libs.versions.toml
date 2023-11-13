@@ -4,38 +4,38 @@ appVersionCode = "21"
 androidCompileSdk = "34"
 androidMinSdk = "26"
 
-aboutlibraries = "10.8.3"
-accompanistSystemuicontroller = "0.30.1"
+aboutlibraries = "10.9.2"
+accompanistSystemuicontroller = "0.32.0"
 androidnetworktools = "0.4.5.3"
 androidxJunit = "1.1.5"
-androixUi = "1.5.1"
+androixUi = "1.5.4"
 appcompat = "1.6.1"
-androidxComposeBom = "2023.09.00"
+androidxComposeBom = "2023.10.01"
 coreKtx = "1.12.0"
 datastorePreferences = "1.0.0"
 dcerpc = "0.12.0"
 documentfile = "1.0.1"
-gradle = "8.1.1"
+gradle = "8.1.3"
 guava = "27.0.1-android"
-hiltAndroid = "2.47"
-hiltNavigationCompose = "1.0.0"
+hiltAndroid = "2.48.1"
+hiltNavigationCompose = "1.1.0"
 jarjar = "1.1.0"
 jcifs = "1.3.19"
-jcifsNg = "2.1.9"
+jcifsNg = "2.1.10"
 junit = "4.13.2"
-kotlin = "1.8.20"
+kotlin = "1.9.20"
 kotlinxCoroutinesAndroid = "1.7.3"
-kotlinxSerializationJson = "1.5.1"
-ksp = "1.8.20-1.0.11"
+kotlinxSerializationJson = "1.6.0"
+ksp = "1.9.20-1.0.14"
 lifecycle = "2.6.2"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
-material3 = "1.1.1"
-navigationCompose = "2.7.2"
+material3 = "1.1.2"
+navigationCompose = "2.7.5"
 reorderable = "0.9.6"
-room = "2.5.2"
-smbj = "0.11.5"
+room = "2.6.0"
+smbj = "0.12.2"
 timber = "4.7.1" # TODO: Update after supporting Kotlin static call
-workRuntimeKtx = "2.8.0"
+workRuntimeKtx = "2.8.1"
 
 [libraries]
 aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutlibraries" }
@@ -45,7 +45,7 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 androidnetworktools = { module = "com.github.stealthcopter:androidnetworktools", version.ref = "androidnetworktools" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "androidxComposeBom" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-documentfile = { module = "androidx.documentfile:documentfile", version.ref = "documentfile" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -96,4 +96,3 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 jarjar = {id = "ru.tinkoff.gradle.jarjar", version.ref = "jarjar"}
 
 [bundles]
-

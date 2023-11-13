@@ -8,7 +8,7 @@ sealed class ConnectionResult {
     abstract val cause: Throwable?
 
     /** Success */
-    object Success: ConnectionResult() {
+    data object Success: ConnectionResult() {
         override val cause: Throwable? = null
     }
     /** Warning */

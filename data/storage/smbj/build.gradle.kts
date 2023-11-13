@@ -46,7 +46,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     implementation(libs.smbj)
-    implementation(libs.dcerpc)
+    implementation(libs.dcerpc) {
+        exclude(group = "org.bouncycastle", module = "bcprov-jdk15on") // Duplicate with JCIFS-NG
+    }
     implementation(libs.listenablefuture) // to avoid conflict
 
     testImplementation(libs.junit)
