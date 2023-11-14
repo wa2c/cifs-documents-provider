@@ -63,7 +63,8 @@ tasks.withType<JarJarTask> {
 }
 
 tasks.configureEach {
-    if (name == "copyDebugJniLibsProjectAndLocalJars") {
-        mustRunAfter("preJarJar")
+    if (name == "copyDebugJniLibsProjectAndLocalJars" ||
+        name == "copyReleaseJniLibsProjectAndLocalJars") {
+        dependsOn("preJarJar")
     }
 }
