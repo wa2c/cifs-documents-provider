@@ -4,6 +4,8 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
@@ -69,7 +71,11 @@ class ProviderNotification constructor(
      */
     fun getNotificationInfo(list: List<String>): ForegroundInfo {
         val notification = createNotification(list)
-        return ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification)
+        }
     }
 
     /**
