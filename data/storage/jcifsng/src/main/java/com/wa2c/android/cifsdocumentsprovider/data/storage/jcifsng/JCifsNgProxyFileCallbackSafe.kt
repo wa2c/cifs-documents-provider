@@ -59,7 +59,8 @@ internal class JCifsNgProxyFileCallbackSafe(
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
             access.seek(offset)
-            access.read(data, 0, size)
+            // if End-Of-File (-1) then return 0 bytes read
+            maxOf(0, access.read(data, 0, size))
         }
     }
 

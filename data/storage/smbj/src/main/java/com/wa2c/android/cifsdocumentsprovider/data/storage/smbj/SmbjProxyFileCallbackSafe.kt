@@ -34,7 +34,8 @@ class SmbjProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            file.read(data, offset, 0, size)
+            // if End-Of-File (-1) then return 0 bytes read
+            maxOf(0,file.read(data, offset, 0, size))
         }
     }
 
