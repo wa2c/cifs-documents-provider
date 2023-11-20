@@ -17,7 +17,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 /**
  * Provider Notification
  */
-class ProviderNotification constructor(
+class ProviderNotification(
     private val context: Context,
 ) {
     /** Notification manager */
@@ -57,6 +57,7 @@ class ProviderNotification constructor(
             .setOngoing(true)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.notification_title_provider))
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setStyle(
                 NotificationCompat.InboxStyle().also { style ->
                     list.map { it.getFileName(context) }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
@@ -81,7 +82,7 @@ class ProviderNotification constructor(
      * Update notification
      */
     fun updateNotification(list: List<Uri>) {
-        if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) return
+        if (list.isEmpty()) return
         val notification = createNotification(list)
         notificationManager.notify(NOTIFICATION_ID_PROVIDER, notification)
     }
