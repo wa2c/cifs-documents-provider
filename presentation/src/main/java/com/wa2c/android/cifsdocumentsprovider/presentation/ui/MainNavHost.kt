@@ -2,10 +2,11 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.core.content.IntentCompat
+import androidx.core.os.BundleCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -192,24 +193,13 @@ internal fun MainNavHost(
                 navDeepLink { action = Intent.ACTION_SEND_MULTIPLE },
             )
         ) { backStackEntry ->
-            @Suppress("DEPRECATION")
             val uriList = remember {
-                backStackEntry.arguments?.getParcelable<Intent>(NavController.KEY_DEEP_LINK_INTENT)
-                    ?.let { intent ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            (intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-                                ?.let { listOf(it) })
-                                ?: (intent.getParcelableArrayExtra(
-                                    Intent.EXTRA_STREAM,
-                                    Uri::class.java
-                                )?.toList())
-                        } else {
-                            (intent.getParcelableExtra<Uri?>(Intent.EXTRA_STREAM)
-                                ?.let { listOf(it) })
-                                ?: (intent.getParcelableArrayListExtra<Uri?>(Intent.EXTRA_STREAM)
-                                    ?.toList())
-                        }
-                    }
+                backStackEntry.arguments?.let {
+                    BundleCompat.getParcelable(it, NavController.KEY_DEEP_LINK_INTENT, Intent::class.java)
+                }?.let { intent ->
+                    IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)?.let { listOf(it) }
+                        ?: (IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, Uri::class.java)?.toList())
+                }
             } ?: emptyList()
 
             ReceiveFile(

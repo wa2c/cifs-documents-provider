@@ -39,3 +39,10 @@ data class SendData(
         get() = (elapsedTime / 1000).let { if (it > 0) { progressSize / it } else { 0 } }
 
 }
+
+/**
+ * Get current ready data
+ */
+fun List<SendData>.getCurrentReady(): SendData? {
+    return firstOrNull { it.state.isReady }
+}

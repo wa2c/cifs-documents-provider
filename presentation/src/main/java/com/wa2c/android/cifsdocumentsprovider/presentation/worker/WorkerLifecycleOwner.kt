@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.provider
+package com.wa2c.android.cifsdocumentsprovider.presentation.worker
 
 import android.os.Handler
 import android.os.Looper
@@ -7,9 +7,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 
 /**
- * Custom lifecycle owner
+ * Worker lifecycle owner
  */
-class CustomLifecycleOwner : LifecycleOwner {
+class WorkerLifecycleOwner : LifecycleOwner {
     private val lifecycleRegistry = LifecycleRegistry(this)
     private val handler = Handler(Looper.getMainLooper())
     override val lifecycle: Lifecycle get() = lifecycleRegistry

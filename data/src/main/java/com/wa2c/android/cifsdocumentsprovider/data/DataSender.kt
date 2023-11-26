@@ -80,11 +80,6 @@ internal class DataSender @Inject constructor(
                     if (!currentSendData.state.inProgress) {
                         return@sendFile false
                     }
-                    if (!isActive) {
-                        currentSendData = currentSendData.copy(state = SendDataState.FAILURE)
-                        return@sendFile false
-                    }
-
                     currentSendData = currentSendData.copy(progressSize = progressSize)
                     callback(currentSendData).let { if (!it) return@sendFile false }
                     return@sendFile true

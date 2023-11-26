@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.presentation.notification
+package com.wa2c.android.cifsdocumentsprovider.presentation.worker
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -45,8 +45,6 @@ class ProviderNotification constructor(
         }.let {
             notificationManager.createNotificationChannel(it)
         }
-
-
     }
 
     /**
@@ -79,9 +77,9 @@ class ProviderNotification constructor(
     }
 
     /**
-     * Update file list
+     * Update notification
      */
-    fun updateFiles(list: List<String>) {
+    fun updateNotification(list: List<String>) {
         if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) return
         val notification = createNotification(list)
         notificationManager.notify(NOTIFICATION_ID_PROVIDER, notification)

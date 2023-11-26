@@ -29,7 +29,9 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.worker.ProviderWorker
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -88,7 +90,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     /** Lifecycle owner */
-    private val lifecycleOwner = CustomLifecycleOwner()
+    private val lifecycleOwner = WorkerLifecycleOwner()
 
     override fun onCreate(): Boolean {
         logD("onCreate")
