@@ -89,8 +89,6 @@ fun SendScreen(
         ) {
             Text(stringResource(id = R.string.send_overwrite_confirmation_message, confirmCount))
         }
-    } else {
-        viewModel.onStartSend(true)
     }
 
     // Exit confirmation

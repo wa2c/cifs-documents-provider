@@ -47,4 +47,8 @@ class SendWorker(
         logD("SendWorker end")
         return Result.success()
     }
+
+    companion object {
+        const val WORKER_NAME = "SendWorker"
+    }
 }

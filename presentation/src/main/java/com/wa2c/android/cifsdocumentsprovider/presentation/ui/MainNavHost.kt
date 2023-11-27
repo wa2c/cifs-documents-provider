@@ -30,7 +30,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsS
 @Composable
 internal fun MainNavHost(
     navController: NavHostController,
-    sendViewModel: SendViewModel,
+    showSendScreen: Boolean,
+    onSendUri: (List<Uri>, Uri) -> Unit,
     onOpenFile: (List<Uri>) -> Unit,
     onCloseApp: () -> Unit,
 ) {
@@ -38,13 +39,6 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = HomeScreenName,
     ) {
-        // Navigate SendScreen if sending
-        if (sendViewModel.sendDataList.value.isNotEmpty()) {
-            navController.navigate(route = SendScreenName, navOptions = navOptions {
-                this.popUpTo(SendScreenName)
-            })
-            return@NavHost
-        }
 
         // Home Screen
         composable(
@@ -178,7 +172,6 @@ internal fun MainNavHost(
             route = SendScreenName,
         ) {
             SendScreen(
-                viewModel = sendViewModel,
                 onNavigateFinish = {
                     onCloseApp()
                 }
@@ -210,11 +203,16 @@ internal fun MainNavHost(
                     })
                 }
             ) {
-                navController.navigate(route = SendScreenName, navOptions = navOptions {
-                    this.popUpTo(SendScreenName)
-                })
-                sendViewModel.sendUri(sourceUriList = uriList, targetUri = it)
+                onSendUri(uriList, it)
             }
+        }
+
+        // Navigate SendScreen if sending
+        if (showSendScreen) {
+            navController.navigate(route = SendScreenName, navOptions = navOptions {
+                this.popUpTo(SendScreenName)
+            })
+            return@NavHost
         }
     }
 }

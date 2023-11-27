@@ -46,4 +46,8 @@ class ProviderWorker(
         return Result.success()
     }
 
+    companion object {
+        const val WORKER_NAME = "ProviderWorker"
+    }
+
 }

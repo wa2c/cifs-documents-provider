@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.send
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
@@ -9,7 +8,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScop
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 /**
@@ -21,16 +19,6 @@ class SendViewModel @Inject constructor(
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     val sendDataList = sendRepository.sendDataList
-
-    /**
-     * Send URI
-     */
-    fun sendUri(sourceUriList: List<Uri>, targetUri: Uri) {
-        logD("sendUri")
-        launch {
-            sendRepository.sendUri(sourceUriList, targetUri)
-        }
-    }
 
     /**
      * Start send job
@@ -72,14 +60,6 @@ class SendViewModel @Inject constructor(
         launch {
             sendRepository.cancelAll()
         }
-    }
-
-    override fun onCleared() {
-        logD("onCleared")
-        runBlocking {
-            sendRepository.clear()
-        }
-        super.onCleared()
     }
 
 }

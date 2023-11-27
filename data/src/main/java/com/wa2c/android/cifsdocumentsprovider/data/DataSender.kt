@@ -13,10 +13,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -67,7 +65,6 @@ internal class DataSender @Inject constructor(
                     df
                 }
             } ?: throw IOException()
-
 
             var currentSendData = sendData.copy(
                 state = SendDataState.PROGRESS,

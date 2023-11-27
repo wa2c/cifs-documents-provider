@@ -69,10 +69,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
             val work = workManager.getWorkInfos(WorkQuery.fromStates(WorkInfo.State.RUNNING, WorkInfo.State.ENQUEUED)).get()
             if (work.isEmpty()) {
                 val request = OneTimeWorkRequest.Builder(ProviderWorker::class.java).build()
-                workManager.enqueueUniqueWork("", ExistingWorkPolicy.REPLACE, request)
+                workManager.enqueueUniqueWork(ProviderWorker.WORKER_NAME, ExistingWorkPolicy.KEEP, request)
             }
         } else  {
-            workManager.cancelAllWork()
+            workManager.cancelUniqueWork(ProviderWorker.WORKER_NAME)
         }
     }
 
@@ -271,7 +271,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("shutdown")
         lifecycleOwner.stop()
         runOnFileHandler { cifsRepository.closeAllSessions() }
-        workManager.cancelAllWork()
+        workManager.cancelUniqueWork(ProviderWorker.WORKER_NAME)
         fileHandler.looper.quit()
     }
 

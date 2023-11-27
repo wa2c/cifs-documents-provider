@@ -23,10 +23,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.getCurrentReady
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
-import com.wa2c.android.cifsdocumentsprovider.presentation.worker.SendNotification
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.SendWorker
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,11 +37,7 @@ class MainActivity : AppCompatActivity() {
 
     /** Main View Model */
     private val mainViewModel by viewModels<MainViewModel>()
-    /** View Model */
-    private val sendViewModel by viewModels<SendViewModel>()
-    /** Send Notification */
-    private val notification: SendNotification by lazy { SendNotification(this) }
-
+    /** Work manager */
     private val workManager: WorkManager = WorkManager.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,20 +68,32 @@ class MainActivity : AppCompatActivity() {
             Theme.AppTheme(
                 darkTheme = mainViewModel.uiThemeFlow.collectAsStateWithLifecycle().value.isDark()
             ) {
+                val showSendScreen = mainViewModel.showSend.collectAsStateWithLifecycle(initialValue = false)
+
                 MainNavHost(
                     navController = navController,
-                    sendViewModel = sendViewModel,
+                    showSendScreen = showSendScreen.value,
+                    onSendUri = { uris, uri -> mainViewModel.sendUri(uris, uri) },
                     onOpenFile = { startApp(it) },
-                    onCloseApp = { finishApp() }
+                    onCloseApp = {
+                        mainViewModel.clearUri()
+                        workManager.cancelUniqueWork(SendWorker.WORKER_NAME)
+                        finishAffinity()
+                    }
                 )
             }
 
             LaunchedEffect(null) {
                 // Start send worker
                 mainViewModel.sendDataList.collectIn(this@MainActivity) { list ->
-                    if (list.getCurrentReady() == null) return@collectIn
-                    val request = OneTimeWorkRequest.Builder(SendWorker::class.java).build()
-                    workManager.enqueueUniqueWork(SendWorker::class.java.name, ExistingWorkPolicy.KEEP, request)
+                    if (list.isEmpty()) {
+                        workManager.cancelUniqueWork(SendWorker.WORKER_NAME)
+                    } else if (list.getCurrentReady() == null) {
+                        return@collectIn
+                    } else {
+                        val request = OneTimeWorkRequest.Builder(SendWorker::class.java).build()
+                        workManager.enqueueUniqueWork(SendWorker.WORKER_NAME, ExistingWorkPolicy.KEEP, request)
+                    }
                 }
             }
         }
@@ -114,10 +120,6 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(Intent.createChooser(shareIntent, null))
         }
-    }
-
-    private fun finishApp() {
-        finishAffinity()
     }
 
 }
