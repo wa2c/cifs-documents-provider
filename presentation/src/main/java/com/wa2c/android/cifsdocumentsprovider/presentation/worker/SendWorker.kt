@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.worker
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.coroutineScope
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -27,6 +29,7 @@ class SendWorker(
         logD("SendWorker begin")
 
         try {
+            notification.hideCompleted()
             lifecycleOwner.start()
             lifecycleOwner.lifecycle.coroutineScope.launch {
                 sendRepository.sendDataList.collectIn(lifecycleOwner) { list ->
@@ -42,6 +45,7 @@ class SendWorker(
             logD(e)
         } finally {
             lifecycleOwner.stop()
+            notification.showCompleted(sendRepository.sendDataList.value)
         }
 
         logD("SendWorker end")

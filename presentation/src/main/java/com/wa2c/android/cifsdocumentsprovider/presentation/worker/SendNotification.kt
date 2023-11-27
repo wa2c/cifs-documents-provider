@@ -67,17 +67,21 @@ class SendNotification constructor(
         val sendData = list.firstOrNull { it.state == SendDataState.PROGRESS }
 
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_SEND)
-            .setAutoCancel(false)
-            .setOngoing(true)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentIntent(startActivityIntent)
             .also { builder ->
                 if (sendData != null) {
+                    // show progress
+                    builder.setAutoCancel(false)
+                    builder.setOngoing(true)
                     builder.setContentTitle(sendData.name)
                     builder.setContentText(sendData.getSummaryText(context))
                     builder.setSubText("[$countCurrent/$countAll]")
                     builder.setProgress(100, sendData.progress, false)
                 } else {
+                    // show completed
+                    builder.setAutoCancel(true)
+                    builder.setOngoing(false)
                     builder.setContentTitle(context.getString(R.string.notification_title_send_completed))
                     builder.setContentText(null)
                     builder.setSubText(null)
@@ -107,8 +111,24 @@ class SendNotification constructor(
         notificationManager.notify(NOTIFICATION_ID_SEND, notification)
     }
 
+    /**
+     * Show completed message
+     */
+    fun showCompleted(list: List<SendData>) {
+        val notification = createNotification(list)
+        notificationManager.notify(COMPLETED_TAG, NOTIFICATION_ID_SEND, notification)
+    }
+
+    /**
+     * Hide completed message
+     */
+    fun hideCompleted() {
+        notificationManager.cancel(COMPLETED_TAG, NOTIFICATION_ID_SEND)
+    }
+
     companion object {
         private const val NOTIFICATION_REQUEST_CODE = 1
+        private const val COMPLETED_TAG = "COMPLETED"
     }
 
 }
