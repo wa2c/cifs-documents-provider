@@ -5,10 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getFileName
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_CHANNEL_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_ID_PROVIDER
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -50,7 +51,7 @@ class ProviderNotification constructor(
     /**
      * Create notification
      */
-    private fun createNotification(list: List<String> = emptyList()): Notification {
+    private fun createNotification(list: List<Uri> = emptyList()): Notification {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
             .setAutoCancel(false)
             .setOngoing(true)
@@ -58,7 +59,7 @@ class ProviderNotification constructor(
             .setContentTitle(context.getString(R.string.notification_title_provider))
             .setStyle(
                 NotificationCompat.InboxStyle().also { style ->
-                    list.map { it.fileName }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
+                    list.map { it.getFileName(context) }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
                 }
             )
             .build()
@@ -67,7 +68,7 @@ class ProviderNotification constructor(
     /**
      * Create CoroutineWorker foreground info
      */
-    fun getNotificationInfo(list: List<String>): ForegroundInfo {
+    fun getNotificationInfo(list: List<Uri>): ForegroundInfo {
         val notification = createNotification(list)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
@@ -79,7 +80,7 @@ class ProviderNotification constructor(
     /**
      * Update notification
      */
-    fun updateNotification(list: List<String>) {
+    fun updateNotification(list: List<Uri>) {
         if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_PROVIDER }) return
         val notification = createNotification(list)
         notificationManager.notify(NOTIFICATION_ID_PROVIDER, notification)

@@ -5,8 +5,8 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import androidx.documentfile.provider.DocumentFile
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getFileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
@@ -32,7 +32,7 @@ internal class DataSender @Inject constructor(
             getDocumentFile(sourceUri)?.let { file ->
                 SendData(
                     id = generateUUID(),
-                    name = file.name ?: file.uri.fileName,
+                    name = file.name ?: file.uri.getFileName(context),
                     size = file.length(),
                     mimeType = file.type?.ifEmpty { null } ?: OTHER_MIME_TYPE,
                     sourceUri = file.uri,

@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
+import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
+import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.decodeJson
 import com.wa2c.android.cifsdocumentsprovider.common.ConnectionUtils.encodeJson
@@ -54,7 +56,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     /** Connected file uri list */
-    private val _openUriList = MutableStateFlow<List<String>>(emptyList())
+    private val _openUriList = MutableStateFlow<List<Uri>>(emptyList())
     val openUriList = _openUriList.asStateFlow()
 
     /** Show notification  */
@@ -77,7 +79,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     private suspend fun updateOpeningFiles() {
-        _openUriList.emit(fileBlockingQueue.map { it.uri })
+        _openUriList.emit(fileBlockingQueue.map { it.uri.toUri() })
     }
 
     private suspend fun <T> runFileBlocking(access: StorageAccess, process: suspend () -> T): T {

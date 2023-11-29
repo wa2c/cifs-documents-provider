@@ -1,7 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.common.utils
 
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
@@ -77,23 +80,37 @@ val Uri.pathFragment: String
     }
 
 /**
- * Get file name (last segment)
+ * Get last path
  */
-val String.fileName: String
-    get() = Uri.decode(lastPath).lastPath
-
-/**
- * Get file name (last segment)
- */
-val Uri.fileName: String
-    get() = pathFragment.fileName
-
 private val String.lastPath: String
     get() = run {
         val path = trimEnd(URI_SEPARATOR)
         val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
         path.substring(startIndex)
     }
+
+/**
+ * Get file name (last segment)
+ */
+val String.fileName: String
+    get() = Uri.decode(this).lastPath
+
+/**
+ * Get file name
+ */
+fun Uri.getFileName(context: Context): String {
+    if (this.scheme == ContentResolver.SCHEME_CONTENT) {
+        context.contentResolver.query(this, null, null, null, null)?.use { c ->
+            if (c.moveToFirst()) {
+                c.getColumnIndex(OpenableColumns.DISPLAY_NAME).takeIf { it >= 0 }?.let {
+                    return c.getString(it)
+                }
+            }
+        }
+    }
+    return this.path?.lastPath ?: ""
+}
+
 
 /**
  * Get parent uri ( last character = '/' )

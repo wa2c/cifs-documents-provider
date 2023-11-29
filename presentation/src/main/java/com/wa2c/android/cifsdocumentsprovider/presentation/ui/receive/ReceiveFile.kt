@@ -5,7 +5,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import androidx.compose.ui.platform.LocalContext
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getFileName
 
 @Composable
 fun ReceiveFile(
@@ -13,6 +14,8 @@ fun ReceiveFile(
     onNavigateFinish: () -> Unit,
     onTargetSelected: (Uri) -> Unit,
 ) {
+    val context = LocalContext.current
+
     /** Single URI result launcher */
     val singleUriLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("*/*")) { uri ->
         if (uri == null) {
@@ -37,9 +40,10 @@ fun ReceiveFile(
         when {
             uriList.size == 1 -> {
                 // Single
-                singleUriLauncher.launch(uriList.first().fileName)
+                uriList.first().getFileName(context).let { fileName ->
+                    singleUriLauncher.launch(fileName)
+                }
             }
-
             uriList.size > 1 -> {
                 // Multiple
                 multipleUriLauncher.launch(uriList.first())
