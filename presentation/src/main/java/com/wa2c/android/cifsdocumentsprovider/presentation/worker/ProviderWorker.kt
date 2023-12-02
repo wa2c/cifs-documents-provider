@@ -9,7 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 
 /**
@@ -23,6 +23,7 @@ class ProviderWorker(
     private val providerNotification: ProviderNotification by lazy { ProviderNotification(context) }
     private val cifsRepository: CifsRepository by lazy { provideCifsRepository(context) }
     private val lifecycleOwner = WorkerLifecycleOwner()
+    private var deferredUntilCompleted = CompletableDeferred<Unit>()
 
     override suspend fun doWork(): Result {
         logD("ProviderWorker begin")
@@ -32,10 +33,13 @@ class ProviderWorker(
             lifecycleOwner.lifecycle.coroutineScope.launch {
                 cifsRepository.openUriList.collectIn(lifecycleOwner) { list ->
                     providerNotification.updateNotification(list)
+                    if (list.isEmpty()) {
+                        deferredUntilCompleted.complete(Unit)
+                    }
                 }
             }
             setForeground(providerNotification.getNotificationInfo(cifsRepository.openUriList.value))
-            delay(Long.MAX_VALUE) // keep foreground
+            deferredUntilCompleted.await() // wait until the uri list is empty.
         } catch (e: CancellationException) {
             // ignored
         } finally {

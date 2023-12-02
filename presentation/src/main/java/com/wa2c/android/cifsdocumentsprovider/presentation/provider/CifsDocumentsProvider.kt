@@ -71,8 +71,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 val request = OneTimeWorkRequest.Builder(ProviderWorker::class.java).build()
                 workManager.enqueueUniqueWork(ProviderWorker.WORKER_NAME, ExistingWorkPolicy.KEEP, request)
             }
-        } else  {
-            workManager.cancelUniqueWork(ProviderWorker.WORKER_NAME)
         }
     }
 
