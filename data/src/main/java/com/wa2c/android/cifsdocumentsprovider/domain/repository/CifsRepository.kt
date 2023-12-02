@@ -212,7 +212,7 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val access = getStorageAccess(uri, connection) ?: return@withContext emptyList()
             runFileBlocking(access) {
-                getClient(access.connection).getChildren(access).map { it.toModel() }
+                getClient(access.connection).getChildren(access)?.map { it.toModel() } ?: emptyList()
             }
         }
     }
@@ -308,13 +308,16 @@ class CifsRepository @Inject internal constructor(
         logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
             val access = getStorageAccess(uri) ?: return@withContext null
-            addBlockingQueue(access)
             try {
+                addBlockingQueue(access)
                 getClient(access.connection).getFileDescriptor(access, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
                     onFileRelease()
                     removeBlockingQueue(access)
-                } ?: return@withContext null
+                } ?: let {
+                    removeBlockingQueue(access)
+                    null
+                }
             } catch (e: Exception) {
                 logE(e)
                 removeBlockingQueue(access)

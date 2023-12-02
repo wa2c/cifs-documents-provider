@@ -9,7 +9,7 @@ interface StorageClient {
 
     suspend fun getFile(access: StorageAccess, ignoreCache: Boolean = false): StorageFile?
 
-    suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean = false): List<StorageFile>
+    suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean = false): List<StorageFile>?
 
     suspend fun createFile(access: StorageAccess, mimeType: String?): StorageFile?
 

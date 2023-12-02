@@ -25,6 +25,7 @@ import jcifs.legacy.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.Properties
 
 
@@ -77,13 +78,15 @@ class JCifsClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(access: StorageAccess, ignoreCache: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(access: StorageAccess, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
                 val authentication = getAuthentication(access.connection, ignoreCache)
                 SmbFile(access.uri, authentication).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
+                }.let {
+                    if (existsRequired && !it.exists()) null else it
                 }
             } catch (e: Exception) {
                 logE(e)
@@ -93,12 +96,29 @@ class JCifsClient constructor(
     }
 
     /**
+     * Convert SmbFile to StorageFile
+     */
+    private suspend fun SmbFile.toStorageFile(): StorageFile {
+        val urlText = url.toString()
+        return withContext(dispatcher) {
+            val isDir = urlText.isDirectoryUri || isDirectory
+            StorageFile(
+                name = name.trim('/'),
+                uri = urlText,
+                size = if (isDir || !isFile) 0 else length(),
+                lastModified = lastModified,
+                isDirectory = isDir,
+            )
+        }
+    }
+
+    /**
      * Check setting connectivity.
      */
     override suspend fun checkConnection(access: StorageAccess): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getSmbFile(access, true)?.list()
+                getChildren(access, true) ?: throw IOException()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -120,17 +140,21 @@ class JCifsClient constructor(
      * Get StorageFile
      */
     override suspend fun getFile(access: StorageAccess, ignoreCache: Boolean): StorageFile? {
-        return getSmbFile(access, ignoreCache)?.toStorageFile()
+        return withContext(dispatcher) {
+            getSmbFile(access, ignoreCache = ignoreCache, existsRequired = true)?.toStorageFile()
+        }
     }
 
     /**
      * Get children StorageFile list
      */
-    override suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean): List<StorageFile> {
-        val parent = getSmbFile(access, ignoreCache) ?: return emptyList()
-        return parent.listFiles()?.mapNotNull {child ->
-            child.toStorageFile()
-        } ?: emptyList()
+    override suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean): List<StorageFile>? {
+        return withContext(dispatcher) {
+            val parent = getSmbFile(access, ignoreCache = ignoreCache, existsRequired = true) ?: return@withContext null
+            parent.listFiles()?.mapNotNull { child ->
+                child.toStorageFile()
+            }
+        }
     }
 
 
@@ -161,7 +185,7 @@ class JCifsClient constructor(
         targetAccess: StorageAccess,
     ): StorageFile? {
         return withContext(dispatcher) {
-            val source = getSmbFile(sourceAccess) ?: return@withContext null
+            val source = getSmbFile(sourceAccess, existsRequired = true) ?: return@withContext null
             val target = getSmbFile(targetAccess) ?: return@withContext null
             source.copyTo(target)
             target.toStorageFile()
@@ -176,7 +200,7 @@ class JCifsClient constructor(
         newName: String,
     ): StorageFile? {
         return withContext(dispatcher) {
-            val source = getSmbFile(access) ?: return@withContext null
+            val source = getSmbFile(access, existsRequired = true) ?: return@withContext null
             val targetUri = access.uri.trimEnd('/').replaceAfterLast('/', newName)
             val target = getSmbFile(access.copy(currentUri = targetUri)) ?: return@withContext null
             source.renameTo(target)
@@ -191,7 +215,7 @@ class JCifsClient constructor(
         access: StorageAccess,
     ): Boolean {
         return withContext(dispatcher) {
-            getSmbFile(access)?.delete() ?: return@withContext false
+            getSmbFile(access, existsRequired = true)?.delete() ?: return@withContext false
             true
         }
     }
@@ -206,7 +230,7 @@ class JCifsClient constructor(
         return withContext(dispatcher) {
             if (sourceAccess.connection == targetAccess.connection) {
                 // Same connection
-                val source = getSmbFile(sourceAccess) ?: return@withContext null
+                val source = getSmbFile(sourceAccess, existsRequired = true) ?: return@withContext null
                 val target = getSmbFile(targetAccess) ?: return@withContext null
                 source.renameTo(target)
                 target.toStorageFile()
@@ -224,7 +248,7 @@ class JCifsClient constructor(
      */
     override suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getSmbFile(access) ?: return@withContext null
+            val file = getSmbFile(access, existsRequired = true) ?: return@withContext null
             val release: suspend () -> Unit = {
                 onFileRelease()
             }
@@ -235,23 +259,6 @@ class JCifsClient constructor(
 
     override suspend fun close() {
         contextCache.evictAll()
-    }
-
-    /**
-     * Convert SmbFile to StorageFile
-     */
-    private suspend fun SmbFile.toStorageFile(): StorageFile {
-        val urlText = url.toString()
-        return withContext(dispatcher) {
-            val isDir = urlText.isDirectoryUri || isDirectory
-            StorageFile(
-                name = name.trim('/'),
-                uri = urlText,
-                size = if (isDir || !isFile) 0 else length(),
-                lastModified = lastModified,
-                isDirectory = isDir,
-            )
-        }
     }
 
     companion object {
