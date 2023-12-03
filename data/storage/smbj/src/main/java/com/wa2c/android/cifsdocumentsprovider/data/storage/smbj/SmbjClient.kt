@@ -133,7 +133,7 @@ class SmbjClient constructor(
      * Open File
      */
     private fun openDiskFile(diskShare: DiskShare, sharePath: String, isRead: Boolean, existsRequired: Boolean): File? {
-        if (existsRequired && diskShare.exists(sharePath)) return null
+        if (existsRequired && !diskShare.exists(sharePath)) return null
         return if (isRead) {
             diskShare.openFile(
                 sharePath.ifEmpty { "/" },
@@ -154,7 +154,6 @@ class SmbjClient constructor(
             )
         }
     }
-
 
     private fun FileAllInformation.toStorageFile(uriText: String): StorageFile {
         return StorageFile(
@@ -343,7 +342,7 @@ class SmbjClient constructor(
     override suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
             val diskFile = useDiskShare(access) {
-                openDiskFile(it, access.sharePath, mode == AccessMode.R, existsRequired = true)
+                openDiskFile(it, access.sharePath, isRead = mode == AccessMode.R, existsRequired = true)
             } ?: return@withContext null
             val release: suspend () -> Unit = {
                 diskFile.closeSilently()
