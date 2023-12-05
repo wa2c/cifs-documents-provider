@@ -111,8 +111,13 @@ class SmbjClient constructor(
      * Check file exists
      */
     private fun DiskShare.exists(path: String): Boolean {
-        return if (path.isEmpty()) return true
-        else fileExists(path) || folderExists(path)
+        return try {
+            if (path.isEmpty()) true
+            else if (path.isDirectoryUri) folderExists(path)
+            else fileExists(path)
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /**
