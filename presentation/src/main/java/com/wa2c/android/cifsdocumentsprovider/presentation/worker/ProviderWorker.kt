@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.worker
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.coroutineScope
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -24,6 +26,7 @@ class ProviderWorker(
     private val cifsRepository: CifsRepository by lazy { provideCifsRepository(context) }
     private val lifecycleOwner = WorkerLifecycleOwner()
     private var deferredUntilCompleted = CompletableDeferred<Unit>()
+    private val handler = Handler(Looper.getMainLooper())
 
     override suspend fun doWork(): Result {
         logD("ProviderWorker begin")
@@ -33,11 +36,20 @@ class ProviderWorker(
             lifecycleOwner.lifecycle.coroutineScope.launch {
                 cifsRepository.openUriList.collectIn(lifecycleOwner) { list ->
                     providerNotification.updateNotification(list)
+                    val completeRunnable = Runnable {
+                        // don't use list here, 5 seconds later the real list could be different
+                        if (cifsRepository.openUriList.value.isEmpty()) deferredUntilCompleted.complete(Unit)
+                        else  providerNotification.updateNotification(cifsRepository.openUriList.value)
+                    }
                     if (list.isEmpty()) {
-                        deferredUntilCompleted.complete(Unit)
+                        // Check again after grace period, if list is empty cancel work.
+                        // otherwise, sometimes notification gets canceled as soon as opened
+                        handler.removeCallbacks(completeRunnable)
+                        handler.postDelayed(completeRunnable, 5000)
                     }
                 }
             }
+
             setForeground(providerNotification.getNotificationInfo(cifsRepository.openUriList.value))
             deferredUntilCompleted.await() // wait until the uri list is empty.
         } catch (e: CancellationException) {
