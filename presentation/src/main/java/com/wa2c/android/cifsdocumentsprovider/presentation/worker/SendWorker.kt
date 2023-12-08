@@ -1,8 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.worker
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.coroutineScope
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters

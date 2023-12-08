@@ -87,6 +87,7 @@ class SendNotification constructor(
                     builder.setSubText(null)
                     builder.setProgress(0, 0, false)
                 }
+                builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             }.build()
     }
 
@@ -106,7 +107,7 @@ class SendNotification constructor(
      * Update notification
      */
     fun updateNotification(list: List<SendData>) {
-        if (!notificationManager.activeNotifications.any { it.id == NOTIFICATION_ID_SEND }) return
+        if (list.isEmpty()) return
         val notification = createNotification(list)
         notificationManager.notify(NOTIFICATION_ID_SEND, notification)
     }

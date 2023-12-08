@@ -34,17 +34,17 @@ class ProviderWorker(
         try {
             lifecycleOwner.start()
             lifecycleOwner.lifecycle.coroutineScope.launch {
+                val completeRunnable = Runnable {
+                    // don't use list here, 5 seconds later the real list could be different
+                    if (cifsRepository.openUriList.value.isEmpty()) deferredUntilCompleted.complete(Unit)
+                    else  providerNotification.updateNotification(cifsRepository.openUriList.value)
+                }
                 cifsRepository.openUriList.collectIn(lifecycleOwner) { list ->
                     providerNotification.updateNotification(list)
-                    val completeRunnable = Runnable {
-                        // don't use list here, 5 seconds later the real list could be different
-                        if (cifsRepository.openUriList.value.isEmpty()) deferredUntilCompleted.complete(Unit)
-                        else  providerNotification.updateNotification(cifsRepository.openUriList.value)
-                    }
+                    handler.removeCallbacks(completeRunnable)
                     if (list.isEmpty()) {
                         // Check again after grace period, if list is empty cancel work.
                         // otherwise, sometimes notification gets canceled as soon as opened
-                        handler.removeCallbacks(completeRunnable)
                         handler.postDelayed(completeRunnable, 5000)
                     }
                 }
