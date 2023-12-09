@@ -36,7 +36,7 @@ class SendWorker(
             }
             setForeground(notification.getNotificationInfo(sendRepository.sendDataList.value))
             while (!isStopped) {
-                val result = sendRepository.sendData()
+                val result = sendRepository.sendReadyData()
                 if (!result) break
             }
         } catch (e: CancellationException) {

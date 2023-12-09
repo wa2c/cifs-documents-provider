@@ -2,10 +2,10 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.aboutlibraries)
-
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val applicationId: String by rootProject.extra
@@ -13,13 +13,19 @@ val javaVersion: JavaVersion by rootProject.extra
 
 android {
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    namespace = "${applicationId}.presentation"
+    namespace = "${applicationId}.data"
 
     defaultConfig {
         minSdk = libs.versions.androidMinSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        buildConfigField("String", "K", "\"com.wa2c.android\"")
+
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
     }
 
     buildTypes {
@@ -41,23 +47,18 @@ android {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
+
     buildFeatures {
-        compose = true
+        buildConfig = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.4"
-    }
-
-}
-
-aboutLibraries {
-    configPath = "config"
 }
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":domain"))
-
+    implementation(project(":data:storage:interfaces"))
+    implementation(project(":data:storage:jcifs"))
+    implementation(project(":data:storage:jcifsng"))
+    implementation(project(":data:storage:smbj"))
 
     // App
 
@@ -66,38 +67,19 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation(libs.androidx.documentfile)
 
-    // UI
-
-    // Compose
-    val composeBom = platform(libs.androidx.compose.bom)
-    implementation(composeBom)
-    testImplementation(composeBom)
-    androidTestImplementation(composeBom)
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.ui.tooling.preview)
-    debugImplementation(libs.androidx.ui.tooling)
-    implementation(libs.reorderable)
-    implementation(libs.accompanist.systemuicontroller)
-    // Lifecycle
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    // Navigation
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.hilt.navigation.compose)
-    // Worker
-    implementation(libs.androidx.work.runtime)
-    implementation(libs.guava) // to solve dependencies conflict
-
-    // Util
-
-    // OSS License
-    implementation(libs.aboutlibraries)
-    implementation(libs.aboutlibraries.compose)
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.paging)
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+    // Android Network Tools
+    implementation(libs.androidnetworktools)
 
     // Test
 
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
 }

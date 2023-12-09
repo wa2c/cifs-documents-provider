@@ -55,7 +55,9 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
     implementation(project(":common"))
     implementation(project(":presentation"))
-    implementation(project(":data"))
+    implementation(project(":domain"))
+    implementation(project(":data:data"))
+
 
     implementation(libs.androidx.appcompat)
     implementation(libs.hilt.android)
