@@ -111,6 +111,12 @@ fun Uri.getFileName(context: Context): String {
     return this.path?.lastPath ?: ""
 }
 
+/**
+ * Rename URI name
+ */
+fun String.rename(newName: String): String {
+    return substringBeforeLast(URI_SEPARATOR) + URI_SEPARATOR + Uri.encode(newName)
+}
 
 /**
  * Get parent uri ( last character = '/' )

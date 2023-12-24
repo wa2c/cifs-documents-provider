@@ -8,6 +8,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
@@ -201,7 +202,7 @@ class JCifsClient constructor(
     ): StorageFile? {
         return withContext(dispatcher) {
             val source = getSmbFile(access, existsRequired = true) ?: return@withContext null
-            val targetUri = access.uri.trimEnd('/').replaceAfterLast('/', newName)
+            val targetUri = access.uri.rename(newName)
             val target = getSmbFile(access.copy(currentUri = targetUri)) ?: return@withContext null
             source.renameTo(target)
             target.toStorageFile()

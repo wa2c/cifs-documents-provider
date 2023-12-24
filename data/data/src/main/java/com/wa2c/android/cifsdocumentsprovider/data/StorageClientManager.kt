@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.data
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
@@ -22,6 +23,9 @@ class StorageClientManager(
     /** JCIFS client */
     private val jCifsClient = lazy { JCifsClient(fileOpenLimit) }
 
+    /** Apache FTP client */
+    private val apacheFtpClient = lazy { ApacheFtpClient(fileOpenLimit) }
+
     /**
      * Get client
      */
@@ -30,6 +34,7 @@ class StorageClientManager(
             StorageType.JCIFS -> jCifsNgClient.value
             StorageType.SMBJ -> smbjClient.value
             StorageType.JCIFS_LEGACY -> jCifsClient.value
+            StorageType.APACHE_FTP -> apacheFtpClient.value
         }
     }
 

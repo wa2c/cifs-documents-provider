@@ -17,9 +17,9 @@ interface StorageClient {
 
     suspend fun renameFile(access: StorageAccess, newName: String): StorageFile?
 
-    suspend fun deleteFile(access: StorageAccess): Boolean
-
     suspend fun moveFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile?
+
+    suspend fun deleteFile(access: StorageAccess): Boolean
 
     suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback?
 

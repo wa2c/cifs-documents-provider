@@ -45,6 +45,8 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.android)
     implementation("commons-net:commons-net:3.10.0")
+    implementation("org.apache.commons:commons-vfs2-jackrabbit2:2.9.0")
+
 
     testImplementation(libs.junit)
 }

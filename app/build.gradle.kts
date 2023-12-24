@@ -49,6 +49,13 @@ android {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
+
+    packaging {
+        // For commons-vfs2-jackrabbit2
+        resources.excludes.addAll(setOf(
+            "META-INF/*",
+        ))
+    }
 }
 
 dependencies {

@@ -14,6 +14,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
+import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -216,7 +217,7 @@ class JCifsNgClient constructor(
     ): StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(access, existsRequired = true)?.use { source ->
-                val targetUri = access.uri.trimEnd('/').replaceAfterLast('/', newName)
+                val targetUri = access.uri.rename(newName)
                 getSmbFile(access.copy(currentUri = targetUri))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()

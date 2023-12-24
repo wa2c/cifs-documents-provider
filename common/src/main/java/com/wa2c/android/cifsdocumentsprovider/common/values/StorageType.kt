@@ -12,6 +12,8 @@ enum class StorageType(
     SMBJ("SMBJ"),
     /** JCIFS */
     JCIFS_LEGACY("JCIFS_LEGACY"),
+    /** Apache FTP */
+    APACHE_FTP("APACHE_FTP"),
     ;
 
     companion object {
