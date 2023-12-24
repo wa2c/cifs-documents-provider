@@ -323,23 +323,24 @@ class SmbjClient constructor(
         }
     }
 
+    override suspend fun moveFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile? {
+        return withContext(dispatcher) {
+            copyFile(sourceAccess, targetAccess)?.also {
+                deleteFile(sourceAccess)
+            }
+        }
+    }
+
     override suspend fun deleteFile(access: StorageAccess): Boolean {
         return withContext(dispatcher) {
             useDiskShare(access) { diskShare ->
                 if (diskShare.exists(access.sharePath)) {
                     diskShare.rm(access.sharePath)
+                    sessionCache.remove(access.connection)
                     true
                 } else {
                     false
                 }
-            }
-        }
-    }
-
-    override suspend fun moveFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile? {
-        return withContext(dispatcher) {
-            copyFile(sourceAccess, targetAccess)?.also {
-                deleteFile(sourceAccess)
             }
         }
     }

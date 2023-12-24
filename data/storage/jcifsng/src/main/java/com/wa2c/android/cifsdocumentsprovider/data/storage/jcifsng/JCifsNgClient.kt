@@ -227,20 +227,6 @@ class JCifsNgClient constructor(
     }
 
     /**
-     * Delete file
-     */
-    override suspend fun deleteFile(
-        access: StorageAccess,
-    ): Boolean {
-        return withContext(dispatcher) {
-            getSmbFile(access, existsRequired = true)?.use {
-                it.delete()
-                true
-            } ?: false
-        }
-    }
-
-    /**
      * Move file
      */
     override suspend fun moveFile(
@@ -262,6 +248,21 @@ class JCifsNgClient constructor(
                     deleteFile(sourceAccess)
                 }
             }
+        }
+    }
+
+    /**
+     * Delete file
+     */
+    override suspend fun deleteFile(
+        access: StorageAccess,
+    ): Boolean {
+        return withContext(dispatcher) {
+            getSmbFile(access, existsRequired = true)?.use {
+                it.delete()
+                contextCache.remove(access.connection)
+                true
+            } ?: false
         }
     }
 

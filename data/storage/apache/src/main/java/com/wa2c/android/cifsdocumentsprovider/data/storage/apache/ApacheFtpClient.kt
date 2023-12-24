@@ -2,9 +2,11 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.wa2c.android.cifsdocumentsprovider.common.exception.FileRequiredException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -27,7 +29,6 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
-import java.io.IOException
 import java.time.Duration
 
 class ApacheFtpClient constructor(
@@ -72,7 +73,7 @@ class ApacheFtpClient constructor(
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setConnectTimeout(options,  Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setDataTimeout(options,  Duration.ofMillis(READ_TIMEOUT.toLong()))
-            builder.setControlEncoding(options, "UTF-8")
+            builder.setControlEncoding(options, "UTF-8") // TODO
             builder.setFileType(options, FtpFileType.BINARY)
         }
 
@@ -84,12 +85,26 @@ class ApacheFtpClient constructor(
     /**
      * Get file object
      */
-    private suspend fun getFileObject(access: StorageAccess, ignoreCache: Boolean = false): FileObject? {
+    private suspend fun getFileObject(
+        access: StorageAccess,
+        ignoreCache: Boolean = false,
+        existsRequired: Boolean = false,
+    ): FileObject {
         return withContext(dispatcher) {
             fileManager.resolveFile(access.uri, getContext(access.connection, ignoreCache))
+                .let {
+                    if (existsRequired && !it.exists()) {
+                        throw FileRequiredException()
+                    } else {
+                        it
+                    }
+                }
         }
     }
 
+    /**
+     * Convert to StorageFile
+     */
     private suspend fun FileObject.toStorageFile(): StorageFile {
         val urlText = url.toString()
         return withContext(dispatcher) {
@@ -104,10 +119,12 @@ class ApacheFtpClient constructor(
         }
     }
 
-    override suspend fun checkConnection(access: StorageAccess): ConnectionResult {
+    override suspend fun checkConnection(
+        access: StorageAccess,
+    ): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(access, true) ?: throw IOException()
+                getChildren(access, true)
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -125,9 +142,12 @@ class ApacheFtpClient constructor(
         }
     }
 
-    override suspend fun getFile(access: StorageAccess, ignoreCache: Boolean): StorageFile? {
+    override suspend fun getFile(
+        access: StorageAccess,
+        ignoreCache: Boolean,
+    ): StorageFile {
         return withContext(dispatcher) {
-            getFileObject(access, ignoreCache)?.toStorageFile()
+            getFileObject(access, ignoreCache).toStorageFile()
         }
     }
 
@@ -136,15 +156,18 @@ class ApacheFtpClient constructor(
         ignoreCache: Boolean,
     ): List<StorageFile> {
         return withContext(dispatcher) {
-            getFileObject(access, true)?.children
+            getFileObject(access, ignoreCache = true).children
                 ?.filter { it.exists() }
                 ?.map { it.toStorageFile() } ?: emptyList()
         }
     }
 
-    override suspend fun createFile(access: StorageAccess, mimeType: String?): StorageFile? {
+    override suspend fun createFile(
+        access: StorageAccess,
+        mimeType: String?,
+        ): StorageFile {
         return withContext(dispatcher) {
-            getFileObject(access, true)?.let { fo ->
+            getFileObject(access, ignoreCache = true).let { fo ->
                 fo.createFile()
                 fo.toStorageFile()
             }
@@ -154,20 +177,23 @@ class ApacheFtpClient constructor(
     override suspend fun copyFile(
         sourceAccess: StorageAccess,
         targetAccess: StorageAccess,
-    ): StorageFile? {
+    ): StorageFile {
         return withContext(dispatcher) {
-            val source = getFileObject(targetAccess, true) ?: return@withContext null
-            val target = getFileObject(targetAccess, false) ?: return@withContext null
+            val source = getFileObject(targetAccess, ignoreCache = true, existsRequired = true)
+            val target = getFileObject(targetAccess, ignoreCache = false, existsRequired = false)
             target.copyFrom(source, Selectors.SELECT_SELF_AND_CHILDREN)
             target.toStorageFile()
         }
     }
 
-    override suspend fun renameFile(access: StorageAccess, newName: String): StorageFile? {
+    override suspend fun renameFile(
+        access: StorageAccess,
+        newName: String,
+    ): StorageFile {
         return withContext(dispatcher) {
             val targetUri = access.uri.rename(newName)
-            val source = getFileObject(access, true) ?: return@withContext null
-            val target = getFileObject(access.copy(currentUri = targetUri.rename(newName)), true) ?: return@withContext null
+            val source = getFileObject(access, ignoreCache = true, existsRequired = true)
+            val target = getFileObject(access.copy(currentUri = targetUri.rename(newName)), true)
             source.moveTo(target)
             target.toStorageFile()
         }
@@ -176,18 +202,20 @@ class ApacheFtpClient constructor(
     override suspend fun moveFile(
         sourceAccess: StorageAccess,
         targetAccess: StorageAccess,
-    ): StorageFile? {
+    ): StorageFile {
         return withContext(dispatcher) {
-            val source = getFileObject(targetAccess, true) ?: return@withContext null
-            val target = getFileObject(targetAccess, false) ?: return@withContext null
+            val source = getFileObject(targetAccess, true)
+            val target = getFileObject(targetAccess, false)
             source.moveTo(target)
             target.toStorageFile()
         }
     }
 
-    override suspend fun deleteFile(access: StorageAccess): Boolean {
+    override suspend fun deleteFile(
+        access: StorageAccess,
+    ): Boolean {
         return withContext(dispatcher) {
-            getFileObject(access, true)?.delete()
+            getFileObject(access, ignoreCache = true).delete()
             true
         }
     }
@@ -197,7 +225,14 @@ class ApacheFtpClient constructor(
         mode: AccessMode,
         onFileRelease: suspend () -> Unit,
     ): ProxyFileDescriptorCallback? {
-        TODO("Not yet implemented")
+        return withContext(dispatcher) {
+            val file = getFileObject(access, existsRequired = true) ?: return@withContext null
+            val release: suspend () -> Unit = {
+                try { file.close() } catch (e: Exception) { logE(e) }
+                onFileRelease()
+            }
+            ApacheFtpProxyFileCallbackSafe(file, mode, release)
+        }
     }
 
     override suspend fun close() {

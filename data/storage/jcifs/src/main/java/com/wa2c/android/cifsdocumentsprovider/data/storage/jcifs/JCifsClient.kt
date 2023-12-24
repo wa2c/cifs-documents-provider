@@ -210,18 +210,6 @@ class JCifsClient constructor(
     }
 
     /**
-     * Delete file
-     */
-    override suspend fun deleteFile(
-        access: StorageAccess,
-    ): Boolean {
-        return withContext(dispatcher) {
-            getSmbFile(access, existsRequired = true)?.delete() ?: return@withContext false
-            true
-        }
-    }
-
-    /**
      * Move file
      */
     override suspend fun moveFile(
@@ -241,6 +229,19 @@ class JCifsClient constructor(
                     deleteFile(sourceAccess)
                 }
             }
+        }
+    }
+
+    /**
+     * Delete file
+     */
+    override suspend fun deleteFile(
+        access: StorageAccess,
+    ): Boolean {
+        return withContext(dispatcher) {
+            getSmbFile(access, existsRequired = true)?.delete() ?: return@withContext false
+            contextCache.remove(access.connection)
+            true
         }
     }
 
