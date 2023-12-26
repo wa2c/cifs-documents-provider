@@ -6,7 +6,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -152,8 +152,8 @@ internal object DomainMapper {
     /**
      * Convert data model to data request model.
      */
-    fun StorageConnection.toStorageRequest(inputUri: String?): StorageAccess {
-        return StorageAccess(
+    fun StorageConnection.toStorageRequest(inputUri: String?): StorageRequest {
+        return StorageRequest(
             connection = this,
             currentUri = inputUri
         )

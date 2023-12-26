@@ -13,7 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -86,12 +86,12 @@ class ApacheFtpClient(
      * Get file object
      */
     private suspend fun getFileObject(
-        access: StorageAccess,
+        request: StorageRequest,
         ignoreCache: Boolean = false,
         existsRequired: Boolean = false,
     ): FileObject {
         return withContext(dispatcher) {
-            fileManager.resolveFile(access.uri, getContext(access.connection, ignoreCache))
+            fileManager.resolveFile(request.uri, getContext(request.connection, ignoreCache))
                 .let {
                     if (existsRequired && !it.exists()) {
                         throw FileRequiredException()
@@ -120,11 +120,11 @@ class ApacheFtpClient(
     }
 
     override suspend fun checkConnection(
-        access: StorageAccess,
+        request: StorageRequest,
     ): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(access, true)
+                getChildren(request, true)
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -137,37 +137,37 @@ class ApacheFtpClient(
                     ConnectionResult.Failure(c)
                 }
             } finally {
-                contextCache.remove(access.connection)
+                contextCache.remove(request.connection)
             }
         }
     }
 
     override suspend fun getFile(
-        access: StorageAccess,
+        request: StorageRequest,
         ignoreCache: Boolean,
     ): StorageFile {
         return withContext(dispatcher) {
-            getFileObject(access, ignoreCache).toStorageFile()
+            getFileObject(request, ignoreCache).toStorageFile()
         }
     }
 
     override suspend fun getChildren(
-        access: StorageAccess,
+        request: StorageRequest,
         ignoreCache: Boolean,
     ): List<StorageFile> {
         return withContext(dispatcher) {
-            getFileObject(access, ignoreCache = true).children
+            getFileObject(request, ignoreCache = true).children
                 ?.filter { it.exists() }
                 ?.map { it.toStorageFile() } ?: emptyList()
         }
     }
 
     override suspend fun createFile(
-        access: StorageAccess,
+        request: StorageRequest,
         mimeType: String?,
         ): StorageFile {
         return withContext(dispatcher) {
-            getFileObject(access, ignoreCache = true).let { fo ->
+            getFileObject(request, ignoreCache = true).let { fo ->
                 fo.createFile()
                 fo.toStorageFile()
             }
@@ -175,58 +175,58 @@ class ApacheFtpClient(
     }
 
     override suspend fun copyFile(
-        sourceAccess: StorageAccess,
-        targetAccess: StorageAccess,
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
     ): StorageFile {
         return withContext(dispatcher) {
-            val source = getFileObject(targetAccess, ignoreCache = true, existsRequired = true)
-            val target = getFileObject(targetAccess, ignoreCache = false, existsRequired = false)
+            val source = getFileObject(sourceRequest, ignoreCache = true, existsRequired = true)
+            val target = getFileObject(targetRequest, ignoreCache = false, existsRequired = false)
             target.copyFrom(source, Selectors.SELECT_SELF_AND_CHILDREN)
             target.toStorageFile()
         }
     }
 
     override suspend fun renameFile(
-        access: StorageAccess,
+        request: StorageRequest,
         newName: String,
     ): StorageFile {
         return withContext(dispatcher) {
-            val targetUri = access.uri.rename(newName)
-            val source = getFileObject(access, ignoreCache = true, existsRequired = true)
-            val target = getFileObject(access.copy(currentUri = targetUri.rename(newName)), true)
+            val targetUri = request.uri.rename(newName)
+            val source = getFileObject(request, ignoreCache = true, existsRequired = true)
+            val target = getFileObject(request.copy(currentUri = targetUri.rename(newName)), true)
             source.moveTo(target)
             target.toStorageFile()
         }
     }
 
     override suspend fun moveFile(
-        sourceAccess: StorageAccess,
-        targetAccess: StorageAccess,
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
     ): StorageFile {
         return withContext(dispatcher) {
-            val source = getFileObject(targetAccess, true)
-            val target = getFileObject(targetAccess, false)
+            val source = getFileObject(sourceRequest, true)
+            val target = getFileObject(targetRequest, false)
             source.moveTo(target)
             target.toStorageFile()
         }
     }
 
     override suspend fun deleteFile(
-        access: StorageAccess,
+        request: StorageRequest,
     ): Boolean {
         return withContext(dispatcher) {
-            getFileObject(access, ignoreCache = true).delete()
+            getFileObject(request, ignoreCache = true).delete()
             true
         }
     }
 
     override suspend fun getFileDescriptor(
-        access: StorageAccess,
+        request: StorageRequest,
         mode: AccessMode,
         onFileRelease: suspend () -> Unit,
     ): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getFileObject(access, existsRequired = true)
+            val file = getFileObject(request, existsRequired = true)
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()

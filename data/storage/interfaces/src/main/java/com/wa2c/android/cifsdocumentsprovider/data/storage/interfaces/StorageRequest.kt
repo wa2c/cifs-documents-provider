@@ -4,9 +4,9 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 
 /**
- * Storage Connection
+ * Storage Request
  */
-data class StorageAccess(
+data class StorageRequest(
     val connection: StorageConnection,
     val currentUri: String? = null,
 ) {

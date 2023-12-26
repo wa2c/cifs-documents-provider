@@ -5,23 +5,23 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 interface StorageClient {
 
-    suspend fun checkConnection(access: StorageAccess): ConnectionResult
+    suspend fun checkConnection(request: StorageRequest): ConnectionResult
 
-    suspend fun getFile(access: StorageAccess, ignoreCache: Boolean = false): StorageFile?
+    suspend fun getFile(request: StorageRequest, ignoreCache: Boolean = false): StorageFile?
 
-    suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean = false): List<StorageFile>?
+    suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean = false): List<StorageFile>?
 
-    suspend fun createFile(access: StorageAccess, mimeType: String?): StorageFile?
+    suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile?
 
-    suspend fun copyFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile?
+    suspend fun copyFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile?
 
-    suspend fun renameFile(access: StorageAccess, newName: String): StorageFile?
+    suspend fun renameFile(request: StorageRequest, newName: String): StorageFile?
 
-    suspend fun moveFile(sourceAccess: StorageAccess, targetAccess: StorageAccess): StorageFile?
+    suspend fun moveFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile?
 
-    suspend fun deleteFile(access: StorageAccess): Boolean
+    suspend fun deleteFile(request: StorageRequest): Boolean
 
-    suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback?
+    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback?
 
     suspend fun close()
 

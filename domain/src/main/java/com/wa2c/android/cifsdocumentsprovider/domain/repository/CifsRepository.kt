@@ -12,7 +12,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
@@ -65,15 +65,15 @@ class CifsRepository @Inject internal constructor(
     }.distinctUntilChanged()
 
     /** File blocking queue */
-    private val fileBlockingQueue = ArrayBlockingQueue<StorageAccess>(appPreferences.openFileLimitFlow.getFirst())
+    private val fileBlockingQueue = ArrayBlockingQueue<StorageRequest>(appPreferences.openFileLimitFlow.getFirst())
 
-    private suspend fun addBlockingQueue(access: StorageAccess) {
-        fileBlockingQueue.put(access)
+    private suspend fun addBlockingQueue(request: StorageRequest) {
+        fileBlockingQueue.put(request)
         updateOpeningFiles()
         logD("Queue added: size=${fileBlockingQueue.count()}")
     }
-    private suspend fun removeBlockingQueue(access: StorageAccess) {
-        fileBlockingQueue.remove(access)
+    private suspend fun removeBlockingQueue(request: StorageRequest) {
+        fileBlockingQueue.remove(request)
         updateOpeningFiles()
         logD("Queue removed: size=${fileBlockingQueue.count()}")
     }
@@ -82,12 +82,12 @@ class CifsRepository @Inject internal constructor(
         _openUriList.emit(fileBlockingQueue.map { it.uri.toUri() })
     }
 
-    private suspend fun <T> runFileBlocking(access: StorageAccess, process: suspend () -> T): T {
+    private suspend fun <T> runFileBlocking(request: StorageRequest, process: suspend () -> T): T {
         return try {
-            addBlockingQueue(access)
+            addBlockingQueue(request)
             process()
         } finally {
-            removeBlockingQueue(access)
+            removeBlockingQueue(request)
         }
     }
 
@@ -151,9 +151,9 @@ class CifsRepository @Inject internal constructor(
     }
 
     /**
-     * Get storage access from URI
+     * Get storage request from URI
      */
-    private suspend fun getStorageAccess(uriText: String?, connection: CifsConnection? = null): StorageAccess? {
+    private suspend fun getStorageRequest(uriText: String?, connection: CifsConnection? = null): StorageRequest? {
         return  withContext(dispatcher) {
             connection?.let { connection.toDataModel().toStorageRequest(uriText) } ?: uriText?.let { uri ->
                 connectionSettingDao.getEntityByUri(uri)?.toDataModel()?.toStorageRequest(uriText)
@@ -188,9 +188,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun getFile(uri: String?, connection: CifsConnection? = null): CifsFile? {
         logD("getFile: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
-            val access = getStorageAccess(uri, connection) ?: return@withContext null
-            runFileBlocking(access) {
-                getClient(access.connection).getFile(access)?.toModel()
+            val request = getStorageRequest(uri, connection) ?: return@withContext null
+            runFileBlocking(request) {
+                getClient(request.connection).getFile(request)?.toModel()
             }
         }
     }
@@ -201,9 +201,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun getFileChildren(uri: String?, connection: CifsConnection? = null): List<CifsFile> {
         logD("getFileChildren: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
-            val access = getStorageAccess(uri, connection) ?: return@withContext emptyList()
-            runFileBlocking(access) {
-                getClient(access.connection).getChildren(access)?.map { it.toModel() } ?: emptyList()
+            val request = getStorageRequest(uri, connection) ?: return@withContext emptyList()
+            runFileBlocking(request) {
+                getClient(request.connection).getChildren(request)?.map { it.toModel() } ?: emptyList()
             }
         }
     }
@@ -214,9 +214,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun createFile(uri: String, mimeType: String?): CifsFile? {
         logD("createFile: uri=$uri, mimeType=$mimeType")
         return withContext(dispatcher) {
-            val access = getStorageAccess(uri) ?: return@withContext null
-            runFileBlocking(access) {
-                getClient(access.connection).createFile(access, mimeType)?.toModel()
+            val request = getStorageRequest(uri) ?: return@withContext null
+            runFileBlocking(request) {
+                getClient(request.connection).createFile(request, mimeType)?.toModel()
             }
         }
     }
@@ -227,9 +227,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun deleteFile(uri: String): Boolean {
         logD("deleteFile: uri=$uri")
         return withContext(dispatcher) {
-            val access = getStorageAccess(uri) ?: return@withContext false
-            runFileBlocking(access) {
-                getClient(access.connection).deleteFile(access)
+            val request = getStorageRequest(uri) ?: return@withContext false
+            runFileBlocking(request) {
+                getClient(request.connection).deleteFile(request)
             }
         }
     }
@@ -240,9 +240,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
         logD("renameFile: sourceUri=$sourceUri, newName=$newName")
         return withContext(dispatcher) {
-            val access = getStorageAccess(sourceUri) ?: return@withContext null
-            runFileBlocking(access) {
-                getClient(access.connection).renameFile(access, newName)?.toModel()
+            val request = getStorageRequest(sourceUri) ?: return@withContext null
+            runFileBlocking(request) {
+                getClient(request.connection).renameFile(request, newName)?.toModel()
             }
         }
     }
@@ -253,11 +253,11 @@ class CifsRepository @Inject internal constructor(
     suspend fun copyFile(sourceUri: String, targetUri: String): CifsFile? {
         logD("copyFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
-            val sourceAccess = getStorageAccess(sourceUri) ?: return@withContext null
-            val targetAccess = getStorageAccess(targetUri) ?: return@withContext null
-            runFileBlocking(sourceAccess) {
-                runFileBlocking(targetAccess) {
-                    getClient(sourceAccess.connection).copyFile(sourceAccess, targetAccess)?.toModel()
+            val sourceRequest = getStorageRequest(sourceUri) ?: return@withContext null
+            val targetRequest = getStorageRequest(targetUri) ?: return@withContext null
+            runFileBlocking(sourceRequest) {
+                runFileBlocking(targetRequest) {
+                    getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.toModel()
                 }
             }
         }
@@ -269,11 +269,11 @@ class CifsRepository @Inject internal constructor(
     suspend fun moveFile(sourceUri: String, targetUri: String): CifsFile? {
         logD("moveFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
-            val sourceAccess = getStorageAccess(sourceUri) ?: return@withContext null
-            val targetAccess = getStorageAccess(targetUri) ?: return@withContext null
-            runFileBlocking(sourceAccess) {
-                runFileBlocking(targetAccess) {
-                    getClient(sourceAccess.connection).moveFile(sourceAccess, targetAccess)?.toModel()
+            val sourceRequest = getStorageRequest(sourceUri) ?: return@withContext null
+            val targetRequest = getStorageRequest(targetUri) ?: return@withContext null
+            runFileBlocking(sourceRequest) {
+                runFileBlocking(targetRequest) {
+                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)?.toModel()
                 }
             }
         }
@@ -285,9 +285,9 @@ class CifsRepository @Inject internal constructor(
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(dispatcher) {
-            val access = connection.toDataModel().toStorageRequest(null)
-            runFileBlocking(access) {
-                getClient(access.connection).checkConnection(access)
+            val request = connection.toDataModel().toStorageRequest(null)
+            runFileBlocking(request) {
+                getClient(request.connection).checkConnection(request)
             }
         }
     }
@@ -298,20 +298,20 @@ class CifsRepository @Inject internal constructor(
     suspend fun getCallback(uri: String, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
-            val access = getStorageAccess(uri) ?: return@withContext null
+            val request = getStorageRequest(uri) ?: return@withContext null
             try {
-                addBlockingQueue(access)
-                getClient(access.connection).getFileDescriptor(access, mode) {
+                addBlockingQueue(request)
+                getClient(request.connection).getFileDescriptor(request, mode) {
                     logD("releaseCallback: uri=$uri, mode=$mode")
                     onFileRelease()
-                    removeBlockingQueue(access)
+                    removeBlockingQueue(request)
                 } ?: let {
-                    removeBlockingQueue(access)
+                    removeBlockingQueue(request)
                     null
                 }
             } catch (e: Exception) {
                 logE(e)
-                removeBlockingQueue(access)
+                removeBlockingQueue(request)
                 throw e
             }
         }
