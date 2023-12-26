@@ -6,7 +6,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
-import com.wa2c.android.cifsdocumentsprovider.data.preference.EncryptUtils
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -21,76 +20,53 @@ import java.util.*
  */
 internal object DomainMapper {
 
-    /**
-     * Convert model to data.
-     */
-    fun ConnectionSettingEntity.toModel(): CifsConnection {
-        return EncryptUtils.decrypt(this.data).let { dataText ->
+    private val formatter = Json {
+        ignoreUnknownKeys = true
+    }
 
-            dataText.decodeJson()
+    private fun jsonToStorageConnection(type: StorageType, json: String): StorageConnection {
+        return when (type) {
+            StorageType.JCIFS,
+            StorageType.SMBJ,
+            StorageType.JCIFS_LEGACY -> {
+                formatter.decodeFromString<StorageConnection.Cifs>(json)
+            }
+            StorageType.APACHE_FTP -> {
+                formatter.decodeFromString<StorageConnection.Ftp>(json)
+            }
         }
     }
 
     /**
-     * Convert to data from model.
+     * Convert db model to data model.
      */
-    fun CifsConnection.toEntity(
+    fun ConnectionSettingEntity.toDataModel(): StorageConnection? {
+        val type = StorageType.findByValue(this.type) ?: return null
+        val json = EncryptUtils.decrypt(this.data)
+        return jsonToStorageConnection(type, json)
+    }
+
+    /**
+     * Convert data model to db model.
+     */
+    fun StorageConnection.toEntityModel(
         sortOrder: Int,
         modifiedDate: Date,
     ): ConnectionSettingEntity {
         return ConnectionSettingEntity(
             id = this.id,
             name = this.name,
-            uri = this.folderSmbUri,
+            uri = this.uri,
             type = this.storage.value,
-            data = EncryptUtils.encrypt(this.encodeJson())  ,
+            data = EncryptUtils.encrypt(formatter.encodeToString(this))  ,
             sortOrder = sortOrder,
             modifiedDate = modifiedDate.time
         )
     }
 
-    private val formatter = Json {
-        ignoreUnknownKeys = true
-    }
-
-    fun CifsConnection.encodeJson(): String {
-        return formatter.encodeToString(this)
-    }
-
-    fun String.decodeJson(): CifsConnection {
-        return formatter.decodeFromString(this)
-    }
-
-
     /**
-     * Convert to send data from storage file.
+     * Convert domain model to data model.
      */
-    fun StorageFile.toSendData(mimeType: String, targetFileUri: Uri, exists: Boolean): SendData {
-        return SendData(
-            id = generateUUID(),
-            name = name,
-            size = size,
-            mimeType = mimeType,
-            sourceFileUri = uri.toUri(),
-            targetFileUri = targetFileUri,
-        ).let {
-            if (exists) {
-                it.copy(state = SendDataState.CONFIRM)
-            } else {
-                it
-            }
-        }
-    }
-
-
-    fun CifsConnection.toStorageAccess(inputUri: String?): StorageAccess {
-        return StorageAccess(
-            connection = this.toDataModel(),
-            currentUri = inputUri
-        )
-    }
-
-
     fun CifsConnection.toDataModel(): StorageConnection {
         return when (storage){
             StorageType.JCIFS,
@@ -131,47 +107,76 @@ internal object DomainMapper {
         }
     }
 
+    /**
+     * Convert data model to domain model.
+     */
     fun StorageConnection.toDomainModel(): CifsConnection {
         return when (this) {
-            is StorageConnection.Cifs -> this.toDomainModel()
-            is StorageConnection.Ftp -> this.toDomainModel()
+            is StorageConnection.Cifs -> {
+                CifsConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    enableDfs = enableDfs,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
+            is StorageConnection.Ftp -> {
+                CifsConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    enableDfs = true, // TODO
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
         }
     }
 
-    private fun StorageConnection.Cifs.toDomainModel(): CifsConnection {
-        return CifsConnection(
-            id = id,
-            name = name,
-            storage = storage,
-            domain = domain,
-            host = host,
-            port = port,
-            enableDfs = enableDfs,
-            folder = folder,
-            user = user,
-            password = password,
-            anonymous = anonymous,
-            extension = extension,
-            safeTransfer = safeTransfer,
+    /**
+     * Convert data model to data request model.
+     */
+    fun StorageConnection.toStorageRequest(inputUri: String?): StorageAccess {
+        return StorageAccess(
+            connection = this,
+            currentUri = inputUri
         )
     }
 
-    private fun StorageConnection.Ftp.toDomainModel(): CifsConnection {
-        return CifsConnection(
-            id = id,
+    /**
+     * Convert to send data from storage file.
+     */
+    fun StorageFile.toSendData(mimeType: String, targetFileUri: Uri, exists: Boolean): SendData {
+        return SendData(
+            id = generateUUID(),
             name = name,
-            storage = storage,
-            domain = domain,
-            host = host,
-            port = port,
-            enableDfs = true, // TODO
-            folder = folder,
-            user = user,
-            password = password,
-            anonymous = anonymous,
-            extension = extension,
-            safeTransfer = safeTransfer,
-        )
+            size = size,
+            mimeType = mimeType,
+            sourceFileUri = uri.toUri(),
+            targetFileUri = targetFileUri,
+        ).let {
+            if (exists) {
+                it.copy(state = SendDataState.CONFIRM)
+            } else {
+                it
+            }
+        }
     }
 
 }

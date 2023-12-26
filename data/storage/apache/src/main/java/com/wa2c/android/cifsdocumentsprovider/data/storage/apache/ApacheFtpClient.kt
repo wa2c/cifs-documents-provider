@@ -31,7 +31,7 @@ import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
 import java.time.Duration
 
-class ApacheFtpClient constructor(
+class ApacheFtpClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -226,7 +226,7 @@ class ApacheFtpClient constructor(
         onFileRelease: suspend () -> Unit,
     ): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getFileObject(access, existsRequired = true) ?: return@withContext null
+            val file = getFileObject(access, existsRequired = true)
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()

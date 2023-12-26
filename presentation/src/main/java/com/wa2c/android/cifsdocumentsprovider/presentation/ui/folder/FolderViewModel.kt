@@ -26,9 +26,9 @@ class FolderViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val temporaryConnection: CifsConnection = runBlocking {
-        cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
-    }
+    private val temporaryConnection: CifsConnection
+        get() = cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+
 
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 val applicationId: String by rootProject.extra
@@ -41,6 +42,6 @@ android {
 
 dependencies {
     implementation(project(":common"))
-
+    implementation(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 }

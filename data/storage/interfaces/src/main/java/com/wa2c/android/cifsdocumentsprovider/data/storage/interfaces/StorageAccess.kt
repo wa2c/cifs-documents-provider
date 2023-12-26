@@ -13,7 +13,7 @@ data class StorageAccess(
 
     /** URI */
     val uri: String
-        get() = currentUri ?: connection.fileUri
+        get() = currentUri ?: connection.uri
 
     /** Share name */
     val shareName: String

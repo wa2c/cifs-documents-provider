@@ -7,6 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
 import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
@@ -15,11 +16,10 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAcc
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.decodeJson
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.encodeJson
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntity
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageAccess
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntityModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile.Companion.toModel
@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.Date
@@ -45,6 +44,7 @@ class CifsRepository @Inject internal constructor(
     private val storageClientManager: StorageClientManager,
     private val appPreferences: AppPreferencesDataStore,
     private val connectionSettingDao: ConnectionSettingDao,
+    private val memoryCache: MemoryCache,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
     /** Use as local */
@@ -52,7 +52,7 @@ class CifsRepository @Inject internal constructor(
 
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
-        list.map { it.toModel() }
+        list.mapNotNull { it.toDataModel()?.toDomainModel() }
     }
 
     /** Connected file uri list */
@@ -101,7 +101,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun getConnection(id: String): CifsConnection? {
         logD("getConnection: id=$id")
         return withContext(dispatcher) {
-            connectionSettingDao.getEntity(id)?.toModel()
+            connectionSettingDao.getEntity(id)?.toDataModel()?.toDomainModel()
         }
     }
 
@@ -111,7 +111,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun loadConnection(): List<CifsConnection>  {
         logD("loadConnection")
         return withContext(dispatcher) {
-            connectionSettingDao.getList().first().map { it.toModel() }
+            connectionSettingDao.getList().first().mapNotNull { it.toDataModel()?.toDomainModel() }
         }
     }
 
@@ -121,12 +121,13 @@ class CifsRepository @Inject internal constructor(
     suspend fun saveConnection(connection: CifsConnection) {
         logD("saveConnection: connection=$connection")
         withContext(dispatcher) {
+            val storageConnection = connection.toDataModel()
             val existsEntity = connectionSettingDao.getEntity(connection.id)
             val entity = existsEntity?.let {
-                connection.toEntity(sortOrder = it.sortOrder, modifiedDate = Date())
+                storageConnection.toEntityModel(sortOrder = it.sortOrder, modifiedDate = Date())
             } ?: let {
                 val order = connectionSettingDao.getMaxSortOrder()
-                connection.toEntity(sortOrder = order + 1, modifiedDate = Date())
+                storageConnection.toEntityModel(sortOrder = order + 1, modifiedDate = Date())
             }
             connectionSettingDao.insert(entity)
         }
@@ -136,21 +137,17 @@ class CifsRepository @Inject internal constructor(
     /**
      * Load temporary connection
      */
-    suspend fun loadTemporaryConnection(): CifsConnection?  {
+    fun loadTemporaryConnection(): CifsConnection?  {
         logD("loadTemporaryConnection")
-        return withContext(dispatcher) {
-            appPreferences.temporaryConnectionJsonFlow.firstOrNull()?.decodeJson()
-        }
+        return memoryCache.temporaryConnection?.toDomainModel()
     }
 
     /**
      * Save temporary connection
      */
-    suspend fun saveTemporaryConnection(connection: CifsConnection?) {
+    fun saveTemporaryConnection(connection: CifsConnection?) {
         logD("saveTemporaryConnection: connection=$connection")
-        withContext(dispatcher) {
-            appPreferences.setTemporaryConnectionJson(connection?.encodeJson())
-        }
+        memoryCache.temporaryConnection = connection?.toDataModel()
     }
 
     /**
@@ -158,8 +155,8 @@ class CifsRepository @Inject internal constructor(
      */
     private suspend fun getStorageAccess(uriText: String?, connection: CifsConnection? = null): StorageAccess? {
         return  withContext(dispatcher) {
-            connection?.let { connection.toStorageAccess(uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toModel()?.toStorageAccess(uriText)
+            connection?.let { connection.toDataModel().toStorageRequest(uriText) } ?: uriText?.let { uri ->
+                connectionSettingDao.getEntityByUri(uri)?.toDataModel()?.toStorageRequest(uriText)
             }
         }
     }
@@ -288,7 +285,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(dispatcher) {
-            val access = connection.toStorageAccess(null)
+            val access = connection.toDataModel().toStorageRequest(null)
             runFileBlocking(access) {
                 getClient(access.connection).checkConnection(access)
             }

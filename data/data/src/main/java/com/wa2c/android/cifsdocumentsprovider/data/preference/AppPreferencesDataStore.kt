@@ -65,20 +65,15 @@ class AppPreferencesDataStore @Inject constructor(
     /** Use foreground to make the app resilient to closing by Android OS */
     suspend fun setUseForeground(value: Boolean) = dataStore.setValue(PREFKEY_USE_FOREGROUND, value)
 
-    /** Temporary connection */
-    val temporaryConnectionJsonFlow: Flow<String?> = dataStore.data.map { it[PREFKEY_TEMPORARY_CONNECTION_JSON]?.let { EncryptUtils.decrypt(it) } }
-
-    /** Temporary connection */
-    suspend fun setTemporaryConnectionJson(value: String?) = dataStore.setValue(PREFKEY_TEMPORARY_CONNECTION_JSON, value?.let { EncryptUtils.encrypt(it) })
-
-
     /**
      * Migrate
      */
     suspend fun migrate() {
         val language = stringPreferencesKey("prefkey_language")
+        val temporaryConnectionJson = stringPreferencesKey("prefkey_temporary_connection_json")
         dataStore.edit { edit ->
             if (edit.contains(language)) edit.remove(language)
+            if (edit.contains(temporaryConnectionJson)) edit.remove(temporaryConnectionJson)
         }
     }
 
@@ -104,7 +99,6 @@ class AppPreferencesDataStore @Inject constructor(
         private val PREFKEY_OPEN_FILE_LIMIT = intPreferencesKey("prefkey_open_file_limit")
         private val PREFKEY_USE_AS_LOCAL = booleanPreferencesKey("prefkey_use_as_local")
         private val PREFKEY_USE_FOREGROUND = booleanPreferencesKey("prefkey_use_foreground")
-        private val PREFKEY_TEMPORARY_CONNECTION_JSON = stringPreferencesKey("prefkey_temporary_connection_json")
     }
 
 }

@@ -221,7 +221,7 @@ class SmbjClient(
             if (access.isRoot) {
                 StorageFile(
                     access.connection.name,
-                    access.connection.fileUri,
+                    access.connection.uri,
                     0,
                     0,
                     true,

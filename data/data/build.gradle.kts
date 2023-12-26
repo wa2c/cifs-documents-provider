@@ -21,8 +21,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "K", "\"com.wa2c.android\"")
-
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }

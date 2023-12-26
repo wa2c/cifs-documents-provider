@@ -4,10 +4,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.getFtpUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
+import kotlinx.serialization.Serializable
 
 /**
  * Storage Connection
  */
+@Serializable
 sealed class StorageConnection {
     abstract val id: String
     abstract val name: String
@@ -22,7 +24,7 @@ sealed class StorageConnection {
     abstract val extension: Boolean
     abstract val safeTransfer: Boolean
 
-    abstract val fileUri: String
+    abstract val uri: String
 
     val isAnonymous: Boolean
         get() = anonymous
@@ -34,7 +36,7 @@ sealed class StorageConnection {
     /**
      * CIFS/SMB
      */
-
+    @Serializable
     data class Cifs(
         override val id: String,
         override val name: String,
@@ -50,13 +52,14 @@ sealed class StorageConnection {
         override val safeTransfer: Boolean,
         val enableDfs: Boolean,
     ) : StorageConnection() {
-        override val fileUri: String
+        override val uri: String
             get() = getSmbUri(host, port, folder, true)
     }
 
     /**
      * FTP
      */
+    @Serializable
     data class Ftp(
         override val id: String,
         override val name: String,
@@ -71,7 +74,7 @@ sealed class StorageConnection {
         override val extension: Boolean,
         override val safeTransfer: Boolean,
     ) : StorageConnection() {
-        override val fileUri: String
+        override val uri: String
             get() = getFtpUri(host, port, folder, true)
     }
 }
