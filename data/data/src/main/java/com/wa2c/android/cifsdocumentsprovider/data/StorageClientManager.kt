@@ -45,6 +45,7 @@ class StorageClientManager(
         if (jCifsNgClient.isInitialized()) jCifsNgClient.value.close()
         if (smbjClient.isInitialized()) smbjClient.value.close()
         if (jCifsClient.isInitialized()) jCifsClient.value.close()
+        if (apacheFtpClient.isInitialized()) apacheFtpClient.value.close()
     }
 
 }

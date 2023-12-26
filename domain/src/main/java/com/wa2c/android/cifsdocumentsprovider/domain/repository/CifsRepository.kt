@@ -19,8 +19,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.decodeJ
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.encodeJson
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntity
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageAccess
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection.Companion.toAccess
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile.Companion.toModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -158,8 +158,8 @@ class CifsRepository @Inject internal constructor(
      */
     private suspend fun getStorageAccess(uriText: String?, connection: CifsConnection? = null): StorageAccess? {
         return  withContext(dispatcher) {
-            connection?.let { connection.toAccess(uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toModel()?.toAccess(uriText)
+            connection?.let { connection.toStorageAccess(uriText) } ?: uriText?.let { uri ->
+                connectionSettingDao.getEntityByUri(uri)?.toModel()?.toStorageAccess(uriText)
             }
         }
     }
@@ -288,7 +288,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
         logD("Connection check: ${connection.folderSmbUri}")
         return withContext(dispatcher) {
-            val access = connection.toAccess(null)
+            val access = connection.toStorageAccess(null)
             runFileBlocking(access) {
                 getClient(access.connection).checkConnection(access)
             }

@@ -44,7 +44,7 @@ import java.io.IOException
 /**
  * SMBJ Client
  */
-class SmbjClient constructor(
+class SmbjClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -84,7 +84,7 @@ class SmbjClient constructor(
     /**
      * Get session
      */
-    private fun getSession(connection: StorageConnection, forced: Boolean = false): Session {
+    private fun getSession(connection: StorageConnection.Cifs, forced: Boolean = false): Session {
         return if (!forced) { sessionCache[connection]?.takeIf { it.connection.isConnected } } else { null } ?: let {
             val config = SmbConfig.builder()
                 .withDfsEnabled(connection.enableDfs)
@@ -124,9 +124,10 @@ class SmbjClient constructor(
      * Get DiskShare
      */
     private fun <T> useDiskShare(access:StorageAccess , forced: Boolean = false, process: (DiskShare) -> T): T {
-        val key = access.connection.copy(folder = access.shareName)
+        val connection = access.connection as StorageConnection.Cifs
+        val key = connection.copy(folder = access.shareName)
         val diskShare = if (!forced) { diskShareCache[key]?.takeIf { it.isConnected } } else { null } ?: let {
-            (getSession(access.connection, forced).connectShare(access.shareName) as DiskShare).also {
+            (getSession(connection, forced).connectShare(access.shareName) as DiskShare).also {
                 diskShareCache.put(key, it)
             }
         }
@@ -220,7 +221,7 @@ class SmbjClient constructor(
             if (access.isRoot) {
                 StorageFile(
                     access.connection.name,
-                    access.connection.smbUri,
+                    access.connection.fileUri,
                     0,
                     0,
                     true,
@@ -239,7 +240,8 @@ class SmbjClient constructor(
         return withContext(dispatcher) {
             if (access.isRoot) {
                 // Root
-                val session = getSession(access.connection, ignoreCache)
+                val connection = access.connection as StorageConnection.Cifs
+                val session = getSession(connection, ignoreCache)
                 val transport = SMBTransportFactories.SRVSVC.getTransport(session)
                 val serverService = ServerService(transport)
                 serverService.shares0

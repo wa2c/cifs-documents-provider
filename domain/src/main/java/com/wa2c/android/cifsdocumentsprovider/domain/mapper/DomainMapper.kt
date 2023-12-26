@@ -4,8 +4,11 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.preference.EncryptUtils
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
@@ -22,7 +25,10 @@ internal object DomainMapper {
      * Convert model to data.
      */
     fun ConnectionSettingEntity.toModel(): CifsConnection {
-        return EncryptUtils.decrypt(this.data).decodeJson()
+        return EncryptUtils.decrypt(this.data).let { dataText ->
+
+            dataText.decodeJson()
+        }
     }
 
     /**
@@ -74,6 +80,98 @@ internal object DomainMapper {
                 it
             }
         }
+    }
+
+
+    fun CifsConnection.toStorageAccess(inputUri: String?): StorageAccess {
+        return StorageAccess(
+            connection = this.toDataModel(),
+            currentUri = inputUri
+        )
+    }
+
+
+    fun CifsConnection.toDataModel(): StorageConnection {
+        return when (storage){
+            StorageType.JCIFS,
+            StorageType.SMBJ,
+            StorageType.JCIFS_LEGACY -> {
+                 StorageConnection.Cifs(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                    enableDfs = enableDfs,
+                )
+            }
+            StorageType.APACHE_FTP -> {
+                StorageConnection.Ftp(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
+        }
+    }
+
+    fun StorageConnection.toDomainModel(): CifsConnection {
+        return when (this) {
+            is StorageConnection.Cifs -> this.toDomainModel()
+            is StorageConnection.Ftp -> this.toDomainModel()
+        }
+    }
+
+    private fun StorageConnection.Cifs.toDomainModel(): CifsConnection {
+        return CifsConnection(
+            id = id,
+            name = name,
+            storage = storage,
+            domain = domain,
+            host = host,
+            port = port,
+            enableDfs = enableDfs,
+            folder = folder,
+            user = user,
+            password = password,
+            anonymous = anonymous,
+            extension = extension,
+            safeTransfer = safeTransfer,
+        )
+    }
+
+    private fun StorageConnection.Ftp.toDomainModel(): CifsConnection {
+        return CifsConnection(
+            id = id,
+            name = name,
+            storage = storage,
+            domain = domain,
+            host = host,
+            port = port,
+            enableDfs = true, // TODO
+            folder = folder,
+            user = user,
+            password = password,
+            anonymous = anonymous,
+            extension = extension,
+            safeTransfer = safeTransfer,
+        )
     }
 
 }

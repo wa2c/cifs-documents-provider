@@ -52,28 +52,6 @@ data class CifsConnection(
 
         const val NEW_ID = ""
 
-        fun CifsConnection.toAccess(inputUri: String?): StorageAccess {
-            return StorageAccess(
-                StorageConnection(
-                    id = id,
-                    name = name,
-                    storage = storage,
-                    domain = domain,
-                    host = host,
-                    port = port,
-                    enableDfs = enableDfs,
-                    folder = folder,
-                    user = user,
-                    password = password,
-                    anonymous = anonymous,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
-                ),
-                currentUri = inputUri
-            )
-        }
-
-
         /**
          * Create from host
          */

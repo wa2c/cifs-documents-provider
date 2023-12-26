@@ -33,7 +33,7 @@ import java.util.Properties
 /**
  * JCIFS Client
  */
-class JCifsClient constructor(
+class JCifsClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -50,7 +50,7 @@ class JCifsClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getAuthentication(
-        connection: StorageConnection,
+        connection: StorageConnection.Cifs,
         ignoreCache: Boolean,
     ): NtlmPasswordAuthentication {
         // FIXME
@@ -82,7 +82,8 @@ class JCifsClient constructor(
     private suspend fun getSmbFile(access: StorageAccess, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val authentication = getAuthentication(access.connection, ignoreCache)
+                val connection = access.connection as StorageConnection.Cifs
+                val authentication = getAuthentication(connection, ignoreCache)
                 SmbFile(access.uri, authentication).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT

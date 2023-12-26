@@ -61,6 +61,14 @@ fun getSmbUri(host: String?, port: String?, folder: String?, isDirectory: Boolea
 }
 
 /**
+ * Get FTP URI ( ftp://<documentId> )
+ */
+fun getFtpUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): String {
+    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: return ""
+    return "ftp://$documentId"
+}
+
+/**
  * Get content URI ( content://<applicationId>/tree/<encodedDocumentId> )
  */
 fun getContentUri(host: String?, port: String?, folder: String?): String {

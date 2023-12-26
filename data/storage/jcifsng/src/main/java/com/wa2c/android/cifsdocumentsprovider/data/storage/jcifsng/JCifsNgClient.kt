@@ -36,7 +36,7 @@ import java.util.Properties
 /**
  * JCIFS-ng Client
  */
-class JCifsNgClient constructor(
+class JCifsNgClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -59,7 +59,7 @@ class JCifsNgClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getCifsContext(
-        connection: StorageConnection,
+        connection: StorageConnection.Cifs,
         ignoreCache: Boolean,
     ): CIFSContext {
         if (!ignoreCache) { contextCache[connection]?.let { return it } }
@@ -94,7 +94,8 @@ class JCifsNgClient constructor(
     private suspend fun getSmbFile(access: StorageAccess, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val context = getCifsContext(access.connection, ignoreCache)
+                val connection = access.connection as StorageConnection.Cifs
+                val context = getCifsContext(connection, ignoreCache)
                 SmbFile(access.uri, context).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
