@@ -1,20 +1,19 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
-import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
 import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
@@ -56,7 +55,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     /** Connected file uri list */
-    private val _openUriList = MutableStateFlow<List<Uri>>(emptyList())
+    private val _openUriList = MutableStateFlow<List<StorageUri>>(emptyList())
     val openUriList = _openUriList.asStateFlow()
 
     /** Show notification  */
@@ -79,7 +78,7 @@ class CifsRepository @Inject internal constructor(
     }
 
     private suspend fun updateOpeningFiles() {
-        _openUriList.emit(fileBlockingQueue.map { it.uri.toUri() })
+        _openUriList.emit(fileBlockingQueue.map { it.uri })
     }
 
     private suspend fun <T> runFileBlocking(request: StorageRequest, process: suspend () -> T): T {
@@ -153,10 +152,10 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get storage request from URI
      */
-    private suspend fun getStorageRequest(uriText: String?, connection: CifsConnection? = null): StorageRequest? {
+    private suspend fun getStorageRequest(uri: StorageUri?, connection: CifsConnection? = null): StorageRequest? {
         return  withContext(dispatcher) {
-            connection?.let { connection.toDataModel().toStorageRequest(uriText) } ?: uriText?.let { uri ->
-                connectionSettingDao.getEntityByUri(uri)?.toDataModel()?.toStorageRequest(uriText)
+            connection?.let { connection.toDataModel().toStorageRequest(uri) } ?: uri?.let { uri ->
+                connectionSettingDao.getEntityByUri(uri.text)?.toDataModel()?.toStorageRequest(uri)
             }
         }
     }
@@ -185,7 +184,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get CIFS File
      */
-    suspend fun getFile(uri: String?, connection: CifsConnection? = null): CifsFile? {
+    suspend fun getFile(uri: StorageUri?, connection: CifsConnection? = null): CifsFile? {
         logD("getFile: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val request = getStorageRequest(uri, connection) ?: return@withContext null
@@ -198,7 +197,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get children CIFS files from uri.
      */
-    suspend fun getFileChildren(uri: String?, connection: CifsConnection? = null): List<CifsFile> {
+    suspend fun getFileChildren(uri: StorageUri?, connection: CifsConnection? = null): List<CifsFile> {
         logD("getFileChildren: uri=$uri, connection=$connection")
         return withContext(dispatcher) {
             val request = getStorageRequest(uri, connection) ?: return@withContext emptyList()
@@ -211,7 +210,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Create new file.
      */
-    suspend fun createFile(uri: String, mimeType: String?): CifsFile? {
+    suspend fun createFile(uri: StorageUri, mimeType: String?): CifsFile? {
         logD("createFile: uri=$uri, mimeType=$mimeType")
         return withContext(dispatcher) {
             val request = getStorageRequest(uri) ?: return@withContext null
@@ -224,7 +223,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Delete a file.
      */
-    suspend fun deleteFile(uri: String): Boolean {
+    suspend fun deleteFile(uri: StorageUri): Boolean {
         logD("deleteFile: uri=$uri")
         return withContext(dispatcher) {
             val request = getStorageRequest(uri) ?: return@withContext false
@@ -237,7 +236,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Rename file
      */
-    suspend fun renameFile(sourceUri: String, newName: String): CifsFile? {
+    suspend fun renameFile(sourceUri: StorageUri, newName: String): CifsFile? {
         logD("renameFile: sourceUri=$sourceUri, newName=$newName")
         return withContext(dispatcher) {
             val request = getStorageRequest(sourceUri) ?: return@withContext null
@@ -250,7 +249,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Copy file
      */
-    suspend fun copyFile(sourceUri: String, targetUri: String): CifsFile? {
+    suspend fun copyFile(sourceUri: StorageUri, targetUri: StorageUri): CifsFile? {
         logD("copyFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceUri) ?: return@withContext null
@@ -266,7 +265,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Move file
      */
-    suspend fun moveFile(sourceUri: String, targetUri: String): CifsFile? {
+    suspend fun moveFile(sourceUri: StorageUri, targetUri: StorageUri): CifsFile? {
         logD("moveFile: sourceUri=$sourceUri, targetUri=$targetUri")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceUri) ?: return@withContext null
@@ -295,7 +294,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get ProxyFileDescriptorCallback
      */
-    suspend fun getCallback(uri: String, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
+    suspend fun getCallback(uri: StorageUri, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
         logD("getCallback: uri=$uri, mode=$mode")
         return withContext(dispatcher) {
             val request = getStorageRequest(uri) ?: return@withContext null

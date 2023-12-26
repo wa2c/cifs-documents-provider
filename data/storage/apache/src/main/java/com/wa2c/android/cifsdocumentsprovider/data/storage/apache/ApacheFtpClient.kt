@@ -91,7 +91,7 @@ class ApacheFtpClient(
         existsRequired: Boolean = false,
     ): FileObject {
         return withContext(dispatcher) {
-            fileManager.resolveFile(request.uri, getContext(request.connection, ignoreCache))
+            fileManager.resolveFile(request.uri.text, getContext(request.connection, ignoreCache))
                 .let {
                     if (existsRequired && !it.exists()) {
                         throw FileRequiredException()

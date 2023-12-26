@@ -5,6 +5,7 @@ import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -56,7 +57,7 @@ internal object DomainMapper {
         return ConnectionSettingEntity(
             id = this.id,
             name = this.name,
-            uri = this.uri,
+            uri = this.uri.text,
             type = this.storage.value,
             data = EncryptUtils.encrypt(formatter.encodeToString(this))  ,
             sortOrder = sortOrder,
@@ -152,7 +153,7 @@ internal object DomainMapper {
     /**
      * Convert data model to data request model.
      */
-    fun StorageConnection.toStorageRequest(inputUri: String?): StorageRequest {
+    fun StorageConnection.toStorageRequest(inputUri: StorageUri?): StorageRequest {
         return StorageRequest(
             connection = this,
             currentUri = inputUri

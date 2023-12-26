@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -39,11 +40,11 @@ data class CifsConnection(
         get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
 
     /** Root SMB URI (smb://) */
-    val rootSmbUri: String
+    val rootSmbUri: StorageUri
         get() = getSmbUri(host, port, null, true)
 
     /** Folder SMB URI (smb://) */
-    val folderSmbUri: String
+    val folderSmbUri: StorageUri
         get() = getSmbUri(host, port, folder, true)
 
     companion object {

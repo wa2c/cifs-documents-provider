@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -55,17 +56,17 @@ fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boole
 /**
  * Get SMB URI ( smb://<documentId> )
  */
-fun getSmbUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): String {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: return ""
-    return "smb://$documentId"
+fun getSmbUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
+    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: throw IllegalArgumentException()
+    return StorageUri("smb://$documentId")
 }
 
 /**
  * Get FTP URI ( ftp://<documentId> )
  */
-fun getFtpUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): String {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: return ""
-    return "ftp://$documentId"
+fun getFtpUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
+    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: throw IllegalArgumentException()
+    return StorageUri("ftp://$documentId")
 }
 
 /**
@@ -162,7 +163,7 @@ fun String.appendChild(childName: String, isDirectory: Boolean): String {
 }
 
 /** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */
-fun String.uncPathToUri(isDirectory: Boolean): String? {
+fun String.uncPathToUri(isDirectory: Boolean): StorageUri? {
     val elements = this.substringAfter(UNC_START).split(UNC_SEPARATOR).ifEmpty { return null }
     val params = elements.getOrNull(0)?.split('@') ?: return null
     val server = params.getOrNull(0) ?: return null

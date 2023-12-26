@@ -1,9 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
-import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.utils.parentUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
@@ -33,8 +33,8 @@ class FolderViewModel @Inject constructor(
     private val _isLoading =  MutableStateFlow<Boolean>(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    private val _currentUri = MutableStateFlow<Uri>(temporaryConnection.folderSmbUri.toUri())
-    val currentUri: StateFlow<Uri> = _currentUri
+    private val _currentUri = MutableStateFlow<StorageUri>(temporaryConnection.folderSmbUri)
+    val currentUri: StateFlow<StorageUri> = _currentUri
 
     private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
     val fileList: StateFlow<List<CifsFile>> = _fileList
@@ -44,7 +44,7 @@ class FolderViewModel @Inject constructor(
 
     init {
         launch {
-            loadList(temporaryConnection.folderSmbUri.toUri())
+            loadList(temporaryConnection.folderSmbUri)
         }
     }
 
@@ -83,10 +83,10 @@ class FolderViewModel @Inject constructor(
     /**
      * Load list
      */
-    private suspend fun loadList(uri: Uri) {
+    private suspend fun loadList(uri: StorageUri) {
         _isLoading.emit(true)
         runCatching {
-            cifsRepository.getFileChildren(uri.toString(), temporaryConnection)
+            cifsRepository.getFileChildren(uri, temporaryConnection)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
         }.onFailure {
