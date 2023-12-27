@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
@@ -54,19 +55,11 @@ fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boole
 }
 
 /**
- * Get SMB URI ( smb://<documentId> )
+ * Get Storage URI ( smb://<documentId> )
  */
-fun getSmbUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
+fun getStorageUri(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
     val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: throw IllegalArgumentException()
-    return StorageUri("smb://$documentId")
-}
-
-/**
- * Get FTP URI ( ftp://<documentId> )
- */
-fun getFtpUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: throw IllegalArgumentException()
-    return StorageUri("ftp://$documentId")
+    return StorageUri( "${type.schema}${URI_START}$documentId")
 }
 
 /**
@@ -74,7 +67,7 @@ fun getFtpUri(host: String?, port: String?, folder: String?, isDirectory: Boolea
  */
 fun getContentUri(host: String?, port: String?, folder: String?): String {
     val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
-    return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
+    return "content$URI_START$URI_AUTHORITY/tree/" + Uri.encode(documentId)
 }
 
 /**
@@ -98,11 +91,21 @@ private val String.lastPath: String
         path.substring(startIndex)
     }
 
+typealias UriString = String
+
+val UriString.host: String?
+    get() = Uri.parse(this).host
+
+val UriString.port: Int?
+    get() = Uri.parse(this).port
+
 /**
  * Get file name (last segment)
  */
 val String.fileName: String
     get() = Uri.decode(this).lastPath
+
+
 
 /**
  * Get file name
@@ -169,7 +172,7 @@ fun String.uncPathToUri(isDirectory: Boolean): StorageUri? {
     val server = params.getOrNull(0) ?: return null
     val port = if (params.size >= 2) params.lastOrNull() else null
     val path = elements.subList(1, elements.size).joinToString(UNC_SEPARATOR)
-    return getSmbUri(server, port, path, isDirectory)
+    return getStorageUri(StorageType.SMBJ, server, port, path, isDirectory)
 }
 
 /**

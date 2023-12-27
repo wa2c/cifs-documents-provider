@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -191,9 +192,9 @@ class ApacheFtpClient(
         newName: String,
     ): StorageFile {
         return withContext(dispatcher) {
-            val targetUri = request.uri.rename(newName)
+            val targetUri = request.uri.text.rename(newName)
             val source = getFileObject(request, ignoreCache = true, existsRequired = true)
-            val target = getFileObject(request.copy(currentUri = targetUri.rename(newName)), true)
+            val target = getFileObject(request.copy(currentUri = StorageUri(targetUri.rename(newName))), true)
             source.moveTo(target)
             target.toStorageFile()
         }

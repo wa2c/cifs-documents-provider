@@ -11,6 +11,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageReq
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -180,4 +181,13 @@ internal object DomainMapper {
         }
     }
 
+    fun StorageFile.toModel(): CifsFile {
+        return CifsFile(
+            name = name,
+            uri = StorageUri(uri),
+            size = size,
+            lastModified = lastModified,
+            isDirectory = isDirectory
+        )
+    }
 }

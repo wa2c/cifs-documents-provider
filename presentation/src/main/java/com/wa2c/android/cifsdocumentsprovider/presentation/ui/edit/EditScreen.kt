@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.net.Uri
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -77,10 +76,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getStorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -108,7 +107,7 @@ fun EditScreen(
     viewModel: EditViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     selectedHost: String? = null,
-    selectedUri: Uri? = null,
+    selectedUri: StorageUri? = null,
     onNavigateBack: () -> Unit,
     onNavigateSearchHost: (CifsConnection?) -> Unit,
     onNavigateSelectFolder: (CifsConnection) -> Unit,
@@ -120,7 +119,7 @@ fun EditScreen(
     val storageType = viewModel.storage.collectAsMutableState()
 
     selectedHost?.let { viewModel.host.value = selectedHost }
-    selectedUri?.let { viewModel.folder.value = it.pathFragment }
+    selectedUri?.let { viewModel.folder.value = it.path }
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -448,12 +447,13 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_connection_uri_title),
                     )
 
-                    UriText(uriText = getSmbUri(
+                    UriText(uriText = getStorageUri(
+                        storageState.value,
                         hostState.value,
                         portState.value,
                         folderState.value,
                         true
-                    ))
+                    ).text)
 
                     SectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),

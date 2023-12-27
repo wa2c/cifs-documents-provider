@@ -176,7 +176,7 @@ class SmbjClient(
         val uri = this.uncPath.uncPathToUri(isDirectory) ?: return null
         return StorageFile(
             name = uri.fileName,
-            uri = uri,
+            uri = uri.text,
             size = this.fileInformation.standardInformation.endOfFile,
             lastModified = this.fileInformation.basicInformation.changeTime.toEpochMillis(),
             isDirectory = isDirectory
@@ -221,7 +221,7 @@ class SmbjClient(
             if (request.isRoot) {
                 StorageFile(
                     request.connection.name,
-                    request.connection.uri,
+                    request.connection.uri.text,
                     0,
                     0,
                     true,
@@ -230,7 +230,7 @@ class SmbjClient(
                 useDiskShare(request, ignoreCache) { diskShare ->
                     if (!diskShare.exists(request.sharePath)) return@useDiskShare null
                     val info = diskShare.getFileInformation(request.sharePath)
-                    info.toStorageFile(request.uri)
+                    info.toStorageFile(request.uri.text)
                 }
             }
         }
@@ -249,7 +249,7 @@ class SmbjClient(
                     .map { info ->
                         StorageFile(
                             name = info.netName,
-                            uri = request.uri.appendChild(info.netName, true),
+                            uri = request.uri.text.appendChild(info.netName, true),
                             size = 0,
                             lastModified = 0,
                             isDirectory = true,
@@ -268,7 +268,7 @@ class SmbjClient(
                             )
                             StorageFile(
                                 name = info.fileName,
-                                uri = request.uri.appendChild(info.fileName, isDirectory),
+                                uri = request.uri.text.appendChild(info.fileName, isDirectory),
                                 size = info.endOfFile,
                                 lastModified = info.changeTime.toEpochMillis(),
                                 isDirectory = isDirectory,
@@ -281,7 +281,7 @@ class SmbjClient(
 
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
+            val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
             useDiskShare(request) { diskShare ->
                 if (optimizedUri.isDirectoryUri) {
                     diskShare.mkdir(request.sharePath)

@@ -14,7 +14,7 @@ import kotlinx.parcelize.Parcelize
 data class CifsFile(
     /** File name */
     val name: String,
-    /** CIFS URI (smb://...) */
+    /** File URI */
     val uri: StorageUri,
     /** File size */
     val size: Long = 0,
@@ -24,18 +24,6 @@ data class CifsFile(
     val isDirectory: Boolean,
 ) : Parcelable {
     val documentId: String
-        get() = getDocumentId(this.uri.host, this.uri.port, this.uri.pathFragment, this.isDirectory) ?: ""
-
-    companion object {
-        fun StorageFile.toModel(): CifsFile {
-            return CifsFile(
-                name = name,
-                uri = StorageUri(uri),
-                size = size,
-                lastModified = lastModified,
-                isDirectory = isDirectory
-            )
-        }
-    }
+        get() = getDocumentId(this.uri.host, this.uri.port, this.uri.path, this.isDirectory) ?: ""
 
 }

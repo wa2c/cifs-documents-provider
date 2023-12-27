@@ -15,6 +15,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -96,7 +97,7 @@ class JCifsNgClient(
             try {
                 val connection = request.connection as StorageConnection.Cifs
                 val context = getCifsContext(connection, ignoreCache)
-                SmbFile(request.uri, context).apply {
+                SmbFile(request.uri.text, context).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }.let {
@@ -178,8 +179,8 @@ class JCifsNgClient(
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
-            getSmbFile(request.copy(currentUri = optimizedUri))?.use { file ->
+            val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
+            getSmbFile(request.copy(currentUri = StorageUri(optimizedUri)))?.use { file ->
                 if (optimizedUri.isDirectoryUri) {
                     // Directory
                     file.mkdir()
@@ -218,8 +219,8 @@ class JCifsNgClient(
     ): StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(request, existsRequired = true)?.use { source ->
-                val targetUri = request.uri.rename(newName)
-                getSmbFile(request.copy(currentUri = targetUri))?.use { target ->
+                val targetUri = request.uri.text.rename(newName)
+                getSmbFile(request.copy(currentUri = StorageUri(targetUri)))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()
                 }

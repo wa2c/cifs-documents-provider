@@ -26,6 +26,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -114,22 +115,20 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun queryDocument(documentId: String?, projection: Array<String>?): Cursor {
         logD("queryDocument: documentId=$documentId")
         val cursor = MatrixCursor(projection.toProjection())
-        if (documentId.isRoot()) {
+        val id = DocumentId.fromId(documentId)
+        if (id.isRoot) {
             // Root
             includeConnection(cursor)
         } else {
             // File / Directory
             runBlocking {
-                documentId?.let {
-                    val uri = getCifsUri(it)
-                    val file = try {
-                        cifsRepository.getFile(uri)
-                    } catch (e: Exception) {
-                        logE(e)
-                        null
-                    } ?: return@let
-                    includeFile(cursor, file)
+                val file = try {
+                    cifsRepository.getFile(id)
+                } catch (e: Exception) {
+                    logE(e)
+                    null
                 }
+                includeFile(cursor, file)
             }
         }
         return cursor
@@ -142,11 +141,12 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): Cursor {
         logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
-        if (parentDocumentId.isRoot()) {
+        val id = DocumentId.fromId(parentDocumentId)
+        if (id.isRoot) {
             runBlocking {
                 cifsRepository.loadConnection().forEach { connection ->
                     try {
-                        val file = cifsRepository.getFile(null, connection) ?: return@forEach
+                        val file = cifsRepository.getFile(id, connection) ?: return@forEach
                         includeFile(cursor, file, connection.name)
                     } catch (e: Exception) {
                         logE(e)
@@ -155,8 +155,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             }
         } else {
             runBlocking {
-                val uri = getCifsDirectoryUri(parentDocumentId!!)
-                cifsRepository.getFileChildren(uri).forEach { file ->
+                cifsRepository.getFileChildren(id).forEach { file ->
                     try {
                         includeFile(cursor, file)
                     } catch (e: Exception) {
@@ -169,7 +168,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
-        val parent = if (parentDocumentId.isRoot()) "/" else parentDocumentId ?: return false
+        val parent = if (DocumentId.fromId(parentDocumentId).isRoot) "/" else parentDocumentId ?: return false
         val child = documentId ?: return false
         return child.indexOf(parent) == 0
     }
@@ -194,8 +193,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
-            val uri = documentId?.let { getCifsFileUri(it) } ?: return@runOnFileHandler null
-            cifsRepository.getCallback(uri, accessMode) { }
+            val id = DocumentId.fromId(documentId).takeIf { !it.isRoot } ?: return@runOnFileHandler null
+            cifsRepository.getCallback(id, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
@@ -214,37 +213,36 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): String? {
         logD("createDocument: parentDocumentId=$parentDocumentId, displayName=$displayName")
         return runOnFileHandler {
-            val documentId = Paths.get(parentDocumentId, displayName).toString()
-            val uri = if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-                getCifsDirectoryUri(documentId)
-            } else {
-                getCifsFileUri(documentId)
-            }
-            cifsRepository.createFile(uri, mimeType)?.documentId
+            val id = DocumentId.fromId(Paths.get(parentDocumentId, displayName).toString())
+            cifsRepository.createFile(id, mimeType, mimeType == DocumentsContract.Document.MIME_TYPE_DIR)?.documentId
         }
     }
 
     override fun deleteDocument(documentId: String?) {
         logD("deleteDocument: documentId=$documentId")
-        if (documentId == null) throw OperationCanceledException()
+        if (documentId.isNullOrEmpty()) throw OperationCanceledException()
         runOnFileHandler {
-             cifsRepository.deleteFile(getCifsUri(documentId))
+            val id = DocumentId.fromId(documentId)
+            cifsRepository.deleteFile(id)
         }
     }
 
     override fun renameDocument(documentId: String?, displayName: String?): String? {
         logD("renameDocument: documentId=$documentId, displayName=$displayName")
-        if (documentId == null || displayName == null) return null
+        if (documentId.isNullOrEmpty() || displayName.isNullOrEmpty()) return null
         return runOnFileHandler {
-            cifsRepository.renameFile(getCifsFileUri(documentId), displayName)?.documentId
+            val id = DocumentId.fromId(documentId)
+            cifsRepository.renameFile(id, displayName)?.documentId
         }
     }
 
     override fun copyDocument(sourceDocumentId: String?, targetParentDocumentId: String?): String? {
         logD("copyDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
-        if (sourceDocumentId == null || targetParentDocumentId == null) return null
-       return runOnFileHandler {
-            cifsRepository.copyFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
+        if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
+        return runOnFileHandler {
+            val sourceId = DocumentId.fromId(sourceDocumentId)
+            val targetParentId = DocumentId.fromId(targetParentDocumentId)
+            cifsRepository.copyFile(sourceId, targetParentId)?.documentId
         }
     }
 
@@ -254,9 +252,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
         targetParentDocumentId: String?,
     ): String? {
         logD("moveDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
-        if (sourceDocumentId == null || targetParentDocumentId == null) return null
+        if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
         return runOnFileHandler {
-            cifsRepository.moveFile(getCifsFileUri(sourceDocumentId), getCifsFileUri(targetParentDocumentId))?.documentId
+            val sourceId = DocumentId.fromId(sourceDocumentId)
+            val targetParentId = DocumentId.fromId(targetParentDocumentId)
+            cifsRepository.moveFile(sourceId, targetParentId)?.documentId
         }
     }
 
@@ -369,18 +369,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun getCifsDirectoryUri(documentId: String): String {
-        val uri = "smb://$documentId"
-        return uri + (if (documentId.last() == '/') "" else '/')
-    }
-
-    private fun getCifsFileUri(documentId: String): String {
-        return "smb://${documentId.trim('/')}"
-    }
-
-    private fun getCifsUri(documentId: String): String {
-        return "smb://${documentId}"
-    }
 
     /**
      * True if the document id is root.

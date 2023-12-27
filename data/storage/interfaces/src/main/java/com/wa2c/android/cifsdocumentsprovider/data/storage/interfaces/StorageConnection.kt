@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getFtpUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getSmbUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getStorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
@@ -25,7 +24,8 @@ sealed class StorageConnection {
     abstract val extension: Boolean
     abstract val safeTransfer: Boolean
 
-    abstract val uri: StorageUri
+    val uri: StorageUri
+        get() = getStorageUri(storage, host, port, folder, true)
 
     val isAnonymous: Boolean
         get() = anonymous
@@ -52,10 +52,7 @@ sealed class StorageConnection {
         override val extension: Boolean,
         override val safeTransfer: Boolean,
         val enableDfs: Boolean,
-    ) : StorageConnection() {
-        override val uri: StorageUri
-            get() = getSmbUri(host, port, folder, true)
-    }
+    ) : StorageConnection()
 
     /**
      * FTP
@@ -74,8 +71,5 @@ sealed class StorageConnection {
         override val anonymous: Boolean,
         override val extension: Boolean,
         override val safeTransfer: Boolean,
-    ) : StorageConnection() {
-        override val uri: StorageUri
-            get() = getFtpUri(host, port, folder, true)
-    }
+    ) : StorageConnection()
 }

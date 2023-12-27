@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import android.content.res.Configuration
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -40,18 +39,18 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.isRoot
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 /**
@@ -62,7 +61,7 @@ fun FolderScreen(
     viewModel: FolderViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: () -> Unit,
-    onNavigateSet: (Uri) -> Unit,
+    onNavigateSet: (StorageUri) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -107,7 +106,7 @@ fun FolderScreen(
 fun FolderScreenContainer(
     snackbarHostState: SnackbarHostState,
     fileList: List<CifsFile>,
-    currentUri: Uri,
+    currentUri: StorageUri,
     isLoading: Boolean,
     onClickBack: () -> Unit,
     onClickReload: () -> Unit,
@@ -261,27 +260,27 @@ private fun FolderScreenContainerPreview() {
             fileList = listOf(
                 CifsFile(
                     name = "example1.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 ),
                 CifsFile(
                     name = "example2example2example2example2example2example2.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 ),
                 CifsFile(
                     name = "example3example3example3example3example3example3example3example3example3example3.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 )
             ),
-            currentUri = Uri.EMPTY,
+            currentUri = StorageUri.ROOT,
             isLoading = false,
             onClickBack = {},
             onClickReload = {},
