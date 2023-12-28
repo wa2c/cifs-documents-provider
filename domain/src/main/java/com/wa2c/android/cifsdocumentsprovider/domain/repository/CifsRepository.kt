@@ -6,7 +6,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
 import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
@@ -92,10 +91,6 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-    private fun DocumentId.getUri(connection: StorageConnection): StorageUri {
-        return StorageUri("${connection.storage.schema}${URI_START}${this}")
-    }
-
     private fun getClient(connection: StorageConnection): StorageClient {
         return storageClientManager.getClient(connection.storage)
     }
@@ -171,7 +166,7 @@ class CifsRepository @Inject internal constructor(
     private suspend fun getStorageRequest(documentId: DocumentId, connection: CifsConnection? = null): StorageRequest? {
         return  withContext(dispatcher) {
             val con = connection?.toDataModel() ?: connectionSettingDao.getEntity(documentId.id)?.toDataModel() ?: return@withContext null
-            val uri = documentId.getUri(con)
+            val uri = documentId.getUri(con.storage)
             con.toStorageRequest(uri)
         }
     }

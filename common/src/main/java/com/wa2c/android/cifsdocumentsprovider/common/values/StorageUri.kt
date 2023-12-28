@@ -16,12 +16,15 @@ data class StorageUri(
     val text: String,
 ) : Parcelable {
 
+    /** Host */
     val host: String
         get() = text.host ?: ""
 
+    /** Port (null if empty) */
     val port: Int?
         get() = text.port
 
+    /** Path[xxx/xxx] (not start with '/') */
     val path: String
         get() {
             val startIndex = text.indexOf(URI_START)

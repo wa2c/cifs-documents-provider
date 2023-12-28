@@ -2,9 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
-import com.wa2c.android.cifsdocumentsprovider.common.utils.pathFragment
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import kotlinx.parcelize.Parcelize
 
 /**

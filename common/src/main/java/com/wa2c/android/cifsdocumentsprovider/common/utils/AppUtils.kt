@@ -70,16 +70,6 @@ fun getContentUri(host: String?, port: String?, folder: String?): String {
     return "content$URI_START$URI_AUTHORITY/tree/" + Uri.encode(documentId)
 }
 
-/**
- * Get path and fragment (scheme://host/[xxx/yyy#zzz])
- */
-val Uri.pathFragment: String
-    get() = run {
-        val startIndex = scheme?.let { "$it$URI_START".length } ?: 0
-        val uriText = toString()
-        val pathIndex = uriText.indexOf(URI_SEPARATOR, startIndex) + 1
-        return uriText.substring(pathIndex)
-    }
 
 /**
  * Get last path
@@ -97,7 +87,7 @@ val UriString.host: String?
     get() = Uri.parse(this).host
 
 val UriString.port: Int?
-    get() = Uri.parse(this).port
+    get() = Uri.parse(this).port.takeIf { it > 0 }
 
 /**
  * Get file name (last segment)

@@ -1,6 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -17,9 +20,13 @@ data class DocumentId internal constructor(
         return id
     }
 
+    fun getUri(storageType: StorageType): StorageUri {
+        return StorageUri("${storageType.schema}$URI_START${this.id}")
+    }
+
     companion object {
-        fun fromId(id: String?): DocumentId {
-            return DocumentId(id ?: "")
+        fun fromId(documentId: String?): DocumentId {
+            return DocumentId(documentId ?: "")
         }
     }
 }
