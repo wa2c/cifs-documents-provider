@@ -41,6 +41,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
@@ -259,6 +260,7 @@ private fun FolderScreenContainerPreview() {
             snackbarHostState = SnackbarHostState(),
             fileList = listOf(
                 CifsFile(
+                    documentId = DocumentId.fromIdText(null),
                     name = "example1.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,
@@ -266,6 +268,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 ),
                 CifsFile(
+                    documentId = DocumentId.fromIdText(null),
                     name = "example2example2example2example2example2example2.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,
@@ -273,6 +276,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 ),
                 CifsFile(
+                    documentId = DocumentId.fromIdText(null),
                     name = "example3example3example3example3example3example3example3example3example3example3.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,

@@ -28,13 +28,9 @@ data class CifsConnection(
     val safeTransfer: Boolean,
 ): Parcelable, java.io.Serializable {
 
-    /** True if new item. */
-    val isNew: Boolean
-        get() = (id == NEW_ID)
-
     /** Folder SMB URI (smb://) */
-    val folderSmbUri: StorageUri
-        get() = getStorageUri(storage, host, port, folder, true)
+    val uri: StorageUri
+        get() = getStorageUri(storage, host, port, folder, true) ?: StorageUri.ROOT
 
     companion object {
 

@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.os.ProxyFileDescriptorCallback
+import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
@@ -153,21 +154,19 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get storage request from URI
      */
-    private suspend fun getStorageRequest(uri: StorageUri, connection: CifsConnection? = null): StorageRequest? {
+    private suspend fun getStorageRequest(documentId: DocumentId): StorageRequest? {
         return  withContext(dispatcher) {
-            val con = connection?.toDataModel() ?: connectionSettingDao.getEntity(uri.text)?.toDataModel() ?: return@withContext null
-            con.toStorageRequest(uri)
+            val con = connectionSettingDao.getEntity(documentId.connectionId)?.toDataModel() ?: return@withContext null
+            con.toStorageRequest(documentId.path)
         }
     }
 
     /**
      * Get storage request from URI
      */
-    private suspend fun getStorageRequest(documentId: DocumentId, connection: CifsConnection? = null): StorageRequest? {
+    private suspend fun getStorageRequest(connection: CifsConnection): StorageRequest {
         return  withContext(dispatcher) {
-            val con = connection?.toDataModel() ?: connectionSettingDao.getEntity(documentId.id)?.toDataModel() ?: return@withContext null
-            val uri = documentId.getUri(con.storage)
-            con.toStorageRequest(uri)
+            connection.toDataModel().toStorageRequest()
         }
     }
 
@@ -194,12 +193,26 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get CIFS File
      */
-    suspend fun getFile(documentId: DocumentId, connection: CifsConnection? = null): CifsFile? {
-        logD("getFile: documentId=$documentId, connection=$connection")
+    suspend fun getFile(documentId: DocumentId): CifsFile? {
+        logD("getFile: documentId=$documentId")
         return withContext(dispatcher) {
-            val request = getStorageRequest(documentId, connection) ?: return@withContext null
+            val request = getStorageRequest(documentId) ?: return@withContext null
             runFileBlocking(request) {
-                getClient(request.connection).getFile(request)?.toModel()
+                getClient(request.connection).getFile(request)?.toModel(documentId)
+            }
+        }
+    }
+
+    /**
+     * Get CIFS File
+     */
+    suspend fun getFile(connection: CifsConnection): CifsFile? {
+        logD("getFile: connection=$connection")
+        return withContext(dispatcher) {
+            val request = getStorageRequest(connection)
+            runFileBlocking(request) {
+                val documentId = DocumentId.fromConnection(request.connection.id, null)
+                getClient(request.connection).getFile(request)?.toModel(documentId)
             }
         }
     }
@@ -212,7 +225,11 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
             runFileBlocking(request) {
-                getClient(request.connection).getChildren(request)?.map { it.toModel() } ?: emptyList()
+                getClient(request.connection).getChildren(request)?.map {
+                    val path = request.connection.getRelativePath(it.uri)
+                    val documentId = DocumentId.fromConnection(request.connection.id, path)
+                    it.toModel(documentId)
+                } ?: emptyList()
             }
         }
     }
@@ -220,12 +237,16 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get children from uri.
      */
-    suspend fun getFileChildren(uri: StorageUri, connection: CifsConnection? = null): List<CifsFile> {
-        logD("getFileChildren: uri=$uri, connection=$connection")
+    suspend fun getFileChildren(connection: CifsConnection, uri: StorageUri): List<CifsFile> {
+        logD("getFileChildren: connection=$connection, uri=$uri")
         return withContext(dispatcher) {
-            val request = getStorageRequest(uri, connection) ?: return@withContext emptyList()
+            val request = connection.toDataModel().toStorageRequest().replacePathByUri(uri.text)
             runFileBlocking(request) {
-                getClient(request.connection).getChildren(request)?.map { it.toModel() } ?: emptyList()
+                getClient(request.connection).getChildren(request)?.map {
+                    val path = request.connection.getRelativePath(it.uri)
+                    val documentId = DocumentId.fromConnection(request.connection.id, path)
+                    it.toModel(documentId)
+                } ?: emptyList()
             }
         }
     }
@@ -233,12 +254,20 @@ class CifsRepository @Inject internal constructor(
     /**
      * Create new file.
      */
-    suspend fun createFile(documentId: DocumentId, mimeType: String?, isDirectory: Boolean): CifsFile? {
-        logD("createFile: documentId=$documentId, mimeType=$mimeType, isDirectory=$isDirectory")
+    suspend fun createFile(parentDocumentId: DocumentId, name: String, mimeType: String?, isDirectory: Boolean): DocumentId? {
+        logD("createFile: parentDocumentId=$parentDocumentId, name=$name, mimeType=$mimeType, isDirectory=$isDirectory")
         return withContext(dispatcher) {
-            val request = getStorageRequest(documentId) ?: return@withContext null
+            val fileDocumentId = DocumentId.fromIdText(parentDocumentId.documentId.appendChild(name, isDirectory))
+            val request = getStorageRequest(fileDocumentId) ?: return@withContext null
             runFileBlocking(request) {
-                getClient(request.connection).createFile(request, mimeType)?.toModel()
+                if (isDirectory) {
+                    getClient(request.connection).createDirectory(request)
+                } else {
+                    getClient(request.connection).createFile(request, mimeType)
+                }?.let {
+                    val relativePath = request.connection.getRelativePath(it.uri)
+                    DocumentId.fromConnection(request.connection.id, relativePath)
+                }
             }
         }
     }
@@ -259,12 +288,15 @@ class CifsRepository @Inject internal constructor(
     /**
      * Rename file
      */
-    suspend fun renameFile(documentId: DocumentId, newName: String): CifsFile? {
+    suspend fun renameFile(documentId: DocumentId, newName: String): DocumentId? {
         logD("renameFile: documentId:=$documentId:, newName=$newName")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
             runFileBlocking(request) {
-                getClient(request.connection).renameFile(request, newName)?.toModel()
+                getClient(request.connection).renameFile(request, newName)?.let {
+                    val relativePath = request.connection.getRelativePath(it.uri)
+                    DocumentId.fromConnection(request.connection.id, relativePath)
+                }
             }
         }
     }
@@ -272,14 +304,17 @@ class CifsRepository @Inject internal constructor(
     /**
      * Copy file
      */
-    suspend fun copyFile(sourceDocumentId: DocumentId, targetParentDocumentId: DocumentId): CifsFile? {
+    suspend fun copyFile(sourceDocumentId: DocumentId, targetParentDocumentId: DocumentId): DocumentId? {
         logD("copyFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetRequest = getStorageRequest(targetParentDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.toModel()
+                    getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.let {
+                        val relativePath = targetRequest.connection.getRelativePath(it.uri)
+                        DocumentId.fromConnection(targetRequest.connection.id, relativePath)
+                    }
                 }
             }
         }
@@ -287,15 +322,17 @@ class CifsRepository @Inject internal constructor(
 
     /**
      * Move file
+     * @return Target Document ID
      */
-    suspend fun moveFile(sourceDocumentId: DocumentId, targetDocumentId: DocumentId): CifsFile? {
+    suspend fun moveFile(sourceDocumentId: DocumentId, targetDocumentId: DocumentId): DocumentId? {
         logD("moveFile: sourceDocumentId=$sourceDocumentId, targetUri=$targetDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)?.toModel()
+                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)
+                    targetDocumentId
                 }
             }
         }
@@ -305,7 +342,7 @@ class CifsRepository @Inject internal constructor(
      * Check setting connectivity.
      */
     suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
-        logD("Connection check: ${connection.folderSmbUri}")
+        logD("Connection check: ${connection.uri}")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest(null)
             runFileBlocking(request) {
@@ -351,18 +388,4 @@ class CifsRepository @Inject internal constructor(
         }
     }
 
-
-
-//    private fun getCifsDirectoryUri(documentId: DocumentId): String {
-//        val uri = "smb://$documentId"
-//        return uri + (if (documentId.last() == '/') "" else '/')
-//    }
-//
-//    private fun getCifsFileUri(documentId: DocumentId): String {
-//        return "smb://${documentId.trim('/')}"
-//    }
-//
-//    private fun getCifsUri(documentId: DocumentId): String {
-//        return "smb://${documentId}"
-//    }
 }

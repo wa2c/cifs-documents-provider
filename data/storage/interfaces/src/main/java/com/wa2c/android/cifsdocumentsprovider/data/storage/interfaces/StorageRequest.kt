@@ -9,12 +9,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
  */
 data class StorageRequest(
     val connection: StorageConnection,
-    val currentUri: StorageUri? = null,
+    val path: String? = null,
 ) {
 
     /** URI */
     val uri: StorageUri
-        get() = currentUri ?: connection.uri
+        get() = connection.uri.addPath(path)
 
     /** Share name */
     val shareName: String
@@ -37,5 +37,10 @@ data class StorageRequest(
     /** True if this is share root */
     val isShareRoot: Boolean
         get() = shareName.isNotEmpty() && sharePath.isEmpty()
+
+
+    fun replacePathByUri(replaceUriText: String): StorageRequest {
+        return copy(path = connection.getRelativePath(replaceUriText))
+    }
 
 }

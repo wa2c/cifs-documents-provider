@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getDocumentId
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import kotlinx.parcelize.Parcelize
 
@@ -10,6 +9,8 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class CifsFile(
+    /** Connection ID */
+    val documentId: DocumentId,
     /** File name */
     val name: String,
     /** File URI */
@@ -20,8 +21,4 @@ data class CifsFile(
     val lastModified: Long = 0,
     /** True if directory */
     val isDirectory: Boolean,
-) : Parcelable {
-    val documentId: String
-        get() = getDocumentId(this.uri.host, this.uri.port, this.uri.path, this.isDirectory) ?: ""
-
-}
+) : Parcelable

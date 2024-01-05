@@ -123,6 +123,7 @@ fun EditScreen(
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
+        idState = viewModel.id.collectAsMutableState(),
         nameState = viewModel.name.collectAsMutableState(),
         storageState = storageType,
         domainState = viewModel.domain.collectAsMutableState(),
@@ -253,6 +254,7 @@ fun EditScreen(
 @Composable
 private fun EditScreenContainer(
     snackbarHostState: SnackbarHostState,
+    idState: MutableState<String>,
     nameState: MutableState<String?>,
     storageState: MutableState<StorageType>,
     domainState: MutableState<String?>,
@@ -327,7 +329,7 @@ private fun EditScreenContainer(
 
                     InputOption(
                         title = stringResource(id = R.string.edit_storage_title),
-                        items = StorageType.values()
+                        items = StorageType.entries
                             .map { OptionItem(it, stringResource(id = it.labelRes)) },
                         state = storageState,
                         focusManager = focusManager,
@@ -453,17 +455,13 @@ private fun EditScreenContainer(
                         portState.value,
                         folderState.value,
                         true
-                    ).text)
+                    )?.text ?: "")
 
                     SectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),
                     )
 
-                    UriText(uriText = getContentUri(
-                        hostState.value,
-                        portState.value,
-                        folderState.value
-                    ))
+                    UriText(uriText = getContentUri(idState.value))
                 }
 
                 DividerNormal()
@@ -597,6 +595,7 @@ fun InputText(
                                 if (it.type == KeyEventType.KeyUp) onClickButton()
                                 true
                             }
+
                             else -> {
                                 false
                             }
@@ -695,6 +694,7 @@ fun InputCheck(
                         if (it.type == KeyEventType.KeyUp) state.value = !state.value
                         true
                     }
+
                     else -> {
                         false
                     }
@@ -756,6 +756,7 @@ private fun EditScreenPreview() {
     Theme.AppTheme {
         EditScreenContainer(
             snackbarHostState = SnackbarHostState(),
+            idState = mutableStateOf("id1"),
             nameState = mutableStateOf("name1"),
             storageState = mutableStateOf(StorageType.SMBJ),
             domainState = mutableStateOf(""),

@@ -24,14 +24,13 @@ class FolderViewModel @Inject constructor(
     private val cifsRepository: CifsRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val temporaryConnection: CifsConnection
-        get() = cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+    private val temporaryConnection: CifsConnection by lazy {
+        cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+    }
 
+    private val rootConnection = temporaryConnection.copy(folder = null)
 
-    private val _isLoading =  MutableStateFlow<Boolean>(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    private val _currentUri = MutableStateFlow<StorageUri>(temporaryConnection.folderSmbUri)
+    private val _currentUri = MutableStateFlow<StorageUri>(temporaryConnection.uri)
     val currentUri: StateFlow<StorageUri> = _currentUri
 
     private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
@@ -40,9 +39,12 @@ class FolderViewModel @Inject constructor(
     private val _result = MutableSharedFlow<Result<Unit>>()
     val result: SharedFlow<Result<Unit>> = _result
 
+    private val _isLoading =  MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     init {
         launch {
-            loadList(temporaryConnection.folderSmbUri)
+            loadList(currentUri.value)
         }
     }
 
@@ -84,7 +86,7 @@ class FolderViewModel @Inject constructor(
     private suspend fun loadList(uri: StorageUri) {
         _isLoading.emit(true)
         runCatching {
-            cifsRepository.getFileChildren(uri, temporaryConnection)
+            cifsRepository.getFileChildren(rootConnection, uri)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
         }.onFailure {

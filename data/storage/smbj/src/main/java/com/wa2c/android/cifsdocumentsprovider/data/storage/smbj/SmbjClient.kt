@@ -21,6 +21,7 @@ import com.rapid7.client.dcerpc.mssrvs.ServerService
 import com.rapid7.client.dcerpc.transport.SMBTransportFactories
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isInvalidFileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -34,7 +35,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFA
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -279,20 +279,27 @@ class SmbjClient(
         }
     }
 
+
+    override suspend fun createDirectory(
+        request: StorageRequest,
+    ): StorageFile? {
+        return withContext(dispatcher) {
+            useDiskShare(request) { diskShare ->
+                diskShare.mkdir(request.sharePath)
+                diskShare.getFileInformation(request.sharePath)
+            }?.toStorageFile(request.uri.text)
+        }
+    }
+
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
             val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
             useDiskShare(request) { diskShare ->
-                if (optimizedUri.isDirectoryUri) {
-                    diskShare.mkdir(request.sharePath)
-                    diskShare.getFileInformation(request.sharePath)
-                } else {
-                    openDiskFile(diskShare, request.sharePath,
-                        isRead = false,
-                        existsRequired = false
-                    )?.use { f ->
-                        f.fileInformation
-                    }
+                openDiskFile(diskShare, request.sharePath,
+                    isRead = false,
+                    existsRequired = false
+                )?.use { f ->
+                    f.fileInformation
                 }
             }?.toStorageFile(optimizedUri)
         }

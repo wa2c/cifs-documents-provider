@@ -58,6 +58,7 @@ class EditViewModel @Inject constructor(
     private val _isBusy = MutableStateFlow(false)
     val isBusy = _isBusy.asStateFlow()
 
+    val id = MutableStateFlow<String>(CifsConnection.NEW_ID)
     var name = MutableStateFlow<String?>(null)
     var storage = MutableStateFlow<StorageType>(StorageType.default)
     var domain = MutableStateFlow<String?>(null)
@@ -105,6 +106,7 @@ class EditViewModel @Inject constructor(
      */
     private fun deployCifsConnection(connection: CifsConnection?) {
         currentId = connection?.id ?: CifsConnection.NEW_ID
+        id.value = currentId
         name.value = connection?.name
         storage.value = connection?.storage ?: StorageType.default
         domain.value = connection?.domain
@@ -220,7 +222,7 @@ class EditViewModel @Inject constructor(
             runCatching {
                 createCifsConnection(isNew)?.let { con ->
                     if (cifsRepository.loadConnection().filter { it.id != con.id }
-                            .any { it.folderSmbUri == con.folderSmbUri }) {
+                            .any { it.uri == con.uri }) {
                         // Duplicate URI
                         throw IllegalArgumentException()
                     }

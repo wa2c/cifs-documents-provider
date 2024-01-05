@@ -14,7 +14,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -140,7 +139,7 @@ class JCifsClient(
     }
 
     /**
-     * Get StorageFile
+     * Get file
      */
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile? {
         return withContext(dispatcher) {
@@ -149,7 +148,7 @@ class JCifsClient(
     }
 
     /**
-     * Get children StorageFile list
+     * Get children file list
      */
     override suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean): List<StorageFile>? {
         return withContext(dispatcher) {
@@ -162,26 +161,32 @@ class JCifsClient(
 
 
     /**
-     * Create new StorageFile.
+     * Create new file.
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
-            getSmbFile(request.copy(currentUri = StorageUri(optimizedUri)))?.let {
-                if (optimizedUri.isDirectoryUri) {
-                    // Directory
-                    it.mkdir()
-                } else {
-                    // File
-                    it.createNewFile()
-                }
+            val optimizedUriText = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
+            getSmbFile(request.replacePathByUri(optimizedUriText))?.let {
+                it.createNewFile()
                 it.toStorageFile()
             }
         }
     }
 
     /**
-     * Copy StorageFile
+     * Create new directory.
+     */
+    override suspend fun createDirectory(request: StorageRequest): StorageFile? {
+        return withContext(dispatcher) {
+            getSmbFile(request)?.let {
+                it.mkdir()
+                it.toStorageFile()
+            }
+        }
+    }
+
+    /**
+     * Copy file
      */
     override suspend fun copyFile(
         sourceRequest: StorageRequest,
@@ -205,7 +210,7 @@ class JCifsClient(
         return withContext(dispatcher) {
             val source = getSmbFile(request, existsRequired = true) ?: return@withContext null
             val targetUri = request.uri.text.rename(newName)
-            val target = getSmbFile(request.copy(currentUri = StorageUri(targetUri))) ?: return@withContext null
+            val target = getSmbFile(request.replacePathByUri(targetUri)) ?: return@withContext null
             source.renameTo(target)
             target.toStorageFile()
         }

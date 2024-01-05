@@ -163,10 +163,21 @@ class ApacheFtpClient(
         }
     }
 
+    override suspend fun createDirectory(
+        request: StorageRequest,
+    ): StorageFile {
+        return withContext(dispatcher) {
+            getFileObject(request, ignoreCache = true).let { fo ->
+                fo.createFolder()
+                fo.toStorageFile()
+            }
+        }
+    }
+
     override suspend fun createFile(
         request: StorageRequest,
         mimeType: String?,
-        ): StorageFile {
+    ): StorageFile {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true).let { fo ->
                 fo.createFile()
@@ -194,7 +205,7 @@ class ApacheFtpClient(
         return withContext(dispatcher) {
             val targetUri = request.uri.text.rename(newName)
             val source = getFileObject(request, ignoreCache = true, existsRequired = true)
-            val target = getFileObject(request.copy(currentUri = StorageUri(targetUri.rename(newName))), true)
+            val target = getFileObject(request.replacePathByUri(targetUri.rename(newName)), true)
             source.moveTo(target)
             target.toStorageFile()
         }

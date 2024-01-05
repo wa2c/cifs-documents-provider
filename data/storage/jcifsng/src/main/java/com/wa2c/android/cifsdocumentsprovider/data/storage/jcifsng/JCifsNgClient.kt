@@ -2,23 +2,22 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
-import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext
@@ -152,7 +151,7 @@ class JCifsNgClient(
     }
 
     /**
-     * Get StorageFile
+     * Get file
      */
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile? {
         return  withContext(dispatcher) {
@@ -173,28 +172,33 @@ class JCifsNgClient(
         }
     }
 
+    /**
+     * Create new directory.
+     */
+    override suspend fun createDirectory(request: StorageRequest): StorageFile? {
+        return withContext(dispatcher) {
+            getSmbFile(request)?.use {
+                it.mkdir()
+                it.toStorageFile()
+            }
+        }
+    }
 
     /**
-     * Create new StorageFile.
+     * Create new file.
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
             val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
-            getSmbFile(request.copy(currentUri = StorageUri(optimizedUri)))?.use { file ->
-                if (optimizedUri.isDirectoryUri) {
-                    // Directory
-                    file.mkdir()
-                } else {
-                    // File
-                    file.createNewFile()
-                }
+            getSmbFile(request.replacePathByUri(optimizedUri))?.use { file ->
+                file.createNewFile()
                 file.toStorageFile()
             }
         }
     }
 
     /**
-     * Copy StorageFile
+     * Copy file
      */
     override suspend fun copyFile(
         sourceRequest: StorageRequest,
@@ -220,7 +224,7 @@ class JCifsNgClient(
         return withContext(dispatcher) {
             getSmbFile(request, existsRequired = true)?.use { source ->
                 val targetUri = request.uri.text.rename(newName)
-                getSmbFile(request.copy(currentUri = StorageUri(targetUri)))?.use { target ->
+                getSmbFile(request.replacePathByUri(targetUri))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()
                 }

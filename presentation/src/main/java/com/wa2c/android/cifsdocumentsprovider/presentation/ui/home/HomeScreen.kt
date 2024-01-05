@@ -241,7 +241,7 @@ private fun ConnectionItem(
             )
         }
         Text(
-            text = connection.folderSmbUri.text,
+            text = connection.uri.text,
             style = MaterialTheme.typography.bodySmall,
         )
     }

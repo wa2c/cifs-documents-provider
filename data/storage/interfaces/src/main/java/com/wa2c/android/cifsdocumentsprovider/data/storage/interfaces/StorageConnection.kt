@@ -25,14 +25,17 @@ sealed class StorageConnection {
     abstract val safeTransfer: Boolean
 
     val uri: StorageUri
-        get() = getStorageUri(storage, host, port, folder, true)
+        get() = getStorageUri(storage, host, port, folder, true) ?: StorageUri.ROOT
 
     val isAnonymous: Boolean
         get() = anonymous
 
     val isGuest: Boolean
         get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
-    
+
+    fun getRelativePath(targetUri: String): String {
+        return targetUri.replace(uri.text, "")
+    }
 
     /**
      * CIFS/SMB

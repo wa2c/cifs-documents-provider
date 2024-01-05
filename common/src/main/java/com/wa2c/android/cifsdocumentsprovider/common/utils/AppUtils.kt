@@ -44,32 +44,24 @@ val String?.mimeType: String
         return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
     }
 
-
 /**
- * Get document ID ( <authority[:port]>/<path> )
+ * Get Storage URI ( <schema>://<documentId> )
  */
-fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boolean): String? {
+fun getStorageUri(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri? {
     if (host.isNullOrBlank()) return null
-    val authority = host + if (port == null || port <= 0) "" else ":$port"
-    return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+    val portInt = port?.toIntOrNull()
+    val authority = host + if (portInt == null || portInt <= 0) "" else ":$port"
+    val uri = Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+    return StorageUri( "${type.schema}${URI_START}$uri")
 }
 
 /**
- * Get Storage URI ( smb://<documentId> )
+ * Get content URI ( content://<applicationId>/tree/<encodedConnectionId> )
  */
-fun getStorageUri(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: throw IllegalArgumentException()
-    return StorageUri( "${type.schema}${URI_START}$documentId")
+fun getContentUri(connectionId: String): String {
+    val id = Uri.encode(connectionId)
+    return "content$URI_START$URI_AUTHORITY/tree/${id}/"
 }
-
-/**
- * Get content URI ( content://<applicationId>/tree/<encodedDocumentId> )
- */
-fun getContentUri(host: String?, port: String?, folder: String?): String {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
-    return "content$URI_START$URI_AUTHORITY/tree/" + Uri.encode(documentId)
-}
-
 
 /**
  * Get last path
@@ -120,21 +112,6 @@ fun String.rename(newName: String): String {
     return substringBeforeLast(URI_SEPARATOR) + URI_SEPARATOR + Uri.encode(newName)
 }
 
-/**
- * Get parent uri ( last character = '/' )
- */
-val Uri.parentUri: Uri?
-    get() {
-        if (pathSegments.isEmpty()) return null
-        val uriText = toString()
-            .let { if (it.last() == URI_SEPARATOR) it.substring(0, it.length - 1) else it }
-        return try { Uri.parse(uriText.substring(0, uriText.lastIndexOf(URI_SEPARATOR) + 1)) } catch (e: Exception) { null }
-    }
-
-
-/** True if root */
-val Uri.isRoot: Boolean
-    get() = (parentUri == null)
 
 /** True if invalid file name */
 val String.isInvalidFileName: Boolean

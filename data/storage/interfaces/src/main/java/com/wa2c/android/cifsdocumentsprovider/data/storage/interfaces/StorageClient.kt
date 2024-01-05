@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+
 interface StorageClient {
 
     suspend fun checkConnection(request: StorageRequest): ConnectionResult
@@ -10,6 +11,8 @@ interface StorageClient {
     suspend fun getFile(request: StorageRequest, ignoreCache: Boolean = false): StorageFile?
 
     suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean = false): List<StorageFile>?
+
+    suspend fun createDirectory(request: StorageRequest): StorageFile?
 
     suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile?
 
