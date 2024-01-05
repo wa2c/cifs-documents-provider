@@ -218,7 +218,7 @@ class SmbjClient(
 
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile? {
         return withContext(dispatcher) {
-            if (request.isRoot) {
+            if (request.isRoot || request.isShareRoot) {
                 StorageFile(
                     request.connection.name,
                     request.connection.uri.text,

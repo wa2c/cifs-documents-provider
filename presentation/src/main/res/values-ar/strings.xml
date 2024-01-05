@@ -34,7 +34,7 @@
     <string name="edit_option_title">خيار</string>
     <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
     <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
-    <string name="edit_connection_uri_title">عنوان ال ( أس أم بي ) </string>
+    <string name="edit_storage_uri_title">عنوان التخزين</string>
     <string name="edit_provider_uri_title">عنوان التشارك</string>
     <string name="edit_check_connection_button">فحص الاتصال</string>
     <string name="edit_check_connection_ok_message">نجح الاتصال</string>

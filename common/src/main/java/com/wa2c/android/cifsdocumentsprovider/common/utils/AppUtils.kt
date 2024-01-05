@@ -129,7 +129,7 @@ fun String.appendSeparator(): String {
 /** Append child entry */
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
-    return this + name
+    return this.appendSeparator() + name
 }
 
 /** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */

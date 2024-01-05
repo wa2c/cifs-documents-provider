@@ -34,8 +34,8 @@
     <string name="edit_option_title">Možnosti</string>
     <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
     <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>
-    <string name="edit_connection_uri_title">SMB URI</string>
-    <string name="edit_provider_uri_title">Shared URI</string>
+    <string name="edit_storage_uri_title">Zdieľanie URI</string>
+    <string name="edit_provider_uri_title">Zdieľaný identifikátor URI</string>
     <string name="edit_check_connection_button">Overiť pripojenie</string>
     <string name="edit_check_connection_ok_message">Pripojenie úspešné.</string>
     <string name="edit_check_connection_wn_message">Nastavenia majú chybu.</string>

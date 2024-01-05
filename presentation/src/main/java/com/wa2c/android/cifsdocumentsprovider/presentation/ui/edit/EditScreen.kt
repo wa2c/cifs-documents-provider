@@ -446,7 +446,7 @@ private fun EditScreenContainer(
                     // URI
 
                     SectionTitle(
-                        text = stringResource(id = R.string.edit_connection_uri_title),
+                        text = stringResource(id = R.string.edit_storage_uri_title),
                     )
 
                     UriText(uriText = getStorageUri(

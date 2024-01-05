@@ -34,7 +34,7 @@
     <string name="edit_option_title">オプション</string>
     <string name="edit_option_extension_label">保存時に拡張子を付与</string>
     <string name="edit_option_safe_transfer_label">安全なデータ転送</string>
-    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_storage_uri_title">ストレージURI</string>
     <string name="edit_provider_uri_title">共有URI</string>
     <string name="edit_check_connection_button">接続確認</string>
     <string name="edit_check_connection_ok_message">接続に成功しました。</string>

@@ -32,7 +32,7 @@
     <string name="edit_password_hint">匿名访问时无效</string>
     <string name="edit_anonymous_label">匿名</string>
     <string name="edit_option_title">选项</string>
-    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_storage_uri_title">存储 URI</string>
     <string name="edit_provider_uri_title">分享 URI</string>
     <string name="edit_check_connection_button">检查连接</string>
     <string name="edit_check_connection_ok_message">连接成功。</string>

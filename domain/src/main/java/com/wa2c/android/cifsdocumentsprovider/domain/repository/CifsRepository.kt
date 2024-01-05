@@ -308,7 +308,8 @@ class CifsRepository @Inject internal constructor(
         logD("copyFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
-            val targetRequest = getStorageRequest(targetParentDocumentId) ?: return@withContext null
+            val targetDocumentId = DocumentId.fromIdText(targetParentDocumentId.documentId.appendChild(sourceRequest.uri.fileName, false))
+            val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
                     getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.let {
@@ -324,15 +325,18 @@ class CifsRepository @Inject internal constructor(
      * Move file
      * @return Target Document ID
      */
-    suspend fun moveFile(sourceDocumentId: DocumentId, targetDocumentId: DocumentId): DocumentId? {
-        logD("moveFile: sourceDocumentId=$sourceDocumentId, targetUri=$targetDocumentId")
+    suspend fun moveFile(sourceDocumentId: DocumentId, targetParentDocumentId: DocumentId): DocumentId? {
+        logD("moveFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
+            val targetDocumentId = DocumentId.fromIdText(targetParentDocumentId.documentId.appendChild(sourceRequest.uri.fileName, false))
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)
-                    targetDocumentId
+                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)?.let {
+                        val relativePath = targetRequest.connection.getRelativePath(it.uri)
+                        DocumentId.fromConnection(targetRequest.connection.id, relativePath)
+                    }
                 }
             }
         }
