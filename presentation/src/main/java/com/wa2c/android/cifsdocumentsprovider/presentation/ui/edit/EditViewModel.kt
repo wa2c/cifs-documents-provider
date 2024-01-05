@@ -7,7 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamId
@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -31,7 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val cifsRepository: CifsRepository
+    private val editRepository: EditRepository,
 ) : ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val paramId: String? = savedStateHandle[EditScreenParamId]
@@ -40,7 +41,7 @@ class EditViewModel @Inject constructor(
     init {
         launch {
             val connection = paramId?.let {
-                cifsRepository.getConnection(paramId).also { initConnection = it }
+                editRepository.getConnection(paramId).also { initConnection = it }
             } ?: CifsConnection.createFromHost(paramHost ?: "")
             deployCifsConnection(connection)
         }
@@ -151,7 +152,7 @@ class EditViewModel @Inject constructor(
             _isBusy.emit(true)
             runCatching {
                 _connectionResult.emit(null)
-               createCifsConnection(false)?.let { cifsRepository.checkConnection(it) }
+               createCifsConnection(false)?.let { editRepository.checkConnection(it) }
             }.fold(
                 onSuccess = { _connectionResult.emit(it ?: ConnectionResult.Failure()) },
                 onFailure = { _connectionResult.emit(ConnectionResult.Failure(it)) }
@@ -180,9 +181,9 @@ class EditViewModel @Inject constructor(
             _isBusy.emit(true)
             runCatching {
                 val folderConnection = createCifsConnection(false) ?: throw IOException()
-                val result = cifsRepository.checkConnection(folderConnection)
+                val result = editRepository.checkConnection(folderConnection)
                 if (result !is ConnectionResult.Failure) {
-                    cifsRepository.saveTemporaryConnection(folderConnection)
+                    editRepository.saveTemporaryConnection(folderConnection)
                     _navigateSelectFolder.emit(Result.success(folderConnection))
                 } else {
                     _connectionResult.emit(result)
@@ -202,7 +203,7 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                cifsRepository.deleteConnection(currentId)
+                editRepository.deleteConnection(currentId)
             }.onSuccess {
                 _result.emit(Result.success(Unit))
                 _isBusy.emit(false)
@@ -221,12 +222,11 @@ class EditViewModel @Inject constructor(
             _isBusy.emit(true)
             runCatching {
                 createCifsConnection(isNew)?.let { con ->
-                    if (cifsRepository.loadConnection().filter { it.id != con.id }
-                            .any { it.uri == con.uri }) {
+                    if (editRepository.connectionListFlow.first().filter { it.id != con.id }.any { it.uri == con.uri }) {
                         // Duplicate URI
                         throw IllegalArgumentException()
                     }
-                    cifsRepository.saveConnection(con)
+                    editRepository.saveConnection(con)
                     currentId = con.id
                     initConnection = con
                 } ?: throw IOException()
@@ -242,7 +242,7 @@ class EditViewModel @Inject constructor(
 
     override fun onCleared() {
         runBlocking {
-            cifsRepository.saveTemporaryConnection(null)
+            editRepository.saveTemporaryConnection(null)
         }
         super.onCleared()
     }

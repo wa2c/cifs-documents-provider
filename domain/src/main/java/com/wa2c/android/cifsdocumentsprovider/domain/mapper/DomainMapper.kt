@@ -43,8 +43,8 @@ internal object DomainMapper {
     /**
      * Convert db model to data model.
      */
-    fun ConnectionSettingEntity.toDataModel(): StorageConnection? {
-        val type = StorageType.findByValue(this.type) ?: return null
+    fun ConnectionSettingEntity.toDataModel(): StorageConnection {
+        val type = StorageType.findByValue(this.type) ?: StorageType.default
         val json = EncryptUtils.decrypt(this.data)
         return jsonToStorageConnection(type, json)
     }

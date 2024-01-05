@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -21,11 +21,11 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FolderViewModel @Inject constructor(
-    private val cifsRepository: CifsRepository
+    private val editRepository: EditRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val temporaryConnection: CifsConnection by lazy {
-        cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+        editRepository.loadTemporaryConnection() ?: throw IllegalStateException()
     }
 
     private val rootConnection = temporaryConnection.copy(folder = null)
@@ -86,7 +86,7 @@ class FolderViewModel @Inject constructor(
     private suspend fun loadList(uri: StorageUri) {
         _isLoading.emit(true)
         runCatching {
-            cifsRepository.getFileChildren(rootConnection, uri)
+            editRepository.getFileChildren(rootConnection, uri)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
         }.onFailure {

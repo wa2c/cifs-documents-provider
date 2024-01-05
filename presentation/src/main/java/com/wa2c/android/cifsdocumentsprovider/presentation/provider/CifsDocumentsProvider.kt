@@ -37,7 +37,6 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.nio.file.Paths
 import kotlin.contracts.contract
 
 /**
@@ -142,26 +141,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
         val id = DocumentId.fromIdText(parentDocumentId)
-        if (id.isRoot) {
-            runBlocking {
-                cifsRepository.loadConnection().forEach { connection ->
-                    try {
-                        val file = cifsRepository.getFile(connection) ?: return@forEach
-                        includeFile(cursor, file)
-                    } catch (e: Exception) {
-                        logE(e)
-                    }
-                }
-            }
-        } else {
-            runBlocking {
-                cifsRepository.getFileChildren(id).forEach { file ->
-                    try {
-                        includeFile(cursor, file)
-                    } catch (e: Exception) {
-                        logE(e)
-                    }
-                }
+        runBlocking {
+            cifsRepository.getFileChildren(id).forEach { file ->
+                includeFile(cursor, file)
             }
         }
         return cursor
