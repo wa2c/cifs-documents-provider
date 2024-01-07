@@ -3,10 +3,12 @@ package com.wa2c.android.cifsdocumentsprovider.common.values
 /**
  * Protocol type
  */
-enum class ProtocolType {
+enum class ProtocolType(
+    val schema: String,
+) {
     /** SMB */
-    SMB,
+    SMB("smb"),
     /** FTP */
-    FTP,
+    FTP("ftp"),
     ;
 }

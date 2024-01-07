@@ -1,8 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getStorageUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
 import kotlinx.serialization.Serializable
 
@@ -24,8 +23,8 @@ sealed class StorageConnection {
     abstract val extension: Boolean
     abstract val safeTransfer: Boolean
 
-    val uri: StorageUri
-        get() = getStorageUri(storage, host, port, folder, true) ?: StorageUri.ROOT
+    val uri: String
+        get() = getUriText(storage, host, port, folder, true) ?: ""
 
     val isAnonymous: Boolean
         get() = anonymous
@@ -34,7 +33,7 @@ sealed class StorageConnection {
         get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
 
     fun getRelativePath(targetUri: String): String {
-        return targetUri.replace(uri.text, "")
+        return targetUri.replace(uri, "")
     }
 
     /**

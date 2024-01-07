@@ -1,7 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository

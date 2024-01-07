@@ -27,8 +27,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isInvalidFileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.uncPathToUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
@@ -36,6 +34,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.uncPathToUri
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -176,7 +176,7 @@ class SmbjClient(
         val uri = this.uncPath.uncPathToUri(isDirectory) ?: return null
         return StorageFile(
             name = uri.fileName,
-            uri = uri.text,
+            uri = uri,
             size = this.fileInformation.standardInformation.endOfFile,
             lastModified = this.fileInformation.basicInformation.changeTime.toEpochMillis(),
             isDirectory = isDirectory
@@ -221,7 +221,7 @@ class SmbjClient(
             if (request.isRoot || request.isShareRoot) {
                 StorageFile(
                     request.connection.name,
-                    request.connection.uri.text,
+                    request.connection.uri,
                     0,
                     0,
                     true,
@@ -230,7 +230,7 @@ class SmbjClient(
                 useDiskShare(request, ignoreCache) { diskShare ->
                     if (!diskShare.exists(request.sharePath)) return@useDiskShare null
                     val info = diskShare.getFileInformation(request.sharePath)
-                    info.toStorageFile(request.uri.text)
+                    info.toStorageFile(request.uri)
                 }
             }
         }
@@ -249,7 +249,7 @@ class SmbjClient(
                     .map { info ->
                         StorageFile(
                             name = info.netName,
-                            uri = request.uri.text.appendChild(info.netName, true),
+                            uri = request.uri.appendChild(info.netName, true),
                             size = 0,
                             lastModified = 0,
                             isDirectory = true,
@@ -268,7 +268,7 @@ class SmbjClient(
                             )
                             StorageFile(
                                 name = info.fileName,
-                                uri = request.uri.text.appendChild(info.fileName, isDirectory),
+                                uri = request.uri.appendChild(info.fileName, isDirectory),
                                 size = info.endOfFile,
                                 lastModified = info.changeTime.toEpochMillis(),
                                 isDirectory = isDirectory,
@@ -287,13 +287,13 @@ class SmbjClient(
             useDiskShare(request) { diskShare ->
                 diskShare.mkdir(request.sharePath)
                 diskShare.getFileInformation(request.sharePath)
-            }?.toStorageFile(request.uri.text)
+            }?.toStorageFile(request.uri)
         }
     }
 
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
+            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath,
                     isRead = false,

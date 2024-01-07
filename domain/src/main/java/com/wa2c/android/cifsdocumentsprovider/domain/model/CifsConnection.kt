@@ -1,9 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getStorageUri
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -30,7 +29,7 @@ data class CifsConnection(
 
     /** Folder SMB URI (smb://) */
     val uri: StorageUri
-        get() = getStorageUri(storage, host, port, folder, true) ?: StorageUri.ROOT
+        get() = getUriText(storage, host, port, folder, true)?.let { StorageUri(it) } ?: StorageUri.ROOT
 
     companion object {
 

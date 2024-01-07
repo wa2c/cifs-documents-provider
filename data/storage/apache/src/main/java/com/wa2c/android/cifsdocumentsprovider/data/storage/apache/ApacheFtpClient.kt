@@ -92,7 +92,7 @@ class ApacheFtpClient(
         existsRequired: Boolean = false,
     ): FileObject {
         return withContext(dispatcher) {
-            fileManager.resolveFile(request.uri.text, getContext(request.connection, ignoreCache)).let {
+            fileManager.resolveFile(request.uri, getContext(request.connection, ignoreCache)).let {
                 if (existsRequired && !it.exists()) {
                     throw FileRequiredException()
                 } else {
@@ -150,7 +150,7 @@ class ApacheFtpClient(
             if (request.isRoot || request.isShareRoot) {
                 StorageFile(
                     name = request.connection.name,
-                    request.connection.uri.text,
+                    request.connection.uri,
                     0,
                     0,
                     true,
@@ -217,7 +217,7 @@ class ApacheFtpClient(
     ): StorageFile {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true, existsRequired = true).use { source ->
-                val targetUri = request.uri.text.rename(newName)
+                val targetUri = request.uri.rename(newName)
                 getFileObject(request.replacePathByUri(targetUri.rename(newName))).use { target ->
                     source.moveTo(target)
                     target.toStorageFile()

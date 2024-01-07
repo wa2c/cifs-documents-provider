@@ -7,7 +7,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
@@ -18,6 +17,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext
@@ -96,7 +96,7 @@ class JCifsNgClient(
             try {
                 val connection = request.connection as StorageConnection.Cifs
                 val context = getCifsContext(connection, ignoreCache)
-                SmbFile(request.uri.text, context).apply {
+                SmbFile(request.uri, context).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }.let {
@@ -189,7 +189,7 @@ class JCifsNgClient(
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
+            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
             getSmbFile(request.replacePathByUri(optimizedUri))?.use { file ->
                 file.createNewFile()
                 file.toStorageFile()
@@ -223,7 +223,7 @@ class JCifsNgClient(
     ): StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(request, existsRequired = true)?.use { source ->
-                val targetUri = request.uri.text.rename(newName)
+                val targetUri = request.uri.rename(newName)
                 getSmbFile(request.replacePathByUri(targetUri))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()

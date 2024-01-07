@@ -7,17 +7,17 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
 import jcifs.legacy.Config
 import jcifs.legacy.smb.NtStatus
 import jcifs.legacy.smb.NtlmPasswordAuthentication
@@ -84,7 +84,7 @@ class JCifsClient(
             try {
                 val connection = request.connection as StorageConnection.Cifs
                 val authentication = getAuthentication(connection, ignoreCache)
-                SmbFile(request.uri.text, authentication).apply {
+                SmbFile(request.uri, authentication).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }.let {
@@ -165,7 +165,7 @@ class JCifsClient(
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUriText = request.uri.text.optimizeUri(if (request.connection.extension) mimeType else null)
+            val optimizedUriText = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
             getSmbFile(request.replacePathByUri(optimizedUriText))?.let {
                 it.createNewFile()
                 it.toStorageFile()
@@ -209,7 +209,7 @@ class JCifsClient(
     ): StorageFile? {
         return withContext(dispatcher) {
             val source = getSmbFile(request, existsRequired = true) ?: return@withContext null
-            val targetUri = request.uri.text.rename(newName)
+            val targetUri = request.uri.rename(newName)
             val target = getSmbFile(request.replacePathByUri(targetUri)) ?: return@withContext null
             source.renameTo(target)
             target.toStorageFile()

@@ -2,10 +2,10 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
@@ -45,7 +45,7 @@ class CifsRepository @Inject internal constructor(
     val useAsLocalFlow = appPreferences.useAsLocalFlow
 
     /** Connected file uri list */
-    private val _openUriList = MutableStateFlow<List<StorageUri>>(emptyList())
+    private val _openUriList = MutableStateFlow<List<String>>(emptyList())
     val openUriList = _openUriList.asStateFlow()
 
     /** Show notification  */

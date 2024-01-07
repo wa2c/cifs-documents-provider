@@ -15,7 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen

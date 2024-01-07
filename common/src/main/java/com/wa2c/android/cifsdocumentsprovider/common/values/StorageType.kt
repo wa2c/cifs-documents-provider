@@ -17,15 +17,6 @@ enum class StorageType(
     APACHE_FTP("APACHE_FTP", ProtocolType.FTP),
     ;
 
-    /**
-     * Get schema
-     */
-    val schema: String
-        get() = when (this) {
-            JCIFS, JCIFS_LEGACY, SMBJ -> "smb"
-            APACHE_FTP -> "ftp"
-        }
-
     companion object {
         val default: StorageType = JCIFS
 

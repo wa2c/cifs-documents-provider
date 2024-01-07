@@ -3,13 +3,9 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
-import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import java.nio.file.Paths
@@ -44,14 +40,14 @@ val String?.mimeType: String
     }
 
 /**
- * Get Storage URI ( <schema>://<documentId> )
+ * Get URI text
  */
-fun getStorageUri(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): StorageUri? {
+fun getUriText(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): String? {
     if (host.isNullOrBlank()) return null
     val portInt = port?.toIntOrNull()
     val authority = host + if (portInt == null || portInt <= 0) "" else ":$port"
     val uri = Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
-    return StorageUri( "${type.schema}${URI_START}$uri")
+    return "${type.protocol.schema}${URI_START}$uri"
 }
 
 /**
@@ -121,31 +117,6 @@ fun String.appendSeparator(): String {
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
     return this.appendSeparator() + name
-}
-
-/** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */
-fun String.uncPathToUri(isDirectory: Boolean): StorageUri? {
-    val elements = this.substringAfter(UNC_START).split(UNC_SEPARATOR).ifEmpty { return null }
-    val params = elements.getOrNull(0)?.split('@') ?: return null
-    val server = params.getOrNull(0) ?: return null
-    val port = if (params.size >= 2) params.lastOrNull() else null
-    val path = elements.subList(1, elements.size).joinToString(UNC_SEPARATOR)
-    return getStorageUri(StorageType.SMBJ, server, port, path, isDirectory)
-}
-
-/**
- * Optimize URI
- */
-fun String.optimizeUri(mimeType: String? = null): String {
-    return  if (mimeType == null) {
-        this
-    } else if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-        this.appendSeparator()
-    } else {
-        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-        if (ext == this.mimeType) this
-        else "$this.$ext"
-    }
 }
 
 /**

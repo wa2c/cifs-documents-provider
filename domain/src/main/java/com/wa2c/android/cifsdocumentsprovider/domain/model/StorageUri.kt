@@ -1,12 +1,13 @@
-package com.wa2c.android.cifsdocumentsprovider.common.values
+package com.wa2c.android.cifsdocumentsprovider.domain.model
 
-import android.net.Uri
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.host
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.port
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -41,7 +42,12 @@ data class StorageUri(
         get() {
             if (isRoot) return null
             val currentUriText = if (text.last() == URI_SEPARATOR) text.substring(0, text.length - 1) else text
-            return StorageUri(currentUriText.substring(0, currentUriText.lastIndexOf(URI_SEPARATOR) + 1))
+            return StorageUri(
+                currentUriText.substring(
+                    0,
+                    currentUriText.lastIndexOf(URI_SEPARATOR) + 1
+                )
+            )
         }
 
     /** True if root */
@@ -53,7 +59,9 @@ data class StorageUri(
         get() = text.fileName
 
     fun addPath(path: String?): StorageUri {
-        return if (path.isNullOrEmpty()) { this } else { StorageUri(text.appendChild(path, path.isDirectoryUri)) }
+        return if (path.isNullOrEmpty()) { this } else {
+            StorageUri(text.appendChild(path, path.isDirectoryUri))
+        }
     }
 
     override fun toString(): String {
