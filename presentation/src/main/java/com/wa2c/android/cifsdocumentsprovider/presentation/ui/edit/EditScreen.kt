@@ -3,7 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Xml.Encoding
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -81,11 +80,11 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
@@ -95,6 +94,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerWide
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -106,7 +106,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import java.nio.charset.Charset
-import java.util.Locale
 
 @Composable
 fun EditScreen(
@@ -335,6 +334,10 @@ private fun EditScreenContainer(
                         focusManager = focusManager,
                     )
 
+                    SectionTitle(
+                        text = stringResource(id = R.string.edit_settings_section_title),
+                    )
+
                     // Domain
                     if (storageState.value.protocol == ProtocolType.SMB) {
                         InputText(
@@ -452,7 +455,7 @@ private fun EditScreenContainer(
                     // Option
 
                     SectionTitle(
-                        text = stringResource(id = R.string.edit_option_title),
+                        text = stringResource(id = R.string.edit_option_section_title),
                     )
 
                     if (safeTransferState != null) {
@@ -472,6 +475,10 @@ private fun EditScreenContainer(
                     // URI
 
                     SectionTitle(
+                        text = stringResource(id = R.string.edit_info_section_title),
+                    )
+
+                    SubsectionTitle(
                         text = stringResource(id = R.string.edit_storage_uri_title),
                     )
 
@@ -483,7 +490,7 @@ private fun EditScreenContainer(
                         true
                     ) ?: "")
 
-                    SectionTitle(
+                    SubsectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),
                     )
 
@@ -747,6 +754,26 @@ fun InputCheck(
 
 @Composable
 private fun SectionTitle(
+    text: String,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = Theme.SizeS)
+    ) {
+        Text(
+            text = text,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(top = Theme.SizeM)
+        )
+        DividerWide()
+    }
+}
+
+@Composable
+private fun SubsectionTitle(
     text: String,
 ) {
     Text(

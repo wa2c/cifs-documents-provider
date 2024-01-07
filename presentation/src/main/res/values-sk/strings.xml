@@ -17,6 +17,7 @@
     <string name="edit_name_title">Názov</string>
     <string name="edit_name_hint">Použije sa názov hostiteľa, ak nevyplníte</string>
     <string name="edit_storage_title">Skladovanie</string>
+    <string name="edit_settings_section_title">Nastavenie</string>
     <string name="edit_domain_title">Doména</string>
     <string name="edit_domain_hint">Zadajte podľa potreby</string>
     <string name="edit_host_title">Hostiteľ</string>
@@ -33,9 +34,10 @@
     <string name="edit_password_title">Heslo</string>
     <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_anonymous_label">Anonymné prihlásenie</string>
-    <string name="edit_option_title">Možnosti</string>
+    <string name="edit_option_section_title">Možnosti</string>
     <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
     <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>
+    <string name="edit_info_section_title">Informácie</string>
     <string name="edit_storage_uri_title">Zdieľanie URI</string>
     <string name="edit_provider_uri_title">Zdieľaný identifikátor URI</string>
     <string name="edit_check_connection_button">Overiť pripojenie</string>

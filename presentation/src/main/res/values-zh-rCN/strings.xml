@@ -17,6 +17,7 @@
     <string name="edit_name_title">名称</string>
     <string name="edit_name_hint">如果留空则为主机名</string>
     <string name="edit_storage_title">存储</string>
+    <string name="edit_settings_section_title">设置</string>
     <string name="edit_domain_title">域名</string>
     <string name="edit_domain_hint">按需填写</string>
     <string name="edit_host_title">主机名</string>
@@ -33,7 +34,10 @@
     <string name="edit_password_title">密码</string>
     <string name="edit_password_hint">匿名访问时无效</string>
     <string name="edit_anonymous_label">匿名</string>
-    <string name="edit_option_title">选项</string>
+    <string name="edit_option_section_title">选项</string>
+    <string name="edit_option_extension_label">保存时添加扩展名</string>
+    <string name="edit_option_safe_transfer_label">安全的数据传输</string>
+    <string name="edit_info_section_title">信息</string>
     <string name="edit_storage_uri_title">存储 URI</string>
     <string name="edit_provider_uri_title">分享 URI</string>
     <string name="edit_check_connection_button">检查连接</string>
@@ -49,8 +53,7 @@
     <string name="edit_delete_confirmation_message">删除此项设置？</string>
     <string name="host_title">主机名</string>
     <string name="host_set_manually">手动设置</string>
-    <string name="edit_option_extension_label">保存时添加扩展名</string>
-    <string name="edit_option_safe_transfer_label">安全的数据传输</string>
+
 
     <!-- Host Screen -->
     <string name="host_select_host_name">主机名</string>
@@ -80,8 +83,8 @@
     <string name="settings_open_file_limit">打开文件限制\n(需要重新启动应用程序)</string>
     <string name="settings_set_use_foreground">打开文件时显示通知</string>
     <string name="settings_set_use_as_local">用作本地存储\n(需要重新启动应用程序)</string>
-    <string name="settings_section_info">" 信息"</string>
-    <string name="settings_info_contributors">" 贡献者"</string>
+    <string name="settings_section_info">信息</string>
+    <string name="settings_info_contributors">贡献者</string>
     <string name="settings_info_libraries">图书馆</string>
     <string name="settings_info_app">应用程序</string>
 

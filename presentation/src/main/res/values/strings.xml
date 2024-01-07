@@ -17,6 +17,7 @@
     <string name="edit_name_title">Name</string>
     <string name="edit_name_hint">Host name if empty</string>
     <string name="edit_storage_title">Storage</string>
+    <string name="edit_settings_section_title">Settings</string>
     <string name="edit_domain_title">Domain</string>
     <string name="edit_domain_hint">Input as needed</string>
     <string name="edit_host_title">Host</string>
@@ -33,9 +34,10 @@
     <string name="edit_password_title">Password</string>
     <string name="edit_password_hint">Invalid if anonymous</string>
     <string name="edit_anonymous_label">Anonymous</string>
-    <string name="edit_option_title">Option</string>
+    <string name="edit_option_section_title">Option</string>
     <string name="edit_option_extension_label">Add extension when saving</string>
     <string name="edit_option_safe_transfer_label">Safe data transfer</string>
+    <string name="edit_info_section_title">Information</string>
     <string name="edit_storage_uri_title">Storage URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>
     <string name="edit_check_connection_button">Check connection</string>
