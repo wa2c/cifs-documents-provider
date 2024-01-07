@@ -26,14 +26,15 @@
     <string name="edit_port_title">ポート</string>
     <string name="edit_port_hint">未入力の場合は標準ポート</string>
     <string name="edit_enable_dfs_label">DFS(Distributed File System)利用</string>
-    <string name="edit_folder_title">フォルダ</string>
-    <string name="edit_folder_hint">未入力の場合は/</string>
     <string name="edit_directory_search_a11y">閲覧</string>
     <string name="edit_user_title">ユーザ名</string>
     <string name="edit_user_hint">匿名の場合は無効</string>
     <string name="edit_password_title">パスワード</string>
     <string name="edit_password_hint">匿名の場合は無効</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_encoding_title">文字コード</string>
+    <string name="edit_folder_title">フォルダ</string>
+    <string name="edit_folder_hint">未入力の場合は/</string>
     <string name="edit_option_section_title">オプション</string>
     <string name="edit_option_extension_label">保存時に拡張子を付与</string>
     <string name="edit_option_safe_transfer_label">安全なデータ転送</string>

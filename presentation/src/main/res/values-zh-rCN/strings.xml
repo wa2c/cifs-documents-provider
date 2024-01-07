@@ -26,14 +26,15 @@
     <string name="edit_port_title">端口号</string>
     <string name="edit_port_hint">如果留空则为默认值</string>
     <string name="edit_enable_dfs_label">启用DFS（分布式文件系统）</string>
-    <string name="edit_folder_title">目录</string>
-    <string name="edit_folder_hint">如果留空则为 /</string>
     <string name="edit_directory_search_a11y">浏览</string>
     <string name="edit_user_title">用户名</string>
     <string name="edit_user_hint">匿名访问时无效</string>
     <string name="edit_password_title">密码</string>
     <string name="edit_password_hint">匿名访问时无效</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_encoding_title">字符代码</string>
+    <string name="edit_folder_title">目录</string>
+    <string name="edit_folder_hint">如果留空则为 /</string>
     <string name="edit_option_section_title">选项</string>
     <string name="edit_option_extension_label">保存时添加扩展名</string>
     <string name="edit_option_safe_transfer_label">安全的数据传输</string>

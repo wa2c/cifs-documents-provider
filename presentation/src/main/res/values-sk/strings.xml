@@ -26,14 +26,15 @@
     <string name="edit_port_title">Port</string>
     <string name="edit_port_hint">Predvolený, ak nevyplníte</string>
     <string name="edit_enable_dfs_label">Povoliť DFS (distribuovaný systém súborov)</string>
-    <string name="edit_folder_title">Cesta</string>
-    <string name="edit_folder_hint">\'/\' ak nevyplníte</string>
     <string name="edit_directory_search_a11y">Prehľadávať</string>
     <string name="edit_user_title">Meno používateľa</string>
     <string name="edit_user_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_password_title">Heslo</string>
     <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_anonymous_label">Anonymné prihlásenie</string>
+    <string name="edit_encoding_title">Kód postavy</string>
+    <string name="edit_folder_title">Cesta</string>
+    <string name="edit_folder_hint">\'/\' ak nevyplníte</string>
     <string name="edit_option_section_title">Možnosti</string>
     <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
     <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>

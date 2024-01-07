@@ -85,7 +85,7 @@ class EditViewModel @Inject constructor(
     var user = MutableStateFlow<String?>(null)
     var password = MutableStateFlow<String?>(null)
     var anonymous = MutableStateFlow<Boolean>(false)
-    val encoding = MutableStateFlow<String?>(null)
+    val encoding = MutableStateFlow<String>(DEFAULT_ENCODING)
 
     var extension = MutableStateFlow<Boolean>(false)
     var safeTransfer = MutableStateFlow<Boolean>(false)
@@ -141,7 +141,7 @@ class EditViewModel @Inject constructor(
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
             anonymous = isAnonymous,
-            encoding = encoding.value ?: DEFAULT_ENCODING,
+            encoding = encoding.value,
             extension = extension.value,
             safeTransfer = safeTransfer.value,
         )

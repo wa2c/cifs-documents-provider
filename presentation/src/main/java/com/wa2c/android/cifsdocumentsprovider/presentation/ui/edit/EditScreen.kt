@@ -247,7 +247,7 @@ private fun EditScreenContainer(
     userState: MutableState<String?>,
     passwordState: MutableState<String?>,
     anonymousState: MutableState<Boolean>,
-    encodingState: MutableState<String?>,
+    encodingState: MutableState<String>,
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>?,
     extensionState: MutableState<Boolean>,
@@ -425,11 +425,8 @@ private fun EditScreenContainer(
 
                     // Encoding
                     if (storageState.value.protocol == ProtocolType.FTP) {
-                        if (encodingState.value.isNullOrEmpty()) {
-                            encodingState.value = DEFAULT_ENCODING
-                        }
                         InputOption(
-                            title = stringResource(id = R.string.edit_storage_title),
+                            title = stringResource(id = R.string.edit_encoding_title),
                             items = Charset.availableCharsets()
                                 .map { OptionItem(it.key, it.value.name()) },
                             state = encodingState,

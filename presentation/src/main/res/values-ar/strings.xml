@@ -26,14 +26,15 @@
     <string name="edit_port_title">بوابة</string>
     <string name="edit_port_hint">أهمل إن كان خاليا</string>
     <string name="edit_enable_dfs_label">فعّل - دي إف أس - ( نظام الملفات الموزعة )</string>
-    <string name="edit_folder_title">المجلد</string>
-    <string name="edit_folder_hint">\'/\' إذا كان خاليا</string>
     <string name="edit_directory_search_a11y">تصفح</string>
     <string name="edit_user_title">المستخدم</string>
     <string name="edit_user_hint">باطل إذا كان مجهول</string>
     <string name="edit_password_title">كلمة المرور</string>
     <string name="edit_password_hint">باطل إذا كان مجهول</string>
     <string name="edit_anonymous_label">مجهول</string>
+    <string name="edit_encoding_title">رمز الحرف</string>
+    <string name="edit_folder_title">المجلد</string>
+    <string name="edit_folder_hint">\'/\' إذا كان خاليا</string>
     <string name="edit_option_section_title">خيار</string>
     <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
     <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
