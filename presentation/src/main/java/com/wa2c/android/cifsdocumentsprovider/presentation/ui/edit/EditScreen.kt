@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
+import android.util.Xml.Encoding
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -77,6 +78,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
+import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -102,6 +105,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import java.nio.charset.Charset
+import java.util.Locale
 
 @Composable
 fun EditScreen(
@@ -135,6 +140,7 @@ fun EditScreen(
         userState = viewModel.user.collectAsMutableState(),
         passwordState = viewModel.password.collectAsMutableState(),
         anonymousState = viewModel.anonymous.collectAsMutableState(),
+        encodingState = viewModel.encoding.collectAsMutableState(),
         folderState = viewModel.folder.collectAsMutableState(),
         onClickBack = {
             if (viewModel.isChanged) {
@@ -242,6 +248,7 @@ private fun EditScreenContainer(
     userState: MutableState<String?>,
     passwordState: MutableState<String?>,
     anonymousState: MutableState<Boolean>,
+    encodingState: MutableState<String?>,
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>?,
     extensionState: MutableState<Boolean>,
@@ -294,6 +301,7 @@ private fun EditScreenContainer(
                         .padding(Theme.Sizes.ScreenMargin)
                         .weight(1f)
                 ) {
+                    // ID
                     InputText(
                         title = stringResource(id = R.string.edit_id_title),
                         hint = stringResource(id = R.string.edit_id_hint),
@@ -305,6 +313,8 @@ private fun EditScreenContainer(
                             imeAction = ImeAction.Next,
                         )
                     )
+
+                    // Name
                     InputText(
                         title = stringResource(id = R.string.edit_name_title),
                         hint = stringResource(id = R.string.edit_name_hint),
@@ -316,6 +326,7 @@ private fun EditScreenContainer(
                         )
                     )
 
+                    // Storage
                     InputOption(
                         title = stringResource(id = R.string.edit_storage_title),
                         items = StorageType.entries
@@ -324,17 +335,21 @@ private fun EditScreenContainer(
                         focusManager = focusManager,
                     )
 
-                    InputText(
-                        title = stringResource(id = R.string.edit_domain_title),
-                        hint = stringResource(id = R.string.edit_domain_hint),
-                        state = domainState,
-                        focusManager = focusManager,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Uri,
-                            imeAction = ImeAction.Next,
-                        ),
-                    )
+                    // Domain
+                    if (storageState.value.protocol == ProtocolType.SMB) {
+                        InputText(
+                            title = stringResource(id = R.string.edit_domain_title),
+                            hint = stringResource(id = R.string.edit_domain_hint),
+                            state = domainState,
+                            focusManager = focusManager,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Uri,
+                                imeAction = ImeAction.Next,
+                            ),
+                        )
+                    }
 
+                    // Host
                     InputText(
                         title = stringResource(id = R.string.edit_host_title),
                         hint = stringResource(id = R.string.edit_host_hint),
@@ -349,6 +364,7 @@ private fun EditScreenContainer(
                         onClickSearchHost()
                     }
 
+                    // Port
                     InputText(
                         title = stringResource(id = R.string.edit_port_title),
                         hint = stringResource(id = R.string.edit_port_hint),
@@ -360,12 +376,16 @@ private fun EditScreenContainer(
                         )
                     )
 
-                    InputCheck(
-                        title = stringResource(id = R.string.edit_enable_dfs_label),
-                        state = enableDfsState,
-                        focusManager = focusManager,
-                    )
+                    // Enable DFS
+                    if (storageState.value.protocol == ProtocolType.SMB) {
+                        InputCheck(
+                            title = stringResource(id = R.string.edit_enable_dfs_label),
+                            state = enableDfsState,
+                            focusManager = focusManager,
+                        )
+                    }
 
+                    // User
                     InputText(
                         title = stringResource(id = R.string.edit_user_title),
                         hint = stringResource(id = R.string.edit_user_hint),
@@ -379,6 +399,7 @@ private fun EditScreenContainer(
                         autofillType = AutofillType.Username,
                     )
 
+                    // Password
                     InputText(
                         title = stringResource(id = R.string.edit_password_title),
                         hint = stringResource(id = R.string.edit_password_hint),
@@ -392,12 +413,28 @@ private fun EditScreenContainer(
                         autofillType = AutofillType.Password,
                     )
 
+                    // Anonymous
                     InputCheck(
                         title = stringResource(id = R.string.edit_anonymous_label),
                         state = anonymousState,
                         focusManager = focusManager,
                     )
 
+                    // Encoding
+                    if (storageState.value.protocol == ProtocolType.FTP) {
+                        if (encodingState.value.isNullOrEmpty()) {
+                            encodingState.value = DEFAULT_ENCODING
+                        }
+                        InputOption(
+                            title = stringResource(id = R.string.edit_storage_title),
+                            items = Charset.availableCharsets()
+                                .map { OptionItem(it.key, it.value.name()) },
+                            state = encodingState,
+                            focusManager = focusManager,
+                        )
+                    }
+
+                    // Folder
                     InputText(
                         title = stringResource(id = R.string.edit_folder_title),
                         hint = stringResource(id = R.string.edit_folder_hint),
@@ -760,6 +797,7 @@ private fun EditScreenPreview() {
             userState = mutableStateOf("user"),
             passwordState = mutableStateOf("password"),
             anonymousState = mutableStateOf(false),
+            encodingState = mutableStateOf("UTF-8"),
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
             extensionState = mutableStateOf(false),

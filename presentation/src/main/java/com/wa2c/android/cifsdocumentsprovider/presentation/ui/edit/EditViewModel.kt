@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
@@ -84,6 +85,7 @@ class EditViewModel @Inject constructor(
     var user = MutableStateFlow<String?>(null)
     var password = MutableStateFlow<String?>(null)
     var anonymous = MutableStateFlow<Boolean>(false)
+    val encoding = MutableStateFlow<String?>(null)
 
     var extension = MutableStateFlow<Boolean>(false)
     var safeTransfer = MutableStateFlow<Boolean>(false)
@@ -96,10 +98,10 @@ class EditViewModel @Inject constructor(
         launch { host.collect { send(null) } }
         launch { port.collect { send(null) } }
         launch { enableDfs.collect { send(null) } }
-        launch { folder.collect { send(null) } }
         launch { user.collect { send(null) } }
         launch { password.collect { send(null) } }
         launch { anonymous.collect { send(null) } }
+        launch { folder.collect { send(null) } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
@@ -117,6 +119,7 @@ class EditViewModel @Inject constructor(
         user.value = connection.user
         password.value = connection.password
         anonymous.value = connection.anonymous
+        encoding.value = connection.encoding
         extension.value = connection.extension
         safeTransfer.value = connection.safeTransfer
     }
@@ -138,6 +141,7 @@ class EditViewModel @Inject constructor(
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
             anonymous = isAnonymous,
+            encoding = encoding.value ?: DEFAULT_ENCODING,
             extension = extension.value,
             safeTransfer = safeTransfer.value,
         )

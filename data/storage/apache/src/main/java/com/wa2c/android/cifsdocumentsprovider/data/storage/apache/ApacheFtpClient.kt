@@ -54,18 +54,21 @@ class ApacheFtpClient(
         connection: StorageConnection,
         ignoreCache: Boolean,
     ): FileSystemOptions {
+        val ftpConnection = (connection as? StorageConnection.Ftp) ?: throw IllegalArgumentException()
+
         if (!ignoreCache) {
-            contextCache[connection]?.let {
+            contextCache[ftpConnection]?.let {
                 return it
             }
         }
+
 
         val options = FileSystemOptions()
 
         DefaultFileSystemConfigBuilder.getInstance().also { builder ->
             builder.setUserAuthenticator(
                 options,
-                StaticUserAuthenticator(connection.domain, connection.user, connection.password)
+                StaticUserAuthenticator(null, ftpConnection.user, ftpConnection.password)
             )
         }
 
@@ -74,12 +77,12 @@ class ApacheFtpClient(
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setConnectTimeout(options,  Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setDataTimeout(options,  Duration.ofMillis(READ_TIMEOUT.toLong()))
-            builder.setControlEncoding(options, "UTF-8") // TODO
+            builder.setControlEncoding(options, ftpConnection.encoding)
             builder.setFileType(options, FtpFileType.BINARY)
         }
 
         logD("Context created: $options")
-        contextCache.put(connection, options)
+        contextCache.put(ftpConnection, options)
         return options
     }
 

@@ -3,9 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
-import com.wa2c.android.cifsdocumentsprovider.common.utils.host
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.port
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import kotlinx.parcelize.Parcelize
@@ -18,14 +16,6 @@ data class StorageUri(
     /** Encoded URI Text */
     val text: String,
 ) : Parcelable {
-
-    /** Host */
-    val host: String
-        get() = text.host ?: ""
-
-    /** Port (null if empty) */
-    val port: Int?
-        get() = text.port
 
     /** Path[xxx/xxx] (not start with '/') */
     val path: String

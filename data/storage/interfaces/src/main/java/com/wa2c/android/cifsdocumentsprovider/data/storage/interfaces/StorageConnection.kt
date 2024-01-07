@@ -13,7 +13,6 @@ sealed class StorageConnection {
     abstract val id: String
     abstract val name: String
     abstract val storage: StorageType
-    abstract val domain: String?
     abstract val host: String
     abstract val port: String?
     abstract val folder: String?
@@ -44,7 +43,6 @@ sealed class StorageConnection {
         override val id: String,
         override val name: String,
         override val storage: StorageType = StorageType.default,
-        override val domain: String?,
         override val host: String,
         override val port: String?,
         override val folder: String?,
@@ -53,6 +51,7 @@ sealed class StorageConnection {
         override val anonymous: Boolean,
         override val extension: Boolean,
         override val safeTransfer: Boolean,
+        val domain: String?,
         val enableDfs: Boolean,
     ) : StorageConnection()
 
@@ -64,7 +63,6 @@ sealed class StorageConnection {
         override val id: String,
         override val name: String,
         override val storage: StorageType = StorageType.default,
-        override val domain: String?,
         override val host: String,
         override val port: String?,
         override val folder: String?,
@@ -73,5 +71,6 @@ sealed class StorageConnection {
         override val anonymous: Boolean,
         override val extension: Boolean,
         override val safeTransfer: Boolean,
+        val encoding: String,
     ) : StorageConnection()
 }
