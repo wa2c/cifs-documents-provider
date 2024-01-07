@@ -59,11 +59,13 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -77,7 +79,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -475,27 +476,27 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_info_section_title),
                     )
 
+                    // Storage URI
                     SubsectionTitle(
                         text = stringResource(id = R.string.edit_storage_uri_title),
                     )
-
-                    UriText(uriText = getUriText(
+                    val storageUri = getUriText(
                         storageState.value,
                         hostState.value,
                         portState.value,
                         folderState.value,
                         true
-                    ) ?: "")
+                    ) ?: ""
+                    UriText(uriText = storageUri)
 
+                    // Shared URI
                     SubsectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),
                     )
-
-                    val contentUri = idState.value.let { connectionId ->
-                        val idText = DocumentId.fromConnection(connectionId)?.idText
-                        "content$URI_START$URI_AUTHORITY/tree/${Uri.encode(idText)}"
-                    }
-                    UriText(uriText = contentUri)
+                    val sharedUri =  DocumentId.fromConnection(idState.value)?.takeIf { !it.isRoot }?.let{
+                        "content$URI_START$URI_AUTHORITY/tree/${Uri.encode(it.idText)}"
+                    } ?: ""
+                    UriText(uriText = sharedUri)
                 }
 
                 DividerNormal()
@@ -786,11 +787,16 @@ private fun SubsectionTitle(
 private fun UriText(
     uriText: String,
 ) {
+    val clipboardManager = LocalClipboardManager.current
+
     SelectionContainer {
         Text(
             text = uriText,
             modifier = Modifier
                 .padding(Theme.SizeS)
+                .clickable {
+                    clipboardManager.setText(AnnotatedString(uriText))
+                }
         )
     }
 }
