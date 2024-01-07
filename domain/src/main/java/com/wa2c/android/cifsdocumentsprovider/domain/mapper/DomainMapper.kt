@@ -3,7 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.mapper
 import android.net.Uri
 import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity

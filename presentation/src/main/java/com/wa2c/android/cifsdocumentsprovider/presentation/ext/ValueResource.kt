@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R

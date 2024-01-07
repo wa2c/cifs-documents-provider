@@ -12,7 +12,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.ForegroundInfo
 import com.wa2c.android.cifsdocumentsprovider.common.values.NOTIFICATION_CHANNEL_ID_SEND
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getSummaryText

@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

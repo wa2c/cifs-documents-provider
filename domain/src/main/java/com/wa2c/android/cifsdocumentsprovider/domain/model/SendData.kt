@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.net.Uri
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
 
 /**
  * Send Data
