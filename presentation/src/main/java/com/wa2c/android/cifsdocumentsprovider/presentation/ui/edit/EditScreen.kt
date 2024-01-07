@@ -6,7 +6,6 @@ import android.net.Uri
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -95,14 +94,13 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButto
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 
 @Composable
@@ -195,27 +193,12 @@ fun EditScreen(
     }
 
     LaunchedEffect(Unit) {
-        val showError = fun (@StringRes stringRes: Int, error: Throwable?) {
-            scope.showPopup(
-                snackbarHostState = snackbarHostState,
-                popupMessage = PopupMessage.Resource(
-                    res = stringRes,
-                    type = PopupMessageType.Error,
-                    error = error
-                )
-            )
-        }
-
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             scope.showPopup(
                 snackbarHostState = snackbarHostState,
-                popupMessage = result?.let {
-                    PopupMessage.Resource(
-                        res = result.messageRes,
-                        type = result.messageType,
-                        error = result.cause
-                    )
-                }
+                stringRes = result?.messageRes,
+                type = result?.messageType,
+                error = result?.cause
             )
         }
 
@@ -227,7 +210,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 result.getOrNull()?.let { onNavigateSelectFolder(it) }
             } else {
-                showError(R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
             }
         }
 
@@ -235,7 +218,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 onNavigateBack()
             } else {
-                showError(R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
             }
         }
     }

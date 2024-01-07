@@ -43,11 +43,11 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
@@ -81,22 +81,17 @@ fun HomeScreen(
                 try {
                     fileOpenLauncher.launch(arrayOf("*/*"))
                 } catch (e: Exception) {
-                    scope.showPopup(
+                    scope.showError(
                         snackbarHostState = snackbarHostState,
-                        popupMessage = PopupMessage.Resource(
-                            res = R.string.provider_error_message,
-                            type = PopupMessageType.Error,
-                            error = e,
-                        )
+                        stringRes = R.string.provider_error_message,
+                        error = e,
                     )
                 }
             } else {
                 scope.showPopup(
                     snackbarHostState = snackbarHostState,
-                    popupMessage = PopupMessage.Resource(
-                        res = R.string.home_open_file_ng_message,
-                        type = PopupMessageType.Warning,
-                    )
+                    stringRes = R.string.home_open_file_ng_message,
+                    type = PopupMessageType.Warning,
                 )
             }
         },

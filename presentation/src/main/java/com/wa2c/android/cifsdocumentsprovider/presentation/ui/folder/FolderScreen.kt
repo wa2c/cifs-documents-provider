@@ -48,11 +48,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 
 /**
  * Folder Screen
@@ -84,13 +82,10 @@ fun FolderScreen(
 
     LaunchedEffect(Unit) {
         viewModel.result.collectIn(lifecycleOwner) {
-            scope.showPopup(
+            scope.showError(
                 snackbarHostState = snackbarHostState,
-                popupMessage = PopupMessage.Resource(
-                    res = R.string.host_error_network,
-                    type = PopupMessageType.Error,
-                    error = it.exceptionOrNull()
-                )
+                stringRes = R.string.host_error_network,
+                error = it.exceptionOrNull(),
             )
         }
     }
