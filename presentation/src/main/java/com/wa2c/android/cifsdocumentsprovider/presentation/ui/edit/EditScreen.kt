@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.net.Uri
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
@@ -75,12 +76,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getContentUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getStorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
@@ -109,7 +112,7 @@ fun EditScreen(
     selectedHost: String? = null,
     selectedUri: StorageUri? = null,
     onNavigateBack: () -> Unit,
-    onNavigateSearchHost: (CifsConnection?) -> Unit,
+    onNavigateSearchHost: (connectionId: String) -> Unit,
     onNavigateSelectFolder: (CifsConnection) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -123,6 +126,7 @@ fun EditScreen(
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
+        isNew = viewModel.isNew,
         idState = viewModel.id.collectAsMutableState(),
         nameState = viewModel.name.collectAsMutableState(),
         storageState = storageType,
@@ -215,12 +219,8 @@ fun EditScreen(
             )
         }
 
-        viewModel.navigateSearchHost.collectIn(lifecycleOwner) { result ->
-            if (result.isSuccess) {
-                result.getOrNull()?.let { onNavigateSearchHost(it) }
-            } else {
-                showError(R.string.edit_save_ng_message, result.exceptionOrNull())
-            }
+        viewModel.navigateSearchHost.collectIn(lifecycleOwner) { connectionId ->
+            onNavigateSearchHost(connectionId)
         }
 
         viewModel.navigateSelectFolder.collectIn(lifecycleOwner) { result ->
@@ -235,13 +235,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 onNavigateBack()
             } else {
-                val error = result.exceptionOrNull()
-                val messageRes = if (error is IllegalArgumentException) {
-                    R.string.edit_save_duplicate_message // URI duplicated
-                } else {
-                    R.string.edit_save_ng_message // Host empty
-                }
-                showError(messageRes, result.exceptionOrNull())
+                showError(R.string.provider_error_message, result.exceptionOrNull())
             }
         }
     }
@@ -254,7 +248,8 @@ fun EditScreen(
 @Composable
 private fun EditScreenContainer(
     snackbarHostState: SnackbarHostState,
-    idState: MutableState<String>,
+    isNew: Boolean,
+    idState: MutableState<String?>,
     nameState: MutableState<String?>,
     storageState: MutableState<StorageType>,
     domainState: MutableState<String?>,
@@ -316,6 +311,17 @@ private fun EditScreenContainer(
                         .padding(Theme.Sizes.ScreenMargin)
                         .weight(1f)
                 ) {
+                    InputText(
+                        title = stringResource(id = R.string.edit_id_title),
+                        hint = stringResource(id = R.string.edit_id_hint),
+                        state = idState,
+                        focusManager = focusManager,
+                        enabled = isNew,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next,
+                        )
+                    )
                     InputText(
                         title = stringResource(id = R.string.edit_name_title),
                         hint = stringResource(id = R.string.edit_name_hint),
@@ -461,7 +467,11 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_provider_uri_title),
                     )
 
-                    UriText(uriText = getContentUri(idState.value))
+                    val contentUri = idState.value.let { connectionId ->
+                        val idText = DocumentId.fromConnection(connectionId)?.idText
+                        "content$URI_START$URI_AUTHORITY/tree/${Uri.encode(idText)}"
+                    }
+                    UriText(uriText = contentUri)
                 }
 
                 DividerNormal()
@@ -756,6 +766,7 @@ private fun EditScreenPreview() {
     Theme.AppTheme {
         EditScreenContainer(
             snackbarHostState = SnackbarHostState(),
+            isNew = true,
             idState = mutableStateOf("id1"),
             nameState = mutableStateOf("name1"),
             storageState = mutableStateOf(StorageType.SMBJ),

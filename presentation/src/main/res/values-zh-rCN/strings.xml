@@ -12,6 +12,8 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">连接</string>
+    <string name="edit_id_title">ID</string>
+    <string name="edit_id_hint">唯一字符串 (不允许使用":", "/")</string>
     <string name="edit_name_title">名称</string>
     <string name="edit_name_hint">如果留空则为主机名</string>
     <string name="edit_storage_title">存储</string>
@@ -38,8 +40,9 @@
     <string name="edit_check_connection_ok_message">连接成功。</string>
     <string name="edit_check_connection_wn_message">设置有误。</string>
     <string name="edit_check_connection_ng_message">连接失败。</string>
-    <string name="edit_save_ng_message">请填写主机名。</string>
-    <string name="edit_save_duplicate_message">URI 重复。</string>
+    <string name="edit_save_ng_input_message">请填写主机名。</string>
+    <string name="edit_save_ng_invalid_id_message">ID 无效。</string>
+    <string name="edit_save_ng_duplicate_id_message">ID 重复。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_delete_button">删除</string>
     <string name="edit_back_confirmation_message">放弃修改？</string>

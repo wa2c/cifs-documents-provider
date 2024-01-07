@@ -95,7 +95,7 @@ internal fun MainNavHost(
                     navController.popBackStack()
                 },
                 onNavigateSearchHost = {
-                    navController.navigate(route = "$HostScreenName?$HostScreenParamId=${it?.id ?: ""}")
+                    navController.navigate(route = "$HostScreenName?$HostScreenParamId=${it}")
                 },
                 onNavigateSelectFolder = {
                     navController.navigate(route = FolderScreenName)

@@ -5,15 +5,16 @@ package com.wa2c.android.cifsdocumentsprovider.common.values
  */
 enum class StorageType(
     val value: String,
+    val protocol: ProtocolType,
 ) {
     /** JCIFS-NG */
-    JCIFS("JCIFS"),
+    JCIFS("JCIFS", ProtocolType.SMB),
     /** SMBJ */
-    SMBJ("SMBJ"),
+    SMBJ("SMBJ", ProtocolType.SMB),
     /** JCIFS */
-    JCIFS_LEGACY("JCIFS_LEGACY"),
+    JCIFS_LEGACY("JCIFS_LEGACY", ProtocolType.SMB),
     /** Apache FTP */
-    APACHE_FTP("APACHE_FTP"),
+    APACHE_FTP("APACHE_FTP", ProtocolType.FTP),
     ;
 
     /**

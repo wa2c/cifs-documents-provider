@@ -12,7 +12,9 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">接続情報</string>
-    <string name="edit_name_title">識別名</string>
+    <string name="edit_id_title">ID</string>
+    <string name="edit_id_hint">一意の文字列 (":", "/"は不可)</string>
+    <string name="edit_name_title">名前</string>
     <string name="edit_name_hint">未入力の場合はホスト</string>
     <string name="edit_storage_title">ストレージ</string>
     <string name="edit_domain_title">ドメイン</string>
@@ -40,8 +42,9 @@
     <string name="edit_check_connection_ok_message">接続に成功しました。</string>
     <string name="edit_check_connection_wn_message">設定にエラーがあります。</string>
     <string name="edit_check_connection_ng_message">接続に失敗しました。</string>
-    <string name="edit_save_ng_message">ホストを入力してください。</string>
-    <string name="edit_save_duplicate_message">URIが重複しています。</string>
+    <string name="edit_save_ng_input_message">ホストを入力してください。</string>
+    <string name="edit_save_ng_invalid_id_message">IDの文字列が不正です。</string>
+    <string name="edit_save_ng_duplicate_id_message">IDが重複しています。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_delete_button">削除</string>
     <string name="edit_back_confirmation_message">変更を破棄しますか？</string>

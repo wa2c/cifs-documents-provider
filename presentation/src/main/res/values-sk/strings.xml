@@ -12,6 +12,8 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">Pripojenie</string>
+    <string name="edit_id_title">ID</string>
+    <string name="edit_id_hint">Jedinečný reťazec (":", "/" nie sú povolené)</string>
     <string name="edit_name_title">Názov</string>
     <string name="edit_name_hint">Použije sa názov hostiteľa, ak nevyplníte</string>
     <string name="edit_storage_title">Skladovanie</string>
@@ -40,8 +42,10 @@
     <string name="edit_check_connection_ok_message">Pripojenie úspešné.</string>
     <string name="edit_check_connection_wn_message">Nastavenia majú chybu.</string>
     <string name="edit_check_connection_ng_message">Pripojenie zlyhalo.</string>
-    <string name="edit_save_ng_message">Zadajte názov hostiteľa.</string>
-    <string name="edit_save_duplicate_message">Duplicitná URI.</string>
+    <string name="edit_save_ng_input_message">Input the host.</string>
+    <string name="edit_save_ng_invalid_id_message">ID je neplatné.</string>
+    <string name="edit_save_ng_duplicate_id_message">ID je duplikované.</string>
+
     <string name="edit_save_button">Uložiť</string>
     <string name="edit_delete_button">Zmazať</string>
     <string name="edit_back_confirmation_message">Zahodiť zmeny?</string>

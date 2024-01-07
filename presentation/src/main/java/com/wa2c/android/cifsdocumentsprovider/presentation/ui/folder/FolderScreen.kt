@@ -260,7 +260,7 @@ private fun FolderScreenContainerPreview() {
             snackbarHostState = SnackbarHostState(),
             fileList = listOf(
                 CifsFile(
-                    documentId = DocumentId.fromIdText(null),
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example1.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,
@@ -268,7 +268,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 ),
                 CifsFile(
-                    documentId = DocumentId.fromIdText(null),
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example2example2example2example2example2example2.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,
@@ -276,7 +276,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 ),
                 CifsFile(
-                    documentId = DocumentId.fromIdText(null),
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example3example3example3example3example3example3example3example3example3example3.txt",
                     uri = StorageUri("smb://example/"),
                     size = 128,

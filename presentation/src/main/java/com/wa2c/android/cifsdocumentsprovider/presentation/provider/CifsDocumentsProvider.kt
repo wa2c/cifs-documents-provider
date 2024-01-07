@@ -114,7 +114,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun queryDocument(documentId: String?, projection: Array<String>?): Cursor {
         logD("queryDocument: documentId=$documentId")
         val cursor = MatrixCursor(projection.toProjection())
-        val id = DocumentId.fromIdText(documentId)
+        val id = DocumentId.fromIdText(documentId) ?: DocumentId.ROOT
         if (id.isRoot) {
             // Root
             includeConnection(cursor)
@@ -140,7 +140,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): Cursor {
         logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
-        val id = DocumentId.fromIdText(parentDocumentId)
+        val id = DocumentId.fromIdText(parentDocumentId) ?: DocumentId.ROOT
         runBlocking {
             cifsRepository.getFileChildren(id).forEach { file ->
                 includeFile(cursor, file)
@@ -150,8 +150,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
-        val parent = if (DocumentId.fromIdText(parentDocumentId).isRoot) "/" else parentDocumentId ?: return false
-        val child = documentId ?: return false
+        val parent = parentDocumentId ?: ""
+        val child = documentId ?: ""
         return child.indexOf(parent) == 0
     }
 
@@ -175,7 +175,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId).takeIf { !it.isRoot } ?: return@runOnFileHandler null
+            val id = DocumentId.fromIdText(documentId)?.takeIf { !it.isRoot } ?: return@runOnFileHandler null
             cifsRepository.getCallback(id, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
@@ -195,12 +195,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): String? {
         logD("createDocument: parentDocumentId=$parentDocumentId, mimeType=$mimeType, displayName=$displayName")
         return runOnFileHandler {
+            val id = DocumentId.fromIdText(parentDocumentId) ?: return@runOnFileHandler null
             cifsRepository.createFile(
-                parentDocumentId = DocumentId.fromIdText(parentDocumentId),
+                parentDocumentId = id,
                 name = displayName,
                 mimeType = mimeType,
                 isDirectory = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
-            )?.documentId
+            )?.idText
         }
     }
 
@@ -208,7 +209,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("deleteDocument: documentId=$documentId")
         if (documentId.isNullOrEmpty()) throw OperationCanceledException()
         runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId)
+            val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler
             cifsRepository.deleteFile(id)
         }
     }
@@ -217,8 +218,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("renameDocument: documentId=$documentId, displayName=$displayName")
         if (documentId.isNullOrEmpty() || displayName.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId)
-            cifsRepository.renameFile(id, displayName)?.documentId
+            val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler null
+            cifsRepository.renameFile(id, displayName)?.idText
         }
     }
 
@@ -226,9 +227,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("copyDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val sourceId = DocumentId.fromIdText(sourceDocumentId)
-            val targetParentId = DocumentId.fromIdText(targetParentDocumentId)
-            cifsRepository.copyFile(sourceId, targetParentId)?.documentId
+            val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
+            val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
+            cifsRepository.copyFile(sourceId, targetParentId)?.idText
         }
     }
 
@@ -240,9 +241,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("moveDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val sourceId = DocumentId.fromIdText(sourceDocumentId)
-            val targetParentId = DocumentId.fromIdText(targetParentDocumentId)
-            cifsRepository.moveFile(sourceId, targetParentId)?.documentId
+            val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
+            val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
+            cifsRepository.moveFile(sourceId, targetParentId)?.idText
         }
     }
 
@@ -319,7 +320,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 }
                 file.isDirectory -> {
                     // Directory
-                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId.documentId)
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId.idText)
                     row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
@@ -336,7 +337,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 }
                 else -> {
                     // File
-                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId.documentId)
+                    row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId.idText)
                     row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)

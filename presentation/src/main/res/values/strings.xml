@@ -12,6 +12,8 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">Connection</string>
+    <string name="edit_id_title">ID</string>
+    <string name="edit_id_hint">Unique string (no ":", "/")</string>
     <string name="edit_name_title">Name</string>
     <string name="edit_name_hint">Host name if empty</string>
     <string name="edit_storage_title">Storage</string>
@@ -40,8 +42,9 @@
     <string name="edit_check_connection_ok_message">Connection successful.</string>
     <string name="edit_check_connection_wn_message">Settings has an error.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
-    <string name="edit_save_ng_message">Input the host.</string>
-    <string name="edit_save_duplicate_message">URI duplicated.</string>
+    <string name="edit_save_ng_input_message">Input the host.</string>
+    <string name="edit_save_ng_invalid_id_message">ID is invalid.</string>
+    <string name="edit_save_ng_duplicate_id_message">ID is duplicated.</string>
     <string name="edit_save_button">Save</string>
     <string name="edit_delete_button">Delete</string>
     <string name="edit_back_confirmation_message">Discard your changes?</string>

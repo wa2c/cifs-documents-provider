@@ -10,7 +10,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import java.nio.file.Paths
@@ -53,14 +52,6 @@ fun getStorageUri(type: StorageType, host: String?, port: String?, folder: Strin
     val authority = host + if (portInt == null || portInt <= 0) "" else ":$port"
     val uri = Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
     return StorageUri( "${type.schema}${URI_START}$uri")
-}
-
-/**
- * Get content URI ( content://<applicationId>/tree/<encodedConnectionId> )
- */
-fun getContentUri(connectionId: String): String {
-    val id = Uri.encode(connectionId)
-    return "content$URI_START$URI_AUTHORITY/tree/${id}/"
 }
 
 /**

@@ -117,16 +117,16 @@ class CifsRepository @Inject internal constructor(
                 connectionSettingDao.getList().first().mapNotNull { entity ->
                     val request = entity.toDataModel().toStorageRequest()
                     runFileBlocking(request) {
-                        val documentId = DocumentId.fromConnection(request.connection.id, null)
+                        val documentId = DocumentId.fromConnection(request.connection.id) ?: return@runFileBlocking null
                         getClient(request.connection).getFile(request)?.toModel(documentId)
                     }
                 }
             } else {
                 val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
                 runFileBlocking(request) {
-                    getClient(request.connection).getChildren(request)?.map {
+                    getClient(request.connection).getChildren(request)?.mapNotNull {
                         val path = request.connection.getRelativePath(it.uri)
-                        val documentId = DocumentId.fromConnection(request.connection.id, path)
+                        val documentId = DocumentId.fromConnection(request.connection.id, path) ?: return@mapNotNull null
                         it.toModel(documentId)
                     } ?: emptyList()
                 }
@@ -140,7 +140,7 @@ class CifsRepository @Inject internal constructor(
     suspend fun createFile(parentDocumentId: DocumentId, name: String, mimeType: String?, isDirectory: Boolean): DocumentId? {
         logD("createFile: parentDocumentId=$parentDocumentId, name=$name, mimeType=$mimeType, isDirectory=$isDirectory")
         return withContext(dispatcher) {
-            val fileDocumentId = DocumentId.fromIdText(parentDocumentId.documentId.appendChild(name, isDirectory))
+            val fileDocumentId = DocumentId.fromIdText(parentDocumentId.idText.appendChild(name, isDirectory)) ?: return@withContext null
             val request = getStorageRequest(fileDocumentId) ?: return@withContext null
             runFileBlocking(request) {
                 if (isDirectory) {
@@ -191,7 +191,8 @@ class CifsRepository @Inject internal constructor(
         logD("copyFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
-            val targetDocumentId = DocumentId.fromIdText(targetParentDocumentId.documentId.appendChild(sourceRequest.uri.fileName, false))
+            val idText = targetParentDocumentId.idText.appendChild(sourceRequest.uri.fileName, false)
+            val targetDocumentId = DocumentId.fromIdText(idText) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
@@ -212,7 +213,8 @@ class CifsRepository @Inject internal constructor(
         logD("moveFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
-            val targetDocumentId = DocumentId.fromIdText(targetParentDocumentId.documentId.appendChild(sourceRequest.uri.fileName, false))
+            val idText = targetParentDocumentId.idText.appendChild(sourceRequest.uri.fileName, false)
+            val targetDocumentId = DocumentId.fromIdText(idText) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {

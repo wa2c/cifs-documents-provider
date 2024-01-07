@@ -12,6 +12,8 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">إتصال</string>
+    <string name="edit_id_title">بطاقة تعريف</string>
+    <string name="edit_id_hint">سلسلة فريدة (":"، "/" غير مسموح بها)</string>
     <string name="edit_name_title">الإسم</string>
     <string name="edit_name_hint">إسم المضيف إذا كان خاليا</string>
     <string name="edit_storage_title">التخزين (نوع المكتبة)</string>
@@ -40,8 +42,9 @@
     <string name="edit_check_connection_ok_message">نجح الاتصال</string>
     <string name="edit_check_connection_wn_message">الإعدادات فيها خطأ</string>
     <string name="edit_check_connection_ng_message">فشل الإتصال</string>
-    <string name="edit_save_ng_message">أدخل المضيف ( الخادم )</string>
-    <string name="edit_save_duplicate_message">العنوان مكرر</string>
+    <string name="edit_save_ng_input_message">أدخل المضيف ( الخادم )</string>
+    <string name="edit_save_ng_invalid_id_message">المعرف غير صالح</string>
+    <string name="edit_save_ng_duplicate_id_message">معرف مكرر.</string>
     <string name="edit_save_button">حفظ</string>
     <string name="edit_delete_button">حذف</string>
     <string name="edit_back_confirmation_message">أهمل التغييرات؟</string>

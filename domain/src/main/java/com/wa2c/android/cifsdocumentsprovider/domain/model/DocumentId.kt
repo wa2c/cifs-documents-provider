@@ -3,7 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.values.DOCUMENT_ID_DELIMITER
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -12,35 +11,48 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class DocumentId internal constructor(
-    val documentId: String,
+    val connectionId: String,
+    val path: String,
 ) : Parcelable {
 
+    val idText: String
+        get() = if (isRoot) "" else connectionId + DOCUMENT_ID_DELIMITER + path
+
     val isRoot: Boolean
-        get() = !documentId.contains(DOCUMENT_ID_DELIMITER)
+        get() = connectionId.isEmpty()
 
     val isPathRoot: Boolean
         get() = path.isEmpty() || path == URI_SEPARATOR.toString()
 
-    val connectionId: String
-        get() = documentId.substringBefore(DOCUMENT_ID_DELIMITER, "")
-
-    val path: String
-        get() = documentId.substringAfter(DOCUMENT_ID_DELIMITER, "")
-
     override fun toString(): String {
-        return documentId
+        return idText
     }
 
     companion object {
-        fun fromIdText(documentId: String?): DocumentId {
-            return DocumentId(documentId ?: "")
+
+        val ROOT = DocumentId("", "")
+
+        fun isInvalidDocumentId(connectionId: String): Boolean {
+            return connectionId.contains(DOCUMENT_ID_DELIMITER) || connectionId.contains(URI_SEPARATOR)
         }
 
-        fun fromConnection(connectionId: String, path: String? = null): DocumentId {
-            val p = path ?: ""
-            if (connectionId.contains(DOCUMENT_ID_DELIMITER) || p.contains(DOCUMENT_ID_DELIMITER)) throw IllegalArgumentException("Invalid document ID or path.")
-            val documentId = "$connectionId$DOCUMENT_ID_DELIMITER$p"
-            return DocumentId(documentId)
+        /**
+         * Root document ID text
+         */
+        fun fromIdText(documentIdText: String?): DocumentId? {
+            val connectionId = documentIdText?.substringBefore(DOCUMENT_ID_DELIMITER, documentIdText)
+            val path = documentIdText?.substringAfter(DOCUMENT_ID_DELIMITER, "")
+            return fromConnection(connectionId, path)
         }
+
+        /**
+         * Create from connection ID and path.
+         */
+        fun fromConnection(connectionId: String?, path: String? = null): DocumentId? {
+            val id = connectionId ?: ""
+            if (isInvalidDocumentId(id)) return null
+            return DocumentId(id, path ?: "")
+        }
+
     }
 }

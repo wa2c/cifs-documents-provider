@@ -108,9 +108,9 @@ class EditRepository @Inject internal constructor(
         logD("getFileChildren: connection=$connection, uri=$uri")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest().replacePathByUri(uri.text)
-            getClient(request.connection).getChildren(request)?.map {
+            getClient(request.connection).getChildren(request)?.mapNotNull {
                 val path = request.connection.getRelativePath(it.uri)
-                val documentId = DocumentId.fromConnection(request.connection.id, path)
+                val documentId = DocumentId.fromConnection(request.connection.id, path) ?: return@mapNotNull null
                 it.toModel(documentId)
             } ?: emptyList()
         }

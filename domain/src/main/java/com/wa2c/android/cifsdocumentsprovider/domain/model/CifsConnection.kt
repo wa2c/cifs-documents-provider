@@ -34,14 +34,16 @@ data class CifsConnection(
 
     companion object {
 
-        const val NEW_ID = ""
+        fun isInvalidConnectionId(connectionId: String): Boolean {
+            return connectionId.isEmpty() || DocumentId.isInvalidDocumentId(connectionId)
+        }
 
         /**
-         * Create from host
+         * Create CifsConnection
          */
-        fun createFromHost(hostText: String): CifsConnection {
+        fun create(id: String, hostText: String): CifsConnection {
             return CifsConnection(
-                id = NEW_ID,
+                id = id,
                 name = hostText,
                 storage = StorageType.default,
                 domain = null,
