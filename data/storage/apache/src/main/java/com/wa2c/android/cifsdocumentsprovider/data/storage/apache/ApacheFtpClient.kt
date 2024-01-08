@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import com.wa2c.android.cifsdocumentsprovider.common.exception.FileRequiredException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -62,7 +61,6 @@ class ApacheFtpClient(
             }
         }
 
-
         val options = FileSystemOptions()
 
         DefaultFileSystemConfigBuilder.getInstance().also { builder ->
@@ -73,9 +71,9 @@ class ApacheFtpClient(
         }
 
         FtpFileSystemConfigBuilder.getInstance().also { builder ->
-            builder.setPassiveMode(options, true)
+            builder.setPassiveMode(options, false)
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
-            builder.setConnectTimeout(options,  Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
+            builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setDataTimeout(options,  Duration.ofMillis(READ_TIMEOUT.toLong()))
             builder.setControlEncoding(options, ftpConnection.encoding)
             builder.setFileType(options, FtpFileType.BINARY)
@@ -93,11 +91,11 @@ class ApacheFtpClient(
         request: StorageRequest,
         ignoreCache: Boolean = false,
         existsRequired: Boolean = false,
-    ): FileObject {
+    ): FileObject? {
         return withContext(dispatcher) {
             fileManager.resolveFile(request.uri, getContext(request.connection, ignoreCache)).let {
                 if (existsRequired && !it.exists()) {
-                    throw FileRequiredException()
+                    null
                 } else {
                     it
                 }
@@ -148,7 +146,7 @@ class ApacheFtpClient(
     override suspend fun getFile(
         request: StorageRequest,
         ignoreCache: Boolean,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
             if (request.isRoot || request.isShareRoot) {
                 StorageFile(
@@ -159,8 +157,8 @@ class ApacheFtpClient(
                     true,
                 )
             } else {
-                getFileObject(request, ignoreCache).use { file ->
-                    file.toStorageFile()
+                getFileObject(request, ignoreCache = ignoreCache, existsRequired = true).use { file ->
+                    file?.toStorageFile()
                 }
             }
         }
@@ -172,16 +170,16 @@ class ApacheFtpClient(
     ): List<StorageFile> {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true).use { file ->
-                file.children?.filter { it.exists() }?.map { it.toStorageFile() } ?: emptyList()
+                file?.children?.filter { it.exists() }?.map { it.toStorageFile() } ?: emptyList()
             }
         }
     }
 
     override suspend fun createDirectory(
         request: StorageRequest,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
-            getFileObject(request, ignoreCache = true).use { file ->
+            getFileObject(request, ignoreCache = true)?.use { file ->
                 file.createFolder()
                 file.toStorageFile()
             }
@@ -191,11 +189,11 @@ class ApacheFtpClient(
     override suspend fun createFile(
         request: StorageRequest,
         mimeType: String?,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true).use { file ->
-                file.createFile()
-                file.toStorageFile()
+                file?.createFile()
+                file?.toStorageFile()
             }
         }
     }
@@ -203,12 +201,12 @@ class ApacheFtpClient(
     override suspend fun copyFile(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
             getFileObject(sourceRequest, ignoreCache = true, existsRequired = true).use { source ->
                 getFileObject(targetRequest).use { target ->
-                    target.copyFrom(source, Selectors.SELECT_SELF_AND_CHILDREN)
-                    target.toStorageFile()
+                    target?.copyFrom(source, Selectors.SELECT_SELF_AND_CHILDREN)
+                    target?.toStorageFile()
                 }
             }
         }
@@ -217,13 +215,13 @@ class ApacheFtpClient(
     override suspend fun renameFile(
         request: StorageRequest,
         newName: String,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true, existsRequired = true).use { source ->
                 val targetUri = request.uri.rename(newName)
                 getFileObject(request.replacePathByUri(targetUri.rename(newName))).use { target ->
-                    source.moveTo(target)
-                    target.toStorageFile()
+                    source?.moveTo(target)
+                    target?.toStorageFile()
                 }
             }
         }
@@ -232,12 +230,12 @@ class ApacheFtpClient(
     override suspend fun moveFile(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
-    ): StorageFile {
+    ): StorageFile? {
         return withContext(dispatcher) {
             getFileObject(sourceRequest, ignoreCache = true, existsRequired = true).use { source ->
                 getFileObject(targetRequest).use { target ->
-                    source.moveTo(target)
-                    target.toStorageFile()
+                    source?.moveTo(target)
+                    target?.toStorageFile()
                 }
             }
         }
@@ -249,7 +247,7 @@ class ApacheFtpClient(
         return withContext(dispatcher) {
             try {
                 getFileObject(request, ignoreCache = true, existsRequired = true).use { file ->
-                    file.delete()
+                    file?.delete()
                 }
                 true
             } catch (e: Exception) {
@@ -263,9 +261,9 @@ class ApacheFtpClient(
         request: StorageRequest,
         mode: AccessMode,
         onFileRelease: suspend () -> Unit,
-    ): ProxyFileDescriptorCallback {
+    ): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getFileObject(request, existsRequired = true)
+            val file = getFileObject(request, existsRequired = true) ?: return@withContext null
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
