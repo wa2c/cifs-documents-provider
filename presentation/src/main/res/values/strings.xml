@@ -33,6 +33,7 @@
     <string name="edit_password_title">Password</string>
     <string name="edit_password_hint">Invalid if anonymous</string>
     <string name="edit_anonymous_label">Anonymous</string>
+    <string name="edit_ftp_mode_title">Active Mode</string>
     <string name="edit_encoding_title">Character Code</string>
     <string name="edit_folder_title">Folder</string>
     <string name="edit_folder_hint">\'/\' if empty</string>

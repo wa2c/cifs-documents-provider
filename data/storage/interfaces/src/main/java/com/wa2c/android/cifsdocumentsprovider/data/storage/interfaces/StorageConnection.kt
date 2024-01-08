@@ -71,6 +71,7 @@ sealed class StorageConnection {
         override val anonymous: Boolean,
         override val extension: Boolean,
         override val safeTransfer: Boolean,
+        val isActiveMode: Boolean,
         val encoding: String,
     ) : StorageConnection()
 }

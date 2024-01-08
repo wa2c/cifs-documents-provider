@@ -32,6 +32,7 @@
     <string name="edit_password_title">كلمة المرور</string>
     <string name="edit_password_hint">باطل إذا كان مجهول</string>
     <string name="edit_anonymous_label">مجهول</string>
+    <string name="edit_ftp_mode_title">الوضع النشط</string>
     <string name="edit_encoding_title">رمز الحرف</string>
     <string name="edit_folder_title">المجلد</string>
     <string name="edit_folder_hint">\'/\' إذا كان خاليا</string>

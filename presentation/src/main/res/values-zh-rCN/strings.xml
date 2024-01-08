@@ -32,6 +32,7 @@
     <string name="edit_password_title">密码</string>
     <string name="edit_password_hint">匿名访问时无效</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_ftp_mode_title">活动模式</string>
     <string name="edit_encoding_title">字符代码</string>
     <string name="edit_folder_title">目录</string>
     <string name="edit_folder_hint">如果留空则为 /</string>

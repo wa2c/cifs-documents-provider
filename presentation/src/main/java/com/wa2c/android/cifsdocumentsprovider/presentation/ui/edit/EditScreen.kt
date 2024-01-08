@@ -140,6 +140,7 @@ fun EditScreen(
         userState = viewModel.user.collectAsMutableState(),
         passwordState = viewModel.password.collectAsMutableState(),
         anonymousState = viewModel.anonymous.collectAsMutableState(),
+        isFtpActiveModeState = viewModel.isFtpActiveMode.collectAsMutableState(),
         encodingState = viewModel.encoding.collectAsMutableState(),
         folderState = viewModel.folder.collectAsMutableState(),
         onClickBack = {
@@ -248,6 +249,7 @@ private fun EditScreenContainer(
     userState: MutableState<String?>,
     passwordState: MutableState<String?>,
     anonymousState: MutableState<Boolean>,
+    isFtpActiveModeState: MutableState<Boolean>,
     encodingState: MutableState<String>,
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>?,
@@ -423,6 +425,16 @@ private fun EditScreenContainer(
                         state = anonymousState,
                         focusManager = focusManager,
                     )
+
+
+                    // FTP Mode
+                    if (storageState.value.protocol == ProtocolType.FTP) {
+                        InputCheck(
+                            title = stringResource(id = R.string.edit_ftp_mode_title),
+                            state = isFtpActiveModeState,
+                            focusManager = focusManager,
+                        )
+                    }
 
                     // Encoding
                     if (storageState.value.protocol == ProtocolType.FTP) {
@@ -827,6 +839,7 @@ private fun EditScreenPreview() {
             userState = mutableStateOf("user"),
             passwordState = mutableStateOf("password"),
             anonymousState = mutableStateOf(false),
+            isFtpActiveModeState = mutableStateOf(false),
             encodingState = mutableStateOf("UTF-8"),
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),

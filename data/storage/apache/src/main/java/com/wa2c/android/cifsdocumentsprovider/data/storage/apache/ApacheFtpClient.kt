@@ -19,6 +19,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageReq
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.vfs2.FileNotFolderException
 import org.apache.commons.vfs2.FileNotFoundException
 import org.apache.commons.vfs2.FileObject
@@ -64,19 +65,21 @@ class ApacheFtpClient(
         val options = FileSystemOptions()
 
         DefaultFileSystemConfigBuilder.getInstance().also { builder ->
-            builder.setUserAuthenticator(
-                options,
-                StaticUserAuthenticator(null, ftpConnection.user, ftpConnection.password)
-            )
+            if (!ftpConnection.isAnonymous) {
+                builder.setUserAuthenticator(
+                    options,
+                    StaticUserAuthenticator(null, ftpConnection.user, ftpConnection.password)
+                )
+            }
         }
 
         FtpFileSystemConfigBuilder.getInstance().also { builder ->
-            builder.setPassiveMode(options, false)
+            builder.setPassiveMode(options, !ftpConnection.isActiveMode)
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setDataTimeout(options,  Duration.ofMillis(READ_TIMEOUT.toLong()))
-            builder.setControlEncoding(options, ftpConnection.encoding)
             builder.setFileType(options, FtpFileType.BINARY)
+            builder.setControlEncoding(options, ftpConnection.encoding)
         }
 
         logD("Context created: $options")
@@ -125,7 +128,7 @@ class ApacheFtpClient(
     ): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(request, true)
+                getChildren(request, ignoreCache = true)
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -169,7 +172,7 @@ class ApacheFtpClient(
         ignoreCache: Boolean,
     ): List<StorageFile> {
         return withContext(dispatcher) {
-            getFileObject(request, ignoreCache = true).use { file ->
+            getFileObject(request).use { file ->
                 file?.children?.filter { it.exists() }?.map { it.toStorageFile() } ?: emptyList()
             }
         }

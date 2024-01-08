@@ -24,6 +24,7 @@ data class CifsConnection(
     val user: String?,
     val password: String?,
     val anonymous: Boolean = false,
+    val isFtpActiveMode: Boolean = false,
     val encoding: String = DEFAULT_ENCODING,
     val extension: Boolean = false,
     val safeTransfer: Boolean = false,

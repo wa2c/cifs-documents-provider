@@ -74,21 +74,23 @@ class EditViewModel @Inject constructor(
     val isBusy = _isBusy.asStateFlow()
 
     val id = MutableStateFlow<String?>(null)
-    var name = MutableStateFlow<String?>(null)
-    var storage = MutableStateFlow<StorageType>(StorageType.default)
+    val name = MutableStateFlow<String?>(null)
+    val storage = MutableStateFlow<StorageType>(StorageType.default)
 
-    var domain = MutableStateFlow<String?>(null)
-    var host = MutableStateFlow<String?>(null)
-    var port = MutableStateFlow<String?>(null)
-    var enableDfs = MutableStateFlow<Boolean>(false)
-    var folder = MutableStateFlow<String?>(null)
-    var user = MutableStateFlow<String?>(null)
-    var password = MutableStateFlow<String?>(null)
-    var anonymous = MutableStateFlow<Boolean>(false)
+    val domain = MutableStateFlow<String?>(null)
+    val host = MutableStateFlow<String?>(null)
+    val port = MutableStateFlow<String?>(null)
+    val enableDfs = MutableStateFlow<Boolean>(false)
+    val user = MutableStateFlow<String?>(null)
+    val password = MutableStateFlow<String?>(null)
+    val anonymous = MutableStateFlow<Boolean>(false)
+    val folder = MutableStateFlow<String?>(null)
+
+    val isFtpActiveMode = MutableStateFlow<Boolean>(false)
     val encoding = MutableStateFlow<String>(DEFAULT_ENCODING)
 
-    var extension = MutableStateFlow<Boolean>(false)
-    var safeTransfer = MutableStateFlow<Boolean>(false)
+    val extension = MutableStateFlow<Boolean>(false)
+    val safeTransfer = MutableStateFlow<Boolean>(false)
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResult = channelFlow<ConnectionResult?> {
@@ -102,6 +104,7 @@ class EditViewModel @Inject constructor(
         launch { password.collect { send(null) } }
         launch { anonymous.collect { send(null) } }
         launch { folder.collect { send(null) } }
+        launch { isFtpActiveMode.collect { send(null) } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     /**
@@ -119,6 +122,7 @@ class EditViewModel @Inject constructor(
         user.value = connection.user
         password.value = connection.password
         anonymous.value = connection.anonymous
+        isFtpActiveMode.value = connection.isFtpActiveMode
         encoding.value = connection.encoding
         extension.value = connection.extension
         safeTransfer.value = connection.safeTransfer
@@ -141,6 +145,7 @@ class EditViewModel @Inject constructor(
             user = if (isAnonymous) null else user.value?.ifEmpty { null },
             password = if (isAnonymous) null else password.value?.ifEmpty { null },
             anonymous = isAnonymous,
+            isFtpActiveMode = isFtpActiveMode.value,
             encoding = encoding.value,
             extension = extension.value,
             safeTransfer = safeTransfer.value,
