@@ -29,10 +29,12 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
+import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
 import java.time.Duration
 
 class ApacheFtpClient(
     private val openFileLimit: Int,
+    private val isSftp: Boolean,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -72,6 +74,7 @@ class ApacheFtpClient(
             }
         }
 
+        // FTP settings
         FtpFileSystemConfigBuilder.getInstance().also { builder ->
             builder.setPassiveMode(options, !ftpConnection.isActiveMode)
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
@@ -79,6 +82,17 @@ class ApacheFtpClient(
             builder.setDataTimeout(options, Duration.ofMillis(READ_TIMEOUT.toLong()))
             builder.setFileType(options, FtpFileType.BINARY)
             builder.setControlEncoding(options, ftpConnection.encoding)
+        }
+
+        // FTPS settings
+        if (isSftp) {
+            SftpFileSystemConfigBuilder.getInstance().also { builder ->
+                builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
+                builder.setStrictHostKeyChecking(options, "no")
+                builder.setPreferredAuthentications(options, "password")
+                builder.setUserDirIsRoot(options, true)
+                builder.setFileNameEncoding(options, ftpConnection.encoding)
+            }
         }
 
         logD("Context created: $options")

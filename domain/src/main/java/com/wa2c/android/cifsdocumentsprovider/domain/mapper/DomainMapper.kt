@@ -34,7 +34,8 @@ internal object DomainMapper {
             StorageType.JCIFS_LEGACY -> {
                 formatter.decodeFromString<StorageConnection.Cifs>(json)
             }
-            StorageType.APACHE_FTP -> {
+            StorageType.APACHE_FTP,
+            StorageType.APACHE_FTPS -> {
                 formatter.decodeFromString<StorageConnection.Ftp>(json)
             }
         }
@@ -188,7 +189,8 @@ internal object DomainMapper {
                     enableDfs = enableDfs,
                 )
             }
-            StorageType.APACHE_FTP -> {
+            StorageType.APACHE_FTP,
+            StorageType.APACHE_FTPS -> {
                 StorageConnection.Ftp(
                     id = id,
                     name = name,

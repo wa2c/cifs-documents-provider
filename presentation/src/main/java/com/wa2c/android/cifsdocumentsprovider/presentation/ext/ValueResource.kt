@@ -90,5 +90,5 @@ val StorageType.labelRes: Int
         StorageType.SMBJ -> R.string.enum_storage_smb_smbj
         StorageType.JCIFS_LEGACY ->R.string.enum_storage_smb_jcifs
         StorageType.APACHE_FTP -> R.string.enum_storage_ftp_apache
-
+        StorageType.APACHE_FTPS -> R.string.enum_storage_ftps_apache
     }

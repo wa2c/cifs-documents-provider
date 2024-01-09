@@ -15,5 +15,6 @@
     <string name="enum_storage_smb_smbj">SMB2,3 (SMBJ)</string>
     <string name="enum_storage_smb_jcifs">SMB1 (JCIFS)</string>
     <string name="enum_storage_ftp_apache">FTP (Apache Commons)</string>
+    <string name="enum_storage_ftps_apache">FTPS (Apache Commons)</string>
 
 </resources>

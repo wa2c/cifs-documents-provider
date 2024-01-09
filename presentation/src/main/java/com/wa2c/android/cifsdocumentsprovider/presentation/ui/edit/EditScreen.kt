@@ -275,6 +275,8 @@ private fun EditScreenContainer(
                         .padding(Theme.Sizes.ScreenMargin)
                         .weight(1f)
                 ) {
+                    val protocol = storageState.value.protocol
+
                     // ID
                     InputText(
                         title = stringResource(id = R.string.edit_id_title),
@@ -314,7 +316,7 @@ private fun EditScreenContainer(
                     )
 
                     // Domain
-                    if (storageState.value.protocol == ProtocolType.SMB) {
+                    if (protocol == ProtocolType.SMB) {
                         InputText(
                             title = stringResource(id = R.string.edit_domain_title),
                             hint = stringResource(id = R.string.edit_domain_hint),
@@ -355,7 +357,7 @@ private fun EditScreenContainer(
                     )
 
                     // Enable DFS
-                    if (storageState.value.protocol == ProtocolType.SMB) {
+                    if (protocol == ProtocolType.SMB) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_enable_dfs_label),
                             state = enableDfsState,
@@ -398,9 +400,8 @@ private fun EditScreenContainer(
                         focusManager = focusManager,
                     )
 
-
                     // FTP Mode
-                    if (storageState.value.protocol == ProtocolType.FTP) {
+                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_ftp_mode_title),
                             state = isFtpActiveModeState,
@@ -409,7 +410,7 @@ private fun EditScreenContainer(
                     }
 
                     // Encoding
-                    if (storageState.value.protocol == ProtocolType.FTP) {
+                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
                         InputOption(
                             title = stringResource(id = R.string.edit_encoding_title),
                             items = Charset.availableCharsets()
