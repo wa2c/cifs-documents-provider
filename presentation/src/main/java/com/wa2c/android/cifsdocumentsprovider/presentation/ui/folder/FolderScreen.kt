@@ -40,7 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -101,12 +101,12 @@ fun FolderScreen(
 @Composable
 fun FolderScreenContainer(
     snackbarHostState: SnackbarHostState,
-    fileList: List<CifsFile>,
+    fileList: List<RemoteFile>,
     currentUri: StorageUri,
     isLoading: Boolean,
     onClickBack: () -> Unit,
     onClickReload: () -> Unit,
-    onClickItem: (CifsFile) -> Unit,
+    onClickItem: (RemoteFile) -> Unit,
     onClickUp: () -> Unit,
     onClickSet: () -> Unit,
 ) {
@@ -155,7 +155,7 @@ fun FolderScreenContainer(
                         }
                         items(items = fileList) { file ->
                             FolderItem(
-                                cifsFile = file,
+                                item = file,
                                 onClick = { onClickItem(file) },
                             )
                             DividerThin()
@@ -216,7 +216,7 @@ private fun UpFolderItem(
 
 @Composable
 private fun FolderItem(
-    cifsFile: CifsFile,
+    item: RemoteFile,
     onClick: () -> Unit,
 ) {
     Row(
@@ -231,7 +231,7 @@ private fun FolderItem(
             modifier = Modifier.size(40.dp),
         )
         Text(
-            text = cifsFile.name,
+            text = item.name,
             fontSize = 15.sp,
             modifier = Modifier
                 .padding(start = Theme.SizeS)
@@ -254,7 +254,7 @@ private fun FolderScreenContainerPreview() {
         FolderScreenContainer(
             snackbarHostState = SnackbarHostState(),
             fileList = listOf(
-                CifsFile(
+                RemoteFile(
                     documentId = DocumentId.fromIdText(null)!!,
                     name = "example1.txt",
                     uri = StorageUri("smb://example/"),
@@ -262,7 +262,7 @@ private fun FolderScreenContainerPreview() {
                     lastModified = 0,
                     isDirectory = true,
                 ),
-                CifsFile(
+                RemoteFile(
                     documentId = DocumentId.fromIdText(null)!!,
                     name = "example2example2example2example2example2example2.txt",
                     uri = StorageUri("smb://example/"),
@@ -270,7 +270,7 @@ private fun FolderScreenContainerPreview() {
                     lastModified = 0,
                     isDirectory = true,
                 ),
-                CifsFile(
+                RemoteFile(
                     documentId = DocumentId.fromIdText(null)!!,
                     name = "example3example3example3example3example3example3example3example3example3example3.txt",
                     uri = StorageUri("smb://example/"),

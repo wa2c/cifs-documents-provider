@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
  * CIFS File
  */
 @Parcelize
-data class CifsFile(
+data class RemoteFile(
     /** Connection ID */
     val documentId: DocumentId,
     /** File name */

@@ -8,7 +8,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.exception.EditException
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamHost
@@ -42,7 +42,7 @@ class EditViewModel @Inject constructor(
     private var currentId: String = paramId ?: generateUUID()
 
     /** Init connection */
-    private var initConnection: CifsConnection? = null
+    private var initConnection: RemoteConnection? = null
 
     /** True if adding new settings */
     val isNew: Boolean
@@ -50,21 +50,21 @@ class EditViewModel @Inject constructor(
 
     /** True if data changed */
     val isChanged: Boolean
-        get() = isNew || initConnection != try { createCifsConnection() } catch (e: Exception) { null }
+        get() = isNew || initConnection != try { createConnection() } catch (e: Exception) { null }
 
     init {
         launch {
             val connection = paramId?.let {
                 editRepository.getConnection(paramId).also { initConnection = it }
-            } ?: CifsConnection.create(currentId, paramHost ?: "")
-            deployCifsConnection(connection)
+            } ?: RemoteConnection.create(currentId, paramHost ?: "")
+            deployConnection(connection)
         }
     }
 
     private val _navigateSearchHost = MutableSharedFlow<String>()
     val navigateSearchHost = _navigateSearchHost.asSharedFlow()
 
-    private val _navigateSelectFolder = MutableSharedFlow<Result<CifsConnection>>()
+    private val _navigateSelectFolder = MutableSharedFlow<Result<RemoteConnection>>()
     val navigateSelectFolder = _navigateSelectFolder.asSharedFlow()
 
     private val _result = MutableSharedFlow<Result<Unit>>()
@@ -110,7 +110,7 @@ class EditViewModel @Inject constructor(
     /**
      * Deploy connection data.
      */
-    private fun deployCifsConnection(connection: CifsConnection) {
+    private fun deployConnection(connection: RemoteConnection) {
         id.value = connection.id
         name.value = connection.name
         storage.value = connection.storage
@@ -131,9 +131,9 @@ class EditViewModel @Inject constructor(
     /**
      * Create connection data
      */
-    private fun createCifsConnection(): CifsConnection {
+    private fun createConnection(): RemoteConnection {
         val isAnonymous = anonymous.value
-        return CifsConnection(
+        return RemoteConnection(
             id = id.value ?: throw EditException.InputRequiredException(),
             name = name.value?.ifEmpty { null } ?: host.value ?: throw EditException.InputRequiredException(),
             storage = storage.value,
@@ -160,7 +160,7 @@ class EditViewModel @Inject constructor(
             _isBusy.emit(true)
             runCatching {
                 _connectionResult.emit(null)
-                editRepository.checkConnection(createCifsConnection())
+                editRepository.checkConnection(createConnection())
             }.fold(
                 onSuccess = { _connectionResult.emit(it) },
                 onFailure = { _connectionResult.emit(ConnectionResult.Failure(it)) }
@@ -183,7 +183,7 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                val folderConnection = createCifsConnection()
+                val folderConnection = createConnection()
                 val result = editRepository.checkConnection(folderConnection)
                 if (result !is ConnectionResult.Failure) {
                     editRepository.saveTemporaryConnection(folderConnection)
@@ -224,8 +224,8 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                createCifsConnection().let { con ->
-                    if (CifsConnection.isInvalidConnectionId(con.id)) {
+                createConnection().let { con ->
+                    if (RemoteConnection.isInvalidConnectionId(con.id)) {
                         throw EditException.InvalidIdException()
                     }
                     if (isNew && editRepository.getConnection(con.id) != null) {

@@ -55,7 +55,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -88,7 +88,7 @@ fun EditScreen(
     selectedUri: StorageUri? = null,
     onNavigateBack: () -> Unit,
     onNavigateSearchHost: (connectionId: String) -> Unit,
-    onNavigateSelectFolder: (CifsConnection) -> Unit,
+    onNavigateSelectFolder: (RemoteConnection) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()

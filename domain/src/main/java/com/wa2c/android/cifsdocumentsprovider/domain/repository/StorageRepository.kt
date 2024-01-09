@@ -18,7 +18,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataM
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -33,10 +33,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * CIFS Repository
+ * Storage Repository
  */
 @Singleton
-class CifsRepository @Inject internal constructor(
+class StorageRepository @Inject internal constructor(
     private val storageClientManager: StorageClientManager,
     private val appPreferences: AppPreferencesDataStore,
     private val connectionSettingDao: ConnectionSettingDao,
@@ -96,9 +96,9 @@ class CifsRepository @Inject internal constructor(
     }
 
     /**
-     * Get CIFS File
+     * Get RemoteFile
      */
-    suspend fun getFile(documentId: DocumentId): CifsFile? {
+    suspend fun getFile(documentId: DocumentId): RemoteFile? {
         logD("getFile: documentId=$documentId")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
@@ -111,7 +111,7 @@ class CifsRepository @Inject internal constructor(
     /**
      * Get children from uri.
      */
-    suspend fun getFileChildren(parentDocumentId: DocumentId): List<CifsFile> {
+    suspend fun getFileChildren(parentDocumentId: DocumentId): List<RemoteFile> {
         logD("getFileChildren: parentDocumentId=$parentDocumentId")
         return withContext(dispatcher) {
             if (parentDocumentId.isRoot) {

@@ -2,8 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import androidx.lifecycle.ViewModel
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +24,7 @@ class FolderViewModel @Inject constructor(
     private val editRepository: EditRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val temporaryConnection: CifsConnection by lazy {
+    private val temporaryConnection: RemoteConnection by lazy {
         editRepository.loadTemporaryConnection() ?: throw IllegalStateException()
     }
 
@@ -33,8 +33,8 @@ class FolderViewModel @Inject constructor(
     private val _currentUri = MutableStateFlow<StorageUri>(temporaryConnection.uri)
     val currentUri: StateFlow<StorageUri> = _currentUri
 
-    private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
-    val fileList: StateFlow<List<CifsFile>> = _fileList
+    private val _fileList = MutableStateFlow<List<RemoteFile>>(emptyList())
+    val fileList: StateFlow<List<RemoteFile>> = _fileList
 
     private val _result = MutableSharedFlow<Result<Unit>>()
     val result: SharedFlow<Result<Unit>> = _result
@@ -51,7 +51,7 @@ class FolderViewModel @Inject constructor(
     /**
      * On select folder
      */
-    fun onSelectFolder(file: CifsFile) {
+    fun onSelectFolder(file: RemoteFile) {
         if (isLoading.value) return
         launch {
             loadList(file.uri)

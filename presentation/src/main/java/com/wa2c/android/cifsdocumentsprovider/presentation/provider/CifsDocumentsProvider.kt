@@ -25,13 +25,13 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
-import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.provideStorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.ProviderWorker
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
@@ -51,7 +51,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
 
     /** Cifs Repository */
-    private val cifsRepository: CifsRepository by lazy { provideCifsRepository(providerContext) }
+    private val storageRepository: StorageRepository by lazy { provideStorageRepository(providerContext) }
 
     /** File handler */
     private val fileHandler: Handler by lazy {
@@ -95,7 +95,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         lifecycleOwner.start()
 
         lifecycleOwner.lifecycleScope.launch {
-            cifsRepository.showNotification.collectIn(lifecycleOwner) {
+            storageRepository.showNotification.collectIn(lifecycleOwner) {
                 updateWorker(it)
             }
         }
@@ -104,7 +104,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<String>?): Cursor {
-        val useAsLocal = runBlocking { cifsRepository.useAsLocalFlow.first() }
+        val useAsLocal = runBlocking { storageRepository.useAsLocalFlow.first() }
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
             includeRoot(it, useAsLocal)
@@ -122,7 +122,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             // File / Directory
             runBlocking {
                 val file = try {
-                    cifsRepository.getFile(id)
+                    storageRepository.getFile(id)
                 } catch (e: Exception) {
                     logE(e)
                     null
@@ -142,7 +142,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         val id = DocumentId.fromIdText(parentDocumentId) ?: DocumentId.ROOT
         runBlocking {
-            cifsRepository.getFileChildren(id).forEach { file ->
+            storageRepository.getFileChildren(id).forEach { file ->
                 includeFile(cursor, file)
             }
         }
@@ -176,7 +176,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val id = DocumentId.fromIdText(documentId)?.takeIf { !it.isRoot } ?: return@runOnFileHandler null
-            cifsRepository.getCallback(id, accessMode) { }
+            storageRepository.getCallback(id, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
@@ -196,7 +196,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("createDocument: parentDocumentId=$parentDocumentId, mimeType=$mimeType, displayName=$displayName")
         return runOnFileHandler {
             val id = DocumentId.fromIdText(parentDocumentId) ?: return@runOnFileHandler null
-            cifsRepository.createFile(
+            storageRepository.createFile(
                 parentDocumentId = id,
                 name = displayName,
                 mimeType = mimeType,
@@ -210,7 +210,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         if (documentId.isNullOrEmpty()) throw OperationCanceledException()
         runOnFileHandler {
             val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler
-            cifsRepository.deleteFile(id)
+            storageRepository.deleteFile(id)
         }
     }
 
@@ -219,7 +219,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         if (documentId.isNullOrEmpty() || displayName.isNullOrEmpty()) return null
         return runOnFileHandler {
             val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler null
-            cifsRepository.renameFile(id, displayName)?.idText
+            storageRepository.renameFile(id, displayName)?.idText
         }
     }
 
@@ -229,7 +229,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
             val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
-            cifsRepository.copyFile(sourceId, targetParentId)?.idText
+            storageRepository.copyFile(sourceId, targetParentId)?.idText
         }
     }
 
@@ -243,7 +243,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
             val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
-            cifsRepository.moveFile(sourceId, targetParentId)?.idText
+            storageRepository.moveFile(sourceId, targetParentId)?.idText
         }
     }
 
@@ -255,7 +255,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun shutdown() {
         logD("shutdown")
         lifecycleOwner.stop()
-        runOnFileHandler { cifsRepository.closeAllSessions() }
+        runOnFileHandler { storageRepository.closeAllSessions() }
         workManager.cancelUniqueWork(ProviderWorker.WORKER_NAME)
         fileHandler.looper.quit()
     }
@@ -306,7 +306,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun includeFile(cursor: MatrixCursor, file: CifsFile?) {
+    private fun includeFile(cursor: MatrixCursor, file: RemoteFile?) {
         cursor.newRow().let { row ->
             when {
                 file == null -> {

@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
@@ -62,7 +62,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onNavigateSettings: () -> Unit,
-    onNavigateEdit: (CifsConnection) -> Unit,
+    onNavigateEdit: (RemoteConnection) -> Unit,
     onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,10 +109,10 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContainer(
     snackbarHostState: SnackbarHostState,
-    connectionList: List<CifsConnection>,
+    connectionList: List<RemoteConnection>,
     onClickMenuOpenFile: () -> Unit,
     onClickMenuSettings: () -> Unit,
-    onClickItem: (CifsConnection) -> Unit,
+    onClickItem: (RemoteConnection) -> Unit,
     onClickAddItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
@@ -174,8 +174,8 @@ fun HomeScreenContainer(
  */
 @Composable
 fun ConnectionList(
-    connectionList: List<CifsConnection>,
-    onClickItem: (CifsConnection) -> Unit,
+    connectionList: List<RemoteConnection>,
+    onClickItem: (RemoteConnection) -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
     val state = rememberReorderableLazyListState(onMove = { from, to ->
@@ -205,7 +205,7 @@ fun ConnectionList(
 
 @Composable
 private fun ConnectionItem(
-    connection: CifsConnection,
+    connection: RemoteConnection,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
@@ -257,7 +257,7 @@ private fun HomeScreenContainerPreview() {
         HomeScreenContainer(
             snackbarHostState = SnackbarHostState(),
             connectionList = listOf(
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "PC1",
                     storage = StorageType.JCIFS,
@@ -267,7 +267,7 @@ private fun HomeScreenContainerPreview() {
                     user = null,
                     password = null,
                 ),
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "PC2",
                     storage = StorageType.JCIFS,
@@ -277,7 +277,7 @@ private fun HomeScreenContainerPreview() {
                     user = null,
                     password = null,
                 ),
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "192.168.0.128",
                     storage = StorageType.SMBJ,

@@ -14,8 +14,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomai
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntityModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.map
@@ -25,7 +25,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * CIFS Repository
+ * Edit Repository
  */
 @Singleton
 class EditRepository @Inject internal constructor(
@@ -50,7 +50,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Get connection
      */
-    suspend fun getConnection(id: String): CifsConnection? {
+    suspend fun getConnection(id: String): RemoteConnection? {
         logD("getConnection: id=$id")
         return withContext(dispatcher) {
             connectionSettingDao.getEntity(id)?.toDataModel()?.toDomainModel()
@@ -60,7 +60,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Save connection
      */
-    suspend fun saveConnection(connection: CifsConnection) {
+    suspend fun saveConnection(connection: RemoteConnection) {
         logD("saveConnection: connection=$connection")
         withContext(dispatcher) {
             val storageConnection = connection.toDataModel()
@@ -88,7 +88,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Load temporary connection
      */
-    fun loadTemporaryConnection(): CifsConnection?  {
+    fun loadTemporaryConnection(): RemoteConnection?  {
         logD("loadTemporaryConnection")
         return memoryCache.temporaryConnection?.toDomainModel()
     }
@@ -96,7 +96,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Save temporary connection
      */
-    fun saveTemporaryConnection(connection: CifsConnection?) {
+    fun saveTemporaryConnection(connection: RemoteConnection?) {
         logD("saveTemporaryConnection: connection=$connection")
         memoryCache.temporaryConnection = connection?.toDataModel()
     }
@@ -104,7 +104,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Get children from uri.
      */
-    suspend fun getFileChildren(connection: CifsConnection, uri: StorageUri): List<CifsFile> {
+    suspend fun getFileChildren(connection: RemoteConnection, uri: StorageUri): List<RemoteFile> {
         logD("getFileChildren: connection=$connection, uri=$uri")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest().replacePathByUri(uri.text)
@@ -118,7 +118,7 @@ class EditRepository @Inject internal constructor(
     /**
      * Check setting connectivity.
      */
-    suspend fun checkConnection(connection: CifsConnection): ConnectionResult {
+    suspend fun checkConnection(connection: RemoteConnection): ConnectionResult {
         logD("Connection check: ${connection.uri}")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest(null)

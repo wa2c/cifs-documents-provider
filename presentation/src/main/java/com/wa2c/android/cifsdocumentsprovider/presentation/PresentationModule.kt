@@ -1,7 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation
 
 import android.content.Context
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
 import dagger.Module
 import dagger.hilt.EntryPoint
@@ -16,7 +16,7 @@ internal object PresentationModule {
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface DocumentsProviderEntryPoint {
-        fun getCifsRepository(): CifsRepository
+        fun getStorageRepository(): StorageRepository
     }
 
     @EntryPoint
@@ -27,10 +27,10 @@ internal object PresentationModule {
 
 }
 
-fun provideCifsRepository(context: Context): CifsRepository {
+fun provideStorageRepository(context: Context): StorageRepository {
     val clazz = PresentationModule.DocumentsProviderEntryPoint::class.java
     val hiltEntryPoint = EntryPointAccessors.fromApplication(context, clazz)
-    return hiltEntryPoint.getCifsRepository()
+    return hiltEntryPoint.getStorageRepository()
 }
 
 fun provideSendRepository(context: Context): SendRepository {

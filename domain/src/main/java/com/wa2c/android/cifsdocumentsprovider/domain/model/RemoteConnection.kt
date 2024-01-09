@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  */
 @Parcelize
 @Serializable
-data class CifsConnection(
+data class RemoteConnection(
     val id: String,
     val name: String,
     val storage: StorageType = StorageType.default,
@@ -41,10 +41,10 @@ data class CifsConnection(
         }
 
         /**
-         * Create CifsConnection
+         * Create RemoteConnection
          */
-        fun create(id: String, hostText: String): CifsConnection {
-            return CifsConnection(
+        fun create(id: String, hostText: String): RemoteConnection {
+            return RemoteConnection(
                 id = id,
                 name = hostText,
                 storage = StorageType.default,

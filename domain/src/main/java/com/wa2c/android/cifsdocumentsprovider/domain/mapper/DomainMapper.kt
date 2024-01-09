@@ -10,8 +10,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.serialization.encodeToString
@@ -53,9 +53,9 @@ internal object DomainMapper {
     /**
      *
      */
-    fun ConnectionSettingEntity.toItem(): CifsFile? {
+    fun ConnectionSettingEntity.toItem(): RemoteFile? {
         val documentId = DocumentId.fromConnection(id) ?: return null
-        return CifsFile(
+        return RemoteFile(
             documentId = documentId,
             name = name,
             uri = StorageUri(uri),
@@ -95,10 +95,10 @@ internal object DomainMapper {
     /**
      * Convert data model to domain model.
      */
-    fun StorageConnection.toDomainModel(): CifsConnection {
+    fun StorageConnection.toDomainModel(): RemoteConnection {
         return when (this) {
             is StorageConnection.Cifs -> {
-                CifsConnection(
+                RemoteConnection(
                     id = id,
                     name = name,
                     storage = storage,
@@ -115,7 +115,7 @@ internal object DomainMapper {
                 )
             }
             is StorageConnection.Ftp -> {
-                CifsConnection(
+                RemoteConnection(
                     id = id,
                     name = name,
                     storage = storage,
@@ -134,8 +134,8 @@ internal object DomainMapper {
         }
     }
 
-    fun StorageFile.toModel(documentId: DocumentId): CifsFile {
-        return CifsFile(
+    fun StorageFile.toModel(documentId: DocumentId): RemoteFile {
+        return RemoteFile(
             documentId = documentId,
             name = name,
             uri = StorageUri(uri),
@@ -168,7 +168,7 @@ internal object DomainMapper {
     /**
      * Convert domain model to data model.
      */
-    fun CifsConnection.toDataModel(): StorageConnection {
+    fun RemoteConnection.toDataModel(): StorageConnection {
         return when (storage){
             StorageType.JCIFS,
             StorageType.SMBJ,
