@@ -5,10 +5,12 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import kotlinx.coroutines.*
 import org.apache.commons.vfs2.FileObject
 import org.apache.commons.vfs2.RandomAccessContent
 import org.apache.commons.vfs2.util.RandomAccessMode
+import java.io.BufferedOutputStream
 import java.io.OutputStream
 import kotlin.coroutines.CoroutineContext
 
@@ -64,13 +66,14 @@ internal class ApacheFtpProxyFileCallbackSafe(
     private fun getWriteAccess(fp: Long): OutputStream {
         return _writeAccess?.let { access ->
             if (writePointer != fp) {
+                launch(coroutineContext) { access.close() }
                 throw ErrnoException("Writing failed", OsConstants.EBADF)
             } else {
                 access
             }
         } ?: let {
             fileObject.content.outputStream.also {
-                _writeAccess = it
+                _writeAccess = BufferedOutputStream(it, BUFFER_SIZE)
             }
         }
         // NOTE:

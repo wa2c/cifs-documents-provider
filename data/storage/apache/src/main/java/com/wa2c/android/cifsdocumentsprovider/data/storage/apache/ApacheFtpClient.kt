@@ -19,7 +19,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageReq
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.apache.commons.net.ftp.FTPClient
 import org.apache.commons.vfs2.FileNotFolderException
 import org.apache.commons.vfs2.FileNotFoundException
 import org.apache.commons.vfs2.FileObject
@@ -77,7 +76,7 @@ class ApacheFtpClient(
             builder.setPassiveMode(options, !ftpConnection.isActiveMode)
             builder.setSoTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
-            builder.setDataTimeout(options,  Duration.ofMillis(READ_TIMEOUT.toLong()))
+            builder.setDataTimeout(options, Duration.ofMillis(READ_TIMEOUT.toLong()))
             builder.setFileType(options, FtpFileType.BINARY)
             builder.setControlEncoding(options, ftpConnection.encoding)
         }
