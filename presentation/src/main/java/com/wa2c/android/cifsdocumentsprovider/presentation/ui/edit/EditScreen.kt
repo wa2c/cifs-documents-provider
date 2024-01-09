@@ -1,43 +1,30 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import InputCheck
+import InputOption
 import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
-import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -45,35 +32,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusManager
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -95,17 +67,17 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerWide
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.InputText
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SectionTitle
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SubsectionTitle
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.UriText
 import java.nio.charset.Charset
 
 @Composable
@@ -573,244 +545,6 @@ private fun EditScreenContainer(
 
     // Back button
     BackHandler { onClickBack() }
-}
-
-/**
- * Input text
- */
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun InputText(
-    title: String,
-    hint: String,
-    state: MutableState<String?>,
-    focusManager: FocusManager,
-    enabled: Boolean = true,
-    keyboardOptions: KeyboardOptions = KeyboardOptions(
-        keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Next,
-    ),
-    autofillType: AutofillType? = null,
-    @DrawableRes iconResource: Int? = null,
-    onClickButton: () -> Unit = {},
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Theme.SizeSS)
-    ) {
-        OutlinedTextField(
-            value = state.value ?: "",
-            label = { Text(title) },
-            enabled = enabled,
-            placeholder = { Text(hint) },
-            onValueChange = { value ->
-                state.value = if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value
-            },
-            keyboardOptions = keyboardOptions,
-            visualTransformation = if (keyboardOptions.keyboardType == KeyboardType.Password) {
-                PasswordVisualTransformation()
-            } else {
-                VisualTransformation.None
-            },
-            maxLines = 1,
-            modifier = Modifier
-                .weight(1f)
-                .align(Alignment.CenterVertically)
-                .moveFocusOnEnter(focusManager)
-                .moveFocusOnTab(focusManager)
-                .autofill(
-                    autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
-                    onFill = { state.value = it }
-                )
-            ,
-        )
-        iconResource?.let {res ->
-            Button(
-                shape = RoundedCornerShape(Theme.SizeSS),
-                contentPadding = PaddingValues(0.dp),
-                enabled = enabled,
-                modifier = Modifier
-                    .size(52.dp, 52.dp)
-                    .padding(top = Theme.SizeSS, start = Theme.SizeSS)
-                    .align(Alignment.CenterVertically)
-                    .moveFocusOnEnter(focusManager)
-                    .moveFocusOnTab(focusManager)
-                    .onPreviewKeyEvent {
-                        when (it.nativeKeyEvent.keyCode) {
-                            KeyEvent.KEYCODE_SPACE -> {
-                                if (it.type == KeyEventType.KeyUp) onClickButton()
-                                true
-                            }
-
-                            else -> {
-                                false
-                            }
-                        }
-                    }
-                ,
-                onClick = onClickButton,
-            ) {
-                Icon(
-                    painter = painterResource(id = res),
-                    contentDescription = title,
-                )
-            }
-        }
-    }
-}
-
-/**
- * Input Option
- */
-@Composable
-fun <T> InputOption(
-    title: String,
-    items: List<OptionItem<T>>,
-    state: MutableState<T>,
-    focusManager: FocusManager,
-    enabled: Boolean = true,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
-    
-    Column(
-        modifier = Modifier
-            .wrapContentWidth()
-            .padding(top = Theme.SizeSS)
-    ) {
-        OutlinedTextField(
-            value = items.first { it.value == state.value }.label,
-            label = { Text(title) },
-            enabled = enabled,
-            readOnly = true,
-            onValueChange = {},
-            trailingIcon = { Icon(imageVector = icon, "") },
-            modifier = Modifier
-                .onFocusChanged {
-                    expanded = it.isFocused
-                }
-        )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-                focusManager.clearFocus()
-            },
-            modifier = Modifier
-                .moveFocusOnEnter(focusManager)
-        ) {
-            items.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item.label) },
-                    enabled = enabled,
-                    onClick = {
-                        state.value = item.value
-                        expanded = false
-                        focusManager.clearFocus()
-                    }
-                )
-            }
-        }
-    }
-}
-
-/**
- * Input check
- */
-@Composable
-fun InputCheck(
-    title: String,
-    state: MutableState<Boolean>,
-    focusManager: FocusManager,
-    enabled: Boolean = true,
-) {
-    Row(
-        Modifier
-            .toggleable(
-                value = state.value,
-                role = Role.Checkbox,
-                onValueChange = { state.value = !state.value }
-            )
-            .padding(Theme.SizeM)
-            .fillMaxWidth()
-            .moveFocusOnEnter(focusManager)
-            .onPreviewKeyEvent {
-                when (it.nativeKeyEvent.keyCode) {
-                    KeyEvent.KEYCODE_SPACE -> {
-                        if (it.type == KeyEventType.KeyUp) state.value = !state.value
-                        true
-                    }
-
-                    else -> {
-                        false
-                    }
-                }
-            }
-    ) {
-        Checkbox(
-            checked = state.value,
-            enabled = enabled,
-            onCheckedChange = null,
-        )
-        Text(
-            text = title,
-            Modifier
-                .weight(1f)
-                .padding(start = Theme.SizeS)
-        )
-    }
-}
-
-@Composable
-private fun SectionTitle(
-    text: String,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = Theme.SizeS)
-    ) {
-        Text(
-            text = text,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(top = Theme.SizeM)
-        )
-        DividerWide()
-    }
-}
-
-@Composable
-private fun SubsectionTitle(
-    text: String,
-) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier
-            .padding(top = Theme.SizeS)
-    )
-}
-
-@Composable
-private fun UriText(
-    uriText: String,
-) {
-    val clipboardManager = LocalClipboardManager.current
-
-    SelectionContainer {
-        Text(
-            text = uriText,
-            modifier = Modifier
-                .padding(Theme.SizeS)
-                .clickable {
-                    clipboardManager.setText(AnnotatedString(uriText))
-                }
-        )
-    }
 }
 
 /**
