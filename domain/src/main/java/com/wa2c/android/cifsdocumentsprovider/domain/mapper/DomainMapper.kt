@@ -50,6 +50,20 @@ internal object DomainMapper {
     }
 
     /**
+     *
+     */
+    fun ConnectionSettingEntity.toItem(): CifsFile? {
+        val documentId = DocumentId.fromConnection(id) ?: return null
+        return CifsFile(
+            documentId = documentId,
+            name = name,
+            uri = StorageUri(uri),
+            lastModified = modifiedDate,
+            isDirectory = true,
+        )
+    }
+
+    /**
      * Convert data model to db model.
      */
     fun StorageConnection.toEntityModel(
@@ -68,47 +82,13 @@ internal object DomainMapper {
     }
 
     /**
-     * Convert domain model to data model.
+     * Convert data model to data request model.
      */
-    fun CifsConnection.toDataModel(): StorageConnection {
-        return when (storage){
-            StorageType.JCIFS,
-            StorageType.SMBJ,
-            StorageType.JCIFS_LEGACY -> {
-                 StorageConnection.Cifs(
-                    id = id,
-                    name = name,
-                    storage = storage,
-                    domain = domain,
-                    host = host,
-                    port = port,
-                    folder = folder,
-                    user = user,
-                    password = password,
-                    anonymous = anonymous,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
-                    enableDfs = enableDfs,
-                )
-            }
-            StorageType.APACHE_FTP -> {
-                StorageConnection.Ftp(
-                    id = id,
-                    name = name,
-                    storage = storage,
-                    host = host,
-                    port = port,
-                    folder = folder,
-                    user = user,
-                    password = password,
-                    anonymous = anonymous,
-                    isActiveMode = isFtpActiveMode,
-                    encoding = encoding,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
-                )
-            }
-        }
+    fun StorageConnection.toStorageRequest(path: String? = null): StorageRequest {
+        return StorageRequest(
+            connection = this,
+            path = path
+        )
     }
 
     /**
@@ -153,13 +133,14 @@ internal object DomainMapper {
         }
     }
 
-    /**
-     * Convert data model to data request model.
-     */
-    fun StorageConnection.toStorageRequest(path: String? = null): StorageRequest {
-        return StorageRequest(
-            connection = this,
-            path = path
+    fun StorageFile.toModel(documentId: DocumentId): CifsFile {
+        return CifsFile(
+            documentId = documentId,
+            name = name,
+            uri = StorageUri(uri),
+            size = size,
+            lastModified = lastModified,
+            isDirectory = isDirectory
         )
     }
 
@@ -183,15 +164,48 @@ internal object DomainMapper {
         }
     }
 
-    fun StorageFile.toModel(documentId: DocumentId): CifsFile {
-        return CifsFile(
-            documentId = documentId,
-            name = name,
-            uri = StorageUri(uri),
-            size = size,
-            lastModified = lastModified,
-            isDirectory = isDirectory
-        )
+    /**
+     * Convert domain model to data model.
+     */
+    fun CifsConnection.toDataModel(): StorageConnection {
+        return when (storage){
+            StorageType.JCIFS,
+            StorageType.SMBJ,
+            StorageType.JCIFS_LEGACY -> {
+                StorageConnection.Cifs(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                    enableDfs = enableDfs,
+                )
+            }
+            StorageType.APACHE_FTP -> {
+                StorageConnection.Ftp(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    isActiveMode = isFtpActiveMode,
+                    encoding = encoding,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
+        }
     }
 
 }

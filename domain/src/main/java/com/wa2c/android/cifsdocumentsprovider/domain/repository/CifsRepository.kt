@@ -15,6 +15,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCon
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
@@ -115,11 +116,7 @@ class CifsRepository @Inject internal constructor(
         return withContext(dispatcher) {
             if (parentDocumentId.isRoot) {
                 connectionSettingDao.getList().first().mapNotNull { entity ->
-                    val request = entity.toDataModel().toStorageRequest()
-                    runFileBlocking(request) {
-                        val documentId = DocumentId.fromConnection(request.connection.id) ?: return@runFileBlocking null
-                        getClient(request.connection).getFile(request)?.toModel(documentId)
-                    }
+                    entity.toItem()
                 }
             } else {
                 val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
