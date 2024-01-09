@@ -122,8 +122,7 @@ class CifsRepository @Inject internal constructor(
                 val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
                 runFileBlocking(request) {
                     getClient(request.connection).getChildren(request)?.mapNotNull {
-                        val path = request.connection.getRelativePath(it.uri)
-                        val documentId = DocumentId.fromConnection(request.connection.id, path) ?: return@mapNotNull null
+                        val documentId = DocumentId.fromConnection(request.connection, it) ?: return@mapNotNull null
                         it.toModel(documentId)
                     } ?: emptyList()
                 }
@@ -145,8 +144,7 @@ class CifsRepository @Inject internal constructor(
                 } else {
                     getClient(request.connection).createFile(request, mimeType)
                 }?.let {
-                    val relativePath = request.connection.getRelativePath(it.uri)
-                    DocumentId.fromConnection(request.connection.id, relativePath)
+                    DocumentId.fromConnection(request.connection, it)
                 }
             }
         }
@@ -174,8 +172,7 @@ class CifsRepository @Inject internal constructor(
             val request = getStorageRequest(documentId) ?: return@withContext null
             runFileBlocking(request) {
                 getClient(request.connection).renameFile(request, newName)?.let {
-                    val relativePath = request.connection.getRelativePath(it.uri)
-                    DocumentId.fromConnection(request.connection.id, relativePath)
+                    DocumentId.fromConnection(request.connection, it)
                 }
             }
         }
@@ -194,8 +191,7 @@ class CifsRepository @Inject internal constructor(
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
                     getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.let {
-                        val relativePath = targetRequest.connection.getRelativePath(it.uri)
-                        DocumentId.fromConnection(targetRequest.connection.id, relativePath)
+                        DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }
             }
@@ -216,8 +212,7 @@ class CifsRepository @Inject internal constructor(
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
                     getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)?.let {
-                        val relativePath = targetRequest.connection.getRelativePath(it.uri)
-                        DocumentId.fromConnection(targetRequest.connection.id, relativePath)
+                        DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }
             }

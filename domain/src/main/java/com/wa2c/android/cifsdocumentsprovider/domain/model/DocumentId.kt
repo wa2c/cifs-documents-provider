@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.domain.model
 import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.values.DOCUMENT_ID_DELIMITER
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -34,6 +36,14 @@ data class DocumentId internal constructor(
 
         fun isInvalidDocumentId(connectionId: String): Boolean {
             return connectionId.contains(DOCUMENT_ID_DELIMITER) || connectionId.contains(URI_SEPARATOR)
+        }
+
+        /**
+         * Create from connection and file.
+         */
+        fun fromConnection(connection: StorageConnection, file: StorageFile): DocumentId? {
+            val relativePath = connection.getRelativePath(file.uri)
+            return fromConnection(connection.id, relativePath)
         }
 
         /**

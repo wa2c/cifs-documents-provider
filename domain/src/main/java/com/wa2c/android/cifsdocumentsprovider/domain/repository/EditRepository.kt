@@ -109,8 +109,7 @@ class EditRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest().replacePathByUri(uri.text)
             getClient(request.connection).getChildren(request)?.mapNotNull {
-                val path = request.connection.getRelativePath(it.uri)
-                val documentId = DocumentId.fromConnection(request.connection.id, path) ?: return@mapNotNull null
+                val documentId = DocumentId.fromConnection(request.connection, it) ?: return@mapNotNull null
                 it.toModel(documentId)
             } ?: emptyList()
         }
