@@ -44,7 +44,7 @@ data class StorageUri(
     val isRoot: Boolean
         get() = path.isEmpty()
 
-    /** File name (decoded) */
+    /** File name */
     val fileName: String
         get() = text.fileName
 

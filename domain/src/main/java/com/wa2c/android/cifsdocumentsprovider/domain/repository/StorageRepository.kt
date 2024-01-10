@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.os.ProxyFileDescriptorCallback
-import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -18,8 +17,8 @@ import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataM
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
-import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,7 +135,7 @@ class StorageRepository @Inject internal constructor(
     suspend fun createFile(parentDocumentId: DocumentId, name: String, mimeType: String?, isDirectory: Boolean): DocumentId? {
         logD("createFile: parentDocumentId=$parentDocumentId, name=$name, mimeType=$mimeType, isDirectory=$isDirectory")
         return withContext(dispatcher) {
-            val fileDocumentId = DocumentId.fromIdText(parentDocumentId.idText.appendChild(name, isDirectory)) ?: return@withContext null
+            val fileDocumentId = parentDocumentId.appendChild(name, isDirectory) ?: return@withContext null
             val request = getStorageRequest(fileDocumentId) ?: return@withContext null
             runFileBlocking(request) {
                 if (isDirectory) {
@@ -185,8 +184,7 @@ class StorageRepository @Inject internal constructor(
         logD("copyFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
-            val idText = targetParentDocumentId.idText.appendChild(sourceRequest.uri.fileName, false)
-            val targetDocumentId = DocumentId.fromIdText(idText) ?: return@withContext null
+            val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
@@ -206,8 +204,7 @@ class StorageRepository @Inject internal constructor(
         logD("moveFile: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         return withContext(dispatcher) {
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
-            val idText = targetParentDocumentId.idText.appendChild(sourceRequest.uri.fileName, false)
-            val targetDocumentId = DocumentId.fromIdText(idText) ?: return@withContext null
+            val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
@@ -240,6 +237,18 @@ class StorageRepository @Inject internal constructor(
                 logE(e)
                 removeBlockingQueue(request)
                 throw e
+            }
+        }
+    }
+
+    suspend fun getDocumentId(idText: String?): DocumentId? {
+        return DocumentId.fromIdText(idText) ?: withContext(dispatcher) {
+            // for legacy id format
+            if (idText.isNullOrEmpty()) return@withContext null
+            val uriText = "smb://${idText}"
+            connectionSettingDao.getEntityByUri(uriText)?.let {
+                val path = uriText.substringAfter(it.uri)
+                DocumentId.fromConnection(it.id, path, idText)
             }
         }
     }

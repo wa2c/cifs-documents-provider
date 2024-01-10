@@ -20,24 +20,24 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideStorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.ProviderWorker
+import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.contracts.contract
 
 /**
  * CIFS DocumentsProvider
@@ -74,6 +74,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
+    private fun getResultDocumentId(inputId: DocumentId, outputId: DocumentId): String {
+        return inputId.legacyId?.let {
+            // for legacy document id
+            val base = if (it.isNotEmpty()) it.substringBeforeLast(inputId.path) else it
+            base.appendChild(outputId.path, false)
+        } ?: outputId.idText
+    }
+
     /**
      * Run on fileHandler
      */
@@ -104,7 +112,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     }
 
     override fun queryRoots(projection: Array<String>?): Cursor {
-        val useAsLocal = runBlocking { storageRepository.useAsLocalFlow.first() }
+        val useAsLocal = runOnFileHandler { storageRepository.useAsLocalFlow.first() }
         // Add root columns
         return MatrixCursor(projection.toRootProjection()).also {
             includeRoot(it, useAsLocal)
@@ -114,13 +122,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
     override fun queryDocument(documentId: String?, projection: Array<String>?): Cursor {
         logD("queryDocument: documentId=$documentId")
         val cursor = MatrixCursor(projection.toProjection())
-        val id = DocumentId.fromIdText(documentId) ?: DocumentId.ROOT
-        if (id.isRoot) {
-            // Root
-            includeConnection(cursor)
-        } else {
-            // File / Directory
-            runBlocking {
+        runOnFileHandler {
+            val id = storageRepository.getDocumentId(documentId) ?: DocumentId.ROOT
+            if (id.isRoot) {
+                // Root
+                includeConnection(cursor)
+            } else {
+                // File / Directory
                 val file = try {
                     storageRepository.getFile(id)
                 } catch (e: Exception) {
@@ -140,8 +148,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): Cursor {
         logD("queryChildDocuments: parentDocumentId=$parentDocumentId")
         val cursor = MatrixCursor(projection.toProjection())
-        val id = DocumentId.fromIdText(parentDocumentId) ?: DocumentId.ROOT
-        runBlocking {
+        runOnFileHandler {
+            val id = storageRepository.getDocumentId(parentDocumentId) ?: DocumentId.ROOT
             storageRepository.getFileChildren(id).forEach { file ->
                 includeFile(cursor, file)
             }
@@ -175,7 +183,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId)?.takeIf { !it.isRoot } ?: return@runOnFileHandler null
+            val id = storageRepository.getDocumentId(documentId)?.takeIf { !it.isRoot } ?: return@runOnFileHandler null
             storageRepository.getCallback(id, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
@@ -195,13 +203,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): String? {
         logD("createDocument: parentDocumentId=$parentDocumentId, mimeType=$mimeType, displayName=$displayName")
         return runOnFileHandler {
-            val id = DocumentId.fromIdText(parentDocumentId) ?: return@runOnFileHandler null
+            val id = storageRepository.getDocumentId(parentDocumentId) ?: return@runOnFileHandler null
             storageRepository.createFile(
                 parentDocumentId = id,
                 name = displayName,
                 mimeType = mimeType,
                 isDirectory = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
-            )?.idText
+            )?.let {
+                getResultDocumentId(id, it)
+            }
         }
     }
 
@@ -209,7 +219,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("deleteDocument: documentId=$documentId")
         if (documentId.isNullOrEmpty()) throw OperationCanceledException()
         runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler
+            val id = storageRepository.getDocumentId(documentId) ?: return@runOnFileHandler
             storageRepository.deleteFile(id)
         }
     }
@@ -218,8 +228,10 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("renameDocument: documentId=$documentId, displayName=$displayName")
         if (documentId.isNullOrEmpty() || displayName.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val id = DocumentId.fromIdText(documentId) ?: return@runOnFileHandler null
-            storageRepository.renameFile(id, displayName)?.idText
+            val id = storageRepository.getDocumentId(documentId) ?: return@runOnFileHandler null
+            storageRepository.renameFile(id, displayName)?.let {
+                getResultDocumentId(id, it)
+            }
         }
     }
 
@@ -227,9 +239,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("copyDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
-            val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
-            storageRepository.copyFile(sourceId, targetParentId)?.idText
+            val sourceId = storageRepository.getDocumentId(sourceDocumentId) ?: return@runOnFileHandler null
+            val targetParentId = storageRepository.getDocumentId(targetParentDocumentId) ?: return@runOnFileHandler null
+            storageRepository.copyFile(sourceId, targetParentId)?.let {
+                getResultDocumentId(sourceId, it)
+            }
         }
     }
 
@@ -241,9 +255,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("moveDocument: sourceDocumentId=$sourceDocumentId, targetParentDocumentId=$targetParentDocumentId")
         if (sourceDocumentId.isNullOrEmpty() || targetParentDocumentId.isNullOrEmpty()) return null
         return runOnFileHandler {
-            val sourceId = DocumentId.fromIdText(sourceDocumentId) ?: return@runOnFileHandler null
-            val targetParentId = DocumentId.fromIdText(targetParentDocumentId) ?: return@runOnFileHandler null
-            storageRepository.moveFile(sourceId, targetParentId)?.idText
+            val sourceId = storageRepository.getDocumentId(sourceDocumentId) ?: return@runOnFileHandler null
+            val targetParentId = storageRepository.getDocumentId(targetParentDocumentId) ?: return@runOnFileHandler null
+            storageRepository.moveFile(sourceId, targetParentId)?.let {
+                getResultDocumentId(sourceId, it)
+            }
         }
     }
 
@@ -354,18 +370,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 }
             }
         }
-    }
-
-
-    /**
-     * True if the document id is root.
-     */
-    @OptIn(kotlin.contracts.ExperimentalContracts::class)
-    private fun String?.isRoot(): Boolean {
-        contract {
-            returns(false) implies (this@isRoot != null)
-        }
-        return (this.isNullOrEmpty() || this == ROOT_DOCUMENT_ID)
     }
 
     companion object {

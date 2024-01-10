@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.model
 
 import android.os.Parcelable
+import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.values.DOCUMENT_ID_DELIMITER
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -15,6 +16,7 @@ import kotlinx.parcelize.Parcelize
 data class DocumentId internal constructor(
     val connectionId: String,
     val path: String,
+    val legacyId: String? = null,
 ) : Parcelable {
 
     val idText: String
@@ -25,6 +27,10 @@ data class DocumentId internal constructor(
 
     val isPathRoot: Boolean
         get() = path.isEmpty() || path == URI_SEPARATOR.toString()
+
+    fun appendChild(child: String, isDirectory: Boolean = false): DocumentId? {
+        return fromIdText(idText.appendChild(child, isDirectory))
+    }
 
     override fun toString(): String {
         return idText
@@ -58,10 +64,10 @@ data class DocumentId internal constructor(
         /**
          * Create from connection ID and path.
          */
-        fun fromConnection(connectionId: String?, path: String? = null): DocumentId? {
+        fun fromConnection(connectionId: String?, path: String? = null, legacyId: String? = null): DocumentId? {
             val id = connectionId ?: ""
             if (isInvalidDocumentId(id)) return null
-            return DocumentId(id, path ?: "")
+            return DocumentId(id, path ?: "", legacyId)
         }
 
     }
