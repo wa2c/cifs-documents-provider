@@ -19,3 +19,5 @@ include(":data:storage:jcifsng")
 include(":data:storage:smbj")
 include(":domain")
 include(":presentation")
+
+includeBuild("tools/string_converter")
