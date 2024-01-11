@@ -44,9 +44,8 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
-    implementation("commons-net:commons-net:3.10.0")
-    implementation("org.apache.commons:commons-vfs2-jackrabbit2:2.9.0")
-
+    implementation(libs.apache.commons.net)
+    implementation(libs.apache.commons.vfs)
 
     testImplementation(libs.junit)
 }
