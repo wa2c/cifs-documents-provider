@@ -13,19 +13,19 @@ class StorageClientManager(
     private val fileOpenLimit: Int,
 ) {
 
-    /** JCifs-ng client */
+    /** jCIFS NG (SMB2,3) client */
     private val jCifsNgClient = lazy { JCifsNgClient(false, fileOpenLimit) }
 
-    /** SMBJ client */
+    /** SMBJ (SMB2,3) client */
     private val smbjClient = lazy { SmbjClient(fileOpenLimit) }
 
-    /** JCIFS client */
-    private val jCifsClient = lazy { JCifsNgClient(true, fileOpenLimit) }
+    /** jCIFS NG (SMB1) client */
+    private val jCifsNgLegacyClient = lazy { JCifsNgClient(true, fileOpenLimit) }
 
     /** Apache FTP client */
     private val apacheFtpClient = lazy { ApacheFtpClient(false, fileOpenLimit) }
 
-    /** Apache FTP client */
+    /** Apache FTPS client */
     private val apacheFtpsClient = lazy { ApacheFtpClient(true, fileOpenLimit) }
 
     /**
@@ -35,7 +35,7 @@ class StorageClientManager(
         return when (type) {
             StorageType.JCIFS -> jCifsNgClient.value
             StorageType.SMBJ -> smbjClient.value
-            StorageType.JCIFS_LEGACY -> jCifsClient.value
+            StorageType.JCIFS_LEGACY -> jCifsNgLegacyClient.value
             StorageType.APACHE_FTP -> apacheFtpClient.value
             StorageType.APACHE_FTPS -> apacheFtpsClient.value
         }
@@ -47,7 +47,7 @@ class StorageClientManager(
     suspend fun closeClient() {
         if (jCifsNgClient.isInitialized()) jCifsNgClient.value.close()
         if (smbjClient.isInitialized()) smbjClient.value.close()
-        if (jCifsClient.isInitialized()) jCifsClient.value.close()
+        if (jCifsNgLegacyClient.isInitialized()) jCifsNgLegacyClient.value.close()
         if (apacheFtpClient.isInitialized()) apacheFtpClient.value.close()
         if (apacheFtpsClient.isInitialized()) apacheFtpsClient.value.close()
     }

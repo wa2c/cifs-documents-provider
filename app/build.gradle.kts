@@ -76,10 +76,3 @@ kapt {
     // https://kotlinlang.org/docs/kapt.html
     correctErrorTypes = true
 }
-
-tasks.configureEach {
-    if (name == "collectDebugDependencies" ||
-        name == "collectReleaseDependencies") {
-        dependsOn(":data:storage:jcifs:preJarJar")
-    }
-}
