@@ -1,0 +1,119 @@
+Component,String Resource Name,Language,,,,
+,,English,日本語 (Japanese),Slovenský (Slovak),简体中文 (Simplified Chinese),العربية (Arabic)
+,,en,ja,sk,zh-rCN,ar
+Common,app_summary,Access the shared folder.,共有フォルダにアクセスします。,Prístup k zdieľaným súborom a priečinkom.,访问共享文件夹,.الوصول إلى المجلدات المشتركة
+,dialog_accept,OK,OK,OK,OK,حسنا
+,dialog_close,Close,閉じる,Zatvoriť,关闭,إغلاق
+,,,,,,
+Home Screen,home_open_file,Open,開く,Otvoriť,打开,فتح
+,home_open_settings,Settings,設定,Nastavenie,设置,الإعدادات
+,home_open_file_ng_message,Add any connection.,接続情報を登録してください。,Pridajte pripojenie.,请先添加连接,أضف أي إتصال
+,home_add_connection_a11y,Add,追加,Pridať,添加,أضف
+,,,,,,
+Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
+,edit_id_title,ID,ID,ID,ID,بطاقة تعريف
+,edit_id_hint,"Unique string (no "":"", ""/"")","一意の文字列 ("":"", ""/""は不可)","Jedinečný reťazec ("":"", ""/"" nie sú povolené)","唯一字符串 (不允许使用"":"", ""/"")",سلسلة فريدة (: و/ غير مسموح بها)
+,edit_name_title,Name,名前,Názov,名称,الإسم
+,edit_name_hint,Host name if empty,未入力の場合はホスト,"Použije sa názov hostiteľa, ak nevyplníte",如果留空则为主机名,إسم المضيف إذا كان خاليا
+,edit_storage_title,Storage,ストレージ,Skladovanie,存储,التخزين (نوع المكتبة)
+,edit_settings_section_title,Settings,設定,Nastavenie,设置,الإعدادات
+,edit_domain_title,Domain,ドメイン,Doména,域名,النطاق
+,edit_domain_hint,Input as needed,必要に応じて入力,Zadajte podľa potreby,按需填写,الإدخال حسب الحاجة
+,edit_host_title,Host,ホスト,Hostiteľ,主机名,المضيف
+,edit_host_hint,IP Address / Host,IPアドレス/ホスト名,Adresa IP / Názov servera,IP地址 / 主机名,عنوان ال ( آي بي ) للمضيف / الخادم
+,edit_host_select_a11y,Browse,閲覧,Prehľadávať,浏览,تصفح
+,edit_port_title,Port,ポート,Port,端口号,بوابة
+,edit_port_hint,Default if empty,未入力の場合は標準ポート,"Predvolený, ak nevyplníte",如果留空则为默认值,أهمل إن كان خاليا
+,edit_enable_dfs_label,Enable DFS (Distributed File System),DFS(Distributed File System)利用,Povoliť DFS (distribuovaný systém súborov),启用DFS（分布式文件系统）,فعّل - دي إف أس - ( نظام الملفات الموزعة )
+,edit_directory_search_a11y,Browse,閲覧,Prehľadávať,浏览,تصفح
+,edit_user_title,User,ユーザ名,Meno používateľa,用户名,المستخدم
+,edit_user_hint,Invalid if anonymous,匿名の場合は無効,Neplatí pre anonymné prihlásenie,匿名访问时无效,باطل إذا كان مجهول
+,edit_password_title,Password,パスワード,Heslo,密码,كلمة المرور
+,edit_password_hint,Invalid if anonymous,匿名の場合は無効,Neplatí pre anonymné prihlásenie,匿名访问时无效,باطل إذا كان مجهول
+,edit_anonymous_label,Anonymous,匿名,Anonymné prihlásenie,匿名,مجهول
+,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
+,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
+,edit_folder_title,Folder,フォルダ,Cesta,目录,المجلد
+,edit_folder_hint,"""/"" if empty","未入力の場合は ""/""","""/"" ak nevyplníte","如果留空则为 ""/""","""/"" إذا كان خاليا"
+,edit_option_section_title,Option,オプション,Možnosti,选项,خيار
+,edit_option_extension_label,Add extension when saving,保存時に拡張子を付与,Pridať príponu pri ukladaní súborov,保存时添加扩展名,أضف وصلة عند الحفظ
+,edit_option_safe_transfer_label,Safe data transfer,安全なデータ転送,Bezpečný prenos dát,安全的数据传输,نقل بيانات آمن
+,edit_info_section_title,Information,情報,Informácie,信息,معلومات
+,edit_storage_uri_title,Storage URI,ストレージURI,Zdieľanie URI,存储 URI,عنوان التخزين
+,edit_provider_uri_title,Shared URI,共有URI,Zdieľaný identifikátor URI,分享 URI,عنوان التشارك
+,edit_check_connection_button,Check connection,接続確認,Overiť pripojenie,检查连接,فحص الاتصال
+,edit_check_connection_ok_message,Connection successful.,接続に成功しました。,Pripojenie úspešné.,连接成功。,نجح الاتصال
+,edit_check_connection_wn_message,Settings has an error.,設定にエラーがあります。,Nastavenia majú chybu.,设置有误。,الإعدادات فيها خطأ
+,edit_check_connection_ng_message,Connection failed.,接続に失敗しました。,Pripojenie zlyhalo.,连接失败。,فشل الإتصال
+,edit_save_ng_input_message,Input the host.,ホストを入力してください。,Input the host.,请填写主机名。,أدخل المضيف ( الخادم )
+,edit_save_ng_invalid_id_message,ID is invalid.,IDの文字列が不正です。,ID je neplatné.,ID 无效。,المعرف غير صالح
+,edit_save_ng_duplicate_id_message,ID is duplicated.,IDが重複しています。,ID je duplikované.,ID 重复。,معرف مكرر.
+,edit_save_button,Save,保存,Uložiť,保存,حفظ
+,edit_delete_button,Delete,削除,Zmazať,删除,حذف
+,edit_back_confirmation_message,Discard your changes?,変更を破棄しますか？,Zahodiť zmeny?,放弃修改？,أهمل التغييرات؟
+,edit_delete_confirmation_message,Delete this settings?,設定を削除しますか？,Naozaj vymazať toto pripojenie?,删除此项设置？,إحذف الإعدادات؟
+,,,,,,
+Host Screen,host_title,Host,ホスト,Hostiteľ,主机名,المضيف
+,host_set_manually,Set manually,手動で設定,Nastaviť ručne,手动设置,تحديد يدويا
+,host_select_confirmation_message,Input selected data to edit form.,選択項目をフォームに入力します。,Input selected data to edit form.,输入所选数据以编辑表单。,أدخل البيانات المختارة لتعديل عليها في الأنموذج
+,host_select_host_name,Host Name,ホスト名,Názov hostiteľa,主机名,إسم المضيف
+,host_select_ip_address,IP Address,IPアドレス,Adresa IP,IP地址,عنوان ال ( آي بي )
+,host_sort_button,Sort,ソート,Zoradiť,排序,فرز
+,host_reload_button,Reload,リロード,Obnoviť,重新加载,إعادة تحميل
+,host_sort_type_detection_ascend,Detection (Ascend),検出順 (昇順),Zistenia (Od najstaršieho),发现顺序（升序）,تحرى (تصاعديا)
+,host_sort_type_detection_descend,Detection (Descend),検出順 (降順),Zistenia (Od najnovšieho),发现顺序（降序）,تحرى (تنازليا)
+,host_sort_type_host_name_ascend,Host Name (Ascend),ホスト名 (昇順),Názvu hostiteľa (Od A po Z),主机名（升序）,إسم المضيف (تصاعديا)
+,host_sort_type_host_name_descend,Host Name (Descend),ホスト名 (降順),Názvu hostiteľa (Od Z po A),主机名（降序）,إسم المضيف (تنازليا)
+,host_sort_type_ip_address_ascend,IP Address (Ascend),IPアドレス (昇順),Adresy IP (Od najnižších),IP地址（升序）,عنوان ال ( آي بي ) (تصاعديا)
+,host_sort_type_ip_address_descend,IP Address (Descend),IPアドレス (降順),Adresy IP (Od najvyšších),IP地址（降序）,عنوان ال ( آي بي ) (تنازليا)
+,,,,,,
+Folder Screen,folder_title,Folder,フォルダ,Priečinok,目录,مجلد
+,folder_set,Set Folder,フォルダ設定,Nastaviť priečinok,目录设置,حدد المجلد
+,folder_reload_button,Reload,リロード,Obnoviť,重新加载,إعادة تحميل
+,folder_list_empty,No sub folders,サブフォルダはありません,Žiadne podpriečinky,不存在子目录,لا مجلدات فرعية
+,,,,,,
+Settings Screen,settings_title,Settings,設定,Nastavenie,设置,الإعدادات
+,settings_section_set,Settings,設定,Nastavenie,设置,الإعدادات
+,settings_set_theme,Theme,テーマ,Téma,主题,الهيئة
+,settings_set_language,Language,言語,Jazyk,语言,اللغة
+,settings_open_file_limit,"Open file limit
+(App restart required)","開けるファイル上限
+(アプリの再起動が必要)","Otvoriť limit súboru
+(Vyžaduje sa reštart aplikácie)","打开文件限制
+(需要重新启动应用程序)","تحديد الملفات المفتوحة
+(يجب إعادة تشغيل التطبيق)"
+,settings_set_use_foreground,Show notification when opening files,ファイル利用時に通知を表示,Pri otváraní súborov zobraziť upozornenia,打开文件时显示通知,أظهر الإشعارات عند فتح الملفات
+,settings_set_use_as_local,"Use as local storage
+(Device reboot required)","ローカルストレージとして使う
+(デバイスの再起動が必要)","Použite ako miestne úložisko
+(Vyžaduje sa reštart zariadenia)","用作本地存储
+(需要重新启动应用程序)","محاكاة الذاكرة المحلية
+(مطلوب إعادة تشغيل الجهاز)"
+,settings_section_info,Information,情報,Informácie,信息,معلومات
+,settings_info_contributors,Contributors,貢献者,Prispievatelia,贡献者,المساهمين
+,settings_info_libraries,Libraries,ライブラリ,Knižnice,图书馆,المكتبات
+,settings_info_app,App,アプリ,App,应用程序,التطبيق
+,,,,,,
+Send Screen,send_title,File Transfer,ファイル転送,Prenos súborov,发送文件,نقل الملف
+,send_close_button,Close,閉じる,Zatvoriť,关闭,إغلاق
+,send_action_cancel,Cancel,キャンセル,Zrušiť,取消,إلغاء
+,send_action_retry,Retry,再試行,Skúsiť znovu,重试,إعادة محاولة
+,send_action_remove,Remove,削除,Odstrániť,删除,إزالة
+,send_state_ready,Ready,待機,Pripravené,就绪,جاهز
+,send_state_overwrite,File exists,ファイルが存在します,Súbor existuje,文件已存在,الملف موجود
+,send_state_success,Success,完了しました,Hotovo,成功,نجاح
+,send_state_failure,Failure,失敗しました,Chyba,失败,فشل
+,send_state_cancel,Cancelled,キャンセルしました,Prerušené,已取消,ملغى
+,send_exit_confirmation_message,Cancel all transfers and exit the app.,すべての転送を中断してアプリを終了します。,Prerušiť všetky prenosy a ukončiť aplikáciu.,取消所有传输流并退出,إلغاء كل عمليات النقل و الخروج من التطبيق
+,send_overwrite_confirmation_message,Overwrite %1$d files.,%1$d件のファイルを上書きします。,Prepísať %1$d súborov.,覆盖 %1$d 个文件。,(استبدال الملفات) Overwrite %1$d files.
+,,,,,,
+DocumentsProvider,provider_error_message,An error was occurred.,エラーが発生しました,Vyskytla sa chyba.,发生错误。,حصل خطأ ما
+,,,,,,
+Notification,notification_channel_name_provider,File Open,ファイルオープン,Súbor Otvorený,文件打开,فتح ملف
+,notification_title_provider,Opening file,ファイルを開いています,Otváranie súborov,打开文件,عملية فتح الملف
+,notification_channel_name_send,Data Transfer,データ送信,Prenos súborov,数据传输,نقل البيانات
+,notification_title_send_completed,Completed,完了しました,Dokončené,成功,تمام
+,,,,,,
+Theme Enum,enum_theme_default,Default,デフォルト,Predvolené,默认,الوضع الطبيعي
+,enum_theme_light,Light,ライト,Svetlo,淺色主題,نهاري
+,enum_theme_dark,Dark,ダーク,Tmavý,深色主題,ليلي

@@ -132,7 +132,7 @@ fun HostScreen(
         viewModel.result.collectIn(lifecycleOwner) {
             scope.showError(
                 snackbarHostState = snackbarHostState,
-                stringRes = R.string.host_error_network,
+                stringRes = R.string.provider_error_message,
                 error = it.exceptionOrNull()
             )
         }

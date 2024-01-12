@@ -15,7 +15,6 @@ class ResourceRepository {
     private val printOptions = PrintOptions(
         pretty = true,
         singleLineTextElements = true,
-        useCharacterReference = true,
         indent = " ".repeat(4),
     )
 
@@ -24,6 +23,8 @@ class ResourceRepository {
      */
     private fun String.replaceText(): String {
         return replace(Regex("\\r\\n|\\r|\\n"), "\\\\n")
+            .replace(Regex("\'"), "\\\\'")
+            .replace(Regex("\""), "\\\\\"")
     }
 
     /**
