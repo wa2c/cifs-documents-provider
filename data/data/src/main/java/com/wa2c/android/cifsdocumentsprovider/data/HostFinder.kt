@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.data
 import com.stealthcopter.networktools.SubnetDevices
 import com.stealthcopter.networktools.subnet.Device
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
@@ -54,6 +55,8 @@ class HostFinder @Inject constructor() {
     suspend fun stopDiscovery() {
         try {
             SubnetDevices.fromLocalAddress().cancel()
+        } catch (e: Exception) {
+            logE(e)
         } finally {
             _hostFlow.emit(null)
         }
