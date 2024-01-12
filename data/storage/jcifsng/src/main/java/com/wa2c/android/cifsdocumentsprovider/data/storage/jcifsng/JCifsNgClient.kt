@@ -37,6 +37,7 @@ import java.util.Properties
  * JCIFS-ng Client
  */
 class JCifsNgClient(
+    private val isSmb1: Boolean,
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -65,8 +66,13 @@ class JCifsNgClient(
         if (!ignoreCache) { contextCache[connection]?.let { return it } }
 
         val property = Properties().apply {
-            setProperty("jcifs.smb.client.minVersion", "SMB202")
-            setProperty("jcifs.smb.client.maxVersion", "SMB311")
+            if (isSmb1) {
+                setProperty("jcifs.smb.client.minVersion", "SMB1")
+                setProperty("jcifs.smb.client.maxVersion", "SMB1")
+            } else {
+                setProperty("jcifs.smb.client.minVersion", "SMB202")
+                setProperty("jcifs.smb.client.maxVersion", "SMB311")
+            }
             setProperty("jcifs.smb.client.responseTimeout", READ_TIMEOUT.toString())
             setProperty("jcifs.smb.client.connTimeout", CONNECTION_TIMEOUT.toString())
             setProperty("jcifs.smb.client.attrExpirationPeriod", CACHE_TIMEOUT.toString())

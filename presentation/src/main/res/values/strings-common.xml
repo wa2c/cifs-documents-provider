@@ -11,9 +11,9 @@
     <string name="enum_language_sk">Slovenský</string>
     <string name="enum_language_zh_rcn">简体中文</string>
 
-    <string name="enum_storage_smb_jcifsng">SMB2,3 (JCIFS-NG)</string>
-    <string name="enum_storage_smb_smbj">SMB2,3 (SMBJ)</string>
-    <string name="enum_storage_smb_jcifs">SMB1 (JCIFS)</string>
+    <string name="enum_storage_smb2_jcifsng">SMB2,3 (jCIFS NG)</string>
+    <string name="enum_storage_smb2_smbj">SMB2,3 (SMBJ)</string>
+    <string name="enum_storage_smb1_jcifsng">SMB1 (jCIFS NG)</string>
     <string name="enum_storage_ftp_apache">FTP (Apache Commons)</string>
     <string name="enum_storage_ftps_apache">FTPS (Apache Commons)</string>
 

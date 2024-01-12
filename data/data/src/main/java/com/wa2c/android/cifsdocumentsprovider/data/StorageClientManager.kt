@@ -3,7 +3,6 @@ package com.wa2c.android.cifsdocumentsprovider.data
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifs.JCifsClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
 
@@ -15,19 +14,19 @@ class StorageClientManager(
 ) {
 
     /** JCifs-ng client */
-    private val jCifsNgClient = lazy { JCifsNgClient(fileOpenLimit) }
+    private val jCifsNgClient = lazy { JCifsNgClient(false, fileOpenLimit) }
 
     /** SMBJ client */
     private val smbjClient = lazy { SmbjClient(fileOpenLimit) }
 
     /** JCIFS client */
-    private val jCifsClient = lazy { JCifsClient(fileOpenLimit) }
+    private val jCifsClient = lazy { JCifsNgClient(true, fileOpenLimit) }
 
     /** Apache FTP client */
-    private val apacheFtpClient = lazy { ApacheFtpClient(fileOpenLimit, false) }
+    private val apacheFtpClient = lazy { ApacheFtpClient(false, fileOpenLimit) }
 
     /** Apache FTP client */
-    private val apacheFtpsClient = lazy { ApacheFtpClient(fileOpenLimit, true) }
+    private val apacheFtpsClient = lazy { ApacheFtpClient(true, fileOpenLimit) }
 
     /**
      * Get client

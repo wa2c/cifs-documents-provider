@@ -33,8 +33,8 @@ import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
 import java.time.Duration
 
 class ApacheFtpClient(
-    private val openFileLimit: Int,
     private val isSftp: Boolean,
+    private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 

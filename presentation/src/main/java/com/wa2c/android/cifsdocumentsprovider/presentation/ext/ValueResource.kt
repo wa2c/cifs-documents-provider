@@ -86,9 +86,9 @@ val SendDataState.labelRes: Int
 val StorageType.labelRes: Int
     @StringRes
     get() = when (this) {
-        StorageType.JCIFS -> R.string.enum_storage_smb_jcifsng
-        StorageType.SMBJ -> R.string.enum_storage_smb_smbj
-        StorageType.JCIFS_LEGACY ->R.string.enum_storage_smb_jcifs
+        StorageType.JCIFS -> R.string.enum_storage_smb2_jcifsng
+        StorageType.SMBJ -> R.string.enum_storage_smb2_smbj
+        StorageType.JCIFS_LEGACY ->R.string.enum_storage_smb1_jcifsng
         StorageType.APACHE_FTP -> R.string.enum_storage_ftp_apache
         StorageType.APACHE_FTPS -> R.string.enum_storage_ftps_apache
     }
