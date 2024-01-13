@@ -35,3 +35,7 @@ buildscript {
 task("clean", Delete::class) {
     delete = setOf(rootProject.buildDir)
 }
+
+tasks.register("convertString") {
+    dependsOn(gradle.includedBuild("string_converter").task(":convertString"))
+}
