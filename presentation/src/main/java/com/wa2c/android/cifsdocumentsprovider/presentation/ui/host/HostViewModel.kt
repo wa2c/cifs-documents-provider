@@ -95,11 +95,7 @@ class HostViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         launch {
-            runCatching {
-                hostRepository.stopDiscovery()
-            }.onFailure {
-                //_navigationEvent.emit(HostNav.NetworkError(it))
-            }
+            hostRepository.stopDiscovery()
             _isLoading.emit(false)
         }
     }
