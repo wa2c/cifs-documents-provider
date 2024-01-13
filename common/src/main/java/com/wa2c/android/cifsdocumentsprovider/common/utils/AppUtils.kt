@@ -60,21 +60,11 @@ private val String.lastPath: String
         path.substring(startIndex)
     }
 
-typealias UriString = String
-
-val UriString.host: String?
-    get() = Uri.parse(this).host
-
-val UriString.port: Int?
-    get() = Uri.parse(this).port.takeIf { it > 0 }
-
 /**
  * Get file name (last segment)
  */
 val String.fileName: String
     get() = Uri.decode(this).lastPath
-
-
 
 /**
  * Get file name
@@ -91,18 +81,6 @@ fun Uri.getFileName(context: Context): String {
     }
     return this.path?.lastPath ?: ""
 }
-
-/**
- * Rename URI name
- */
-fun String.rename(newName: String): String {
-    return substringBeforeLast(URI_SEPARATOR) + URI_SEPARATOR + Uri.encode(newName)
-}
-
-
-/** True if invalid file name */
-val String.isInvalidFileName: Boolean
-    get() = this == "." || this == ".."
 
 /** True if directory URI */
 val String.isDirectoryUri: Boolean

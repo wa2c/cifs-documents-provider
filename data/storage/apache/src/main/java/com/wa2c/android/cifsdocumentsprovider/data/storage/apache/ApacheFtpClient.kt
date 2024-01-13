@@ -7,7 +7,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -16,6 +15,8 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.encodeUri
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -235,7 +236,7 @@ class ApacheFtpClient(
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true, existsRequired = true).use { source ->
                 val targetUri = request.uri.rename(newName)
-                getFileObject(request.replacePathByUri(targetUri.rename(newName))).use { target ->
+                getFileObject(request.replacePathByUri(targetUri)).use { target ->
                     source?.moveTo(target)
                     target?.toStorageFile()
                 }

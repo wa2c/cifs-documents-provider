@@ -7,7 +7,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
@@ -18,6 +17,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCon
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext

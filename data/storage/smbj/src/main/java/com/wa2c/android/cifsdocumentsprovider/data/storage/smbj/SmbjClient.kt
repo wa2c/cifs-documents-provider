@@ -23,7 +23,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
-import com.wa2c.android.cifsdocumentsprovider.common.utils.isInvalidFileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
@@ -34,7 +33,10 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.isInvalidFileName
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.toUncSeparator
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.uncPathToUri
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -325,7 +327,8 @@ class SmbjClient(
         return withContext(dispatcher) {
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath, isRead = false, existsRequired = true)?.use { diskEntry ->
-                    diskEntry.rename(newName)
+                    val newPath = request.sharePath.rename(newName)
+                    diskEntry.rename(newPath.toUncSeparator())
                     diskEntry.toStorageFile()
                 }
             }
@@ -334,8 +337,11 @@ class SmbjClient(
 
     override suspend fun moveFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile? {
         return withContext(dispatcher) {
-            copyFile(sourceRequest, targetRequest)?.also {
-                deleteFile(sourceRequest)
+            useDiskShare(sourceRequest) { diskShare ->
+                openDiskFile(diskShare, sourceRequest.sharePath, isRead = false, existsRequired = true)?.use { diskEntry ->
+                    diskEntry.rename(targetRequest.sharePath.toUncSeparator())
+                    diskEntry.toStorageFile()
+                }
             }
         }
     }
