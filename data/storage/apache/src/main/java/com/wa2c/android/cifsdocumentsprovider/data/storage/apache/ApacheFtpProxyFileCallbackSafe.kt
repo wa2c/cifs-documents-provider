@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import android.system.OsConstants
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
@@ -35,47 +37,71 @@ internal class ApacheFtpProxyFileCallbackSafe(
         AccessMode.W -> RandomAccessMode.READWRITE
     }
 
-    private var _readAccess: RandomAccessContent? = null
+    private var writePointer: Long = 0L
 
-    private fun createReadAccess(fp: Long): RandomAccessContent {
+    private var _reader: RandomAccessContent? = null
+
+    private var _writer: OutputStream? = null
+
+    private fun createReader(fp: Long): RandomAccessContent {
         return fileObject.content.getRandomAccessContent(fileAccessMode).also {
             it.seek(fp)
         }.also {
-            _readAccess = it
+            _reader = it
         }
+    }
+
+    private fun createWriter(): OutputStream {
+        return fileObject.content.outputStream.also {
+            _writer = BufferedOutputStream(it, BUFFER_SIZE)
+        }
+    }
+
+
+    private fun closeReader() {
+        launch {
+            try { _reader?.close() } catch (e: Exception) { logE(e) } // close in background
+        }
+        _reader = null
+        logD("Reader released")
+    }
+
+
+    private fun closeWriter() {
+        launch {
+            try { _writer?.close() } catch (e: Exception) { logE(e) } // close in background
+        }
+        _writer = null
+        writePointer = 0L
+        logD("Writer released")
     }
 
     private fun getReadAccess(fp: Long): RandomAccessContent {
-        return _readAccess?.let { access ->
+        closeWriter()
+        return _reader?.let { access ->
             if (access.filePointer != fp) {
-                launch(coroutineContext) {
-                    access.close() // close in background
-                }
-                createReadAccess(fp)
+                closeReader()
+                createReader(fp)
             } else {
                 access
             }
-        } ?: createReadAccess(fp)
+        } ?: createReader(fp)
     }
 
-
-    private var writePointer: Long = 0L
-
-    private var _writeAccess: OutputStream? = null
-
     private fun getWriteAccess(fp: Long): OutputStream {
-        return _writeAccess?.let { access ->
-            if (writePointer != fp) {
-                launch(coroutineContext) { access.close() }
-                throw ErrnoException("Writing failed", OsConstants.EBADF)
+        closeReader()
+        return _writer?.let { access ->
+            if (fp == 0L) {
+                closeWriter()
+                null
+            } else if (writePointer != fp) {
+                closeWriter()
+                _writer = null
+                throw ErrnoException("This type does not support random writing.", OsConstants.EBADF)
             } else {
                 access
             }
-        } ?: let {
-            fileObject.content.outputStream.also {
-                _writeAccess = BufferedOutputStream(it, BUFFER_SIZE)
-            }
-        }
+        } ?: createWriter()
         // NOTE:
         // Apache VFS does not support Random writing
         // https://commons.apache.org/proper/commons-vfs/filesystems.html
@@ -89,8 +115,9 @@ internal class ApacheFtpProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onRead(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            getReadAccess(offset).readFully(data, 0, size)
-            size
+            val maxSize = minOf(size.toLong(), fileSize - offset).toInt()
+            getReadAccess(offset).readFully(data, 0, maxSize)
+            maxSize
         }
     }
 
@@ -112,10 +139,8 @@ internal class ApacheFtpProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onRelease() {
         processFileIo(coroutineContext) {
-            _readAccess?.close()
-            _readAccess = null
-            _writeAccess?.close()
-            _writeAccess = null
+            closeReader()
+            closeWriter()
             onFileRelease()
         }
     }

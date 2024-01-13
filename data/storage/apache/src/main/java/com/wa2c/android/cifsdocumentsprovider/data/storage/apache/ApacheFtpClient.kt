@@ -15,7 +15,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.encodeUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
