@@ -11,7 +11,7 @@ String resources are defined in [SpreadSheet](https://docs.google.com/spreadshee
 ## Usage
 
 ```sh
-# In project directory
+# In module directory
 ../../gradlew convertString
 ```
 
