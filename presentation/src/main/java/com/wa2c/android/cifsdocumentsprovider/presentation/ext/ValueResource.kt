@@ -6,7 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -86,7 +86,9 @@ val SendDataState.labelRes: Int
 val StorageType.labelRes: Int
     @StringRes
     get() = when (this) {
-        StorageType.JCIFS -> R.string.enum_storage_jcifsng
-        StorageType.SMBJ -> R.string.enum_storage_smbj
-        StorageType.JCIFS_LEGACY ->R.string.enum_storage_jcifs
+        StorageType.JCIFS -> R.string.enum_storage_smb_jcifsng
+        StorageType.SMBJ -> R.string.enum_storage_smb_smbj
+        StorageType.JCIFS_LEGACY ->R.string.enum_storage_smb_jcifs
+        StorageType.APACHE_FTP -> R.string.enum_storage_ftp_apache
+        StorageType.APACHE_FTPS -> R.string.enum_storage_ftps_apache
     }

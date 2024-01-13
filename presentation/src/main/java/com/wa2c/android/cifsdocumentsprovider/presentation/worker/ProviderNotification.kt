@@ -51,7 +51,7 @@ class ProviderNotification(
     /**
      * Create notification
      */
-    private fun createNotification(list: List<Uri> = emptyList()): Notification {
+    private fun createNotification(list: List<String> = emptyList()): Notification {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_PROVIDER)
             .setAutoCancel(false)
             .setOngoing(true)
@@ -60,7 +60,7 @@ class ProviderNotification(
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setStyle(
                 NotificationCompat.InboxStyle().also { style ->
-                    list.map { it.getFileName(context) }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
+                    list.map { Uri.parse(it).getFileName(context) }.filter { it.isNotBlank() }.forEach { style.addLine(it) }
                 }
             )
             .build()
@@ -69,7 +69,7 @@ class ProviderNotification(
     /**
      * Create CoroutineWorker foreground info
      */
-    fun getNotificationInfo(list: List<Uri>): ForegroundInfo {
+    fun getNotificationInfo(list: List<String>): ForegroundInfo {
         val notification = createNotification(list)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ForegroundInfo(NOTIFICATION_ID_PROVIDER, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
@@ -81,7 +81,7 @@ class ProviderNotification(
     /**
      * Update notification
      */
-    fun updateNotification(list: List<Uri>) {
+    fun updateNotification(list: List<String>) {
         if (list.isEmpty()) return
         val notification = createNotification(list)
         notificationManager.notify(NOTIFICATION_ID_PROVIDER, notification)

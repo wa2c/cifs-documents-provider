@@ -7,9 +7,9 @@ import androidx.lifecycle.coroutineScope
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
-import com.wa2c.android.cifsdocumentsprovider.presentation.provideCifsRepository
+import com.wa2c.android.cifsdocumentsprovider.presentation.provideStorageRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ class ProviderWorker(
 ) : CoroutineWorker(context, params) {
 
     private val providerNotification: ProviderNotification by lazy { ProviderNotification(context) }
-    private val cifsRepository: CifsRepository by lazy { provideCifsRepository(context) }
+    private val storageRepository: StorageRepository by lazy { provideStorageRepository(context) }
     private val lifecycleOwner = WorkerLifecycleOwner()
     private var deferredUntilCompleted = CompletableDeferred<Unit>()
     private val handler = Handler(Looper.getMainLooper())
@@ -36,10 +36,10 @@ class ProviderWorker(
             lifecycleOwner.lifecycle.coroutineScope.launch {
                 val completeRunnable = Runnable {
                     // don't use list here, 5 seconds later the real list could be different
-                    if (cifsRepository.openUriList.value.isEmpty()) deferredUntilCompleted.complete(Unit)
-                    else  providerNotification.updateNotification(cifsRepository.openUriList.value)
+                    if (storageRepository.openUriList.value.isEmpty()) deferredUntilCompleted.complete(Unit)
+                    else  providerNotification.updateNotification(storageRepository.openUriList.value)
                 }
-                cifsRepository.openUriList.collectIn(lifecycleOwner) { list ->
+                storageRepository.openUriList.collectIn(lifecycleOwner) { list ->
                     providerNotification.updateNotification(list)
                     handler.removeCallbacks(completeRunnable)
                     if (list.isEmpty()) {
@@ -50,7 +50,7 @@ class ProviderWorker(
                 }
             }
 
-            setForeground(providerNotification.getNotificationInfo(cifsRepository.openUriList.value))
+            setForeground(providerNotification.getNotificationInfo(storageRepository.openUriList.value))
             deferredUntilCompleted.await() // wait until the uri list is empty.
         } catch (e: CancellationException) {
             // ignored

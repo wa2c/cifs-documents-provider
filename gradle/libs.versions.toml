@@ -9,6 +9,8 @@ accompanistSystemuicontroller = "0.32.0"
 androidnetworktools = "0.4.5.3"
 androidxJunit = "1.1.5"
 androixUi = "1.5.4"
+apacheCommonsNet = "3.10.0"
+apacheCommonsVfs = "2.9.0"
 appcompat = "1.6.1"
 androidxComposeBom = "2023.10.01"
 coreKtx = "1.12.0"
@@ -63,6 +65,8 @@ androidx-ui = { module = "androidx.compose.ui:ui", version.ref = "androixUi" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "androixUi" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "androixUi" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
+apache-commons-net = { module = "commons-net:commons-net", version.ref = "apacheCommonsNet" }
+apache-commons-vfs = { module = "org.apache.commons:commons-vfs2-jackrabbit2", version.ref = "apacheCommonsVfs" }
 dcerpc = { module = "com.rapid7.client:dcerpc", version.ref = "dcerpc" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }

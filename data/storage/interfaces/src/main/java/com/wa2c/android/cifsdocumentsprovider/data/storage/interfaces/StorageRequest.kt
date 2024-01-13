@@ -1,19 +1,20 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
+import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 
 /**
- * Storage Connection
+ * Storage Request
  */
-data class StorageAccess(
+data class StorageRequest(
     val connection: StorageConnection,
-    val currentUri: String? = null,
+    val path: String? = null,
 ) {
 
     /** URI */
     val uri: String
-        get() = currentUri ?: connection.smbUri
+        get() = connection.uri.appendChild(path ?: "", false)
 
     /** Share name */
     val shareName: String
@@ -36,5 +37,10 @@ data class StorageAccess(
     /** True if this is share root */
     val isShareRoot: Boolean
         get() = shareName.isNotEmpty() && sharePath.isEmpty()
+
+
+    fun replacePathByUri(replaceUriText: String): StorageRequest {
+        return copy(path = connection.getRelativePath(replaceUriText))
+    }
 
 }

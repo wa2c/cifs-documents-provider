@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 
 @Composable
+fun DividerWide() = Divider(thickness = 2.dp, color = Theme.Colors.Divider)
+
+@Composable
 fun DividerNormal() = Divider(thickness = 1.dp, color = Theme.Colors.Divider)
 
 @Composable

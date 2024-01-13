@@ -58,12 +58,10 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 
 /**
  * Settings Screen
@@ -107,13 +105,10 @@ fun SettingsScreen(
             try {
                 context.startActivity(intent)
             } catch (e: Exception) {
-                scope.showPopup(
+                scope.showError(
                     snackbarHostState = snackbarHostState,
-                    popupMessage = PopupMessage.Resource(
-                        res = R.string.provider_error_message,
-                        type = PopupMessageType.Error,
-                        error = e
-                    )
+                    stringRes = R.string.provider_error_message,
+                    error = e,
                 )
             }
         },
@@ -229,8 +224,8 @@ private fun SettingsList(
             // UI Theme
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_theme),
-                items = UiTheme.values().map { it.getLabel(context) }.toList(),
-                selectedIndex = UiTheme.values().indexOf(theme),
+                items = UiTheme.entries.map { it.getLabel(context) }.toList(),
+                selectedIndex = UiTheme.entries.indexOf(theme),
             ) {
                 onSetUiTheme(UiTheme.findByIndexOrDefault(it))
             }
@@ -238,8 +233,8 @@ private fun SettingsList(
             // Language
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_language),
-                items = Language.values().map { it.getLabel(context) }.toList(),
-                selectedIndex = Language.values().indexOf(language),
+                items = Language.entries.map { it.getLabel(context) }.toList(),
+                selectedIndex = Language.entries.indexOf(language),
             ) {
                 onSetLanguage(Language.findByIndexOrDefault(it))
             }

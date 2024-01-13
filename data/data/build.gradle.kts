@@ -21,8 +21,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
 
-        buildConfigField("String", "K", "\"com.wa2c.android\"")
-
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
@@ -59,6 +57,7 @@ dependencies {
     implementation(project(":data:storage:jcifs"))
     implementation(project(":data:storage:jcifsng"))
     implementation(project(":data:storage:smbj"))
+    implementation(project(":data:storage:apache"))
 
     // App
 

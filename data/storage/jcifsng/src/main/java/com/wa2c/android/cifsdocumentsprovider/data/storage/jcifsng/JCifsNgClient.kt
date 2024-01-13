@@ -2,21 +2,22 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
-import com.wa2c.android.cifsdocumentsprovider.common.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageAccess
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
 import jcifs.context.BaseContext
@@ -35,7 +36,7 @@ import java.util.Properties
 /**
  * JCIFS-ng Client
  */
-class JCifsNgClient constructor(
+class JCifsNgClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -58,7 +59,7 @@ class JCifsNgClient constructor(
      * Get auth by user. Anonymous if user and password are empty.
      */
     private fun getCifsContext(
-        connection: StorageConnection,
+        connection: StorageConnection.Cifs,
         ignoreCache: Boolean,
     ): CIFSContext {
         if (!ignoreCache) { contextCache[connection]?.let { return it } }
@@ -90,11 +91,12 @@ class JCifsNgClient constructor(
     /**
      * Get SMB file
      */
-    private suspend fun getSmbFile(access: StorageAccess, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile? {
+    private suspend fun getSmbFile(request: StorageRequest, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile? {
         return withContext(dispatcher) {
             try {
-                val context = getCifsContext(access.connection, ignoreCache)
-                SmbFile(access.uri, context).apply {
+                val connection = request.connection as StorageConnection.Cifs
+                val context = getCifsContext(connection, ignoreCache)
+                SmbFile(request.uri, context).apply {
                     connectTimeout = CONNECTION_TIMEOUT
                     readTimeout = READ_TIMEOUT
                 }.let {
@@ -127,10 +129,10 @@ class JCifsNgClient constructor(
     /**
      * Check setting connectivity.
      */
-    override suspend fun checkConnection(access: StorageAccess): ConnectionResult {
+    override suspend fun checkConnection(request: StorageRequest): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(access, true) ?: throw IOException()
+                getChildren(request, true) ?: throw IOException()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -143,26 +145,26 @@ class JCifsNgClient constructor(
                     ConnectionResult.Failure(c)
                 }
             } finally {
-                contextCache.remove(access.connection)
+                contextCache.remove(request.connection)
             }
         }
     }
 
     /**
-     * Get StorageFile
+     * Get file
      */
-    override suspend fun getFile(access: StorageAccess, ignoreCache: Boolean): StorageFile? {
+    override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile? {
         return  withContext(dispatcher) {
-            getSmbFile(access, ignoreCache = ignoreCache, existsRequired = true)?.use { it.toStorageFile() }
+            getSmbFile(request, ignoreCache = ignoreCache, existsRequired = true)?.use { it.toStorageFile() }
         }
     }
 
     /**
      * Get children StorageFile list
      */
-    override suspend fun getChildren(access: StorageAccess, ignoreCache: Boolean): List<StorageFile>? {
+    override suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean): List<StorageFile>? {
         return  withContext(dispatcher) {
-            getSmbFile(access, ignoreCache = ignoreCache, existsRequired = true)?.use { parent ->
+            getSmbFile(request, ignoreCache = ignoreCache, existsRequired = true)?.use { parent ->
                 parent.listFiles()?.mapNotNull { child ->
                     child.use { it.toStorageFile() }
                 }
@@ -170,36 +172,41 @@ class JCifsNgClient constructor(
         }
     }
 
+    /**
+     * Create new directory.
+     */
+    override suspend fun createDirectory(request: StorageRequest): StorageFile? {
+        return withContext(dispatcher) {
+            getSmbFile(request)?.use {
+                it.mkdir()
+                it.toStorageFile()
+            }
+        }
+    }
 
     /**
-     * Create new StorageFile.
+     * Create new file.
      */
-    override suspend fun createFile(access: StorageAccess, mimeType: String?): StorageFile? {
+    override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = access.uri.optimizeUri(if (access.connection.extension) mimeType else null)
-            getSmbFile(access.copy(currentUri = optimizedUri))?.use { file ->
-                if (optimizedUri.isDirectoryUri) {
-                    // Directory
-                    file.mkdir()
-                } else {
-                    // File
-                    file.createNewFile()
-                }
+            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
+            getSmbFile(request.replacePathByUri(optimizedUri))?.use { file ->
+                file.createNewFile()
                 file.toStorageFile()
             }
         }
     }
 
     /**
-     * Copy StorageFile
+     * Copy file
      */
     override suspend fun copyFile(
-        sourceAccess: StorageAccess,
-        targetAccess: StorageAccess,
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
     ): StorageFile? {
         return withContext(dispatcher) {
-            getSmbFile(sourceAccess, existsRequired = true)?.use { source ->
-                getSmbFile(targetAccess)?.use { target ->
+            getSmbFile(sourceRequest, existsRequired = true)?.use { source ->
+                getSmbFile(targetRequest)?.use { target ->
                     source.copyTo(target)
                     target.toStorageFile()
                 }
@@ -211,15 +218,40 @@ class JCifsNgClient constructor(
      * Rename file
      */
     override suspend fun renameFile(
-        access: StorageAccess,
+        request: StorageRequest,
         newName: String,
     ): StorageFile? {
         return withContext(dispatcher) {
-            getSmbFile(access, existsRequired = true)?.use { source ->
-                val targetUri = access.uri.trimEnd('/').replaceAfterLast('/', newName)
-                getSmbFile(access.copy(currentUri = targetUri))?.use { target ->
+            getSmbFile(request, existsRequired = true)?.use { source ->
+                val targetUri = request.uri.rename(newName)
+                getSmbFile(request.replacePathByUri(targetUri))?.use { target ->
                     source.renameTo(target)
                     target.toStorageFile()
+                }
+            }
+        }
+    }
+
+    /**
+     * Move file
+     */
+    override suspend fun moveFile(
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
+    ): StorageFile? {
+        return withContext(dispatcher) {
+            if (sourceRequest.connection == targetRequest.connection) {
+                // Same connection
+                getSmbFile(sourceRequest, existsRequired = true)?.use { source ->
+                    getSmbFile(targetRequest)?.use { target ->
+                        source.renameTo(target)
+                        target.toStorageFile()
+                    }
+                }
+            } else {
+                // Different connection
+                copyFile(sourceRequest, targetRequest)?.also {
+                    deleteFile(sourceRequest)
                 }
             }
         }
@@ -229,53 +261,29 @@ class JCifsNgClient constructor(
      * Delete file
      */
     override suspend fun deleteFile(
-        access: StorageAccess,
+        request: StorageRequest,
     ): Boolean {
         return withContext(dispatcher) {
-            getSmbFile(access, existsRequired = true)?.use {
+            getSmbFile(request, existsRequired = true)?.use {
                 it.delete()
+                contextCache.remove(request.connection)
                 true
             } ?: false
         }
     }
 
     /**
-     * Move file
-     */
-    override suspend fun moveFile(
-        sourceAccess: StorageAccess,
-        targetAccess: StorageAccess,
-    ): StorageFile? {
-        return withContext(dispatcher) {
-            if (sourceAccess.connection == targetAccess.connection) {
-                // Same connection
-                getSmbFile(sourceAccess, existsRequired = true)?.use { source ->
-                    getSmbFile(targetAccess)?.use { target ->
-                        source.renameTo(target)
-                        target.toStorageFile()
-                    }
-                }
-            } else {
-                // Different connection
-                copyFile(sourceAccess, targetAccess)?.also {
-                    deleteFile(sourceAccess)
-                }
-            }
-        }
-    }
-
-    /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(access: StorageAccess, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
+    override suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getSmbFile(access, existsRequired = true) ?: return@withContext null
+            val file = getSmbFile(request, existsRequired = true) ?: return@withContext null
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }
 
-            if (access.connection.safeTransfer) {
+            if (request.connection.safeTransfer) {
                 JCifsNgProxyFileCallbackSafe(file, mode, release)
             } else {
                 JCifsNgProxyFileCallback(file, mode, release)

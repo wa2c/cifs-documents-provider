@@ -15,13 +15,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.host.HostScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.receive.ReceiveFile
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendScreen
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.send.SendViewModel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsScreen
 
 /**
@@ -83,9 +83,9 @@ internal fun MainNavHost(
                     backStackEntry.savedStateHandle.remove<String?>(HostScreenResultKey)
                 }
             val selectedUri =
-                backStackEntry.savedStateHandle.getStateFlow<Uri?>(FolderScreenResultKey, null)
+                backStackEntry.savedStateHandle.getStateFlow<StorageUri?>(FolderScreenResultKey, null)
                     .collectAsState(null).value?.also {
-                    backStackEntry.savedStateHandle.remove<Uri?>(FolderScreenResultKey)
+                    backStackEntry.savedStateHandle.remove<StorageUri?>(FolderScreenResultKey)
                 }
 
             EditScreen(
@@ -95,7 +95,7 @@ internal fun MainNavHost(
                     navController.popBackStack()
                 },
                 onNavigateSearchHost = {
-                    navController.navigate(route = "$HostScreenName?$HostScreenParamId=${it?.id ?: ""}")
+                    navController.navigate(route = "$HostScreenName?$HostScreenParamId=${it}")
                 },
                 onNavigateSelectFolder = {
                     navController.navigate(route = FolderScreenName)

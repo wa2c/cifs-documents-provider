@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.wa2c.android.cifsdocumentsprovider.domain.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 
 @Composable
@@ -48,9 +49,29 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
                     text = text.toString(),
                     fontWeight = FontWeight.Bold,
                 )
-                val cause = message.error?.localizedMessage?.substringAfter(": ")
-                if (cause != null) {
-                    Text(text = "[$cause]")
+                // Error message
+                message.error?.let { error ->
+                    error.localizedMessage?.substringAfter(": ")?.let {
+                        // included message
+                        Text(text = "[$it]")
+                    } ?: let {
+                        // type message
+                        if (error is EditException) {
+                            when (error) {
+                                is EditException.InputRequiredException -> {
+                                    Text(text = "[${stringResource(id = R.string.edit_save_ng_input_message)}]")
+                                }
+
+                                is EditException.InvalidIdException -> {
+                                    Text(text = "[${stringResource(id = R.string.edit_save_ng_invalid_id_message)}]")
+                                }
+
+                                is EditException.DuplicatedIdException -> {
+                                    Text(text = "[${stringResource(id = R.string.edit_save_ng_duplicate_id_message)}]")
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

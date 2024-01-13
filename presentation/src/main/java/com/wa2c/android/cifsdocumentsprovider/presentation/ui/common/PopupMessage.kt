@@ -74,11 +74,30 @@ enum class PopupMessageType {
     Error,
 }
 
-fun CoroutineScope.showPopup(snackbarHostState: SnackbarHostState, popupMessage: PopupMessage?) {
+fun CoroutineScope.showPopup(
+    snackbarHostState: SnackbarHostState,
+    @StringRes stringRes: Int?,
+    type: PopupMessageType?,
+    error: Throwable? = null,
+) {
     launch {
         snackbarHostState.currentSnackbarData?.dismiss()
-        popupMessage?.let { snackbarHostState.showSnackbar(MessageSnackbarVisual.create(it)) }
+        if (stringRes == null || type == null) return@launch
+        val visual = MessageSnackbarVisual.create(
+            popupMessage = PopupMessage.Resource(
+                res = stringRes,
+                type = type,
+                error = error,
+            )
+        )
+        snackbarHostState.showSnackbar(visual)
     }
 }
 
-
+fun CoroutineScope.showError(
+    snackbarHostState: SnackbarHostState,
+    @StringRes stringRes: Int,
+    error: Throwable? = null,
+) {
+    showPopup(snackbarHostState, stringRes, PopupMessageType.Error, error)
+}

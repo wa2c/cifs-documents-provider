@@ -12,9 +12,12 @@
 
     <!-- Edit Screen -->
     <string name="edit_title">Connection</string>
+    <string name="edit_id_title">ID</string>
+    <string name="edit_id_hint">Unique string (no ":", "/")</string>
     <string name="edit_name_title">Name</string>
     <string name="edit_name_hint">Host name if empty</string>
     <string name="edit_storage_title">Storage</string>
+    <string name="edit_settings_section_title">Settings</string>
     <string name="edit_domain_title">Domain</string>
     <string name="edit_domain_hint">Input as needed</string>
     <string name="edit_host_title">Host</string>
@@ -23,25 +26,30 @@
     <string name="edit_port_title">Port</string>
     <string name="edit_port_hint">Default if empty</string>
     <string name="edit_enable_dfs_label">Enable DFS (Distributed File System)</string>
-    <string name="edit_folder_title">Folder</string>
-    <string name="edit_folder_hint">\'/\' if empty</string>
+
     <string name="edit_directory_search_a11y">Browse</string>
     <string name="edit_user_title">User</string>
     <string name="edit_user_hint">Invalid if anonymous</string>
     <string name="edit_password_title">Password</string>
     <string name="edit_password_hint">Invalid if anonymous</string>
     <string name="edit_anonymous_label">Anonymous</string>
-    <string name="edit_option_title">Option</string>
+    <string name="edit_ftp_mode_title">Active Mode</string>
+    <string name="edit_encoding_title">Character Code</string>
+    <string name="edit_folder_title">Folder</string>
+    <string name="edit_folder_hint">\'/\' if empty</string>
+    <string name="edit_option_section_title">Option</string>
     <string name="edit_option_extension_label">Add extension when saving</string>
     <string name="edit_option_safe_transfer_label">Safe data transfer</string>
-    <string name="edit_connection_uri_title">SMB URI</string>
+    <string name="edit_info_section_title">Information</string>
+    <string name="edit_storage_uri_title">Storage URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>
     <string name="edit_check_connection_button">Check connection</string>
     <string name="edit_check_connection_ok_message">Connection successful.</string>
     <string name="edit_check_connection_wn_message">Settings has an error.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
-    <string name="edit_save_ng_message">Input the host.</string>
-    <string name="edit_save_duplicate_message">URI duplicated.</string>
+    <string name="edit_save_ng_input_message">Input the host.</string>
+    <string name="edit_save_ng_invalid_id_message">ID is invalid.</string>
+    <string name="edit_save_ng_duplicate_id_message">ID is duplicated.</string>
     <string name="edit_save_button">Save</string>
     <string name="edit_delete_button">Delete</string>
     <string name="edit_back_confirmation_message">Discard your changes?</string>

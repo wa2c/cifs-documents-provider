@@ -3,58 +3,147 @@ package com.wa2c.android.cifsdocumentsprovider.domain.mapper
 import android.net.Uri
 import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
-import com.wa2c.android.cifsdocumentsprovider.common.values.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
-import com.wa2c.android.cifsdocumentsprovider.data.preference.EncryptUtils
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.*
+import java.util.Date
 
 /**
  * Json Converter
  */
 internal object DomainMapper {
 
-    /**
-     * Convert model to data.
-     */
-    fun ConnectionSettingEntity.toModel(): CifsConnection {
-        return EncryptUtils.decrypt(this.data).decodeJson()
+    private val formatter = Json {
+        ignoreUnknownKeys = true
+    }
+
+    private fun jsonToStorageConnection(type: StorageType, json: String): StorageConnection {
+        return when (type) {
+            StorageType.JCIFS,
+            StorageType.SMBJ,
+            StorageType.JCIFS_LEGACY -> {
+                formatter.decodeFromString<StorageConnection.Cifs>(json)
+            }
+            StorageType.APACHE_FTP,
+            StorageType.APACHE_FTPS -> {
+                formatter.decodeFromString<StorageConnection.Ftp>(json)
+            }
+        }
     }
 
     /**
-     * Convert to data from model.
+     * Convert db model to data model.
      */
-    fun CifsConnection.toEntity(
+    fun ConnectionSettingEntity.toDataModel(): StorageConnection {
+        val type = StorageType.findByValue(this.type) ?: StorageType.default
+        val json = EncryptUtils.decrypt(this.data)
+        return jsonToStorageConnection(type, json)
+    }
+
+    /**
+     *
+     */
+    fun ConnectionSettingEntity.toItem(): RemoteFile? {
+        val documentId = DocumentId.fromConnection(id) ?: return null
+        return RemoteFile(
+            documentId = documentId,
+            name = name,
+            uri = StorageUri(uri),
+            lastModified = modifiedDate,
+            isDirectory = true,
+        )
+    }
+
+    /**
+     * Convert data model to db model.
+     */
+    fun StorageConnection.toEntityModel(
         sortOrder: Int,
         modifiedDate: Date,
     ): ConnectionSettingEntity {
         return ConnectionSettingEntity(
             id = this.id,
             name = this.name,
-            uri = this.folderSmbUri,
+            uri = this.uri,
             type = this.storage.value,
-            data = EncryptUtils.encrypt(this.encodeJson())  ,
+            data = EncryptUtils.encrypt(formatter.encodeToString(this))  ,
             sortOrder = sortOrder,
             modifiedDate = modifiedDate.time
         )
     }
 
-    private val formatter = Json {
-        ignoreUnknownKeys = true
+    /**
+     * Convert data model to data request model.
+     */
+    fun StorageConnection.toStorageRequest(path: String? = null): StorageRequest {
+        return StorageRequest(
+            connection = this,
+            path = path
+        )
     }
 
-    fun CifsConnection.encodeJson(): String {
-        return formatter.encodeToString(this)
+    /**
+     * Convert data model to domain model.
+     */
+    fun StorageConnection.toDomainModel(): RemoteConnection {
+        return when (this) {
+            is StorageConnection.Cifs -> {
+                RemoteConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    enableDfs = enableDfs,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
+            is StorageConnection.Ftp -> {
+                RemoteConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    isFtpActiveMode = isActiveMode,
+                    encoding = encoding,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
+            }
+        }
     }
 
-    fun String.decodeJson(): CifsConnection {
-        return formatter.decodeFromString(this)
+    fun StorageFile.toModel(documentId: DocumentId): RemoteFile {
+        return RemoteFile(
+            documentId = documentId,
+            name = name,
+            uri = StorageUri(uri),
+            size = size,
+            lastModified = lastModified,
+            isDirectory = isDirectory
+        )
     }
-
 
     /**
      * Convert to send data from storage file.
@@ -72,6 +161,51 @@ internal object DomainMapper {
                 it.copy(state = SendDataState.CONFIRM)
             } else {
                 it
+            }
+        }
+    }
+
+    /**
+     * Convert domain model to data model.
+     */
+    fun RemoteConnection.toDataModel(): StorageConnection {
+        return when (storage){
+            StorageType.JCIFS,
+            StorageType.SMBJ,
+            StorageType.JCIFS_LEGACY -> {
+                StorageConnection.Cifs(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    domain = domain,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                    enableDfs = enableDfs,
+                )
+            }
+            StorageType.APACHE_FTP,
+            StorageType.APACHE_FTPS -> {
+                StorageConnection.Ftp(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    isActiveMode = isFtpActiveMode,
+                    encoding = encoding,
+                    extension = extension,
+                    safeTransfer = safeTransfer,
+                )
             }
         }
     }

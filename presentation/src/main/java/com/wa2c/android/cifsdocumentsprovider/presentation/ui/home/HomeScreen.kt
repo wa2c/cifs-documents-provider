@@ -39,15 +39,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
@@ -62,7 +62,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onNavigateSettings: () -> Unit,
-    onNavigateEdit: (CifsConnection) -> Unit,
+    onNavigateEdit: (RemoteConnection) -> Unit,
     onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -81,22 +81,17 @@ fun HomeScreen(
                 try {
                     fileOpenLauncher.launch(arrayOf("*/*"))
                 } catch (e: Exception) {
-                    scope.showPopup(
+                    scope.showError(
                         snackbarHostState = snackbarHostState,
-                        popupMessage = PopupMessage.Resource(
-                            res = R.string.provider_error_message,
-                            type = PopupMessageType.Error,
-                            error = e,
-                        )
+                        stringRes = R.string.provider_error_message,
+                        error = e,
                     )
                 }
             } else {
                 scope.showPopup(
                     snackbarHostState = snackbarHostState,
-                    popupMessage = PopupMessage.Resource(
-                        res = R.string.home_open_file_ng_message,
-                        type = PopupMessageType.Warning,
-                    )
+                    stringRes = R.string.home_open_file_ng_message,
+                    type = PopupMessageType.Warning,
                 )
             }
         },
@@ -114,10 +109,10 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContainer(
     snackbarHostState: SnackbarHostState,
-    connectionList: List<CifsConnection>,
+    connectionList: List<RemoteConnection>,
     onClickMenuOpenFile: () -> Unit,
     onClickMenuSettings: () -> Unit,
-    onClickItem: (CifsConnection) -> Unit,
+    onClickItem: (RemoteConnection) -> Unit,
     onClickAddItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
@@ -179,8 +174,8 @@ fun HomeScreenContainer(
  */
 @Composable
 fun ConnectionList(
-    connectionList: List<CifsConnection>,
-    onClickItem: (CifsConnection) -> Unit,
+    connectionList: List<RemoteConnection>,
+    onClickItem: (RemoteConnection) -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
     val state = rememberReorderableLazyListState(onMove = { from, to ->
@@ -210,7 +205,7 @@ fun ConnectionList(
 
 @Composable
 private fun ConnectionItem(
-    connection: CifsConnection,
+    connection: RemoteConnection,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
@@ -241,7 +236,7 @@ private fun ConnectionItem(
             )
         }
         Text(
-            text = connection.folderSmbUri,
+            text = connection.uri.text,
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -262,50 +257,35 @@ private fun HomeScreenContainerPreview() {
         HomeScreenContainer(
             snackbarHostState = SnackbarHostState(),
             connectionList = listOf(
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "PC1",
                     storage = StorageType.JCIFS,
-                    domain = null,
                     host = "pc1",
                     port = null,
-                    enableDfs = false,
                     folder = null,
                     user = null,
                     password = null,
-                    anonymous = false,
-                    extension = false,
-                    safeTransfer = false,
                 ),
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "PC2",
                     storage = StorageType.JCIFS,
-                    domain = null,
                     host = "pc1",
                     port = null,
-                    enableDfs = false,
                     folder = "test/test/test/test/test/test/test/test",
                     user = null,
                     password = null,
-                    anonymous = false,
-                    extension = false,
-                    safeTransfer = false,
                 ),
-                CifsConnection(
+                RemoteConnection(
                     id = "",
                     name = "192.168.0.128",
                     storage = StorageType.SMBJ,
-                    domain = null,
                     host = "pc1",
                     port = null,
-                    enableDfs = false,
                     folder = null,
                     user = null,
                     password = null,
-                    anonymous = false,
-                    extension = false,
-                    safeTransfer = false,
                 ),
             ),
             onClickItem = {},

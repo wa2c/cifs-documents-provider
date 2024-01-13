@@ -1,12 +1,10 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
-import android.net.Uri
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.common.utils.parentUri
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsConnection
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.CifsRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -23,35 +21,37 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class FolderViewModel @Inject constructor(
-    private val cifsRepository: CifsRepository
+    private val editRepository: EditRepository
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    private val temporaryConnection: CifsConnection = runBlocking {
-        cifsRepository.loadTemporaryConnection() ?: throw IllegalStateException()
+    private val temporaryConnection: RemoteConnection by lazy {
+        editRepository.loadTemporaryConnection() ?: throw IllegalStateException()
     }
 
-    private val _isLoading =  MutableStateFlow<Boolean>(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val rootConnection = temporaryConnection.copy(folder = null)
 
-    private val _currentUri = MutableStateFlow<Uri>(temporaryConnection.folderSmbUri.toUri())
-    val currentUri: StateFlow<Uri> = _currentUri
+    private val _currentUri = MutableStateFlow<StorageUri>(temporaryConnection.uri)
+    val currentUri: StateFlow<StorageUri> = _currentUri
 
-    private val _fileList = MutableStateFlow<List<CifsFile>>(emptyList())
-    val fileList: StateFlow<List<CifsFile>> = _fileList
+    private val _fileList = MutableStateFlow<List<RemoteFile>>(emptyList())
+    val fileList: StateFlow<List<RemoteFile>> = _fileList
 
     private val _result = MutableSharedFlow<Result<Unit>>()
     val result: SharedFlow<Result<Unit>> = _result
 
+    private val _isLoading =  MutableStateFlow<Boolean>(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     init {
         launch {
-            loadList(temporaryConnection.folderSmbUri.toUri())
+            loadList(currentUri.value)
         }
     }
 
     /**
      * On select folder
      */
-    fun onSelectFolder(file: CifsFile) {
+    fun onSelectFolder(file: RemoteFile) {
         if (isLoading.value) return
         launch {
             loadList(file.uri)
@@ -83,10 +83,10 @@ class FolderViewModel @Inject constructor(
     /**
      * Load list
      */
-    private suspend fun loadList(uri: Uri) {
+    private suspend fun loadList(uri: StorageUri) {
         _isLoading.emit(true)
         runCatching {
-            cifsRepository.getFileChildren(uri.toString(), temporaryConnection)
+            editRepository.getFileChildren(rootConnection, uri)
         }.onSuccess { list ->
             _fileList.emit(list.filter { it.isDirectory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }))
         }.onFailure {

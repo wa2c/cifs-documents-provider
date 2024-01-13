@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder
 
 import android.content.res.Configuration
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -40,19 +39,18 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.isRoot
-import com.wa2c.android.cifsdocumentsprovider.domain.model.CifsFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessage
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 
 /**
  * Folder Screen
@@ -62,7 +60,7 @@ fun FolderScreen(
     viewModel: FolderViewModel = hiltViewModel(),
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onNavigateBack: () -> Unit,
-    onNavigateSet: (Uri) -> Unit,
+    onNavigateSet: (StorageUri) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -84,13 +82,10 @@ fun FolderScreen(
 
     LaunchedEffect(Unit) {
         viewModel.result.collectIn(lifecycleOwner) {
-            scope.showPopup(
+            scope.showError(
                 snackbarHostState = snackbarHostState,
-                popupMessage = PopupMessage.Resource(
-                    res = R.string.host_error_network,
-                    type = PopupMessageType.Error,
-                    error = it.exceptionOrNull()
-                )
+                stringRes = R.string.host_error_network,
+                error = it.exceptionOrNull(),
             )
         }
     }
@@ -106,12 +101,12 @@ fun FolderScreen(
 @Composable
 fun FolderScreenContainer(
     snackbarHostState: SnackbarHostState,
-    fileList: List<CifsFile>,
-    currentUri: Uri,
+    fileList: List<RemoteFile>,
+    currentUri: StorageUri,
     isLoading: Boolean,
     onClickBack: () -> Unit,
     onClickReload: () -> Unit,
-    onClickItem: (CifsFile) -> Unit,
+    onClickItem: (RemoteFile) -> Unit,
     onClickUp: () -> Unit,
     onClickSet: () -> Unit,
 ) {
@@ -160,7 +155,7 @@ fun FolderScreenContainer(
                         }
                         items(items = fileList) { file ->
                             FolderItem(
-                                cifsFile = file,
+                                item = file,
                                 onClick = { onClickItem(file) },
                             )
                             DividerThin()
@@ -221,7 +216,7 @@ private fun UpFolderItem(
 
 @Composable
 private fun FolderItem(
-    cifsFile: CifsFile,
+    item: RemoteFile,
     onClick: () -> Unit,
 ) {
     Row(
@@ -236,7 +231,7 @@ private fun FolderItem(
             modifier = Modifier.size(40.dp),
         )
         Text(
-            text = cifsFile.name,
+            text = item.name,
             fontSize = 15.sp,
             modifier = Modifier
                 .padding(start = Theme.SizeS)
@@ -259,29 +254,32 @@ private fun FolderScreenContainerPreview() {
         FolderScreenContainer(
             snackbarHostState = SnackbarHostState(),
             fileList = listOf(
-                CifsFile(
+                RemoteFile(
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example1.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 ),
-                CifsFile(
+                RemoteFile(
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example2example2example2example2example2example2.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 ),
-                CifsFile(
+                RemoteFile(
+                    documentId = DocumentId.fromIdText(null)!!,
                     name = "example3example3example3example3example3example3example3example3example3example3.txt",
-                    uri = Uri.parse("smb://example/"),
+                    uri = StorageUri("smb://example/"),
                     size = 128,
                     lastModified = 0,
                     isDirectory = true,
                 )
             ),
-            currentUri = Uri.EMPTY,
+            currentUri = StorageUri.ROOT,
             isLoading = false,
             onClickBack = {},
             onClickReload = {},

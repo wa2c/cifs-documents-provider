@@ -7,7 +7,10 @@ const val URI_SEPARATOR = '/'
 const val UNC_START = "\\\\"
 const val UNC_SEPARATOR = "\\"
 
+const val DOCUMENT_ID_DELIMITER = ":"
+
 const val USER_GUEST = "guest"
+const val DEFAULT_ENCODING = "UTF-8"
 
 const val CONNECTION_TIMEOUT = 10000
 const val READ_TIMEOUT = 10000

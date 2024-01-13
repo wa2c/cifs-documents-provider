@@ -3,12 +3,9 @@ package com.wa2c.android.cifsdocumentsprovider.common.utils
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
-import android.provider.DocumentsContract
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
-import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
-import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START
-import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import java.nio.file.Paths
@@ -42,42 +39,16 @@ val String?.mimeType: String
         return if (mimeType.isNullOrEmpty()) "*/*" else mimeType
     }
 
-
 /**
- * Get document ID ( <authority[:port]>/<path> )
+ * Get URI text
  */
-fun getDocumentId(host: String?, port: Int?, folder: String?, isDirectory: Boolean): String? {
+fun getUriText(type: StorageType, host: String?, port: String?, folder: String?, isDirectory: Boolean): String? {
     if (host.isNullOrBlank()) return null
-    val authority = host + if (port == null || port <= 0) "" else ":$port"
-    return Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+    val portInt = port?.toIntOrNull()
+    val authority = host + if (portInt == null || portInt <= 0) "" else ":$port"
+    val uri = Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
+    return "${type.protocol.schema}${URI_START}$uri"
 }
-
-/**
- * Get SMB URI ( smb://<documentId> )
- */
-fun getSmbUri(host: String?, port: String?, folder: String?, isDirectory: Boolean): String {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, isDirectory) ?: return ""
-    return "smb://$documentId"
-}
-
-/**
- * Get content URI ( content://<applicationId>/tree/<encodedDocumentId> )
- */
-fun getContentUri(host: String?, port: String?, folder: String?): String {
-    val documentId = getDocumentId(host, port?.toIntOrNull(), folder, true) ?: return ""
-    return "content://$URI_AUTHORITY/tree/" + Uri.encode(documentId)
-}
-
-/**
- * Get path and fragment (scheme://host/[xxx/yyy#zzz])
- */
-val Uri.pathFragment: String
-    get() = run {
-        val startIndex = scheme?.let { "$it$URI_START".length } ?: 0
-        val uriText = toString()
-        val pathIndex = uriText.indexOf(URI_SEPARATOR, startIndex) + 1
-        return uriText.substring(pathIndex)
-    }
 
 /**
  * Get last path
@@ -111,27 +82,6 @@ fun Uri.getFileName(context: Context): String {
     return this.path?.lastPath ?: ""
 }
 
-
-/**
- * Get parent uri ( last character = '/' )
- */
-val Uri.parentUri: Uri?
-    get() {
-        if (pathSegments.isEmpty()) return null
-        val uriText = toString()
-            .let { if (it.last() == URI_SEPARATOR) it.substring(0, it.length - 1) else it }
-        return try { Uri.parse(uriText.substring(0, uriText.lastIndexOf(URI_SEPARATOR) + 1)) } catch (e: Exception) { null }
-    }
-
-
-/** True if root */
-val Uri.isRoot: Boolean
-    get() = (parentUri == null)
-
-/** True if invalid file name */
-val String.isInvalidFileName: Boolean
-    get() = this == "." || this == ".."
-
 /** True if directory URI */
 val String.isDirectoryUri: Boolean
     get() = this.endsWith(URI_SEPARATOR)
@@ -144,32 +94,7 @@ fun String.appendSeparator(): String {
 /** Append child entry */
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
-    return this + name
-}
-
-/** Convert UNC Path (\\<server>\<share>\<path> to URI (smb://<server>/<share>/<path>) */
-fun String.uncPathToUri(isDirectory: Boolean): String? {
-    val elements = this.substringAfter(UNC_START).split(UNC_SEPARATOR).ifEmpty { return null }
-    val params = elements.getOrNull(0)?.split('@') ?: return null
-    val server = params.getOrNull(0) ?: return null
-    val port = if (params.size >= 2) params.lastOrNull() else null
-    val path = elements.subList(1, elements.size).joinToString(UNC_SEPARATOR)
-    return getSmbUri(server, port, path, isDirectory)
-}
-
-/**
- * Optimize URI
- */
-fun String.optimizeUri(mimeType: String? = null): String {
-    return  if (mimeType == null) {
-        this
-    } else if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-        this.appendSeparator()
-    } else {
-        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-        if (ext == this.mimeType) this
-        else "$this.$ext"
-    }
+    return this.appendSeparator() + name
 }
 
 /**
