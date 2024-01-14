@@ -123,7 +123,7 @@ fun EditScreen(
             }
         },
         onClickDelete = { showDeleteDialog.value = true },
-        safeTransferState = if (storageType.value == StorageType.JCIFS_LEGACY) null else viewModel.safeTransfer.collectAsMutableState(),
+        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
         isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
@@ -224,7 +224,7 @@ private fun EditScreenContainer(
     isFtpActiveModeState: MutableState<Boolean>,
     encodingState: MutableState<String>,
     folderState: MutableState<String?>,
-    safeTransferState: MutableState<Boolean>?,
+    safeTransferState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
     isBusy: Boolean,
     connectionResult: ConnectionResult?,
@@ -441,7 +441,7 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_option_section_title),
                     )
 
-                    if (safeTransferState != null) {
+                    if (protocol == ProtocolType.SMB) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_option_safe_transfer_label),
                             state = safeTransferState,
