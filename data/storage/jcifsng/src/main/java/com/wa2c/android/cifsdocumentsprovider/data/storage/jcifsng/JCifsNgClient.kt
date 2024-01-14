@@ -16,7 +16,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration
@@ -195,8 +194,7 @@ class JCifsNgClient(
      */
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
-            getSmbFile(request.replacePathByUri(optimizedUri))?.use { file ->
+            getSmbFile(request)?.use { file ->
                 file.createNewFile()
                 file.toStorageFile()
             }

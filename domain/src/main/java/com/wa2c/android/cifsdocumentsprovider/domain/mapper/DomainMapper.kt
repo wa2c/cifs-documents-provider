@@ -1,19 +1,21 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.mapper
 
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
-import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.Date
@@ -206,6 +208,22 @@ internal object DomainMapper {
                     extension = extension,
                     safeTransfer = safeTransfer,
                 )
+            }
+        }
+    }
+
+    /**
+     * Add Mime type extension
+     */
+    fun String.addExtension(mimeType: String? = null): String {
+        return  if (mimeType.isNullOrEmpty()) {
+            this
+        } else {
+            val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+            if (ext == this.mimeType || ext.isNullOrEmpty()) {
+                this
+            } else {
+                "$this.$ext"
             }
         }
     }

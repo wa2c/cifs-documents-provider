@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.addExtension
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
@@ -136,7 +137,14 @@ class StorageRepository @Inject internal constructor(
         logD("createFile: parentDocumentId=$parentDocumentId, name=$name, mimeType=$mimeType, isDirectory=$isDirectory")
         return withContext(dispatcher) {
             val fileDocumentId = parentDocumentId.appendChild(name, isDirectory) ?: return@withContext null
-            val request = getStorageRequest(fileDocumentId) ?: return@withContext null
+            val request = getStorageRequest(fileDocumentId)?.let { r ->
+                if (r.connection.extension) {
+                    r.copy(r.connection, r.path?.addExtension(mimeType))
+                } else {
+                    r
+                }
+            } ?: return@withContext null
+
             runFileBlocking(request) {
                 if (isDirectory) {
                     getClient(request.connection).createDirectory(request)

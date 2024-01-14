@@ -34,21 +34,6 @@ fun String.toUncSeparator(): String {
     return this.replace(URI_SEPARATOR.toString(), UNC_SEPARATOR)
 }
 
-/**
- * Optimize URI
- */
-fun String.optimizeUri(mimeType: String? = null): String {
-    return  if (mimeType == null) {
-        this
-    } else if (mimeType == DocumentsContract.Document.MIME_TYPE_DIR) {
-        this.appendSeparator()
-    } else {
-        val ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-        if (ext == this.mimeType) this
-        else "$this.$ext"
-    }
-}
-
 /** True if invalid file name */
 val String.isInvalidFileName: Boolean
     get() = this == "." || this == ".."

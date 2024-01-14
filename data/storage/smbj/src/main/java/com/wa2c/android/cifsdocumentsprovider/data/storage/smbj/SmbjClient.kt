@@ -34,7 +34,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCon
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.isInvalidFileName
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.optimizeUri
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.toUncSeparator
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.uncPathToUri
@@ -295,7 +294,6 @@ class SmbjClient(
 
     override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
         return withContext(dispatcher) {
-            val optimizedUri = request.uri.optimizeUri(if (request.connection.extension) mimeType else null)
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath,
                     isRead = false,
@@ -303,7 +301,7 @@ class SmbjClient(
                 )?.use { f ->
                     f.fileInformation
                 }
-            }?.toStorageFile(optimizedUri)
+            }?.toStorageFile(request.uri)
         }
     }
 
