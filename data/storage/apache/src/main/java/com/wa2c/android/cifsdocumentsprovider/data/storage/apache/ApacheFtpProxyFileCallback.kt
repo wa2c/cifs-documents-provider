@@ -19,7 +19,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Proxy File Callback for Apache FTP with Random Access
  */
-internal class ApacheFtpProxyFileCallbackSafe(
+internal class ApacheFtpProxyFileCallback(
     private val fileObject: FileObject,
     private val accessMode: AccessMode,
     private val onFileRelease: suspend () -> Unit,
@@ -59,21 +59,28 @@ internal class ApacheFtpProxyFileCallbackSafe(
 
 
     private fun closeReader() {
-        launch {
-            try { _reader?.close() } catch (e: Exception) { logE(e) } // close in background
+        _reader?.let {
+            launch {
+                // close in background
+                try { it.close() } catch (e: Exception) { logE(e) }
+                logD("Reader released")
+            }
         }
         _reader = null
-        logD("Reader released")
+
     }
 
 
     private fun closeWriter() {
-        launch {
-            try { _writer?.close() } catch (e: Exception) { logE(e) } // close in background
-        }
+       _writer?.let {
+           launch {
+               // close in background
+               try { it.close() } catch (e: Exception) { logE(e) }
+               logD("Writer released")
+           }
+       }
         _writer = null
         writePointer = 0L
-        logD("Writer released")
     }
 
     private fun getReadAccess(fp: Long): RandomAccessContent {
@@ -96,7 +103,6 @@ internal class ApacheFtpProxyFileCallbackSafe(
                 null
             } else if (writePointer != fp) {
                 closeWriter()
-                _writer = null
                 throw ErrnoException("This type does not support random writing.", OsConstants.EBADF)
             } else {
                 access
@@ -125,6 +131,7 @@ internal class ApacheFtpProxyFileCallbackSafe(
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         if (accessMode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
+            logD("onWrite: offset=$offset, size=$size")
             getWriteAccess(offset).write(data, 0, size)
             writePointer += size.toLong()
             size

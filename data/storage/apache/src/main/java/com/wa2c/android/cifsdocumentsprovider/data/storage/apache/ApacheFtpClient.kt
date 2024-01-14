@@ -284,7 +284,7 @@ class ApacheFtpClient(
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }
-            ApacheFtpProxyFileCallbackSafe(file, mode, release)
+            ApacheFtpProxyFileCallback(file, mode, release)
         }
     }
 
