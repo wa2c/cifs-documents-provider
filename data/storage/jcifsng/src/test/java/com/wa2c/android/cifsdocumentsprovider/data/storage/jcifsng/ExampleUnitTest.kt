@@ -1,8 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).

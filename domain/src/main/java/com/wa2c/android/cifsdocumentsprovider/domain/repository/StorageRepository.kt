@@ -13,6 +13,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
+import com.wa2c.android.cifsdocumentsprovider.domain.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.addExtension
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
@@ -144,6 +145,7 @@ class StorageRepository @Inject internal constructor(
                     r
                 }
             } ?: return@withContext null
+            if (request.connection.readOnly) throw StorageException.WritingNotAllowedException()
 
             runFileBlocking(request) {
                 if (isDirectory) {
@@ -164,6 +166,8 @@ class StorageRepository @Inject internal constructor(
         logD("deleteFile: documentId=$documentId")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext false
+            if (request.connection.readOnly) throw StorageException.WritingNotAllowedException()
+
             runFileBlocking(request) {
                 getClient(request.connection).deleteFile(request)
             }
@@ -177,6 +181,8 @@ class StorageRepository @Inject internal constructor(
         logD("renameFile: documentId:=$documentId:, newName=$newName")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
+            if (request.connection.readOnly) throw StorageException.WritingNotAllowedException()
+
             runFileBlocking(request) {
                 getClient(request.connection).renameFile(request, newName)?.let {
                     DocumentId.fromConnection(request.connection, it)
@@ -194,6 +200,8 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
+            if (targetRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.WritingNotAllowedException()
+
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
                     getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest)?.let {
@@ -214,6 +222,8 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
+            if (sourceRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.WritingNotAllowedException()
+
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
                     getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest)?.let {
@@ -231,6 +241,7 @@ class StorageRepository @Inject internal constructor(
         logD("getCallback: documentId=$documentId, mode=$mode")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
+            if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.WritingNotAllowedException()
             try {
                 addBlockingQueue(request)
                 getClient(request.connection).getFileDescriptor(request, mode) {

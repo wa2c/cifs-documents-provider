@@ -35,9 +35,10 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
 ,edit_folder_title,Folder,フォルダ,Cesta,目录,المجلد
 ,edit_folder_hint,"""/"" if empty","未入力の場合は ""/""","""/"" ak nevyplníte","如果留空则为 ""/""","""/"" إذا كان خاليا"
-,edit_option_section_title,Option,オプション,Možnosti,选项,خيار
-,edit_option_extension_label,Add extension when saving,保存時に拡張子を付与,Pridať príponu pri ukladaní súborov,保存时添加扩展名,أضف وصلة عند الحفظ
+,edit_option_section_title,Option,オプション,možnosti,选项,خيارات
 ,edit_option_safe_transfer_label,Safe data transfer,安全なデータ転送,Bezpečný prenos dát,安全的数据传输,نقل بيانات آمن
+,edit_option_read_only_label,Read only,読込み専用,Iba na čítanie,只读,يقرأ فقط
+,edit_option_extension_label,Add extension when saving,保存時に拡張子を付与,Pridať príponu pri ukladaní súborov,保存时添加扩展名,أضف وصلة عند الحفظ
 ,edit_info_section_title,Information,情報,Informácie,信息,معلومات
 ,edit_storage_uri_title,Storage URI,ストレージURI,Zdieľanie URI,存储 URI,عنوان التخزين
 ,edit_provider_uri_title,Shared URI,共有URI,Zdieľaný identifikátor URI,分享 URI,عنوان التشارك

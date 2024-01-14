@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -15,6 +14,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +30,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
 import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
+import java.io.IOException
 import java.time.Duration
 
 class ApacheFtpClient(
@@ -52,11 +53,9 @@ class ApacheFtpClient(
      * Get context
      */
     private fun getContext(
-        connection: StorageConnection,
+        ftpConnection: StorageConnection.Ftp,
         ignoreCache: Boolean,
     ): FileSystemOptions {
-        val ftpConnection = (connection as? StorageConnection.Ftp) ?: throw IllegalArgumentException()
-
         if (!ignoreCache) {
             contextCache[ftpConnection]?.let {
                 return it
@@ -109,7 +108,8 @@ class ApacheFtpClient(
         existsRequired: Boolean = false,
     ): FileObject? {
         return withContext(dispatcher) {
-            fileManager.resolveFile(request.uri, getContext(request.connection, ignoreCache)).let {
+            val connection = request.connection as StorageConnection.Ftp
+            fileManager.resolveFile(request.uri, getContext(connection, ignoreCache)).let {
                 if (existsRequired && !it.exists()) {
                     null
                 } else {
@@ -141,7 +141,7 @@ class ApacheFtpClient(
     ): ConnectionResult {
         return withContext(dispatcher) {
             try {
-                getChildren(request, ignoreCache = true)
+                getChildren(request, ignoreCache = true) ?: throw IOException()
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
@@ -183,10 +183,10 @@ class ApacheFtpClient(
     override suspend fun getChildren(
         request: StorageRequest,
         ignoreCache: Boolean,
-    ): List<StorageFile> {
+    ): List<StorageFile>? {
         return withContext(dispatcher) {
             getFileObject(request).use { file ->
-                file?.children?.filter { it.exists() }?.map { it.toStorageFile() } ?: emptyList()
+                file?.children?.filter { it.exists() }?.map { it.toStorageFile() }
             }
         }
     }

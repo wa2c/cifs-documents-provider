@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -16,6 +15,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import jcifs.CIFSContext
 import jcifs.config.PropertyConfiguration

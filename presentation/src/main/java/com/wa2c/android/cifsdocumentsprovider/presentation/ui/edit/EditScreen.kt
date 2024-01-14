@@ -124,6 +124,7 @@ fun EditScreen(
         },
         onClickDelete = { showDeleteDialog.value = true },
         safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
+        readOnlyState = viewModel.optionReadOnly.collectAsMutableState(),
         extensionState = viewModel.extension.collectAsMutableState(),
         isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
@@ -225,6 +226,7 @@ private fun EditScreenContainer(
     encodingState: MutableState<String>,
     folderState: MutableState<String?>,
     safeTransferState: MutableState<Boolean>,
+    readOnlyState: MutableState<Boolean>,
     extensionState: MutableState<Boolean>,
     isBusy: Boolean,
     connectionResult: ConnectionResult?,
@@ -450,6 +452,12 @@ private fun EditScreenContainer(
                     }
 
                     InputCheck(
+                        title = "Read Only",
+                        state = readOnlyState ,
+                        focusManager = focusManager,
+                    )
+
+                    InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
                         state = extensionState,
                         focusManager = focusManager,
@@ -578,6 +586,7 @@ private fun EditScreenPreview() {
             encodingState = mutableStateOf("UTF-8"),
             folderState = mutableStateOf("/test"),
             safeTransferState = mutableStateOf(false),
+            readOnlyState = mutableStateOf(false),
             extensionState = mutableStateOf(false),
             isBusy = false,
             connectionResult = null,

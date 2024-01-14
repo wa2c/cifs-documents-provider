@@ -89,8 +89,9 @@ class EditViewModel @Inject constructor(
     val isFtpActiveMode = MutableStateFlow<Boolean>(false)
     val encoding = MutableStateFlow<String>(DEFAULT_ENCODING)
 
-    val extension = MutableStateFlow<Boolean>(false)
     val safeTransfer = MutableStateFlow<Boolean>(false)
+    val optionReadOnly = MutableStateFlow<Boolean>(false)
+    val extension = MutableStateFlow<Boolean>(false)
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResult = channelFlow<ConnectionResult?> {
@@ -124,8 +125,9 @@ class EditViewModel @Inject constructor(
         anonymous.value = connection.anonymous
         isFtpActiveMode.value = connection.isFtpActiveMode
         encoding.value = connection.encoding
-        extension.value = connection.extension
-        safeTransfer.value = connection.safeTransfer
+        safeTransfer.value = connection.optionSafeTransfer
+        optionReadOnly.value = connection.optionReadOnly
+        extension.value = connection.optionAddExtension
     }
 
     /**
@@ -147,8 +149,9 @@ class EditViewModel @Inject constructor(
             anonymous = isAnonymous,
             isFtpActiveMode = isFtpActiveMode.value,
             encoding = encoding.value,
-            extension = extension.value,
-            safeTransfer = safeTransfer.value,
+            optionAddExtension = extension.value,
+            optionReadOnly = optionReadOnly.value,
+            optionSafeTransfer = safeTransfer.value,
         )
     }
 

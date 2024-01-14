@@ -2,12 +2,13 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
-import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.exception.FileOperationException
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import kotlinx.coroutines.*
 import org.apache.commons.vfs2.FileObject
 import org.apache.commons.vfs2.RandomAccessContent
@@ -103,7 +104,7 @@ internal class ApacheFtpProxyFileCallback(
                 null
             } else if (writePointer != fp) {
                 closeWriter()
-                throw ErrnoException("This type does not support random writing.", OsConstants.EBADF)
+                throw FileOperationException.RandomAccessNotPermittedException()
             } else {
                 access
             }
@@ -123,15 +124,14 @@ internal class ApacheFtpProxyFileCallback(
         return processFileIo(coroutineContext) {
             val maxSize = minOf(size.toLong(), fileSize - offset).toInt()
             getReadAccess(offset).readFully(data, 0, maxSize)
-            maxSize
+            maxOf(0, maxSize)
         }
     }
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        if (accessMode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
-            logD("onWrite: offset=$offset, size=$size")
+            checkWritePermission(accessMode)
             getWriteAccess(offset).write(data, 0, size)
             writePointer += size.toLong()
             size

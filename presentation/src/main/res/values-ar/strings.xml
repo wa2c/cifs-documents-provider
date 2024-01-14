@@ -37,9 +37,10 @@
     <string name="edit_encoding_title">رمز الحرف</string>
     <string name="edit_folder_title">المجلد</string>
     <string name="edit_folder_hint">\&quot;/\&quot; إذا كان خاليا</string>
-    <string name="edit_option_section_title">خيار</string>
-    <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
+    <string name="edit_option_section_title">خيارات</string>
     <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
+    <string name="edit_option_read_only_label">يقرأ فقط</string>
+    <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
     <string name="edit_info_section_title">معلومات</string>
     <string name="edit_storage_uri_title">عنوان التخزين</string>
     <string name="edit_provider_uri_title">عنوان التشارك</string>

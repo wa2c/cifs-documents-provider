@@ -18,13 +18,13 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
-import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferWriter
-import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.BackgroundBufferWriter
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class JCifsNgProxyFileCallback(
     private val smbFile: SmbFile,
-    private val mode: AccessMode,
+    private val accessMode: AccessMode,
     private val onFileRelease: suspend () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
@@ -65,7 +65,7 @@ internal class JCifsNgProxyFileCallback(
             }
 
             reader ?: BackgroundBufferReader(fileSize) { start, array, off, len ->
-                smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
+                smbFile.openRandomAccess(accessMode.smbMode, SmbFile.FILE_SHARE_READ).use { access ->
                     access.seek(start)
                     access.read(array, off, len)
                 }
@@ -85,7 +85,7 @@ internal class JCifsNgProxyFileCallback(
             }
 
             writer ?: BackgroundBufferWriter { start, array, off, len ->
-                (outputAccess ?: smbFile.openRandomAccess(mode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
+                (outputAccess ?: smbFile.openRandomAccess(accessMode.smbMode, SmbFile.FILE_SHARE_WRITE).also { outputAccess = it }).let { access ->
                     access.seek(start)
                     access.write(array, off, len)
                 }
@@ -110,8 +110,8 @@ internal class JCifsNgProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
+            checkWritePermission(accessMode)
             getWriter().writeBuffer(offset, size, data)
         }
     }

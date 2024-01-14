@@ -1,10 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils
 
-import android.provider.DocumentsContract
-import android.webkit.MimeTypeMap
-import com.wa2c.android.cifsdocumentsprovider.common.utils.appendSeparator
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
-import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.UNC_START

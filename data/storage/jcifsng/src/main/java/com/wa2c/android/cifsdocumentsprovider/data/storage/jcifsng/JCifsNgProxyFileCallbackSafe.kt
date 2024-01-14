@@ -18,9 +18,9 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
-import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
 import kotlinx.coroutines.*
@@ -31,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal class JCifsNgProxyFileCallbackSafe(
     private val smbFile: SmbFile,
-    private val mode: AccessMode,
+    private val accessMode: AccessMode,
     private val onFileRelease: suspend () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
@@ -44,7 +44,7 @@ internal class JCifsNgProxyFileCallbackSafe(
 
     private val accessLazy: Lazy<SmbRandomAccessFile> = lazy {
         processFileIo(coroutineContext) {
-            smbFile.openRandomAccess(mode.smbMode)
+            smbFile.openRandomAccess(accessMode.smbMode)
         }
     }
 
@@ -66,8 +66,8 @@ internal class JCifsNgProxyFileCallbackSafe(
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
+            checkWritePermission(accessMode)
             access.seek(offset)
             access.write(data, 0, size)
             size

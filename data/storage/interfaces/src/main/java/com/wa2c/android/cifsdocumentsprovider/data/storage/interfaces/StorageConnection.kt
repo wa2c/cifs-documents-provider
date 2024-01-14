@@ -19,8 +19,9 @@ sealed class StorageConnection {
     abstract val user: String?
     abstract val password: String?
     abstract val anonymous: Boolean
-    abstract val extension: Boolean
     abstract val safeTransfer: Boolean
+    abstract val readOnly: Boolean
+    abstract val extension: Boolean
 
     val uri: String
         get() = getUriText(storage, host, port, folder, true) ?: ""
@@ -50,9 +51,10 @@ sealed class StorageConnection {
         override val folder: String?,
         override val user: String?,
         override val password: String?,
-        override val anonymous: Boolean,
-        override val extension: Boolean,
-        override val safeTransfer: Boolean,
+        override val anonymous: Boolean = false,
+        override val safeTransfer: Boolean = false,
+        override val readOnly: Boolean = false,
+        override val extension: Boolean = false,
         val domain: String?,
         val enableDfs: Boolean,
     ) : StorageConnection()
@@ -70,9 +72,10 @@ sealed class StorageConnection {
         override val folder: String?,
         override val user: String?,
         override val password: String?,
-        override val anonymous: Boolean,
-        override val extension: Boolean,
-        override val safeTransfer: Boolean,
+        override val anonymous: Boolean = false,
+        override val safeTransfer: Boolean = false,
+        override val readOnly: Boolean = false,
+        override val extension: Boolean = false,
         val isActiveMode: Boolean,
         val encoding: String,
     ) : StorageConnection()

@@ -2,12 +2,12 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.smbj
 
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
-import android.system.OsConstants
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.utils.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.common.utils.processFileIo
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.BackgroundBufferReader
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
  */
 class SmbjProxyFileCallback(
     private val file: File,
-    private val mode: AccessMode,
+    private val accessMode: AccessMode,
     private val onFileRelease: suspend () -> Unit,
 ) : ProxyFileDescriptorCallback(), CoroutineScope {
 
@@ -49,8 +49,8 @@ class SmbjProxyFileCallback(
 
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
-        if (mode != AccessMode.W) { throw ErrnoException("Writing is not permitted", OsConstants.EBADF) }
         return processFileIo(coroutineContext) {
+            checkWritePermission(accessMode)
             file.writeAsync(data, offset, 0, size)
             size
         }

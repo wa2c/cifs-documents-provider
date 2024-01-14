@@ -16,6 +16,7 @@ data class RemoteConnection(
     val id: String,
     val name: String,
     val storage: StorageType = StorageType.default,
+    // Settings
     val domain: String? = null,
     val host: String,
     val port: String?,
@@ -26,8 +27,10 @@ data class RemoteConnection(
     val anonymous: Boolean = false,
     val isFtpActiveMode: Boolean = false,
     val encoding: String = DEFAULT_ENCODING,
-    val extension: Boolean = false,
-    val safeTransfer: Boolean = false,
+    // Options
+    val optionSafeTransfer: Boolean = false,
+    val optionReadOnly: Boolean = false,
+    val optionAddExtension: Boolean = false,
 ): Parcelable, java.io.Serializable {
 
     /** Folder SMB URI (smb://) */

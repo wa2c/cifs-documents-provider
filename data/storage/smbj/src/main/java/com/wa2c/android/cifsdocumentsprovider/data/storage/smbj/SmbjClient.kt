@@ -21,7 +21,6 @@ import com.rapid7.client.dcerpc.mssrvs.ServerService
 import com.rapid7.client.dcerpc.transport.SMBTransportFactories
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -33,6 +32,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCli
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.getCause
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.isInvalidFileName
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.rename
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.toUncSeparator

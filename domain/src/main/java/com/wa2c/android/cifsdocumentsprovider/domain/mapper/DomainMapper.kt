@@ -112,8 +112,9 @@ internal object DomainMapper {
                     user = user,
                     password = password,
                     anonymous = anonymous,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
+                    optionSafeTransfer = safeTransfer,
+                    optionReadOnly = readOnly,
+                    optionAddExtension = extension,
                 )
             }
             is StorageConnection.Ftp -> {
@@ -129,8 +130,9 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     isFtpActiveMode = isActiveMode,
                     encoding = encoding,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
+                    optionSafeTransfer = safeTransfer,
+                    optionReadOnly = readOnly,
+                    optionAddExtension = extension,
                 )
             }
         }
@@ -179,15 +181,16 @@ internal object DomainMapper {
                     id = id,
                     name = name,
                     storage = storage,
-                    domain = domain,
                     host = host,
                     port = port,
                     folder = folder,
                     user = user,
                     password = password,
                     anonymous = anonymous,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
+                    safeTransfer = optionSafeTransfer,
+                    extension = optionAddExtension,
+                    readOnly = optionReadOnly,
+                    domain = domain,
                     enableDfs = enableDfs,
                 )
             }
@@ -203,10 +206,11 @@ internal object DomainMapper {
                     user = user,
                     password = password,
                     anonymous = anonymous,
+                    safeTransfer = optionSafeTransfer,
+                    readOnly = optionReadOnly,
+                    extension = optionAddExtension,
                     isActiveMode = isFtpActiveMode,
                     encoding = encoding,
-                    extension = extension,
-                    safeTransfer = safeTransfer,
                 )
             }
         }
