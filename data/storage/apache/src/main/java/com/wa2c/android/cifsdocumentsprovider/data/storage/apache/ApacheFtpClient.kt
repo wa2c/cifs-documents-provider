@@ -204,7 +204,6 @@ class ApacheFtpClient(
 
     override suspend fun createFile(
         request: StorageRequest,
-        mimeType: String?,
     ): StorageFile? {
         return withContext(dispatcher) {
             getFileObject(request, ignoreCache = true).use { file ->

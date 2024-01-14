@@ -149,7 +149,7 @@ class StorageRepository @Inject internal constructor(
                 if (isDirectory) {
                     getClient(request.connection).createDirectory(request)
                 } else {
-                    getClient(request.connection).createFile(request, mimeType)
+                    getClient(request.connection).createFile(request)
                 }?.let {
                     DocumentId.fromConnection(request.connection, it)
                 }

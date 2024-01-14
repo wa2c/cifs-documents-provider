@@ -192,7 +192,7 @@ class JCifsNgClient(
     /**
      * Create new file.
      */
-    override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
+    override suspend fun createFile(request: StorageRequest): StorageFile? {
         return withContext(dispatcher) {
             getSmbFile(request)?.use { file ->
                 file.createNewFile()

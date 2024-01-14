@@ -14,7 +14,7 @@ interface StorageClient {
 
     suspend fun createDirectory(request: StorageRequest): StorageFile?
 
-    suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile?
+    suspend fun createFile(request: StorageRequest): StorageFile?
 
     suspend fun copyFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile?
 

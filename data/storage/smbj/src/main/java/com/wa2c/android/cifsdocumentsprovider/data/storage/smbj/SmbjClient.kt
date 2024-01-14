@@ -292,7 +292,7 @@ class SmbjClient(
         }
     }
 
-    override suspend fun createFile(request: StorageRequest, mimeType: String?): StorageFile? {
+    override suspend fun createFile(request: StorageRequest): StorageFile? {
         return withContext(dispatcher) {
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath,
