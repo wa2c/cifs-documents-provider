@@ -30,12 +30,12 @@ enum class Language(
 
         /** Find value or default by code */
         fun findByCodeOrDefault(code: String?): Language {
-            return values().firstOrNull { it.code == code } ?: ENGLISH
+            return entries.firstOrNull { it.code == code } ?: ENGLISH
         }
 
         /** Find value or default by index. */
         fun findByIndexOrDefault(index: Int?): Language {
-            return values().firstOrNull { it.index == index } ?: ENGLISH
+            return entries.firstOrNull { it.index == index } ?: ENGLISH
         }
     }
 }

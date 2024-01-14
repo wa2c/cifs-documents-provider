@@ -21,12 +21,12 @@ enum class UiTheme(
     companion object {
         /** Find value or default by key. */
         fun findByKeyOrDefault(key: String?): UiTheme {
-            return values().firstOrNull { it.key == key } ?: DEFAULT
+            return entries.firstOrNull { it.key == key } ?: DEFAULT
         }
 
         /** Find value or default by index. */
         fun findByIndexOrDefault(index: Int?): UiTheme {
-            return values().firstOrNull { it.index == index } ?: DEFAULT
+            return entries.firstOrNull { it.index == index } ?: DEFAULT
         }
     }
 }

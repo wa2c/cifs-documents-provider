@@ -452,7 +452,7 @@ private fun EditScreenContainer(
                     }
 
                     InputCheck(
-                        title = "Read Only",
+                        title = stringResource(id = R.string.edit_option_read_only_label),
                         state = readOnlyState ,
                         focusManager = focusManager,
                     )

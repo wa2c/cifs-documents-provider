@@ -20,7 +20,7 @@ enum class HostSortType(
          * Find soft type or default (TimeAscend).
          */
         fun findByValueOrDefault(value: Int?): HostSortType {
-            return values().firstOrNull { it.intValue == value } ?: default
+            return entries.firstOrNull { it.intValue == value } ?: default
         }
 
     }
