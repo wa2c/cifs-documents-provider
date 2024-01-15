@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.FileNotFoundException
+import java.io.IOException
 
 /**
  * CIFS DocumentsProvider
@@ -96,7 +97,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             } catch (e: StorageException.WritingNotAllowedException) {
                 throw SecurityException(e.message)
             } catch (e: Exception) {
-                throw e
+                throw IOException(e)
             }
         }
     }
@@ -187,15 +188,16 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             storageRepository.getDocumentId(documentId).takeIf { !it.isRoot && !it.isPathRoot }?.let { id ->
                 storageRepository.getCallback(id, accessMode) { }
+            } ?: let {
+                throw StorageException.FileNotFoundException()
             }
-        }?.let { callback ->
+        }.let { callback ->
+            // NOTE: not inside runOnFileHandler
             storageManager.openProxyFileDescriptor(
                 ParcelFileDescriptor.parseMode(accessMode.safMode),
                 callback,
                 fileHandler
             )
-        } ?: let {
-            throw StorageException.FileNotFoundException()
         }
     }
 
