@@ -94,7 +94,7 @@ fun String.appendSeparator(): String {
 /** Append child entry */
 fun String.appendChild(childName: String, isDirectory: Boolean): String {
     val name = if (isDirectory) childName.appendSeparator() else childName
-    return this.appendSeparator() + name
+    return this.appendSeparator() + name.trimStart(URI_SEPARATOR)
 }
 
 /**

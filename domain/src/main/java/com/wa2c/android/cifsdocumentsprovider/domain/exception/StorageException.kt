@@ -8,4 +8,8 @@ import java.io.IOException
 sealed class StorageException(message: String) : IOException(message) {
     class WritingNotAllowedException : StorageException("Writing is not allowed in options.")
 
+    class DocumentIdException : StorageException("Invalid document id.")
+
+    class FileNotFoundException : StorageException("File not found.")
+
 }

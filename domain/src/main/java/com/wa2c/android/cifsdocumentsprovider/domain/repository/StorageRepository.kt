@@ -260,16 +260,16 @@ class StorageRepository @Inject internal constructor(
         }
     }
 
-    suspend fun getDocumentId(idText: String?): DocumentId? {
+    suspend fun getDocumentId(idText: String?): DocumentId {
         return DocumentId.fromIdText(idText) ?: withContext(dispatcher) {
+            if (idText.isNullOrEmpty() || idText == DocumentId.ROOT_DOCUMENT_ID_TEXT) return@withContext DocumentId.ROOT
             // for legacy id format
-            if (idText.isNullOrEmpty()) return@withContext null
             val uriText = "smb://${idText}"
             connectionSettingDao.getEntityByUri(uriText)?.let {
                 val path = uriText.substringAfter(it.uri)
                 DocumentId.fromConnection(it.id, path, idText)
             }
-        }
+        } ?: throw StorageException.DocumentIdException()
     }
 
     /**

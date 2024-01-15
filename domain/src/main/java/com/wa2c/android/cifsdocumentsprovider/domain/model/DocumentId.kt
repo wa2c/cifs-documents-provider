@@ -38,6 +38,8 @@ data class DocumentId internal constructor(
 
     companion object {
 
+        val ROOT_DOCUMENT_ID_TEXT = "/"
+
         val ROOT = DocumentId("", "")
 
         fun isInvalidDocumentId(connectionId: String): Boolean {
