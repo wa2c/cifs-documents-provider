@@ -33,7 +33,7 @@ data class RemoteConnection(
     val optionAddExtension: Boolean = false,
 ): Parcelable, java.io.Serializable {
 
-    /** Folder SMB URI (smb://) */
+    /** URI */
     val uri: StorageUri
         get() = getUriText(storage, host, port, folder, true)?.let { StorageUri(it) } ?: StorageUri.ROOT
 

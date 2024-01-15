@@ -278,7 +278,7 @@ class ApacheFtpClient(
         onFileRelease: suspend () -> Unit,
     ): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getFileObject(request, existsRequired = true) ?: return@withContext null
+            val file = getFileObject(request, existsRequired = true)?.takeIf { it.isFile } ?: return@withContext null
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()

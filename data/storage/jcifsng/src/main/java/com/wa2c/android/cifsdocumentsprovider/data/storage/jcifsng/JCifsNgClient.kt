@@ -281,7 +281,7 @@ class JCifsNgClient(
      */
     override suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback? {
         return withContext(dispatcher) {
-            val file = getSmbFile(request, existsRequired = true) ?: return@withContext null
+            val file = getSmbFile(request, existsRequired = true)?.takeIf { it.isFile } ?: return@withContext null
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()

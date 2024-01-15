@@ -1,12 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
 /**
- * CIFS File
+ * Storage File
  */
 data class StorageFile(
     /** File name */
     val name: String,
-    /** URI (e.g. smb://...) */
+    /** URI */
     val uri: String,
     /** File size */
     val size: Long = 0,

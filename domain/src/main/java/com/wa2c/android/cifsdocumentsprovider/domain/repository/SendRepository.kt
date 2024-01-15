@@ -31,7 +31,6 @@ class SendRepository @Inject internal constructor(
         val inputList = sourceUriList.mapNotNull { uri ->
             val (storageFile, mimeType) = documentFileManager.getStorageFileAndMimeType(uri) ?: return@mapNotNull null
             val exists = documentFileManager.existsFile(targetUri, storageFile.name)
-            //val targetFileUri = documentFileManager.getPermittedFileUri(targetUri, storageFile.name, mimeType) ?: return@mapNotNull null
             storageFile.toSendData(mimeType, targetUri, exists)
         }
         _sendDataList.emit(sendDataList.value + inputList)

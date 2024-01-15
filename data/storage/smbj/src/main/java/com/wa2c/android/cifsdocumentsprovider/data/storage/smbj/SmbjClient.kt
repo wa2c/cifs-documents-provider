@@ -362,7 +362,7 @@ class SmbjClient(
         return withContext(dispatcher) {
             val diskFile = useDiskShare(request) {
                 openDiskFile(it, request.sharePath, isRead = mode == AccessMode.R, existsRequired = true)
-            } ?: return@withContext null
+            }?.takeIf { !it.fileInformation.standardInformation.isDirectory } ?: return@withContext null
             val release: suspend () -> Unit = {
                 diskFile.closeSilently()
                 onFileRelease()

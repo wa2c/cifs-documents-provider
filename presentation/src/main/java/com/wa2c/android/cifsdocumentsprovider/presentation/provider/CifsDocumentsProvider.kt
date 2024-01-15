@@ -5,7 +5,9 @@ import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.HandlerThread
@@ -38,6 +40,8 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.FileDescriptor
+import java.io.PrintWriter
 
 /**
  * CIFS DocumentsProvider
@@ -183,7 +187,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
-            val id = storageRepository.getDocumentId(documentId)?.takeIf { !it.isRoot } ?: return@runOnFileHandler null
+            val id = storageRepository.getDocumentId(documentId)?.takeIf { !it.isRoot && !it.isPathRoot } ?: return@runOnFileHandler null
             storageRepository.getCallback(id, accessMode) { }
         }?.let { callback ->
             storageManager.openProxyFileDescriptor(
