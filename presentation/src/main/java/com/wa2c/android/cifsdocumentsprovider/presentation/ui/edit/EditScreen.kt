@@ -535,7 +535,6 @@ private fun EditScreenContainer(
                         shape = RoundedCornerShape(Theme.SizeSS),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = Theme.SizeS)
                     ) {
                         Text(text = stringResource(id = R.string.edit_save_button))
                     }
