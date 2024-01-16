@@ -61,9 +61,6 @@ sealed class PopupMessage : Parcelable {
  * Message icon
  */
 enum class PopupMessageType {
-    /** Normal */
-    Normal,
-
     /** Success */
     Success,
 

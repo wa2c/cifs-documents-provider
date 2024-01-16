@@ -14,17 +14,20 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -55,8 +58,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
-import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
@@ -245,7 +248,36 @@ private fun EditScreenContainer(
                 title = { Text(stringResource(id = R.string.edit_title)) },
                 colors = getAppTopAppBarColors(),
                 actions = {
-                    IconButton(onClick = onClickDelete) {
+                    BadgedBox(
+                        badge = {
+                            Box(
+                                modifier = Modifier
+                                    .size(Theme.SizeM)
+                                    .offset(x = (-Theme.SizeM), y = Theme.SizeM)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_check_bg),
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colorScheme.onSurface,
+                                )
+                                MessageIcon(type = connectionResult?.messageType)
+                            }
+                        }
+                    ) {
+                        IconButton(
+                            onClick = onClickCheckConnection,
+                            enabled = isBusy.not(),
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_folder_check),
+                                contentDescription = stringResource(id = R.string.edit_check_connection_button),
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = onClickDelete,
+                        enabled = isBusy.not(),
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_delete),
                             contentDescription = stringResource(id = R.string.edit_delete_button),
@@ -496,28 +528,8 @@ private fun EditScreenContainer(
 
                 Column(
                     modifier = Modifier
-                        .padding(Theme.Sizes.ScreenMargin)
+                        .padding(Theme.Sizes.ScreenMargin, Theme.Sizes.S)
                 ) {
-                    OutlinedButton(
-                        onClick = onClickCheckConnection,
-                        shape = RoundedCornerShape(Theme.SizeSS),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        if (connectionResult == null) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_check),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .padding(end = Theme.SizeM)
-                                    .align(Alignment.CenterVertically)
-                            )
-                        } else {
-                            MessageIcon(type = connectionResult.messageType)
-                        }
-                        Text(text = stringResource(id = R.string.edit_check_connection_button))
-                    }
-
                     Button(
                         onClick = onClickSave,
                         shape = RoundedCornerShape(Theme.SizeSS),

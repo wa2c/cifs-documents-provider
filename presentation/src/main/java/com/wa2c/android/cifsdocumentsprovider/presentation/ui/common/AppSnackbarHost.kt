@@ -1,10 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
@@ -16,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.wa2c.android.cifsdocumentsprovider.domain.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 
@@ -36,7 +41,13 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
             .padding(Theme.SizeS)
     ) {
         Row {
-            MessageIcon(type = message.type)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = Theme.SizeM)
+            ) {
+                MessageIcon(type = message.type)
+            }
             val text = when (message) {
                 is PopupMessage.Resource -> stringResource(id = message.res)
                 is PopupMessage.Text -> message.text
@@ -78,17 +89,16 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
     }
 }
 
+
+
 @Composable
-fun RowScope.MessageIcon(type: PopupMessageType?) {
+fun MessageIcon(type: PopupMessageType?) {
     when (type) {
         PopupMessageType.Success -> {
             Icon(
                 painter = painterResource(id = R.drawable.ic_check_ok),
                 contentDescription = "Success",
                 tint = Theme.Colors.CheckOk,
-                modifier = Modifier
-                    .padding(end = Theme.SizeM)
-                    .align(Alignment.CenterVertically)
             )
         }
 
@@ -97,9 +107,6 @@ fun RowScope.MessageIcon(type: PopupMessageType?) {
                 painter = painterResource(id = R.drawable.ic_check_wn),
                 contentDescription = "Warning",
                 tint = Theme.Colors.CheckWn,
-                modifier = Modifier
-                    .padding(end = Theme.SizeM)
-                    .align(Alignment.CenterVertically)
             )
         }
 
@@ -108,12 +115,14 @@ fun RowScope.MessageIcon(type: PopupMessageType?) {
                 painter = painterResource(id = R.drawable.ic_check_ng),
                 contentDescription = "Error",
                 tint = Theme.Colors.CheckNg,
-                modifier = Modifier
-                    .padding(end = Theme.SizeM)
-                    .align(Alignment.CenterVertically)
             )
         }
-        PopupMessageType.Normal -> {}
-        null -> {}
+        null -> {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_check_uc),
+                contentDescription = "Unchecked",
+                tint = Theme.Colors.CheckUc
+            )
+        }
     }
 }

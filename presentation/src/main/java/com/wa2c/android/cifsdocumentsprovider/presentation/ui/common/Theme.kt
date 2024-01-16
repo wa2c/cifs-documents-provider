@@ -55,6 +55,8 @@ object Theme {
     object Colors {
         val StatusBackground = Color(0xFFF57C00)
 
+        /** Uncheck */
+        val CheckUc = Color(0xFF909090)
         /** Check result OK */
         val CheckOk = Color(0xFF30C030)
         /** Check result Warning */
