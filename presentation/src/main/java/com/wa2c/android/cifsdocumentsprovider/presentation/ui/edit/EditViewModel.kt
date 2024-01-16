@@ -134,7 +134,6 @@ class EditViewModel @Inject constructor(
      * Create connection data
      */
     private fun createConnection(): RemoteConnection {
-        val isAnonymous = anonymous.value
         return RemoteConnection(
             id = id.value ?: throw EditException.InputRequiredException(),
             name = name.value?.ifEmpty { null } ?: host.value ?: throw EditException.InputRequiredException(),
@@ -144,9 +143,9 @@ class EditViewModel @Inject constructor(
             port = port.value?.ifEmpty { null },
             enableDfs = enableDfs.value,
             folder = folder.value?.ifEmpty { null },
-            user = if (isAnonymous) null else user.value?.ifEmpty { null },
-            password = if (isAnonymous) null else password.value?.ifEmpty { null },
-            anonymous = isAnonymous,
+            user = user.value,
+            password = password.value,
+            anonymous = anonymous.value,
             isFtpActiveMode = isFtpActiveMode.value,
             encoding = encoding.value,
             optionAddExtension = extension.value,

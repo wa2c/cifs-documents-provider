@@ -70,6 +70,11 @@ class ApacheFtpClient(
                     options,
                     StaticUserAuthenticator(null, ftpConnection.user, ftpConnection.password)
                 )
+            } else {
+                builder.setUserAuthenticator(
+                    options,
+                    StaticUserAuthenticator(null, ANONYMOUS, null)
+                )
             }
         }
 
@@ -290,6 +295,10 @@ class ApacheFtpClient(
     override suspend fun close() {
         contextCache.evictAll()
         fileManager.close()
+    }
+
+    companion object {
+        private const val ANONYMOUS = "anonymous"
     }
 
 }

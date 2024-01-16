@@ -23,7 +23,7 @@ fun <T> processFileIo(context: CoroutineContext, process: suspend CoroutineScope
         logE(e)
         when (e.cause) {
             is ErrnoException -> throw (e.cause as ErrnoException)
-            is FileOperationException -> throw ErrnoException("Writing", OsConstants.EPERM, e)
+            is FileOperationException -> throw ErrnoException("Writing", OsConstants.EBADF, e)
             else -> throw ErrnoException("I/O", OsConstants.EIO, e)
         }
     }
