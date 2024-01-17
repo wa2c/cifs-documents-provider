@@ -24,7 +24,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.domain.exception.StorageException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
@@ -94,7 +94,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 throw FileNotFoundException(e.message)
             } catch (e: StorageException.FileNotFoundException) {
                 throw FileNotFoundException(e.message)
-            } catch (e: StorageException.WritingNotAllowedException) {
+            } catch (e: StorageException.ReadOnlyException) {
                 throw SecurityException(e.message)
             } catch (e: Exception) {
                 throw IOException(e)

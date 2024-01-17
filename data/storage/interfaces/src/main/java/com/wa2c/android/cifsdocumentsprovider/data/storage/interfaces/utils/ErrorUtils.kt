@@ -4,7 +4,7 @@ import android.system.ErrnoException
 import android.system.OsConstants
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.exception.FileOperationException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
@@ -23,7 +23,7 @@ fun <T> processFileIo(context: CoroutineContext, process: suspend CoroutineScope
         logE(e)
         when (e.cause) {
             is ErrnoException -> throw (e.cause as ErrnoException)
-            is FileOperationException -> throw ErrnoException("Writing", OsConstants.EBADF, e)
+            is StorageException -> throw ErrnoException("Writing", OsConstants.EBADF, e)
             else -> throw ErrnoException("I/O", OsConstants.EIO, e)
         }
     }
@@ -40,8 +40,8 @@ fun Throwable.getCause(): Throwable {
 /**
  * Check write permission.
  */
-fun checkWritePermission(mode: AccessMode) {
+fun checkAccessMode(mode: AccessMode) {
     if (mode != AccessMode.W) {
-        throw FileOperationException.WritingNotPermittedException()
+        throw StorageException.AccessModeException()
     }
 }

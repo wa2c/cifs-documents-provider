@@ -6,7 +6,7 @@ import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.BackgroundBufferReader
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkAccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,7 +50,7 @@ class SmbjProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            checkWritePermission(accessMode)
+            checkAccessMode(accessMode)
             file.writeAsync(data, offset, 0, size)
             size
         }

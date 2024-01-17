@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.domain.exception
+package com.wa2c.android.cifsdocumentsprovider.common.exception
 
 /**
  * Edit exception.

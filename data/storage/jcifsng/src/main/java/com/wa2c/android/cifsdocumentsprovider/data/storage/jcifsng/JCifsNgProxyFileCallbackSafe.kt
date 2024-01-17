@@ -19,7 +19,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 import android.os.ProxyFileDescriptorCallback
 import android.system.ErrnoException
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkAccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import jcifs.smb.SmbFile
 import jcifs.smb.SmbRandomAccessFile
@@ -67,7 +67,7 @@ internal class JCifsNgProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            checkWritePermission(accessMode)
+            checkAccessMode(accessMode)
             access.seek(offset)
             access.write(data, 0, size)
             size

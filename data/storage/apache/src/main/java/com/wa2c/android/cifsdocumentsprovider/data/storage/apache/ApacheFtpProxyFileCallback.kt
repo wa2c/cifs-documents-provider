@@ -6,8 +6,8 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.exception.FileOperationException
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkAccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import kotlinx.coroutines.*
 import org.apache.commons.vfs2.FileObject
@@ -104,7 +104,7 @@ internal class ApacheFtpProxyFileCallback(
                 null
             } else if (writePointer != fp) {
                 closeWriter()
-                throw FileOperationException.RandomAccessNotPermittedException()
+                throw StorageException.RandomAccessNotPermittedException()
             } else {
                 access
             }
@@ -131,7 +131,7 @@ internal class ApacheFtpProxyFileCallback(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            checkWritePermission(accessMode)
+            checkAccessMode(accessMode)
             getWriteAccess(offset).write(data, 0, size)
             writePointer += size.toLong()
             size

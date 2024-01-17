@@ -8,23 +8,23 @@ interface StorageClient {
 
     suspend fun checkConnection(request: StorageRequest): ConnectionResult
 
-    suspend fun getFile(request: StorageRequest, ignoreCache: Boolean = false): StorageFile?
+    suspend fun getFile(request: StorageRequest, ignoreCache: Boolean = false): StorageFile
 
-    suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean = false): List<StorageFile>?
+    suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean = false): List<StorageFile>
 
-    suspend fun createDirectory(request: StorageRequest): StorageFile?
+    suspend fun createDirectory(request: StorageRequest): StorageFile
 
-    suspend fun createFile(request: StorageRequest): StorageFile?
+    suspend fun createFile(request: StorageRequest): StorageFile
 
-    suspend fun copyFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile?
+    suspend fun copyFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile
 
-    suspend fun renameFile(request: StorageRequest, newName: String): StorageFile?
+    suspend fun renameFile(request: StorageRequest, newName: String): StorageFile
 
-    suspend fun moveFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile?
+    suspend fun moveFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile
 
     suspend fun deleteFile(request: StorageRequest): Boolean
 
-    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback?
+    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback
 
     suspend fun close()
 

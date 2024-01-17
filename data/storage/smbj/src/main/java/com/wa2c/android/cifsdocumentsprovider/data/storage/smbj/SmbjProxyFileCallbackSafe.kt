@@ -5,7 +5,7 @@ import android.system.ErrnoException
 import com.hierynomus.smbj.share.File
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkWritePermission
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.checkAccessMode
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.utils.processFileIo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,7 +42,7 @@ class SmbjProxyFileCallbackSafe(
     @Throws(ErrnoException::class)
     override fun onWrite(offset: Long, size: Int, data: ByteArray): Int {
         return processFileIo(coroutineContext) {
-            checkWritePermission(accessMode)
+            checkAccessMode(accessMode)
             file.write(data, offset, 0, size).toInt()
         }
     }
