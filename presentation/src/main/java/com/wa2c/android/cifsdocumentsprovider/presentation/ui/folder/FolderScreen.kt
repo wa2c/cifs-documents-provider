@@ -4,9 +4,7 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,8 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,13 +35,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
-import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.BottomButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -164,28 +160,11 @@ fun FolderScreenContainer(
                 }
             }
 
-            DividerNormal()
-
-            Column(
-                modifier = Modifier
-                    .padding(Theme.SizeS),
-            ) {
-                Text(
-                    text = currentUri.toString(),
-                    maxLines = 1,
-                    modifier = Modifier
-                        .horizontalScroll(ScrollState(Int.MAX_VALUE))
-                )
-                Button(
-                    onClick = onClickSet,
-                    shape = RoundedCornerShape(Theme.SizeSS),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Theme.SizeS)
-                ) {
-                    Text(text = stringResource(id = R.string.folder_set))
-                }
-            }
+            BottomButton(
+                label = stringResource(id = R.string.host_set_manually),
+                subText = currentUri.toString(),
+                onClick = onClickSet,
+            )
         }
     }
 }
@@ -279,7 +258,7 @@ private fun FolderScreenContainerPreview() {
                     isDirectory = true,
                 )
             ),
-            currentUri = StorageUri.ROOT,
+            currentUri = StorageUri("smb://example/"),
             isLoading = false,
             onClickBack = {},
             onClickReload = {},

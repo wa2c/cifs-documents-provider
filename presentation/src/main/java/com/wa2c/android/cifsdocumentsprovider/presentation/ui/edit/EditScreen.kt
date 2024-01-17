@@ -18,11 +18,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -67,9 +65,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.BottomButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -524,21 +522,10 @@ private fun EditScreenContainer(
                     UriText(uriText = sharedUri)
                 }
 
-                DividerNormal()
-
-                Column(
-                    modifier = Modifier
-                        .padding(Theme.Sizes.ScreenMargin, Theme.Sizes.S)
-                ) {
-                    Button(
-                        onClick = onClickSave,
-                        shape = RoundedCornerShape(Theme.SizeSS),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(id = R.string.edit_save_button))
-                    }
-                }
+                BottomButton(
+                    label = stringResource(id = R.string.edit_save_button),
+                    onClick = onClickSave,
+                )
             }
 
             // isBusy

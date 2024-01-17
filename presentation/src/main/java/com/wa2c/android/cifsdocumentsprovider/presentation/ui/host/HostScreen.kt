@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,9 +39,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.BottomButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerNormal
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DividerThin
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingIconButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
@@ -195,21 +193,10 @@ fun HostScreenContainer(
             )
 
             if (isInit) {
-                DividerNormal()
-
-                Column(
-                    modifier = Modifier
-                        .padding(Theme.SizeS),
-                ) {
-                    Button(
-                        onClick = onClickSet,
-                        shape = RoundedCornerShape(Theme.SizeSS),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = stringResource(id = R.string.host_set_manually))
-                    }
-                }
+                BottomButton(
+                    label = stringResource(id = R.string.host_set_manually),
+                    onClick = onClickSet,
+                )
             }
         }
     }
