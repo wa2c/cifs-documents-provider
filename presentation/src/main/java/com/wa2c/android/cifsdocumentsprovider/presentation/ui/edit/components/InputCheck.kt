@@ -38,7 +38,7 @@ fun InputCheck(
                 role = Role.Checkbox,
                 onValueChange = { state.value = !state.value }
             )
-            .padding(Theme.SizeM)
+            .padding(Theme.Sizes.M)
             .fillMaxWidth()
             .moveFocusOnEnter(focusManager)
             .onPreviewKeyEvent {
@@ -63,7 +63,7 @@ fun InputCheck(
             text = title,
             Modifier
                 .weight(1f)
-                .padding(start = Theme.SizeS)
+                .padding(start = Theme.Sizes.S)
         )
     }
 }

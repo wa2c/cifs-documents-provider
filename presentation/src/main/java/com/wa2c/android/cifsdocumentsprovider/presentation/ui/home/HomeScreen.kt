@@ -189,7 +189,7 @@ fun ConnectionList(
     ) {
         items(items = connectionList, { it }) { connection ->
             ReorderableItem(state, key = connection) { isDragging ->
-                val elevation = animateDpAsState(if (isDragging) Theme.SizeM else 0.dp, label = "")
+                val elevation = animateDpAsState(if (isDragging) Theme.Sizes.M else 0.dp, label = "")
                 ConnectionItem(
                     connection = connection,
                     modifier = Modifier
@@ -213,7 +213,7 @@ private fun ConnectionItem(
         modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Row(
             modifier = Modifier
@@ -230,7 +230,7 @@ private fun ConnectionItem(
                 text = stringResource(id = connection.storage.labelRes),
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
-                    .padding(start = Theme.SizeS)
+                    .padding(start = Theme.Sizes.S)
                     .align(alignment = Alignment.CenterVertically)
                 ,
             )

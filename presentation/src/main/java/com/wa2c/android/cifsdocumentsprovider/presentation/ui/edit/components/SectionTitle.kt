@@ -20,7 +20,7 @@ fun SectionTitle(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = Theme.SizeS)
+            .padding(top = Theme.Sizes.S)
     ) {
         Text(
             text = text,
@@ -28,8 +28,8 @@ fun SectionTitle(
             fontWeight = FontWeight.Bold,
             modifier = Modifier
                 .padding(
-                    top = Theme.SizeM,
-                    bottom = Theme.SizeSS,
+                    top = Theme.Sizes.M,
+                    bottom = Theme.Sizes.SS,
                 )
         )
         DividerWide()

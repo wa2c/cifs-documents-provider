@@ -234,7 +234,7 @@ private fun HostItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_host),
@@ -244,7 +244,7 @@ private fun HostItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = Theme.SizeS)
+                .padding(start = Theme.Sizes.S)
         ) {
 
             Text(

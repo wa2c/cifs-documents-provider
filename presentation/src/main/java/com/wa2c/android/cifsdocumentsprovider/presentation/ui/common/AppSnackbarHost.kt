@@ -33,13 +33,13 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
     Snackbar(
         modifier = Modifier
             .clickable { onDismiss() }
-            .padding(Theme.SizeS)
+            .padding(Theme.Sizes.S)
     ) {
         Row {
             Box(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .padding(end = Theme.SizeM)
+                    .padding(end = Theme.Sizes.M)
             ) {
                 MessageIcon(type = message.type)
             }

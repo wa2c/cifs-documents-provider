@@ -27,13 +27,13 @@ fun BottomButton(label: String, subText: String? = null, onClick: () -> Unit) {
                     .horizontalScroll(ScrollState(Int.MAX_VALUE))
             )
         }
-
+        
         Button(
             onClick = onClick,
-            shape = RoundedCornerShape(Theme.SizeSS),
+            shape = RoundedCornerShape(Theme.Sizes.SS),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Theme.Sizes.ScreenMargin, vertical = Theme.SizeS)
+                .padding(horizontal = Theme.Sizes.ScreenMargin, vertical = Theme.Sizes.S)
         ) {
             Text(text = label)
         }

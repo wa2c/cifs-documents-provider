@@ -19,7 +19,7 @@ fun SubsectionTitle(
         fontSize = 12.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
-            .padding(top = Theme.SizeS)
+            .padding(top = Theme.Sizes.S)
     )
 }
 

@@ -169,15 +169,15 @@ fun SendScreenContainer(
 
             Column(
                 modifier = Modifier
-                    .padding(Theme.SizeS),
+                    .padding(Theme.Sizes.S),
             ) {
                 Button(
                     onClick = onClickCancelAll,
-                    shape = RoundedCornerShape(Theme.SizeSS),
+                    shape = RoundedCornerShape(Theme.Sizes.SS),
                     enabled = sendDataList.any { it.state.isCancelable },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = Theme.SizeS)
+                        .padding(top = Theme.Sizes.S)
                 ) {
                     Text(text = stringResource(id = R.string.send_action_cancel))
                 }
@@ -204,7 +204,7 @@ private fun SendDataItem(
             .clickable(enabled = true, onClick = {
                 showPopup.value = true
             })
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Text(
             text = sendData.name,

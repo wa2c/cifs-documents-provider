@@ -22,7 +22,7 @@ fun UriText(
         Text(
             text = uriText,
             modifier = Modifier
-                .padding(Theme.SizeS)
+                .padding(Theme.Sizes.S)
                 .clickable {
                     clipboardManager.setText(AnnotatedString(uriText))
                 }

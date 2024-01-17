@@ -176,7 +176,7 @@ private fun UpFolderItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeSS)
+            .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.SS)
             .clickable(enabled = true, onClick = onClick)
     ) {
         Icon(
@@ -188,7 +188,7 @@ private fun UpFolderItem(
             text = "..",
             fontSize = 15.sp,
             modifier = Modifier
-                .padding(start = Theme.SizeS)
+                .padding(start = Theme.Sizes.S)
         )
     }
 }
@@ -201,7 +201,7 @@ private fun FolderItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeSS)
+            .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.SS)
             .clickable(enabled = true, onClick = onClick)
     ) {
         Icon(
@@ -213,7 +213,7 @@ private fun FolderItem(
             text = item.name,
             fontSize = 15.sp,
             modifier = Modifier
-                .padding(start = Theme.SizeS)
+                .padding(start = Theme.Sizes.S)
         )
     }
 }

@@ -77,14 +77,8 @@ object Theme {
         val L = 24.dp
         val LL = 32.dp
 
-        val ScreenMargin = SizeM
-
+        val ScreenMargin = M
     }
-
-
-    val SizeSS = 4.dp
-    val SizeS = 8.dp
-    val SizeM = 16.dp
 
 
 //    private val Typography = Typography(

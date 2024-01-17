@@ -299,7 +299,7 @@ private fun TitleItem(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp)
-            .padding(horizontal = Theme.SizeS, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.S)
     ) {
         Text(
             text = text,
@@ -323,7 +323,7 @@ private fun SettingsItem(
             .fillMaxWidth()
             .heightIn(64.dp)
             .clickable(enabled = true, onClick = onClick)
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Text(
             text = text,
@@ -345,7 +345,7 @@ private fun SettingsCheckItem(
             .fillMaxWidth()
             .heightIn(64.dp)
             .clickable(enabled = true, onClick = { onCheckedChange(!checked) })
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Text(
             text = text,
@@ -403,7 +403,7 @@ private fun SettingsInputNumberItem(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(64.dp)
-            .padding(horizontal = Theme.SizeM, vertical = Theme.SizeS)
+            .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Text(
             text = text,

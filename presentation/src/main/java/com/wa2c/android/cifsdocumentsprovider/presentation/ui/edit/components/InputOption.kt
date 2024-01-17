@@ -42,7 +42,7 @@ fun <T> InputOption(
     Column(
         modifier = Modifier
             .wrapContentWidth()
-            .padding(top = Theme.SizeSS)
+            .padding(top = Theme.Sizes.SS)
     ) {
         OutlinedTextField(
             value = items.first { it.value == state.value }.label,

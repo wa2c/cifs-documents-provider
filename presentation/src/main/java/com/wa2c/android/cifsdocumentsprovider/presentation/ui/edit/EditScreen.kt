@@ -250,8 +250,8 @@ private fun EditScreenContainer(
                         badge = {
                             Box(
                                 modifier = Modifier
-                                    .size(Theme.SizeM)
-                                    .offset(x = (-Theme.SizeM), y = Theme.SizeM)
+                                    .size(Theme.Sizes.M)
+                                    .offset(x = (-Theme.Sizes.M), y = Theme.Sizes.M)
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_check_bg),

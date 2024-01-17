@@ -45,8 +45,8 @@ fun CommonDialog(
                     confirmButtons.forEach {
                         Button(
                             onClick = it.onClick,
-                            contentPadding = PaddingValues(Theme.SizeS),
-                            modifier = Modifier.padding(start = Theme.SizeS)
+                            contentPadding = PaddingValues(Theme.Sizes.S),
+                            modifier = Modifier.padding(start = Theme.Sizes.S)
                         ) {
                             Text(it.label)
                         }

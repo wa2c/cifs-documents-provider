@@ -62,7 +62,7 @@ fun InputText(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = Theme.SizeSS)
+            .padding(top = Theme.Sizes.SS)
     ) {
         OutlinedTextField(
             value = state.value ?: "",
@@ -92,12 +92,12 @@ fun InputText(
         )
         iconResource?.let {res ->
             Button(
-                shape = RoundedCornerShape(Theme.SizeSS),
+                shape = RoundedCornerShape(Theme.Sizes.SS),
                 contentPadding = PaddingValues(0.dp),
                 enabled = enabled,
                 modifier = Modifier
                     .size(52.dp, 52.dp)
-                    .padding(top = Theme.SizeSS, start = Theme.SizeSS)
+                    .padding(top = Theme.Sizes.SS, start = Theme.Sizes.SS)
                     .align(Alignment.CenterVertically)
                     .moveFocusOnEnter(focusManager)
                     .moveFocusOnTab(focusManager)
