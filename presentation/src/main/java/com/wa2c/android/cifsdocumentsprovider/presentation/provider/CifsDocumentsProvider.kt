@@ -24,7 +24,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
-import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
@@ -133,7 +132,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             val id = storageRepository.getDocumentId(documentId)
             if (id.isRoot) {
                 // Root
-                includeConnection(cursor)
+                includeStorageRoot(cursor)
             } else {
                 // File / Directory
                 storageRepository.getFile(id)?.let { file ->
@@ -311,7 +310,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         }
     }
 
-    private fun includeConnection(cursor: MatrixCursor) {
+    private fun includeStorageRoot(cursor: MatrixCursor) {
         cursor.newRow().let { row ->
             row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentId.ROOT_DOCUMENT_ID_TEXT)
             row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
@@ -330,10 +329,15 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 file.isDirectory -> {
                     // Directory
                     row.add(DocumentsContract.Document.COLUMN_DOCUMENT_ID, file.documentId.idText)
-                    row.add(DocumentsContract.Document.COLUMN_SIZE, 0)
+                    row.add(DocumentsContract.Document.COLUMN_SIZE, file.size)
                     row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, file.name)
                     row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, file.lastModified)
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+                    if (file.documentId.isPathRoot) {
+                        // connection
+                        row.add(DocumentsContract.Document.COLUMN_SUMMARY, file.uri.toString())
+                        row.add(DocumentsContract.Document.COLUMN_ICON, R.drawable.ic_host)
+                    }
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
                         DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_WRITE or
@@ -384,7 +388,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
             DocumentsContract.Document.COLUMN_LAST_MODIFIED,
             DocumentsContract.Document.COLUMN_FLAGS,
-            DocumentsContract.Document.COLUMN_SIZE
+            DocumentsContract.Document.COLUMN_SIZE,
+            DocumentsContract.Document.COLUMN_ICON,
         )
     }
 
