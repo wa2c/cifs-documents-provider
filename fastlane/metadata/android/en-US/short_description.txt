@@ -1,1 +1,1 @@
-Provides access to shared folders.
+Provides access to shared network storage.

@@ -2,18 +2,29 @@
 
 <strong><font color="#339933">[Feature]</font></strong>
 
-* Allows access to Windows shared folders. (SMB2,SMB3)
-* Provides access to Windows shared folders via Storage Access Framework (SAF).
-* Read, write, and directory access in shared folders from external applications by using SAF.
-* File sharing from shared folder.
-* File transfer any files.
-* Multiple connection settings can be saved.
+* Provide other apps with access to shared online storage via the Storage Access Framework (SAF).
+* Provides access to files and directories.
+* Supports SMB, FTP, and FTPS.
+* Share and transfer files on online storage.
+* Multiple connection settings can be stored.
+* Supports multiple languages.
+* Supports dark mode.
+* Can be treated as local storage. (Configuration required)
+* Notifications can be displayed to prevent task kills. (configuration required)
 
 <strong><font color="#339933">[Objective]</font></strong>
 
-* File reading in shared folders.
-* Playing music, videos, and images in shared folders.
-* Managing shared folders.
+* Import and export of files created by the app.
+* Manage files and directories with the Storage Manager app.
+* Play music, videos, etc. with the media player app.
+* Direct saving of photos taken with the camera app.
+
+<strong><font color="#339933">[Note]</font></strong>
+
+* No file management function in this app.
+* To use this app, your apps must support SAF (Storage Access Framework).
+* Apps that assume local storage may not work properly.
+* Apps may crash when specified as a storage destination for streaming audio or video data.
 
 <strong><font color="#339933">[How to use]</font></strong>
 
