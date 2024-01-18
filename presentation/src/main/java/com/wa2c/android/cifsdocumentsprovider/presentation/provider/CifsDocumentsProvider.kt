@@ -19,6 +19,7 @@ import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkQuery
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.security.AccessControlException
 
 /**
  * CIFS DocumentsProvider
@@ -89,14 +91,14 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runBlocking(fileHandler.asCoroutineDispatcher()) {
             try {
                 function()
-            } catch (e: StorageException.DocumentIdException) {
-                throw FileNotFoundException(e.message)
-            } catch (e: StorageException.FileNotFoundException) {
-                throw FileNotFoundException(e.message)
-            } catch (e: StorageException.ReadOnlyException) {
-                throw SecurityException(e.message)
             } catch (e: Exception) {
-                throw IOException(e)
+                when (e) {
+                    is StorageException.DocumentIdException,
+                    is StorageException.FileNotFoundException -> throw FileNotFoundException(e.message)
+                    is StorageException.AccessModeException,
+                    is StorageException.ReadOnlyException -> throw AccessControlException(e.message)
+                    else -> throw IOException(e)
+                }
             }
         }
     }
@@ -335,7 +337,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
                     if (file.documentId.isPathRoot) {
                         // connection
-                        row.add(DocumentsContract.Document.COLUMN_SUMMARY, file.uri.toString())
                         row.add(DocumentsContract.Document.COLUMN_ICON, R.drawable.ic_host)
                     }
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
@@ -379,7 +380,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             DocumentsContract.Root.COLUMN_TITLE,
             DocumentsContract.Root.COLUMN_SUMMARY,
             DocumentsContract.Root.COLUMN_DOCUMENT_ID,
-            DocumentsContract.Root.COLUMN_AVAILABLE_BYTES
+            DocumentsContract.Root.COLUMN_AVAILABLE_BYTES,
         )
 
         private val DEFAULT_DOCUMENT_PROJECTION: Array<String> = arrayOf(
