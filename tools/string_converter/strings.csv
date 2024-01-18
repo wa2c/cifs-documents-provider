@@ -1,7 +1,7 @@
 Component,String Resource Name,Language,,,,
 ,,English,日本語 (Japanese),Slovenský (Slovak),简体中文 (Simplified Chinese),العربية (Arabic)
 ,,en,ja,sk,zh-rCN,ar
-Common,app_summary,Access the shared folder.,共有フォルダにアクセスします。,Prístup k zdieľaným súborom a priečinkom.,访问共享文件夹,.الوصول إلى المجلدات المشتركة
+Common,app_summary,Access online storage,オンラインストレージにアクセス,Prístup online úložiska,访问在线存储,الوصول إلى التخزين عبر الإنترنت
 ,dialog_accept,OK,OK,OK,OK,حسنا
 ,dialog_close,Close,閉じる,Zatvoriť,关闭,إغلاق
 ,,,,,,
