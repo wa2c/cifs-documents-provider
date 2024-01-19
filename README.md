@@ -3,7 +3,11 @@ CIFS Documents Provider
 
 ## About
 
-**CIFS Documents Provider** is an Android app to provide access to shared folder by SMB/CIFS.
+**CIFS Documents Provider** is an Android app to provide access to shared online storage.
+
+<img width="240" alt="Home Screen" src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" />
+<img width="240" alt="Home Screen" src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" />
+<img width="240" alt="Home Screen" src="./fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" />
 
 ## App Store
 
