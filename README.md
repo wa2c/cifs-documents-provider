@@ -17,9 +17,9 @@ CIFS Documents Provider
 * [F-Droid](https://f-droid.org/packages/com.wa2c.android.cifsdocumentsprovider/)
 * [Amazon Appstore](https://www.amazon.com/gp/product/B09D4264PB) 
 
-## Download
+## Release History (APK Download)
 
-* [APK](https://www.wa2c.com/android/apk/CIFSDocumentsProvider/)
+* [Release](https://github.com/wa2c/cifs-documents-provider/releases)
 
 ## Source Code
 
