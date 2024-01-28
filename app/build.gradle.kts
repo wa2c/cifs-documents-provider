@@ -15,7 +15,7 @@ android {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
     }
-
+	
     defaultConfig {
         applicationId = applicationId
         minSdk = libs.versions.androidMinSdk.get().toInt()
