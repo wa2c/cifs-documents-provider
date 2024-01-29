@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnectionIndex
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
@@ -62,7 +62,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onNavigateSettings: () -> Unit,
-    onNavigateEdit: (RemoteConnection) -> Unit,
+    onNavigateEdit: (RemoteConnectionIndex) -> Unit,
     onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -109,10 +109,10 @@ fun HomeScreen(
 @Composable
 fun HomeScreenContainer(
     snackbarHostState: SnackbarHostState,
-    connectionList: List<RemoteConnection>,
+    connectionList: List<RemoteConnectionIndex>,
     onClickMenuOpenFile: () -> Unit,
     onClickMenuSettings: () -> Unit,
-    onClickItem: (RemoteConnection) -> Unit,
+    onClickItem: (RemoteConnectionIndex) -> Unit,
     onClickAddItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
@@ -174,8 +174,8 @@ fun HomeScreenContainer(
  */
 @Composable
 fun ConnectionList(
-    connectionList: List<RemoteConnection>,
-    onClickItem: (RemoteConnection) -> Unit,
+    connectionList: List<RemoteConnectionIndex>,
+    onClickItem: (RemoteConnectionIndex) -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
     val state = rememberReorderableLazyListState(onMove = { from, to ->
@@ -205,7 +205,7 @@ fun ConnectionList(
 
 @Composable
 private fun ConnectionItem(
-    connection: RemoteConnection,
+    connection: RemoteConnectionIndex,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
@@ -236,7 +236,7 @@ private fun ConnectionItem(
             )
         }
         Text(
-            text = connection.uri.text,
+            text = connection.uri,
             style = MaterialTheme.typography.bodySmall,
         )
     }
@@ -257,35 +257,23 @@ private fun HomeScreenContainerPreview() {
         HomeScreenContainer(
             snackbarHostState = SnackbarHostState(),
             connectionList = listOf(
-                RemoteConnection(
+                RemoteConnectionIndex(
                     id = "",
                     name = "PC1",
                     storage = StorageType.JCIFS,
-                    host = "pc1",
-                    port = null,
-                    folder = null,
-                    user = null,
-                    password = null,
+                    uri = "",
                 ),
-                RemoteConnection(
+                RemoteConnectionIndex(
                     id = "",
                     name = "PC2",
                     storage = StorageType.JCIFS,
-                    host = "pc1",
-                    port = null,
-                    folder = "test/test/test/test/test/test/test/test",
-                    user = null,
-                    password = null,
+                    uri = "",
                 ),
-                RemoteConnection(
+                RemoteConnectionIndex(
                     id = "",
                     name = "192.168.0.128",
                     storage = StorageType.SMBJ,
-                    host = "pc1",
-                    port = null,
-                    folder = null,
-                    user = null,
-                    password = null,
+                    uri = "",
                 ),
             ),
             onClickItem = {},

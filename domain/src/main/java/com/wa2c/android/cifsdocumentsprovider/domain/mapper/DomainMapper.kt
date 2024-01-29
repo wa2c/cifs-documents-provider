@@ -12,6 +12,7 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFil
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnectionIndex
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
@@ -50,6 +51,18 @@ internal object DomainMapper {
         val type = StorageType.findByValue(this.type) ?: StorageType.default
         val json = EncryptUtils.decrypt(this.data)
         return jsonToStorageConnection(type, json)
+    }
+
+    /**
+     * Convert db model to index model.
+     */
+    fun ConnectionSettingEntity.toIndexModel(): RemoteConnectionIndex {
+        return RemoteConnectionIndex(
+            id = id,
+            name = name,
+            storage = StorageType.findByValue(type) ?: StorageType.default,
+            uri = uri,
+        )
     }
 
     /**

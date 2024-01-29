@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
 import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
@@ -12,11 +11,13 @@ import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntityModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toIndexModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
+import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
-import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
+import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -37,7 +38,7 @@ class EditRepository @Inject internal constructor(
 
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
-        list.map { it.toDataModel().toDomainModel() }
+        list.map { it.toIndexModel() }
     }
 
     /**
