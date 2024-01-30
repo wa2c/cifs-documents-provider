@@ -167,7 +167,7 @@ class JCifsNgClient(
      */
     override suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean): List<StorageFile> {
         return  withContext(dispatcher) {
-            getSmbFile(request, ignoreCache = ignoreCache, existsRequired = true).use { parent ->
+            getSmbFile(request, ignoreCache = ignoreCache).use { parent ->
                 parent.listFiles().map { child ->
                     child.use { it.toStorageFile() }
                 }
