@@ -15,8 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -58,21 +56,18 @@ fun InputText(
     onClickButton: () -> Unit = {},
     onChange: (String?) -> Unit,
 ) {
-    val state = remember { mutableStateOf(value) }
-    //onChange(value)
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Theme.Sizes.SS)
     ) {
         OutlinedTextField(
-            value = state.value ?: "",
+            value = value ?: "",
             label = { Text(title) },
             enabled = enabled,
             placeholder = { Text(hint) },
             onValueChange = { value ->
-                state.value = if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value
+                onChange(if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value)
             },
             keyboardOptions = keyboardOptions,
             visualTransformation = if (keyboardOptions.keyboardType == KeyboardType.Password) {
@@ -88,7 +83,7 @@ fun InputText(
                 .moveFocusOnTab(focusManager)
                 .autofill(
                     autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
-                    onFill = { state.value = it }
+                    onFill = { onChange(it) }
                 )
             ,
         )

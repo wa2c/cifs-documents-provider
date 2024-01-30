@@ -37,7 +37,28 @@ data class RemoteConnection(
     val uri: StorageUri
         get() = getUriText(storage, host, port, folder, true)?.let { StorageUri(it) } ?: StorageUri.ROOT
 
+    /**
+     * True if connection changed.
+     */
+    fun isChangedConnection(other: RemoteConnection): Boolean {
+        return  this.id != other.id
+                || this.storage != other.storage
+                || this.domain != other.domain
+                || this.host != other.host
+                || this.port != other.port
+                || this.enableDfs != other.enableDfs
+                || this.folder != other.folder
+                || this.user != other.user
+                || this.password != other.password
+                || this.anonymous != other.anonymous
+                || this.isFtpActiveMode != other.isFtpActiveMode
+                || this.encoding != other.encoding
+    }
+
     companion object {
+
+        val INVALID_CONNECTION = create("", "")
+
 
         fun isInvalidConnectionId(connectionId: String): Boolean {
             return connectionId.isEmpty() || DocumentId.isInvalidDocumentId(connectionId)

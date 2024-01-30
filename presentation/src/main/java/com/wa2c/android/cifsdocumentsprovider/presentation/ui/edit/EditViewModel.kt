@@ -11,16 +11,20 @@ import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.EditScreenParamId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -42,7 +46,10 @@ class EditViewModel @Inject constructor(
     private var currentId: String = paramId ?: generateUUID()
 
     /** Init connection */
-    private var initConnection: RemoteConnection? = null
+    private var initConnection: RemoteConnection = RemoteConnection.INVALID_CONNECTION
+
+    /** Current RemoteConnection */
+    val remoteConnection = MutableStateFlow<RemoteConnection>(initConnection)
 
     /** True if adding new settings */
     val isNew: Boolean
@@ -55,9 +62,8 @@ class EditViewModel @Inject constructor(
     init {
         launch {
             val connection = paramId?.let {
-                editRepository.getConnection(paramId).also { initConnection = it }
+                editRepository.getConnection(paramId)?.also { initConnection = it }
             } ?: RemoteConnection.create(currentId, paramHost ?: "")
-//            deployConnection(connection)
             remoteConnection.emit(connection)
         }
     }
@@ -74,94 +80,19 @@ class EditViewModel @Inject constructor(
     private val _isBusy = MutableStateFlow(false)
     val isBusy = _isBusy.asStateFlow()
 
-    val remoteConnection = MutableStateFlow<RemoteConnection>(RemoteConnection.create("", ""))
-
-    val id = MutableStateFlow<String?>(null)
-    val name = MutableStateFlow<String?>(null)
-    val storage = MutableStateFlow<StorageType>(StorageType.default)
-
-    val domain = MutableStateFlow<String?>(null)
-    val host = MutableStateFlow<String?>(null)
-    val port = MutableStateFlow<String?>(null)
-    val enableDfs = MutableStateFlow<Boolean>(false)
-    val user = MutableStateFlow<String?>(null)
-    val password = MutableStateFlow<String?>(null)
-    val anonymous = MutableStateFlow<Boolean>(false)
-    val folder = MutableStateFlow<String?>(null)
-
-    val isFtpActiveMode = MutableStateFlow<Boolean>(false)
-    val encoding = MutableStateFlow<String>(DEFAULT_ENCODING)
-
-    val safeTransfer = MutableStateFlow<Boolean>(false)
-    val optionReadOnly = MutableStateFlow<Boolean>(false)
-    val extension = MutableStateFlow<Boolean>(false)
-
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResult = channelFlow<ConnectionResult?> {
+        var prevConnection = initConnection
         launch { _connectionResult.collect { send(it) } }
-        launch { storage.collect { send(null) } }
-        launch { domain.collect { send(null) } }
-        launch { host.collect { send(null) } }
-        launch { port.collect { send(null) } }
-        launch { enableDfs.collect { send(null) } }
-        launch { user.collect { send(null) } }
-        launch { password.collect { send(null) } }
-        launch { anonymous.collect { send(null) } }
-        launch { folder.collect { send(null) } }
-        launch { isFtpActiveMode.collect { send(null) } }
+        launch {
+            remoteConnection.collect {
+                if (it.isChangedConnection(prevConnection)) {
+                    send(null)
+                }
+                prevConnection = it
+            }
+        }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
-
-//    fun updateRemoteConnection(connection: RemoteConnection?) {
-//        launch {
-//            remoteConnection.emit(connection)
-//        }
-//    }
-
-    /**
-     * Deploy connection data.
-     */
-//    private fun deployConnection(connection: RemoteConnection) {
-//        id.value = connection.id
-//        name.value = connection.name
-//        storage.value = connection.storage
-//        domain.value = connection.domain
-//        host.value = connection.host
-//        port.value = connection.port
-//        enableDfs.value = connection.enableDfs
-//        folder.value = connection.folder
-//        user.value = connection.user
-//        password.value = connection.password
-//        anonymous.value = connection.anonymous
-//        isFtpActiveMode.value = connection.isFtpActiveMode
-//        encoding.value = connection.encoding
-//        safeTransfer.value = connection.optionSafeTransfer
-//        optionReadOnly.value = connection.optionReadOnly
-//        extension.value = connection.optionAddExtension
-//    }
-
-//    /**
-//     * Create connection data
-//     */
-//    private fun createConnection(): RemoteConnection {
-//        return RemoteConnection(
-//            id = id.value ?: throw EditException.InputRequiredException(),
-//            name = name.value?.ifEmpty { null } ?: host.value ?: throw EditException.InputRequiredException(),
-//            storage = storage.value,
-//            domain = domain.value?.ifEmpty { null },
-//            host = host.value?.ifEmpty { null } ?: throw EditException.InputRequiredException(),
-//            port = port.value?.ifEmpty { null },
-//            enableDfs = enableDfs.value,
-//            folder = folder.value?.ifEmpty { null },
-//            user = user.value,
-//            password = password.value,
-//            anonymous = anonymous.value,
-//            isFtpActiveMode = isFtpActiveMode.value,
-//            encoding = encoding.value,
-//            optionAddExtension = extension.value,
-//            optionReadOnly = optionReadOnly.value,
-//            optionSafeTransfer = safeTransfer.value,
-//        )
-//    }
 
     /**
      * Check connection

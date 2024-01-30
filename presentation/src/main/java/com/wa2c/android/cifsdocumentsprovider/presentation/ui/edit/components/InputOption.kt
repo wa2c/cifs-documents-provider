@@ -36,9 +36,6 @@ fun <T> InputOption(
     enabled: Boolean = true,
     onChange: (value: T) -> Unit,
 ) {
-    val state = remember { mutableStateOf(value) }
-    //onChange(state.value)
-
     var expanded by remember { mutableStateOf(false) }
     val icon = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown
 
@@ -48,7 +45,7 @@ fun <T> InputOption(
             .padding(top = Theme.Sizes.SS)
     ) {
         OutlinedTextField(
-            value = items.first { it.value == state.value }.label,
+            value = items.first { it.value == value }.label,
             label = { Text(title) },
             enabled = enabled,
             readOnly = true,
@@ -73,7 +70,7 @@ fun <T> InputOption(
                     text = { Text(item.label) },
                     enabled = enabled,
                     onClick = {
-                        state.value = item.value
+                        onChange(item.value)
                         expanded = false
                         focusManager.clearFocus()
                     }

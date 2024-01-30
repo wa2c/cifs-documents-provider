@@ -7,8 +7,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.input.key.KeyEventType
@@ -31,16 +29,13 @@ fun InputCheck(
     enabled: Boolean = true,
     onChange: (value: Boolean) -> Unit,
 ) {
-    val state =  remember { mutableStateOf(value) }
-    //onChange(value)
-
     Row(
         Modifier
             .toggleable(
-                value = state.value,
+                value = value,
                 role = Role.Checkbox,
                 onValueChange = {
-                    state.value = !state.value
+                    onChange(!value)
                 }
             )
             .padding(Theme.Sizes.M)
@@ -49,7 +44,9 @@ fun InputCheck(
             .onPreviewKeyEvent {
                 when (it.nativeKeyEvent.keyCode) {
                     KeyEvent.KEYCODE_SPACE -> {
-                        if (it.type == KeyEventType.KeyUp) state.value = !state.value
+                        if (it.type == KeyEventType.KeyUp) {
+                            onChange(!value)
+                        }
                         true
                     }
 
@@ -60,7 +57,7 @@ fun InputCheck(
             }
     ) {
         Checkbox(
-            checked = state.value,
+            checked = value,
             enabled = enabled,
             onCheckedChange = null,
         )

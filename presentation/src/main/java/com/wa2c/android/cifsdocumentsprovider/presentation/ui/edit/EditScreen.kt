@@ -50,7 +50,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -96,8 +95,8 @@ fun EditScreen(
     val showDeleteDialog = remember { mutableStateOf(false) }
     val showBackConfirmationDialog = remember { mutableStateOf(false) }
 
-    selectedHost?.let { viewModel.host.value = selectedHost }
-    selectedUri?.let { viewModel.folder.value = it.path }
+    selectedHost?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(host = it) }
+    selectedUri?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(folder = it.path) }
 
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -260,6 +259,10 @@ private fun EditScreenContainer(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
+        if (connectionState.value == RemoteConnection.INVALID_CONNECTION) {
+            return@Scaffold
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxHeight()
