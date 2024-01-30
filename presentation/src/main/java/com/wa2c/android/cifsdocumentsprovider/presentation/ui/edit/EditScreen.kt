@@ -50,7 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -95,7 +95,6 @@ fun EditScreen(
     val scope = rememberCoroutineScope()
     val showDeleteDialog = remember { mutableStateOf(false) }
     val showBackConfirmationDialog = remember { mutableStateOf(false) }
-    val storageType = viewModel.storage.collectAsMutableState()
 
     selectedHost?.let { viewModel.host.value = selectedHost }
     selectedUri?.let { viewModel.folder.value = it.path }
@@ -103,19 +102,9 @@ fun EditScreen(
     EditScreenContainer(
         snackbarHostState = snackbarHostState,
         isNew = viewModel.isNew,
-        idState = viewModel.id.collectAsMutableState(),
-        nameState = viewModel.name.collectAsMutableState(),
-        storageState = storageType,
-        domainState = viewModel.domain.collectAsMutableState(),
-        hostState = viewModel.host.collectAsMutableState(),
-        portState = viewModel.port.collectAsMutableState(),
-        enableDfsState = viewModel.enableDfs.collectAsMutableState(),
-        userState = viewModel.user.collectAsMutableState(),
-        passwordState = viewModel.password.collectAsMutableState(),
-        anonymousState = viewModel.anonymous.collectAsMutableState(),
-        isFtpActiveModeState = viewModel.isFtpActiveMode.collectAsMutableState(),
-        encodingState = viewModel.encoding.collectAsMutableState(),
-        folderState = viewModel.folder.collectAsMutableState(),
+        isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
+        connectionState = viewModel.remoteConnection.collectAsMutableState(),
+        connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickBack = {
             if (viewModel.isChanged) {
                 showBackConfirmationDialog.value = true
@@ -124,11 +113,6 @@ fun EditScreen(
             }
         },
         onClickDelete = { showDeleteDialog.value = true },
-        safeTransferState = viewModel.safeTransfer.collectAsMutableState(),
-        readOnlyState = viewModel.optionReadOnly.collectAsMutableState(),
-        extensionState = viewModel.extension.collectAsMutableState(),
-        isBusy = viewModel.isBusy.collectAsStateWithLifecycle().value,
-        connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
@@ -213,23 +197,8 @@ fun EditScreen(
 private fun EditScreenContainer(
     snackbarHostState: SnackbarHostState,
     isNew: Boolean,
-    idState: MutableState<String?>,
-    nameState: MutableState<String?>,
-    storageState: MutableState<StorageType>,
-    domainState: MutableState<String?>,
-    hostState: MutableState<String?>,
-    portState: MutableState<String?>,
-    enableDfsState: MutableState<Boolean>,
-    userState: MutableState<String?>,
-    passwordState: MutableState<String?>,
-    anonymousState: MutableState<Boolean>,
-    isFtpActiveModeState: MutableState<Boolean>,
-    encodingState: MutableState<String>,
-    folderState: MutableState<String?>,
-    safeTransferState: MutableState<Boolean>,
-    readOnlyState: MutableState<Boolean>,
-    extensionState: MutableState<Boolean>,
     isBusy: Boolean,
+    connectionState: MutableState<RemoteConnection>,
     connectionResult: ConnectionResult?,
     onClickBack: () -> Unit,
     onClickDelete: () -> Unit,
@@ -307,41 +276,47 @@ private fun EditScreenContainer(
                         .padding(Theme.Sizes.ScreenMargin)
                         .weight(1f)
                 ) {
-                    val protocol = storageState.value.protocol
+                    val protocol = connectionState.value.storage.protocol
 
                     // ID
                     InputText(
                         title = stringResource(id = R.string.edit_id_title),
                         hint = stringResource(id = R.string.edit_id_hint),
-                        state = idState,
+                        value = connectionState.value.id,
                         focusManager = focusManager,
                         enabled = isNew,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Next,
-                        )
-                    )
+                        ),
+                    ) {
+                        connectionState.value = connectionState.value.copy(id = it ?: "")
+                    }
 
                     // Name
                     InputText(
                         title = stringResource(id = R.string.edit_name_title),
                         hint = stringResource(id = R.string.edit_name_hint),
-                        state = nameState,
+                        value = connectionState.value.name,
                         focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Text,
                             imeAction = ImeAction.Next,
-                        )
-                    )
+                        ),
+                    ) {
+                        connectionState.value = connectionState.value.copy(name = it ?: "")
+                    }
 
                     // Storage
                     InputOption(
                         title = stringResource(id = R.string.edit_storage_title),
                         items = StorageType.entries
                             .map { OptionItem(it, stringResource(id = it.labelRes)) },
-                        state = storageState,
+                        value = connectionState.value.storage,
                         focusManager = focusManager,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(storage = it)
+                    }
 
                     SectionTitle(
                         text = stringResource(id = R.string.edit_settings_section_title),
@@ -352,93 +327,110 @@ private fun EditScreenContainer(
                         InputText(
                             title = stringResource(id = R.string.edit_domain_title),
                             hint = stringResource(id = R.string.edit_domain_hint),
-                            state = domainState,
+                            value = connectionState.value.domain,
                             focusManager = focusManager,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Uri,
                                 imeAction = ImeAction.Next,
                             ),
-                        )
+                        ) {
+                            connectionState.value = connectionState.value.copy(domain = it)
+                        }
                     }
 
                     // Host
                     InputText(
                         title = stringResource(id = R.string.edit_host_title),
                         hint = stringResource(id = R.string.edit_host_hint),
-                        state = hostState,
+                        value = connectionState.value.host,
                         focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next,
                         ),
                         iconResource = R.drawable.ic_search,
+                        onClickButton = { onClickSearchHost() }
                     ) {
-                        onClickSearchHost()
+                        connectionState.value = connectionState.value.copy(host = it ?: "")
                     }
 
                     // Port
                     InputText(
                         title = stringResource(id = R.string.edit_port_title),
                         hint = stringResource(id = R.string.edit_port_hint),
-                        state = portState,
+                        value = connectionState.value.port,
                         focusManager = focusManager,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next,
                         )
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(port = it)
+                    }
+
+
 
                     // Enable DFS
                     if (protocol == ProtocolType.SMB) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_enable_dfs_label),
-                            state = enableDfsState,
+                            value = connectionState.value.enableDfs,
                             focusManager = focusManager,
-                        )
+                        ) {
+                            connectionState.value = connectionState.value.copy(enableDfs = it)
+                        }
                     }
 
                     // User
                     InputText(
                         title = stringResource(id = R.string.edit_user_title),
                         hint = stringResource(id = R.string.edit_user_hint),
-                        state = userState,
+                        value = connectionState.value.user,
                         focusManager = focusManager,
-                        enabled = !anonymousState.value,
+                        enabled = !connectionState.value.anonymous,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next,
                         ),
                         autofillType = AutofillType.Username,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(user = it)
+                    }
 
                     // Password
                     InputText(
                         title = stringResource(id = R.string.edit_password_title),
                         hint = stringResource(id = R.string.edit_password_hint),
-                        state = passwordState,
+                        value = connectionState.value.password,
                         focusManager = focusManager,
-                        enabled = !anonymousState.value,
+                        enabled = !connectionState.value.anonymous,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Next,
                         ),
                         autofillType = AutofillType.Password,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(password = it)
+                    }
 
                     // Anonymous
                     InputCheck(
                         title = stringResource(id = R.string.edit_anonymous_label),
-                        state = anonymousState,
+                        value = connectionState.value.anonymous,
                         focusManager = focusManager,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(anonymous = it)
+                    }
 
                     // FTP Mode
                     if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_ftp_mode_title),
-                            state = isFtpActiveModeState,
+                            value = connectionState.value.isFtpActiveMode,
                             focusManager = focusManager,
-                        )
+                        ) {
+                            connectionState.value = connectionState.value.copy(isFtpActiveMode = it)
+                        }
                     }
 
                     // Encoding
@@ -447,24 +439,27 @@ private fun EditScreenContainer(
                             title = stringResource(id = R.string.edit_encoding_title),
                             items = Charset.availableCharsets()
                                 .map { OptionItem(it.key, it.value.name()) },
-                            state = encodingState,
+                            value = connectionState.value.encoding,
                             focusManager = focusManager,
-                        )
+                        ) {
+                            connectionState.value = connectionState.value.copy(encoding = it)
+                        }
                     }
 
                     // Folder
                     InputText(
                         title = stringResource(id = R.string.edit_folder_title),
                         hint = stringResource(id = R.string.edit_folder_hint),
-                        state = folderState,
+                        value = connectionState.value.folder,
                         focusManager = focusManager,
                         iconResource = R.drawable.ic_folder,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Uri,
                             imeAction = ImeAction.Next,
                         ),
+                        onClickButton = { onClickSelectFolder() }
                     ) {
-                        onClickSelectFolder()
+                        connectionState.value = connectionState.value.copy(folder = it)
                     }
 
                     // Option
@@ -476,22 +471,28 @@ private fun EditScreenContainer(
                     if (protocol == ProtocolType.SMB) {
                         InputCheck(
                             title = stringResource(id = R.string.edit_option_safe_transfer_label),
-                            state = safeTransferState,
+                            value = connectionState.value.optionSafeTransfer,
                             focusManager = focusManager,
-                        )
+                        ) {
+                            connectionState.value = connectionState.value.copy(optionSafeTransfer = it)
+                        }
                     }
 
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_read_only_label),
-                        state = readOnlyState ,
+                        value = connectionState.value.optionReadOnly,
                         focusManager = focusManager,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(optionReadOnly = it)
+                    }
 
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
-                        state = extensionState,
+                        value = connectionState.value.optionAddExtension,
                         focusManager = focusManager,
-                    )
+                    ) {
+                        connectionState.value = connectionState.value.copy(optionAddExtension = it)
+                    }
 
                     // URI
 
@@ -503,20 +504,14 @@ private fun EditScreenContainer(
                     SubsectionTitle(
                         text = stringResource(id = R.string.edit_storage_uri_title),
                     )
-                    val storageUri = getUriText(
-                        storageState.value,
-                        hostState.value,
-                        portState.value,
-                        folderState.value,
-                        true
-                    ) ?: ""
-                    UriText(uriText = storageUri)
+
+                    UriText(uriText = connectionState.value.uri.text)
 
                     // Shared URI
                     SubsectionTitle(
                         text = stringResource(id = R.string.edit_provider_uri_title),
                     )
-                    val sharedUri =  DocumentId.fromConnection(idState.value)?.takeIf { !it.isRoot }?.let{
+                    val sharedUri =  DocumentId.fromConnection(connectionState.value.id)?.takeIf { !it.isRoot }?.let{
                         "content$URI_START$URI_AUTHORITY/tree/${Uri.encode(it.idText)}"
                     } ?: ""
                     UriText(uriText = sharedUri)
@@ -570,24 +565,9 @@ private fun EditScreenPreview() {
         EditScreenContainer(
             snackbarHostState = SnackbarHostState(),
             isNew = true,
-            idState = mutableStateOf("id1"),
-            nameState = mutableStateOf("name1"),
-            storageState = mutableStateOf(StorageType.SMBJ),
-            domainState = mutableStateOf(""),
-            hostState = mutableStateOf("pc1"),
-            portState = mutableStateOf(""),
-            enableDfsState = mutableStateOf(false),
-            userState = mutableStateOf("user"),
-            passwordState = mutableStateOf("password"),
-            anonymousState = mutableStateOf(false),
-            isFtpActiveModeState = mutableStateOf(false),
-            encodingState = mutableStateOf("UTF-8"),
-            folderState = mutableStateOf("/test"),
-            safeTransferState = mutableStateOf(false),
-            readOnlyState = mutableStateOf(false),
-            extensionState = mutableStateOf(false),
             isBusy = false,
             connectionResult = null,
+            connectionState = mutableStateOf(RemoteConnection.create(id = "test", hostText = "pc1")),
             onClickBack = {},
             onClickDelete = {},
             onClickSearchHost = {},

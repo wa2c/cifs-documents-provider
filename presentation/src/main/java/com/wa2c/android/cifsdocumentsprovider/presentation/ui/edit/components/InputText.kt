@@ -15,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,7 +38,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
 
-
 /**
  * Input text
  */
@@ -48,7 +46,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOn
 fun InputText(
     title: String,
     hint: String,
-    state: MutableState<String?>,
+    value: String?,
     focusManager: FocusManager,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
@@ -58,7 +56,11 @@ fun InputText(
     autofillType: AutofillType? = null,
     @DrawableRes iconResource: Int? = null,
     onClickButton: () -> Unit = {},
+    onChange: (String?) -> Unit,
 ) {
+    val state = remember { mutableStateOf(value) }
+    //onChange(value)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,14 +137,13 @@ fun InputText(
 @Composable
 private fun InputTextPreview() {
     Theme.AppTheme {
-        val state = remember { mutableStateOf<String?>("Input") }
         InputText(
             title = "Title",
             hint = "Hint",
-            state = state,
+            value = "Input",
             focusManager = LocalFocusManager.current,
             enabled = true,
-
-        )
+        ) {
+        }
     }
 }

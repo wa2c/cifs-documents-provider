@@ -7,7 +7,6 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,16 +26,22 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOn
 @Composable
 fun InputCheck(
     title: String,
-    state: MutableState<Boolean>,
+    value: Boolean,
     focusManager: FocusManager,
     enabled: Boolean = true,
+    onChange: (value: Boolean) -> Unit,
 ) {
+    val state =  remember { mutableStateOf(value) }
+    //onChange(value)
+
     Row(
         Modifier
             .toggleable(
                 value = state.value,
                 role = Role.Checkbox,
-                onValueChange = { state.value = !state.value }
+                onValueChange = {
+                    state.value = !state.value
+                }
             )
             .padding(Theme.Sizes.M)
             .fillMaxWidth()
@@ -77,12 +82,12 @@ fun InputCheck(
 @Composable
 private fun InputCheckPreview() {
     Theme.AppTheme {
-        val state = remember { mutableStateOf(false) }
         InputCheck(
             title = "Title",
-            state = state,
+            value = true,
             focusManager = LocalFocusManager.current,
             enabled = true,
-        )
+        ) {
+        }
     }
 }

@@ -50,14 +50,15 @@ class EditViewModel @Inject constructor(
 
     /** True if data changed */
     val isChanged: Boolean
-        get() = isNew || initConnection != try { createConnection() } catch (e: Exception) { null }
+        get() = isNew || initConnection != remoteConnection.value
 
     init {
         launch {
             val connection = paramId?.let {
                 editRepository.getConnection(paramId).also { initConnection = it }
             } ?: RemoteConnection.create(currentId, paramHost ?: "")
-            deployConnection(connection)
+//            deployConnection(connection)
+            remoteConnection.emit(connection)
         }
     }
 
@@ -72,6 +73,8 @@ class EditViewModel @Inject constructor(
 
     private val _isBusy = MutableStateFlow(false)
     val isBusy = _isBusy.asStateFlow()
+
+    val remoteConnection = MutableStateFlow<RemoteConnection>(RemoteConnection.create("", ""))
 
     val id = MutableStateFlow<String?>(null)
     val name = MutableStateFlow<String?>(null)
@@ -108,51 +111,57 @@ class EditViewModel @Inject constructor(
         launch { isFtpActiveMode.collect { send(null) } }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
+//    fun updateRemoteConnection(connection: RemoteConnection?) {
+//        launch {
+//            remoteConnection.emit(connection)
+//        }
+//    }
+
     /**
      * Deploy connection data.
      */
-    private fun deployConnection(connection: RemoteConnection) {
-        id.value = connection.id
-        name.value = connection.name
-        storage.value = connection.storage
-        domain.value = connection.domain
-        host.value = connection.host
-        port.value = connection.port
-        enableDfs.value = connection.enableDfs
-        folder.value = connection.folder
-        user.value = connection.user
-        password.value = connection.password
-        anonymous.value = connection.anonymous
-        isFtpActiveMode.value = connection.isFtpActiveMode
-        encoding.value = connection.encoding
-        safeTransfer.value = connection.optionSafeTransfer
-        optionReadOnly.value = connection.optionReadOnly
-        extension.value = connection.optionAddExtension
-    }
+//    private fun deployConnection(connection: RemoteConnection) {
+//        id.value = connection.id
+//        name.value = connection.name
+//        storage.value = connection.storage
+//        domain.value = connection.domain
+//        host.value = connection.host
+//        port.value = connection.port
+//        enableDfs.value = connection.enableDfs
+//        folder.value = connection.folder
+//        user.value = connection.user
+//        password.value = connection.password
+//        anonymous.value = connection.anonymous
+//        isFtpActiveMode.value = connection.isFtpActiveMode
+//        encoding.value = connection.encoding
+//        safeTransfer.value = connection.optionSafeTransfer
+//        optionReadOnly.value = connection.optionReadOnly
+//        extension.value = connection.optionAddExtension
+//    }
 
-    /**
-     * Create connection data
-     */
-    private fun createConnection(): RemoteConnection {
-        return RemoteConnection(
-            id = id.value ?: throw EditException.InputRequiredException(),
-            name = name.value?.ifEmpty { null } ?: host.value ?: throw EditException.InputRequiredException(),
-            storage = storage.value,
-            domain = domain.value?.ifEmpty { null },
-            host = host.value?.ifEmpty { null } ?: throw EditException.InputRequiredException(),
-            port = port.value?.ifEmpty { null },
-            enableDfs = enableDfs.value,
-            folder = folder.value?.ifEmpty { null },
-            user = user.value,
-            password = password.value,
-            anonymous = anonymous.value,
-            isFtpActiveMode = isFtpActiveMode.value,
-            encoding = encoding.value,
-            optionAddExtension = extension.value,
-            optionReadOnly = optionReadOnly.value,
-            optionSafeTransfer = safeTransfer.value,
-        )
-    }
+//    /**
+//     * Create connection data
+//     */
+//    private fun createConnection(): RemoteConnection {
+//        return RemoteConnection(
+//            id = id.value ?: throw EditException.InputRequiredException(),
+//            name = name.value?.ifEmpty { null } ?: host.value ?: throw EditException.InputRequiredException(),
+//            storage = storage.value,
+//            domain = domain.value?.ifEmpty { null },
+//            host = host.value?.ifEmpty { null } ?: throw EditException.InputRequiredException(),
+//            port = port.value?.ifEmpty { null },
+//            enableDfs = enableDfs.value,
+//            folder = folder.value?.ifEmpty { null },
+//            user = user.value,
+//            password = password.value,
+//            anonymous = anonymous.value,
+//            isFtpActiveMode = isFtpActiveMode.value,
+//            encoding = encoding.value,
+//            optionAddExtension = extension.value,
+//            optionReadOnly = optionReadOnly.value,
+//            optionSafeTransfer = safeTransfer.value,
+//        )
+//    }
 
     /**
      * Check connection
@@ -162,7 +171,7 @@ class EditViewModel @Inject constructor(
             _isBusy.emit(true)
             runCatching {
                 _connectionResult.emit(null)
-                editRepository.checkConnection(createConnection())
+                editRepository.checkConnection(remoteConnection.value)
             }.fold(
                 onSuccess = { _connectionResult.emit(it) },
                 onFailure = { _connectionResult.emit(ConnectionResult.Failure(it)) }
@@ -185,7 +194,7 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                val folderConnection = createConnection()
+                val folderConnection = remoteConnection.value
                 val result = editRepository.checkConnection(folderConnection)
                 if (result !is ConnectionResult.Failure) {
                     editRepository.saveTemporaryConnection(folderConnection)
@@ -226,7 +235,7 @@ class EditViewModel @Inject constructor(
         launch {
             _isBusy.emit(true)
             runCatching {
-                createConnection().let { con ->
+                remoteConnection.value.let { con ->
                     if (RemoteConnection.isInvalidConnectionId(con.id)) {
                         throw EditException.InvalidIdException()
                     }
