@@ -31,11 +31,10 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
 import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
-import java.io.IOException
 import java.time.Duration
 
 class ApacheFtpClient(
-    private val isSftp: Boolean,
+    private val isFtps: Boolean,
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
@@ -90,7 +89,7 @@ class ApacheFtpClient(
         }
 
         // FTPS settings
-        if (isSftp) {
+        if (isFtps) {
             SftpFileSystemConfigBuilder.getInstance().also { builder ->
                 builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
                 builder.setStrictHostKeyChecking(options, "no")
