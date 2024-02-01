@@ -339,6 +339,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                     if (file.documentId.isPathRoot) {
                         // connection
                         row.add(DocumentsContract.Document.COLUMN_ICON, R.drawable.ic_host)
+                        row.add(DocumentsContract.Document.COLUMN_SUMMARY, file.uri)
                     }
                     row.add(DocumentsContract.Document.COLUMN_FLAGS,
                         DocumentsContract.Document.FLAG_DIR_SUPPORTS_CREATE or
