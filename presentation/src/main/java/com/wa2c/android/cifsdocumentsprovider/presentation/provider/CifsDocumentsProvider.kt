@@ -319,6 +319,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
             row.add(DocumentsContract.Document.COLUMN_DISPLAY_NAME, "/")
             row.add(DocumentsContract.Document.COLUMN_LAST_MODIFIED, 0)
             row.add(DocumentsContract.Document.COLUMN_MIME_TYPE, DocumentsContract.Document.MIME_TYPE_DIR)
+            row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 row.add(DocumentsContract.Document.COLUMN_FLAGS, DocumentsContract.Document.FLAG_DIR_BLOCKS_OPEN_DOCUMENT_TREE)
             }
