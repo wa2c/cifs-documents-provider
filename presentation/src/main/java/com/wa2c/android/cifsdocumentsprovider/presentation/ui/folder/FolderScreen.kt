@@ -161,7 +161,7 @@ fun FolderScreenContainer(
             }
 
             BottomButton(
-                label = stringResource(id = R.string.host_set_manually),
+                label = stringResource(id = R.string.folder_set),
                 subText = currentUri.toString(),
                 onClick = onClickSet,
             )
