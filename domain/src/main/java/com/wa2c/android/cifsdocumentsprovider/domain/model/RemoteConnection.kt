@@ -14,16 +14,16 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RemoteConnection(
     val id: String,
-    val name: String,
+    val name: String = "",
     val storage: StorageType = StorageType.default,
     // Settings
     val domain: String? = null,
     val host: String,
-    val port: String?,
+    val port: String? = null,
     val enableDfs: Boolean = false,
-    val folder: String?,
-    val user: String?,
-    val password: String?,
+    val folder: String? = null,
+    val user: String? = null,
+    val password: String? = null,
     val anonymous: Boolean = false,
     val isFtpActiveMode: Boolean = false,
     val encoding: String = DEFAULT_ENCODING,
@@ -32,6 +32,17 @@ data class RemoteConnection(
     val optionReadOnly: Boolean = false,
     val optionAddExtension: Boolean = false,
 ): Parcelable, java.io.Serializable {
+
+    var isInvalid: Boolean
+        private set
+
+    init {
+        isInvalid = false
+    }
+
+    private constructor() : this(id = "", host = "") {
+        isInvalid = true
+    }
 
     /** URI */
     val uri: StorageUri
@@ -57,28 +68,11 @@ data class RemoteConnection(
 
     companion object {
 
-        val INVALID_CONNECTION = create("", "")
+        val INVALID_CONNECTION = RemoteConnection()
 
 
         fun isInvalidConnectionId(connectionId: String): Boolean {
             return connectionId.isEmpty() || DocumentId.isInvalidDocumentId(connectionId)
-        }
-
-        /**
-         * Create RemoteConnection
-         */
-        fun create(id: String, hostText: String): RemoteConnection {
-            return RemoteConnection(
-                id = id,
-                name = hostText,
-                storage = StorageType.default,
-                domain = null,
-                host = hostText,
-                port = null,
-                folder = null,
-                user = null,
-                password = null,
-            )
         }
 
     }

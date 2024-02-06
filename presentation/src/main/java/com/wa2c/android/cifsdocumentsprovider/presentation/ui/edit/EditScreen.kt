@@ -259,7 +259,7 @@ private fun EditScreenContainer(
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        if (connectionState.value == RemoteConnection.INVALID_CONNECTION) {
+        if (connectionState.value.isInvalid) {
             return@Scaffold
         }
 
@@ -570,7 +570,7 @@ private fun EditScreenPreview() {
             isNew = true,
             isBusy = false,
             connectionResult = null,
-            connectionState = mutableStateOf(RemoteConnection.create(id = "test", hostText = "pc1")),
+            connectionState = mutableStateOf(RemoteConnection(id = "test", host = "pc1")),
             onClickBack = {},
             onClickDelete = {},
             onClickSearchHost = {},

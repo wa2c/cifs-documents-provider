@@ -63,7 +63,7 @@ class EditViewModel @Inject constructor(
         launch {
             val connection = paramId?.let {
                 editRepository.getConnection(paramId)?.also { initConnection = it }
-            } ?: RemoteConnection.create(currentId, paramHost ?: "")
+            } ?: RemoteConnection(id = currentId, host = paramHost ?: "")
             remoteConnection.emit(connection)
         }
     }
