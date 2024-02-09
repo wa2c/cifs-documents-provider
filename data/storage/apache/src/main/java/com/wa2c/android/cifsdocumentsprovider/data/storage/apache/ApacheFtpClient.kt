@@ -30,8 +30,12 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftp.FtpFileType
+import org.apache.commons.vfs2.provider.ftps.FtpsDataChannelProtectionLevel
+import org.apache.commons.vfs2.provider.ftps.FtpsFileSystemConfigBuilder
+import org.apache.commons.vfs2.provider.ftps.FtpsMode
 import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
 import java.time.Duration
+import javax.net.ssl.KeyManager
 
 class ApacheFtpClient(
     private val isFtps: Boolean,
@@ -87,15 +91,11 @@ class ApacheFtpClient(
             builder.setFileType(options, FtpFileType.BINARY)
             builder.setControlEncoding(options, ftpConnection.encoding)
         }
-
-        // FTPS settings
         if (isFtps) {
-            SftpFileSystemConfigBuilder.getInstance().also { builder ->
+            FtpsFileSystemConfigBuilder.getInstance().also { builder ->
                 builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
-                builder.setStrictHostKeyChecking(options, "no")
-                builder.setPreferredAuthentications(options, "password")
-                builder.setUserDirIsRoot(options, true)
-                builder.setFileNameEncoding(options, ftpConnection.encoding)
+                builder.setFtpsMode(options, FtpsMode.EXPLICIT)
+                builder.setDataChannelProtectionLevel(options, FtpsDataChannelProtectionLevel.P)
             }
         }
 
