@@ -48,7 +48,7 @@
     <string name="edit_check_connection_ok_message">连接成功。</string>
     <string name="edit_check_connection_wn_message">设置有误。</string>
     <string name="edit_check_connection_ng_message">连接失败。</string>
-    <string name="edit_save_ng_input_message">请填写主机名。</string>
+    <string name="edit_save_ng_input_message">需要名称和主机。</string>
     <string name="edit_save_ng_invalid_id_message">ID 无效。</string>
     <string name="edit_save_ng_duplicate_id_message">ID 重复。</string>
     <string name="edit_save_button">保存</string>

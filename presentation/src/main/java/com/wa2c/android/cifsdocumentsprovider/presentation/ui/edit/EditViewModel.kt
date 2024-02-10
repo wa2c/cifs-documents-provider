@@ -164,6 +164,9 @@ class EditViewModel @Inject constructor(
                     if (RemoteConnection.isInvalidConnectionId(con.id)) {
                         throw EditException.InvalidIdException()
                     }
+                    if (con.name.isEmpty() || con.host.isEmpty()) {
+                        throw EditException.InputRequiredException()
+                    }
                     if (isNew && editRepository.getConnection(con.id) != null) {
                         throw EditException.DuplicatedIdException()
                     }

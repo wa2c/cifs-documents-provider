@@ -48,7 +48,7 @@
     <string name="edit_check_connection_ok_message">Pripojenie úspešné.</string>
     <string name="edit_check_connection_wn_message">Nastavenia majú chybu.</string>
     <string name="edit_check_connection_ng_message">Pripojenie zlyhalo.</string>
-    <string name="edit_save_ng_input_message">Input the host.</string>
+    <string name="edit_save_ng_input_message">Vyžaduje sa meno a hostiteľ.</string>
     <string name="edit_save_ng_invalid_id_message">ID je neplatné.</string>
     <string name="edit_save_ng_duplicate_id_message">ID je duplikované.</string>
     <string name="edit_save_button">Uložiť</string>

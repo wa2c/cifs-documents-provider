@@ -46,7 +46,7 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_check_connection_ok_message,Connection successful.,接続に成功しました。,Pripojenie úspešné.,连接成功。,نجح الاتصال
 ,edit_check_connection_wn_message,Settings has an error.,設定にエラーがあります。,Nastavenia majú chybu.,设置有误。,الإعدادات فيها خطأ
 ,edit_check_connection_ng_message,Connection failed.,接続に失敗しました。,Pripojenie zlyhalo.,连接失败。,فشل الإتصال
-,edit_save_ng_input_message,Input the host.,ホストを入力してください。,Input the host.,请填写主机名。,أدخل المضيف ( الخادم )
+,edit_save_ng_input_message,Name and host are required.,名前とホストは必須です。,Vyžaduje sa meno a hostiteľ.,需要名称和主机。,الاسم والمضيف مطلوب.
 ,edit_save_ng_invalid_id_message,ID is invalid.,IDの文字列が不正です。,ID je neplatné.,ID 无效。,المعرف غير صالح
 ,edit_save_ng_duplicate_id_message,ID is duplicated.,IDが重複しています。,ID je duplikované.,ID 重复。,معرف مكرر.
 ,edit_save_button,Save,保存,Uložiť,保存,حفظ

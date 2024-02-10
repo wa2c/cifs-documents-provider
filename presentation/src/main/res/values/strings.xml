@@ -48,7 +48,7 @@
     <string name="edit_check_connection_ok_message">Connection successful.</string>
     <string name="edit_check_connection_wn_message">Settings has an error.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
-    <string name="edit_save_ng_input_message">Input the host.</string>
+    <string name="edit_save_ng_input_message">Name and host are required.</string>
     <string name="edit_save_ng_invalid_id_message">ID is invalid.</string>
     <string name="edit_save_ng_duplicate_id_message">ID is duplicated.</string>
     <string name="edit_save_button">Save</string>

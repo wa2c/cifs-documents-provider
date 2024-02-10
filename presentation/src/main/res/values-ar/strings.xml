@@ -48,7 +48,7 @@
     <string name="edit_check_connection_ok_message">نجح الاتصال</string>
     <string name="edit_check_connection_wn_message">الإعدادات فيها خطأ</string>
     <string name="edit_check_connection_ng_message">فشل الإتصال</string>
-    <string name="edit_save_ng_input_message">أدخل المضيف ( الخادم )</string>
+    <string name="edit_save_ng_input_message">الاسم والمضيف مطلوب.</string>
     <string name="edit_save_ng_invalid_id_message">المعرف غير صالح</string>
     <string name="edit_save_ng_duplicate_id_message">معرف مكرر.</string>
     <string name="edit_save_button">حفظ</string>
