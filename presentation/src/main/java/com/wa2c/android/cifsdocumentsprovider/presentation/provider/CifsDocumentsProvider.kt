@@ -6,6 +6,7 @@ import android.database.Cursor
 import android.database.MatrixCursor
 import android.graphics.Point
 import android.os.Build
+import android.os.Bundle
 import android.os.CancellationSignal
 import android.os.Handler
 import android.os.HandlerThread
@@ -54,6 +55,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
 
     /** Cifs Repository */
     private val storageRepository: StorageRepository by lazy { provideStorageRepository(providerContext) }
+
+    /** Current files */
+    private val currentFiles: MutableSet<RemoteFile> = mutableSetOf()
 
     /** File handler */
     private val fileHandler: Handler by lazy {
@@ -154,11 +158,50 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val cursor = MatrixCursor(projection.toProjection())
         runOnFileHandler {
             val id = storageRepository.getDocumentId(parentDocumentId)
+            currentFiles.clear()
             storageRepository.getFileChildren(id).forEach { file ->
+                includeFile(cursor, file)
+                currentFiles.add(file)
+            }
+        }
+        return cursor
+    }
+
+    override fun querySearchDocuments(
+        rootId: String?,
+        query: String?,
+        projection: Array<String>?
+    ): Cursor {
+        logD("querySearchDocuments: rootId=$rootId, query=$query, projection=${projection?.contentToString()}")
+        // Search (Android -9)
+        val cursor = MatrixCursor(projection.toProjection())
+        currentFiles.forEach { file ->
+            if (file.name.contains(query ?: "", ignoreCase = true)) {
                 includeFile(cursor, file)
             }
         }
         return cursor
+    }
+
+    override fun querySearchDocuments(
+        rootId: String,
+        projection: Array<String>?,
+        queryArgs: Bundle
+    ): Cursor? {
+        logD("querySearchDocuments: rootId=$rootId, queryArgs=$queryArgs, projection=${projection?.contentToString()}")
+        // Search (Android 10+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            queryArgs.getString(DocumentsContract.QUERY_ARG_DISPLAY_NAME)?.let {
+                val cursor = MatrixCursor(projection.toProjection())
+                currentFiles.forEach { file ->
+                    if (file.name.contains(it, ignoreCase = true)) {
+                        includeFile(cursor, file)
+                    }
+                }
+                return cursor
+            }
+        }
+        return super.querySearchDocuments(rootId, projection, queryArgs)
     }
 
     override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
@@ -300,13 +343,13 @@ class CifsDocumentsProvider : DocumentsProvider() {
             add(DocumentsContract.Root.COLUMN_ROOT_ID, URI_AUTHORITY)
             add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, DocumentId.ROOT_DOCUMENT_ID_TEXT)
             add(DocumentsContract.Root.COLUMN_TITLE, providerContext.getString(R.string.app_name))
-            add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
+            //add(DocumentsContract.Root.COLUMN_SUMMARY, providerContext.getString(R.string.app_summary))
             add(DocumentsContract.Root.COLUMN_MIME_TYPES, "*/*")
-            add(DocumentsContract.Root.COLUMN_AVAILABLE_BYTES, Int.MAX_VALUE)
             add(DocumentsContract.Root.COLUMN_ICON, R.mipmap.ic_launcher)
             add(DocumentsContract.Root.COLUMN_FLAGS,
                 DocumentsContract.Root.FLAG_SUPPORTS_IS_CHILD or
                         DocumentsContract.Root.FLAG_SUPPORTS_CREATE or
+                        DocumentsContract.Root.FLAG_SUPPORTS_SEARCH or
                         if (useAsLocal) DocumentsContract.Root.FLAG_LOCAL_ONLY else 0
             )
         }
