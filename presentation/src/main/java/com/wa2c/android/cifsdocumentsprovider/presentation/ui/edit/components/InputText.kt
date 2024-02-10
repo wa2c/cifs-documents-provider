@@ -12,25 +12,32 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
@@ -56,6 +63,9 @@ fun InputText(
     onClickButton: () -> Unit = {},
     onChange: (String?) -> Unit,
 ) {
+    val isPassword = keyboardOptions.keyboardType == KeyboardType.Password
+    var passwordVisible: Boolean by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -70,10 +80,22 @@ fun InputText(
                 onChange(if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value)
             },
             keyboardOptions = keyboardOptions,
-            visualTransformation = if (keyboardOptions.keyboardType == KeyboardType.Password) {
+            visualTransformation = if (isPassword && !passwordVisible) {
                 PasswordVisualTransformation()
             } else {
                 VisualTransformation.None
+            },
+            trailingIcon = {
+                if (isPassword) {
+                    IconButton(
+                        onClick = { passwordVisible = !passwordVisible }
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_visibility),
+                            contentDescription = "Password visibility",
+                        )
+                    }
+                }
             },
             maxLines = 1,
             modifier = Modifier
@@ -84,10 +106,9 @@ fun InputText(
                 .autofill(
                     autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
                     onFill = { onChange(it) }
-                )
-            ,
+                ),
         )
-        iconResource?.let {res ->
+        iconResource?.let { res ->
             Button(
                 shape = RoundedCornerShape(Theme.Sizes.SS),
                 contentPadding = PaddingValues(0.dp),
