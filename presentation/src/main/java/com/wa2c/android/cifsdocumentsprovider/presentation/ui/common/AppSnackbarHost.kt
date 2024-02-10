@@ -13,8 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
@@ -91,7 +92,7 @@ fun MessageIcon(type: PopupMessageType?) {
     when (type) {
         PopupMessageType.Success -> {
             Icon(
-                painter = painterResource(id = R.drawable.ic_check_ok),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check_ok),
                 contentDescription = "Success",
                 tint = Theme.Colors.CheckOk,
             )
@@ -99,7 +100,7 @@ fun MessageIcon(type: PopupMessageType?) {
 
         PopupMessageType.Warning -> {
             Icon(
-                painter = painterResource(id = R.drawable.ic_check_wn),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check_wn),
                 contentDescription = "Warning",
                 tint = Theme.Colors.CheckWn,
             )
@@ -107,14 +108,14 @@ fun MessageIcon(type: PopupMessageType?) {
 
         PopupMessageType.Error -> {
             Icon(
-                painter = painterResource(id = R.drawable.ic_check_ng),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check_ng),
                 contentDescription = "Error",
                 tint = Theme.Colors.CheckNg,
             )
         }
         null -> {
             Icon(
-                painter = painterResource(id = R.drawable.ic_check_uc),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_check_uc),
                 contentDescription = "Unchecked",
                 tint = Theme.Colors.CheckUc
             )

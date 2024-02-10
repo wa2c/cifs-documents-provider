@@ -14,14 +14,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 
 @Composable
 fun LoadingIconButton(
-    painter: Painter = painterResource(id = R.drawable.ic_reload),
+    imageVector: ImageVector = ImageVector.vectorResource(id = R.drawable.ic_reload),
     contentDescription: String? = stringResource(id = R.string.host_reload_button),
     isLoading: Boolean,
     onClick: () -> Unit,
@@ -33,7 +33,7 @@ fun LoadingIconButton(
         val rotation = remember { Animatable(currentRotation.value) }
 
         Icon(
-            painter = painter,
+            imageVector = imageVector,
             contentDescription = contentDescription,
             modifier = Modifier
                 .rotate(rotation.value)

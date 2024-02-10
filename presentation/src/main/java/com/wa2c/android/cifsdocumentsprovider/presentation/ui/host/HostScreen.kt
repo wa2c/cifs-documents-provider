@@ -25,9 +25,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -163,7 +164,7 @@ fun HostScreenContainer(
                         onClick = { onClickSort() }
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_sort),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_sort),
                             contentDescription = stringResource(id = R.string.host_sort_button),
                         )
                     }
@@ -175,7 +176,10 @@ fun HostScreenContainer(
                 },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
+                            contentDescription = "",
+                        )
                     }
                 },
             )
@@ -237,7 +241,7 @@ private fun HostItem(
             .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.ic_host),
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_host),
             "Host",
             modifier = Modifier.size(48.dp),
         )

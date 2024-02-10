@@ -135,7 +135,7 @@ fun InputText(
                 onClick = onClickButton,
             ) {
                 Icon(
-                    painter = painterResource(id = res),
+                    imageVector = ImageVector.vectorResource(id = res),
                     contentDescription = title,
                 )
             }

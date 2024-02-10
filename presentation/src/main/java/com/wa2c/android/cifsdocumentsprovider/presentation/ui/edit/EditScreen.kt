@@ -40,10 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -222,7 +223,7 @@ private fun EditScreenContainer(
                                     .offset(x = (-Theme.Sizes.M), y = Theme.Sizes.M)
                             ) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.ic_check_bg),
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_check_bg),
                                     contentDescription = "",
                                     tint = MaterialTheme.colorScheme.onSurface,
                                 )
@@ -235,7 +236,7 @@ private fun EditScreenContainer(
                             enabled = isBusy.not(),
                         ) {
                             Icon(
-                                painter = painterResource(id = R.drawable.ic_folder_check),
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_folder_check),
                                 contentDescription = stringResource(id = R.string.edit_check_connection_button),
                             )
                         }
@@ -245,14 +246,17 @@ private fun EditScreenContainer(
                         enabled = isBusy.not(),
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_delete),
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
                             contentDescription = stringResource(id = R.string.edit_delete_button),
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onClickBack) {
-                        Icon(painter = painterResource(id = R.drawable.ic_back), contentDescription = "")
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
+                            contentDescription = "",
+                        )
                     }
                 },
             )
