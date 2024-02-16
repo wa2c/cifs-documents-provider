@@ -33,8 +33,9 @@
     <string name="edit_password_title">パスワード</string>
     <string name="edit_password_hint">匿名の場合は無効</string>
     <string name="edit_anonymous_label">匿名</string>
-    <string name="edit_ftp_mode_title">アクティブモード</string>
     <string name="edit_encoding_title">文字コード</string>
+    <string name="edit_ftp_mode_title">アクティブモード</string>
+    <string name="edit_ftps_implicit_label">暗黙的SSL/TLSモード</string>
     <string name="edit_folder_title">フォルダ</string>
     <string name="edit_folder_hint">未入力の場合は \&quot;/\&quot;</string>
     <string name="edit_option_section_title">オプション</string>

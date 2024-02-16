@@ -33,9 +33,7 @@ import org.apache.commons.vfs2.provider.ftp.FtpFileType
 import org.apache.commons.vfs2.provider.ftps.FtpsDataChannelProtectionLevel
 import org.apache.commons.vfs2.provider.ftps.FtpsFileSystemConfigBuilder
 import org.apache.commons.vfs2.provider.ftps.FtpsMode
-import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
 import java.time.Duration
-import javax.net.ssl.KeyManager
 
 class ApacheFtpClient(
     private val isFtps: Boolean,
@@ -93,8 +91,7 @@ class ApacheFtpClient(
         }
         if (isFtps) {
             FtpsFileSystemConfigBuilder.getInstance().also { builder ->
-                builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
-                builder.setFtpsMode(options, FtpsMode.EXPLICIT)
+                builder.setFtpsMode(options, if (ftpConnection.isImplicitMode) FtpsMode.IMPLICIT else FtpsMode.EXPLICIT)
                 builder.setDataChannelProtectionLevel(options, FtpsDataChannelProtectionLevel.P)
             }
         }
@@ -150,7 +147,8 @@ class ApacheFtpClient(
                 when (c) {
                     is FileNotFoundException,
                     is FileNotFolderException,
-                    is StorageException -> {
+                    is StorageException,
+                    -> {
                         // Warning
                         ConnectionResult.Warning(c)
                     }

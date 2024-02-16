@@ -5,6 +5,8 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_FTPS_IMPLICIT_PORT
+import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
@@ -49,6 +51,16 @@ fun getUriText(type: StorageType, host: String?, port: String?, folder: String?,
     val uri = Paths.get( authority, folder ?: "").toString() + if (isDirectory) "/" else ""
     return "${type.protocol.schema}${URI_START}$uri"
 }
+
+/**
+ * Get port
+ */
+fun getPort(port: String?, type: StorageType, isFtpsImplicit: Boolean): String? {
+    if (!port.isNullOrEmpty()) return port
+    return if (type.protocol == ProtocolType.FTPS && isFtpsImplicit) return "$DEFAULT_FTPS_IMPLICIT_PORT"
+    else null
+}
+
 
 /**
  * Get last path

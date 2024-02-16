@@ -429,6 +429,19 @@ private fun EditScreenContainer(
                         connectionState.value = connectionState.value.copy(anonymous = it)
                     }
 
+                    // Encoding
+                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
+                        InputOption(
+                            title = stringResource(id = R.string.edit_encoding_title),
+                            items = Charset.availableCharsets()
+                                .map { OptionItem(it.key, it.value.name()) },
+                            value = connectionState.value.encoding,
+                            focusManager = focusManager,
+                        ) {
+                            connectionState.value = connectionState.value.copy(encoding = it)
+                        }
+                    }
+
                     // FTP Mode
                     if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
                         InputCheck(
@@ -440,16 +453,14 @@ private fun EditScreenContainer(
                         }
                     }
 
-                    // Encoding
-                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
-                        InputOption(
-                            title = stringResource(id = R.string.edit_encoding_title),
-                            items = Charset.availableCharsets()
-                                .map { OptionItem(it.key, it.value.name()) },
-                            value = connectionState.value.encoding,
+                    // Implicit SSL/TLS Mode
+                    if (protocol == ProtocolType.FTPS) {
+                        InputCheck(
+                            title = stringResource(id = R.string.edit_ftps_implicit_label),
+                            value = connectionState.value.isFtpsImplicit,
                             focusManager = focusManager,
                         ) {
-                            connectionState.value = connectionState.value.copy(encoding = it)
+                            connectionState.value = connectionState.value.copy(isFtpsImplicit = it)
                         }
                     }
 

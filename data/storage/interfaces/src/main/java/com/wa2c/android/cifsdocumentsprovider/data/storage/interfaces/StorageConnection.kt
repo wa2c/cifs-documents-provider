@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
+import com.wa2c.android.cifsdocumentsprovider.common.utils.getPort
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
@@ -23,7 +24,7 @@ sealed class StorageConnection {
     abstract val readOnly: Boolean
     abstract val extension: Boolean
 
-    val uri: String
+    open val uri: String
         get() = getUriText(storage, host, port, folder, true) ?: ""
 
     val isAnonymous: Boolean
@@ -76,7 +77,11 @@ sealed class StorageConnection {
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
         override val extension: Boolean = false,
-        val isActiveMode: Boolean,
         val encoding: String,
-    ) : StorageConnection()
+        val isActiveMode: Boolean,
+        val isImplicitMode: Boolean = false,
+    ) : StorageConnection() {
+        override val uri: String
+            get() = getUriText(storage, host, getPort(port, storage, isImplicitMode), folder, true) ?: ""
+    }
 }

@@ -33,8 +33,9 @@
     <string name="edit_password_title">Heslo</string>
     <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_anonymous_label">Anonymné prihlásenie</string>
-    <string name="edit_ftp_mode_title">Aktívny režim</string>
     <string name="edit_encoding_title">Kód postavy</string>
+    <string name="edit_ftp_mode_title">Aktívny režim</string>
+    <string name="edit_ftps_implicit_label">Implicitný režim SSL/TLS</string>
     <string name="edit_folder_title">Cesta</string>
     <string name="edit_folder_hint">\&quot;/\&quot; ak nevyplníte</string>
     <string name="edit_option_section_title">možnosti</string>

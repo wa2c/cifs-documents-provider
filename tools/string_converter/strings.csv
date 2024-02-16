@@ -31,8 +31,9 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_password_title,Password,パスワード,Heslo,密码,كلمة المرور
 ,edit_password_hint,Invalid if anonymous,匿名の場合は無効,Neplatí pre anonymné prihlásenie,匿名访问时无效,باطل إذا كان مجهول
 ,edit_anonymous_label,Anonymous,匿名,Anonymné prihlásenie,匿名,مجهول
-,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
 ,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
+,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
+,edit_ftps_implicit_label,Implicit SSL/TLS Mode,暗黙的SSL/TLSモード,Implicitný režim SSL/TLS,隐式SSL/TLS模式,وضع SSL/TLS الضمني
 ,edit_folder_title,Folder,フォルダ,Cesta,目录,المجلد
 ,edit_folder_hint,"""/"" if empty","未入力の場合は ""/""","""/"" ak nevyplníte","如果留空则为 ""/""","""/"" إذا كان خاليا"
 ,edit_option_section_title,Option,オプション,možnosti,选项,خيارات

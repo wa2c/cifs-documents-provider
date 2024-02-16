@@ -141,6 +141,7 @@ internal object DomainMapper {
                     user = user,
                     password = password,
                     anonymous = anonymous,
+                    isFtpsImplicit = isImplicitMode,
                     isFtpActiveMode = isActiveMode,
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
@@ -222,8 +223,9 @@ internal object DomainMapper {
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
                     extension = optionAddExtension,
-                    isActiveMode = isFtpActiveMode,
                     encoding = encoding,
+                    isActiveMode = isFtpActiveMode,
+                    isImplicitMode = isFtpsImplicit,
                 )
             }
         }
