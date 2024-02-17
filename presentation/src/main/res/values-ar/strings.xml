@@ -111,4 +111,5 @@
     <string name="enum_theme_default">الوضع الطبيعي</string>
     <string name="enum_theme_light">نهاري</string>
     <string name="enum_theme_dark">ليلي</string>
+    <string name="settings_info_help">مساعدة</string>
 </resources>

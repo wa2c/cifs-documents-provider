@@ -111,4 +111,5 @@
     <string name="enum_theme_default">デフォルト</string>
     <string name="enum_theme_light">ライト</string>
     <string name="enum_theme_dark">ダーク</string>
+    <string name="settings_info_help">ヘルプ</string>
 </resources>

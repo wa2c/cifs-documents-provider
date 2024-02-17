@@ -111,4 +111,5 @@
     <string name="enum_theme_default">Predvolené</string>
     <string name="enum_theme_light">Svetlo</string>
     <string name="enum_theme_dark">Tmavý</string>
+    <string name="settings_info_help">Pomoc</string>
 </resources>

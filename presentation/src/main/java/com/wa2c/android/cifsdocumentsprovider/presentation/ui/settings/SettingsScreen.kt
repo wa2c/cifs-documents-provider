@@ -1,40 +1,26 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.material3.internal.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -63,6 +50,44 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoic
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
+import java.util.*
+
+class HelpWebViewClient(private val context: Context) : WebViewClient() {
+
+    @Deprecated("Deprecated in Java")
+    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+        // Open the URL externally using the default browser
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+        return true
+    }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ShowHelpContent() {
+    val context = LocalContext.current
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(id = R.string.settings_info_help)) },
+                colors = getAppTopAppBarColors(),
+            )
+        }
+    ) {
+        AndroidView(
+            factory = { context ->
+                WebView(context).apply {
+                    webViewClient = HelpWebViewClient(context)
+                    loadUrl("file:///android_asset/help.html")
+                }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
 
 /**
  * Settings Screen
@@ -80,6 +105,7 @@ fun SettingsScreen(
     val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
     val useForeground = viewModel.useForegroundFlow.collectAsStateWithLifecycle(false)
     val showLibraries = remember { mutableStateOf(false) }
+    val showHelp = remember { mutableStateOf(false) }
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -88,6 +114,8 @@ fun SettingsScreen(
             viewModel.setUiTheme(it)
             AppCompatDelegate.setDefaultNightMode(it.mode)
         },
+        showHelp = showHelp.value,
+        onShowHelp = { showHelp.value = true },
         language = Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()),
         onSetLanguage = {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code))
@@ -116,7 +144,10 @@ fun SettingsScreen(
         onClickBack = {
             if (showLibraries.value) {
                 showLibraries.value = false
-            } else {
+            } else if (showHelp.value) {
+                showHelp.value = false
+            }
+            else {
                 onNavigateBack()
             }
         }
@@ -141,6 +172,8 @@ private fun SettingsScreenContainer(
     useForeground: Boolean,
     onSetUseForeground: (Boolean) -> Unit,
     showLibraries: Boolean,
+    showHelp: Boolean,
+    onShowHelp: () -> Unit,
     onClickLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
     onClickBack: () -> Unit,
@@ -175,6 +208,9 @@ private fun SettingsScreenContainer(
                         contentColor = MaterialTheme.colorScheme.onBackground,
                     ),
                 )
+            }  else if (showHelp) {
+                // Help screen
+                ShowHelpContent()
             } else {
                 // Settings screen
                 SettingsList(
@@ -190,6 +226,7 @@ private fun SettingsScreenContainer(
                     onSetUseForeground = onSetUseForeground,
                     onShowLibraries = onClickLibraries,
                     onStartIntent = onStartIntent,
+                    onShowHelp = onShowHelp,
                 )
             }
         }
@@ -216,6 +253,7 @@ private fun SettingsList(
     onSetUseForeground: (Boolean) -> Unit,
     onShowLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
+    onShowHelp: () -> Unit,
 ) {
     val context = LocalContext.current
     // Scrollable container
@@ -224,6 +262,11 @@ private fun SettingsList(
         item {
             // Settings Title
             TitleItem(text = stringResource(id = R.string.settings_section_set))
+
+            // Help
+            SettingsItem(text = stringResource(id = R.string.settings_info_help)) {
+                onShowHelp()
+            }
 
             // UI Theme
             SettingsSingleChoiceItem(
