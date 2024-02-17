@@ -26,6 +26,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
+import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
@@ -202,6 +203,23 @@ class CifsDocumentsProvider : DocumentsProvider() {
             }
         }
         return super.querySearchDocuments(rootId, projection, queryArgs)
+    }
+
+    override fun findDocumentPath(
+        parentDocumentId: String?,
+        childDocumentId: String?
+    ): DocumentsContract.Path {
+        parentDocumentId ?: throw FileNotFoundException()
+        val pathList = mutableListOf<String>()
+        var currentId = childDocumentId ?: throw FileNotFoundException()
+        do {
+            pathList.add(0, currentId)
+            currentId = currentId.trimEnd(URI_SEPARATOR).let { it.substring(0, it.lastIndexOf(URI_SEPARATOR) + 1) }
+        } while (currentId.contains(parentDocumentId))
+        return DocumentsContract.Path(
+            DocumentId.fromIdText(parentDocumentId)?.connectionId,
+            pathList
+        )
     }
 
     override fun isChildDocument(parentDocumentId: String?, documentId: String?): Boolean {
