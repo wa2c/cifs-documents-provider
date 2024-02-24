@@ -38,7 +38,8 @@ internal object DomainMapper {
                 formatter.decodeFromString<StorageConnection.Cifs>(json)
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS,
+            StorageType.APACHE_SFTP -> {
                 formatter.decodeFromString<StorageConnection.Ftp>(json)
             }
         }
@@ -209,7 +210,8 @@ internal object DomainMapper {
                 )
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS,
+            StorageType.APACHE_SFTP, -> {
                 StorageConnection.Ftp(
                     id = id,
                     name = name,

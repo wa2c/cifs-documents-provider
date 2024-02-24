@@ -46,6 +46,12 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.apache.commons.net)
     implementation(libs.apache.commons.vfs)
+    implementation("com.jcraft:jsch:0.1.55")
+//    implementation("commons-logging:commons-logging:1.3.0")
+//    implementation("org.apache.commons:commons-lang3:3.14.0")
+
+
+
 
     testImplementation(libs.junit)
 }

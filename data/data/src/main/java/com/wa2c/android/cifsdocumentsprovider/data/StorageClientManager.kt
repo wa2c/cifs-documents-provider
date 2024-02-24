@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.data
 
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheSftpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
@@ -28,6 +29,9 @@ class StorageClientManager(
     /** Apache FTPS client */
     private val apacheFtpsClient = lazy { ApacheFtpClient(true, fileOpenLimit) }
 
+    /** Apache SFTP client */
+    private val apacheSftpClient = lazy { ApacheSftpClient(fileOpenLimit) }
+
     /**
      * Get client
      */
@@ -38,6 +42,7 @@ class StorageClientManager(
             StorageType.JCIFS_LEGACY -> jCifsNgLegacyClient.value
             StorageType.APACHE_FTP -> apacheFtpClient.value
             StorageType.APACHE_FTPS -> apacheFtpsClient.value
+            StorageType.APACHE_SFTP -> apacheSftpClient.value
         }
     }
 
@@ -50,6 +55,7 @@ class StorageClientManager(
         if (jCifsNgLegacyClient.isInitialized()) jCifsNgLegacyClient.value.close()
         if (apacheFtpClient.isInitialized()) apacheFtpClient.value.close()
         if (apacheFtpsClient.isInitialized()) apacheFtpsClient.value.close()
+        if (apacheSftpClient.isInitialized()) apacheSftpClient.value.close()
     }
 
 }

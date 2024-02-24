@@ -12,5 +12,7 @@ enum class ProtocolType(
     FTP("ftp"),
     /** FTP over SSL */
     FTPS("ftps"),
+    /** SSH FTP */
+    SFTP("sftp"),
     ;
 }
