@@ -45,10 +45,6 @@ android {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {

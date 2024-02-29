@@ -2,7 +2,6 @@ package com.wa2c.android.cifsdocumentsprovider
 
 import android.app.Application
 import com.wa2c.android.cifsdocumentsprovider.common.utils.initLog
-import com.wa2c.android.cifsdocumentsprovider.data.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.runBlocking
