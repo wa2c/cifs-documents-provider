@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings
 
 import android.content.Intent
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -24,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,6 +39,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStateAdapter
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsList
@@ -173,4 +177,31 @@ private fun SettingsScreenContainer(
 
     // Back button
     BackHandler { onClickBack() }
+}
+
+/**
+ * Preview
+ */
+@Preview(
+    name = "Preview",
+    group = "Group",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+)
+@Composable
+private fun SettingsScreenContainerPreview() {
+    Theme.AppTheme {
+        SettingsScreenContainer(
+            snackbarHostState = remember { SnackbarHostState() },
+            theme = remember { mutableStateOf(UiTheme.DEFAULT) },
+            language = remember { mutableStateOf(Language.default) },
+            openFileLimit = remember { mutableIntStateOf(OPEN_FILE_LIMIT_DEFAULT) },
+            useForeground = remember { mutableStateOf(false) },
+            useAsLocal = remember { mutableStateOf(false) },
+            showLibraries = false,
+            onClickLibraries = {},
+            onStartIntent = {},
+            onClickBack = {},
+        )
+    }
 }

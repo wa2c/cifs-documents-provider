@@ -1,18 +1,25 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
 /**
  * Settings Screen
@@ -92,5 +99,29 @@ internal fun SettingsList(
                 )
             }
         }
+    }
+}
+
+/**
+ * Preview
+ */
+@Preview(
+    name = "Preview",
+    group = "Group",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+)
+@Composable
+private fun SettingsListPreview() {
+    Theme.AppTheme {
+        SettingsList(
+            theme = remember { mutableStateOf(UiTheme.DEFAULT) },
+            language = remember { mutableStateOf(Language.default) },
+            openFileLimit = remember { mutableIntStateOf(OPEN_FILE_LIMIT_DEFAULT) },
+            useForeground = remember { mutableStateOf(false) },
+            useAsLocal = remember { mutableStateOf(false) },
+            onShowLibraries = {},
+            onStartIntent = {},
+        )
     }
 }
