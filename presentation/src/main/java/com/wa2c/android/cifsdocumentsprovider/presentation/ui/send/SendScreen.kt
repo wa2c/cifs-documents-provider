@@ -216,7 +216,7 @@ private fun SendDataItem(
             style = MaterialTheme.typography.bodyMedium,
         )
         LinearProgressIndicator(
-            progress = (sendData.progress.toFloat() / 100),
+            progress = { (sendData.progress.toFloat() / 100) },
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (sendData.state.inProgress) 1f else 0f),
