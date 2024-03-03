@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,14 +25,13 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 @Composable
 internal fun SettingsCheckItem(
     text: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    checked: MutableState<Boolean>,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(64.dp)
-            .clickable(enabled = true, onClick = { onCheckedChange(!checked) })
+            .clickable(enabled = true, onClick = { checked.value = !checked.value })
             .padding(horizontal = Theme.Sizes.M, vertical = Theme.Sizes.S)
     ) {
         Text(
@@ -40,8 +42,8 @@ internal fun SettingsCheckItem(
             ,
         )
         Checkbox(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
+            checked = checked.value,
+            onCheckedChange = { checked.value = !checked.value  },
         )
     }
     DividerThin()
@@ -61,7 +63,7 @@ private fun SettingsCheckItemPreview() {
     Theme.AppTheme {
         SettingsCheckItem(
             text = "Settings Check Item",
-            checked = true,
-        ) {}
+            checked = remember { mutableStateOf(true) },
+        )
     }
 }

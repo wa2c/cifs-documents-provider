@@ -15,6 +15,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -34,6 +35,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStateAdapter
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsList
@@ -49,29 +51,39 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val theme = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT)
-    val openFileLimit = viewModel.openFileLimitFlow.collectAsStateWithLifecycle(OPEN_FILE_LIMIT_DEFAULT)
-    val useAsLocal = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(false)
-    val useForeground = viewModel.useForegroundFlow.collectAsStateWithLifecycle(false)
     val showLibraries = remember { mutableStateOf(false) }
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
-        theme = theme.value,
-        onSetUiTheme = {
-            viewModel.setUiTheme(it)
-            AppCompatDelegate.setDefaultNightMode(it.mode)
-        },
-        language = Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()),
-        onSetLanguage = {
-            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code))
-        },
-        openFileLimit = openFileLimit.value,
-        onSetOpenFileLimit = { viewModel.setOpenFileLimit(it) },
-        useAsLocal = useAsLocal.value,
-        onSetUseAsLocal = { viewModel.setUseAsLocal(it) },
-        useForeground = useForeground.value,
-        onSetUseForeground = { viewModel.setUseForeground(it) },
+        theme = MutableStateAdapter(
+            state = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT),
+            mutate = { value ->
+                value?.let {
+                    viewModel.setUiTheme(it)
+                    AppCompatDelegate.setDefaultNightMode(it.mode)
+                }
+            },
+        ),
+        language = MutableStateAdapter(
+            state =  remember {
+                mutableStateOf(Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()))
+            },
+            mutate = { value ->
+                value?.let { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code)) }
+            },
+        ),
+        openFileLimit = MutableStateAdapter(
+            state = viewModel.openFileLimitFlow.collectAsStateWithLifecycle(initialValue = OPEN_FILE_LIMIT_DEFAULT),
+            mutate = viewModel::setOpenFileLimit,
+        ),
+        useForeground = MutableStateAdapter(
+            state = viewModel.useForegroundFlow.collectAsStateWithLifecycle(initialValue = false),
+            mutate = viewModel::setUseForeground,
+        ),
+        useAsLocal = MutableStateAdapter(
+            state = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(initialValue = false),
+            mutate = viewModel::setUseAsLocal,
+        ),
         showLibraries = showLibraries.value,
         onClickLibraries = {
             showLibraries.value = true
@@ -104,16 +116,11 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenContainer(
     snackbarHostState: SnackbarHostState,
-    theme: UiTheme,
-    onSetUiTheme: (UiTheme) -> Unit,
-    language: Language,
-    onSetLanguage: (Language) -> Unit,
-    openFileLimit: Int,
-    onSetOpenFileLimit: (Int) -> Unit,
-    useAsLocal: Boolean,
-    onSetUseAsLocal: (Boolean) -> Unit,
-    useForeground: Boolean,
-    onSetUseForeground: (Boolean) -> Unit,
+    theme: MutableState<UiTheme?>,
+    language: MutableState<Language?>,
+    openFileLimit: MutableState<Int>,
+    useForeground:  MutableState<Boolean>,
+    useAsLocal:  MutableState<Boolean>,
     showLibraries: Boolean,
     onClickLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
@@ -153,15 +160,10 @@ private fun SettingsScreenContainer(
                 // Settings screen
                 SettingsList(
                     theme = theme,
-                    onSetUiTheme = onSetUiTheme,
                     language = language,
-                    onSetLanguage = onSetLanguage,
                     openFileLimit = openFileLimit,
-                    onSetOpenFileLimit = onSetOpenFileLimit,
-                    useAsLocal = useAsLocal,
-                    onSetUseAsLocal = onSetUseAsLocal,
                     useForeground = useForeground,
-                    onSetUseForeground = onSetUseForeground,
+                    useAsLocal = useAsLocal,
                     onShowLibraries = onClickLibraries,
                     onStartIntent = onStartIntent,
                 )

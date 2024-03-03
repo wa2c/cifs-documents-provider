@@ -5,28 +5,25 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 
 /**
  * Settings Screen
  */
 @Composable
 internal fun SettingsList(
-    theme: UiTheme,
-    onSetUiTheme: (UiTheme) -> Unit,
-    language: Language,
-    onSetLanguage: (Language) -> Unit,
-    openFileLimit: Int,
-    onSetOpenFileLimit: (Int) -> Unit,
-    useAsLocal: Boolean,
-    onSetUseAsLocal: (Boolean) -> Unit,
-    useForeground: Boolean,
-    onSetUseForeground: (Boolean) -> Unit,
+    theme: MutableState<UiTheme?>,
+    language: MutableState<Language?>,
+    openFileLimit: MutableState<Int>,
+    useForeground: MutableState<Boolean>,
+    useAsLocal: MutableState<Boolean>,
     onShowLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
 ) {
@@ -41,44 +38,34 @@ internal fun SettingsList(
             // UI Theme
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_theme),
-                items = UiTheme.entries.map { it.getLabel(context) }.toList(),
-                selectedIndex = UiTheme.entries.indexOf(theme),
-            ) {
-                onSetUiTheme(UiTheme.findByIndexOrDefault(it))
-            }
+                items = UiTheme.entries.map { OptionItem(it, it.getLabel(context)) }.toList(),
+                selectedItem = theme,
+            )
 
             // Language
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_language),
-                items = Language.entries.map { it.getLabel(context) }.toList(),
-                selectedIndex = Language.entries.indexOf(language),
-            ) {
-                onSetLanguage(Language.findByIndexOrDefault(it))
-            }
+                items = Language.entries.map { OptionItem(it, it.getLabel(context)) }.toList(),
+                selectedItem = language,
+            )
 
             // Open File Limit
             SettingsInputNumberItem(
                 text = stringResource(id = R.string.settings_open_file_limit),
                 value = openFileLimit,
-            ) {
-                onSetOpenFileLimit(it)
-            }
+            )
 
             // Use Foreground Service
             SettingsCheckItem(
                 text = stringResource(R.string.settings_set_use_foreground),
                 checked = useForeground,
-            ) {
-                onSetUseForeground(it)
-            }
+            )
 
             // Use Local
             SettingsCheckItem(
                 text = stringResource(id = R.string.settings_set_use_as_local),
                 checked = useAsLocal,
-            ) {
-                onSetUseAsLocal(it)
-            }
+            )
 
             // Information Title
             TitleItem(text = stringResource(id = R.string.settings_section_info))

@@ -11,6 +11,9 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
@@ -27,10 +30,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 @Composable
 internal fun SettingsInputNumberItem(
     text: String,
-    value: Int,
+    value: MutableState<Int>,
     maxValue: Int = 999,
     minValue: Int = 1,
-    onValueChange: (Int)  -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -45,7 +47,7 @@ internal fun SettingsInputNumberItem(
                 .weight(weight = 1f, fill = true),
         )
         OutlinedTextField(
-            value = value.toString(),
+            value = value.value.toString(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,
@@ -56,7 +58,7 @@ internal fun SettingsInputNumberItem(
                 .width(80.dp),
             onValueChange = {
                 val number = it.toIntOrNull() ?: minValue
-                onValueChange(number.coerceIn(minValue, maxValue))
+                value.value = number.coerceIn(minValue, maxValue)
             }
         )
     }
@@ -77,7 +79,7 @@ private fun SettingsInputNumberItemPreview() {
     Theme.AppTheme {
         SettingsInputNumberItem(
             text = "Settings Input Number Item",
-            value = 9999,
-        ) {}
+            value = remember { mutableIntStateOf(9999) },
+        )
     }
 }

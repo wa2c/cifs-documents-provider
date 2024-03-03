@@ -2,11 +2,13 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.componen
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
@@ -14,11 +16,10 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
  * Settings single choice item
  */
 @Composable
-internal fun SettingsSingleChoiceItem(
+internal fun <T> SettingsSingleChoiceItem(
     title: String,
-    items: List<String>,
-    selectedIndex: Int,
-    onSetIndex: (Int) -> Unit,
+    items: List<OptionItem<T>>,
+    selectedItem: MutableState<T?>,
 ) {
     val showThemeDialog = remember { mutableStateOf(false) }
 
@@ -28,15 +29,15 @@ internal fun SettingsSingleChoiceItem(
 
     if (showThemeDialog.value) {
         SingleChoiceDialog(
-            items = items,
-            selectedIndex = selectedIndex,
+            items = items.map { it.label },
+            selectedIndex = items.indexOfFirst { it.value == selectedItem.value },
             title = title,
             dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
                 showThemeDialog.value = false
             },
             onDismiss = { showThemeDialog.value = false }
         ) { index, _ ->
-            onSetIndex(index)
+            selectedItem.value = items[index].value
             showThemeDialog.value = false
         }
     }
@@ -56,8 +57,8 @@ private fun SettingsSingleChoiceItemPreview() {
     Theme.AppTheme {
         SettingsSingleChoiceItem(
             title = "Single Choice Item",
-            items = listOf("Item1", "Item2", "Item3"),
-            selectedIndex = 0,
-        ) {}
+            items = listOf(OptionItem("1", "Item1"), OptionItem("2","Item2"), OptionItem("3","Item3")),
+            selectedItem = remember { mutableStateOf("Item1") },
+        )
     }
 }
