@@ -62,10 +62,8 @@ fun SettingsScreen(
         theme = MutableStateAdapter(
             state = viewModel.uiThemeFlow.collectAsStateWithLifecycle(UiTheme.DEFAULT),
             mutate = { value ->
-                value?.let {
-                    viewModel.setUiTheme(it)
-                    AppCompatDelegate.setDefaultNightMode(it.mode)
-                }
+                viewModel.setUiTheme(value)
+                AppCompatDelegate.setDefaultNightMode(value.mode)
             },
         ),
         language = MutableStateAdapter(
@@ -73,7 +71,7 @@ fun SettingsScreen(
                 mutableStateOf(Language.findByCodeOrDefault(AppCompatDelegate.getApplicationLocales().toLanguageTags()))
             },
             mutate = { value ->
-                value?.let { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(it.code)) }
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(value.code))
             },
         ),
         openFileLimit = MutableStateAdapter(
@@ -120,8 +118,8 @@ fun SettingsScreen(
 @Composable
 private fun SettingsScreenContainer(
     snackbarHostState: SnackbarHostState,
-    theme: MutableState<UiTheme?>,
-    language: MutableState<Language?>,
+    theme: MutableState<UiTheme>,
+    language: MutableState<Language>,
     openFileLimit: MutableState<Int>,
     useForeground:  MutableState<Boolean>,
     useAsLocal:  MutableState<Boolean>,

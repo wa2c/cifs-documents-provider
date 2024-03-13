@@ -19,26 +19,26 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 internal fun <T> SettingsSingleChoiceItem(
     title: String,
     items: List<OptionItem<T>>,
-    selectedItem: MutableState<T?>,
+    selectedItem: MutableState<T>,
 ) {
-    val showThemeDialog = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
 
     SettingsItem(text = title) {
-        showThemeDialog.value = true
+        showDialog.value = true
     }
 
-    if (showThemeDialog.value) {
+    if (showDialog.value) {
         SingleChoiceDialog(
             items = items.map { it.label },
             selectedIndex = items.indexOfFirst { it.value == selectedItem.value },
             title = title,
             dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
-                showThemeDialog.value = false
+                showDialog.value = false
             },
-            onDismiss = { showThemeDialog.value = false }
+            onDismiss = { showDialog.value = false }
         ) { index, _ ->
             selectedItem.value = items[index].value
-            showThemeDialog.value = false
+            showDialog.value = false
         }
     }
 }

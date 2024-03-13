@@ -26,8 +26,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
  */
 @Composable
 internal fun SettingsList(
-    theme: MutableState<UiTheme?>,
-    language: MutableState<Language?>,
+    theme: MutableState<UiTheme>,
+    language: MutableState<Language>,
     openFileLimit: MutableState<Int>,
     useForeground: MutableState<Boolean>,
     useAsLocal: MutableState<Boolean>,
@@ -45,14 +45,14 @@ internal fun SettingsList(
             // UI Theme
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_theme),
-                items = UiTheme.entries.map { OptionItem(it, it.getLabel(context)) }.toList(),
+                items = UiTheme.entries.map { OptionItem(it, it.getLabel(context)) },
                 selectedItem = theme,
             )
 
             // Language
             SettingsSingleChoiceItem(
                 title = stringResource(id = R.string.settings_set_language),
-                items = Language.entries.map { OptionItem(it, it.getLabel(context)) }.toList(),
+                items = Language.entries.map { OptionItem(it, it.getLabel(context)) },
                 selectedItem = language,
             )
 
