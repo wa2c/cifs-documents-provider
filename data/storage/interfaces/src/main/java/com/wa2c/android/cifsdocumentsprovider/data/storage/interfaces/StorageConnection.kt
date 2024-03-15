@@ -61,7 +61,7 @@ sealed class StorageConnection {
     ) : StorageConnection()
 
     /**
-     * FTP
+     * FTP / FTPS(FTP over SSL/TLS)
      */
     @Serializable
     data class Ftp(
@@ -84,4 +84,25 @@ sealed class StorageConnection {
         override val uri: String
             get() = getUriText(storage, host, getPort(port, storage, isImplicitMode), folder, true) ?: ""
     }
+
+    /**
+     * SFTP(Secure FTP)
+     */
+    @Serializable
+    data class Sftp(
+        override val id: String,
+        override val name: String,
+        override val storage: StorageType = StorageType.default,
+        override val host: String,
+        override val port: String?,
+        override val folder: String?,
+        override val user: String?,
+        override val password: String?,
+        override val anonymous: Boolean = false,
+        override val safeTransfer: Boolean = false,
+        override val readOnly: Boolean = false,
+        override val extension: Boolean = false,
+        val keyFileUri: String? = null,
+        val encoding: String,
+    ) : StorageConnection()
 }

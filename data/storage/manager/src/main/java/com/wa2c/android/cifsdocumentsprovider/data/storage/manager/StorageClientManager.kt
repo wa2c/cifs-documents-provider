@@ -1,18 +1,27 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.storage.manager
 
+import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheSftpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Storage Client Manager
  */
-class StorageClientManager(
-    private val fileOpenLimit: Int,
+@Singleton
+class StorageClientManager @Inject constructor(
+    private val preferences: AppPreferencesDataStore,
 ) {
+    private val fileOpenLimit: Int
+        get() = runBlocking { preferences.openFileLimitFlow.first() }
 
     /** jCIFS NG (SMB2,3) client */
     private val jCifsNgClient = lazy { JCifsNgClient(false, fileOpenLimit) }
