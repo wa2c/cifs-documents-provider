@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -99,6 +100,10 @@ class EditViewModel @Inject constructor(
     private val _keyCheckResult = MutableSharedFlow<Result<Uri?>>()
     val keyCheckResult = _keyCheckResult.asSharedFlow()
 
+    // first: grant permission uri / second: revoke permission uri
+    private val _updatePermission = MutableSharedFlow<Pair<Uri?, Uri?>>()
+    val updatePermission = _updatePermission.asSharedFlow()
+
     /**
      * Check connection
      */
@@ -182,6 +187,12 @@ class EditViewModel @Inject constructor(
                         throw EditException.DuplicatedIdException()
                     }
                     editRepository.saveConnection(con)
+
+                    // update permission
+                    val grantPermissionUri = con.keyFileUri?.toUri()
+                    val revokePermissionUri = initConnection.keyFileUri?.takeIf { it != con.keyFileUri }?.toUri()
+                    _updatePermission.emit(grantPermissionUri to revokePermissionUri)
+
                     currentId = con.id
                     initConnection = con
                 }

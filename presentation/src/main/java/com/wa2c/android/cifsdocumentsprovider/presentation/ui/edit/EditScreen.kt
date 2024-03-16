@@ -238,14 +238,16 @@ fun EditScreen(
         viewModel.keyCheckResult.collectIn(lifecycleOwner) { result ->
             // TODO fix message
             if (result.isSuccess) {
-                result.getOrNull()?.let {
-                    context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-
                 scope.showPopup(snackbarHostState, R.string.edit_check_connection_ok_message, ConnectionResult.Success.messageType)
             } else {
                 scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
             }
+        }
+
+        // Update permissions
+        viewModel.updatePermission.collectIn(lifecycleOwner) { (grantPermission, revokePermission) ->
+            revokePermission?.let { context.contentResolver.releasePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            grantPermission?.let { context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         }
     }
 }
@@ -504,7 +506,7 @@ private fun EditScreenContainer(
                             },
                             focusManager = focusManager,
                             readonly = true,
-                            iconResource = R.drawable.ic_folder,
+                            iconResource = R.drawable.ic_key,
                             keyboardOptions = KeyboardOptions(
                                 keyboardType = KeyboardType.Uri,
                                 imeAction = ImeAction.Next,
@@ -537,7 +539,7 @@ private fun EditScreenContainer(
                     }
 
                     // Encoding
-                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
+                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS || protocol == ProtocolType.SFTP) {
                         InputOption(
                             title = stringResource(id = R.string.edit_encoding_title),
                             items = Charset.availableCharsets()
