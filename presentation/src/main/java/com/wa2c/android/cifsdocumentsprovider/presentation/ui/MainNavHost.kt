@@ -173,7 +173,7 @@ internal fun MainNavHost(
         ) {
             SendScreen(
                 onNavigateFinish = {
-                    navController.popBackStack()
+                    onCloseApp()
                 }
             )
         }

@@ -83,6 +83,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAp
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.InputText
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.KeyInputDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SubsectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.UriText
@@ -193,7 +194,15 @@ fun EditScreen(
     }
 
     if (showKeyInputDialog) {
-        // TODO
+        KeyInputDialog(
+            onInput = {
+                viewModel.inputKey(it)
+                showKeyInputDialog = false
+            },
+            onDismiss = {
+                showKeyInputDialog = false
+            }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -489,8 +498,8 @@ private fun EditScreenContainer(
                             title = "秘密鍵",
                             hint = "秘密鍵は選択されていません。",
                             value = let {
-                                if (connectionState.value.keyData.isNullOrEmpty()) "保存されています。"
-                                else if (connectionState.value.keyFileUri.isNullOrEmpty()) "選択されています。"
+                                if (!connectionState.value.keyData.isNullOrEmpty()) "保存されています。"
+                                else if (!connectionState.value.keyFileUri.isNullOrEmpty()) "選択されています。"
                                 else null
                             },
                             focusManager = focusManager,

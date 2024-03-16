@@ -24,14 +24,14 @@ class ApacheSftpClient(
         SftpFileSystemConfigBuilder.getInstance().also { builder ->
             builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setSessionTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
-            builder.setPreferredAuthentications(options, "password,publickey")
+            builder.setPreferredAuthentications(options, "publickey,password")
             builder.setStrictHostKeyChecking(options, "no")
-            builder.setFileNameEncoding(options, "UTF-8")
+            builder.setFileNameEncoding(options, sftpConnection.encoding)
             // Key
-            sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
+            (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
                 try { onKeyRead(uri) } catch (e: Exception) { null }
-            }?.let {
-                val identity = BytesIdentityInfo(it, sftpConnection.password?.encodeToByteArray())
+            })?.let { keyBinary ->
+                val identity = BytesIdentityInfo(keyBinary, sftpConnection.password?.encodeToByteArray())
                 builder.setIdentityProvider(options, identity)
             }
         }

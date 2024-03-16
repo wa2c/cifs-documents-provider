@@ -204,7 +204,7 @@ class EditViewModel @Inject constructor(
             runCatching {
                 editRepository.loadKeyFile(uri.toString()) // check key
             }.onSuccess {
-                remoteConnection.value = remoteConnection.value.copy(keyFileUri = uri.toString(), keyData = null)
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = uri.toString(), keyData = null))
                 _keyCheckResult.emit(Result.success(uri))
             }.onFailure {
                 _keyCheckResult.emit(Result.failure(it))
@@ -223,7 +223,23 @@ class EditViewModel @Inject constructor(
             runCatching {
                 editRepository.loadKeyFile(uri.toString())
             }.onSuccess {
-                remoteConnection.value = remoteConnection.value.copy(keyFileUri = null, keyData = it)
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = it))
+                _keyCheckResult.emit(Result.success(null))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
+    }
+
+    fun inputKey(key: String) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.checkKey(key)
+            }.onSuccess {
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = key))
                 _keyCheckResult.emit(Result.success(null))
             }.onFailure {
                 _keyCheckResult.emit(Result.failure(it))
@@ -234,7 +250,9 @@ class EditViewModel @Inject constructor(
     }
 
     fun clearKey() {
-        remoteConnection.value = remoteConnection.value.copy(keyFileUri = null, keyData = null)
+        launch {
+            remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = null))
+        }
     }
 
     override fun onCleared() {

@@ -147,16 +147,15 @@ class EditRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val binary = documentFileManager.loadFile(uri) ?: throw EditException.KeyAccessFailedException()
             if (!sshKeyManager.checkKeyFile(binary)) throw EditException.InvalidKeyException()
-            binary.toString()
+            String(binary)
         }
     }
 
-    suspend fun checkKeyData(uri: String): Boolean {
+    suspend fun checkKey(key: String) {
         return withContext(dispatcher) {
-            documentFileManager.loadFile(uri)?.let {
-                sshKeyManager.checkKeyFile(it)
-            } ?: false
+            if (!sshKeyManager.checkKeyFile(key.encodeToByteArray())) throw EditException.InvalidKeyException()
         }
     }
+
 
 }
