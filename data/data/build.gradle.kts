@@ -67,6 +67,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     // Android Network Tools
     implementation(libs.androidnetworktools)
+    // SSH
+    implementation(libs.jsch)
 
     // Test
 

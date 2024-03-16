@@ -44,15 +44,10 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.documentfile)
     implementation(libs.apache.commons.net)
     implementation(libs.apache.commons.vfs)
-    implementation("com.jcraft:jsch:0.1.55")
-//    implementation("commons-logging:commons-logging:1.3.0")
-//    implementation("org.apache.commons:commons-lang3:3.14.0")
-    implementation("androidx.documentfile:documentfile:1.0.1")
-
-
-
+    implementation(libs.jsch)
 
     testImplementation(libs.junit)
 }

@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -93,6 +95,9 @@ class EditViewModel @Inject constructor(
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    private val _keyCheckResult = MutableSharedFlow<Result<Uri?>>()
+    val keyCheckResult = _keyCheckResult.asSharedFlow()
 
     /**
      * Check connection
@@ -182,24 +187,50 @@ class EditViewModel @Inject constructor(
                 }
             }.onSuccess {
                 _result.emit(Result.success(Unit))
-                _isBusy.emit(false)
             }.onFailure {
                 _result.emit(Result.failure(it))
+            }.also {
                 _isBusy.emit(false)
             }
         }
     }
 
-    fun selectKey(uri: String) {
-
+    /**
+     * Select external key
+     */
+    fun selectKey(uri: Uri) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.loadKeyFile(uri.toString()) // check key
+            }.onSuccess {
+                remoteConnection.value = remoteConnection.value.copy(keyFileUri = uri.toString(), keyData = null)
+                _keyCheckResult.emit(Result.success(uri))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
     }
 
-    fun importKey(uri: String) {
-
-    }
-
-    fun inputKey(data: String) {
-
+    /**
+     * Import external key
+     */
+    fun importKey(uri: Uri) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.loadKeyFile(uri.toString())
+            }.onSuccess {
+                remoteConnection.value = remoteConnection.value.copy(keyFileUri = null, keyData = it)
+                _keyCheckResult.emit(Result.success(null))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
     }
 
     fun clearKey() {

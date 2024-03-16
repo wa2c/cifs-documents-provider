@@ -68,12 +68,18 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
                                 is EditException.InputRequiredException -> {
                                     Text(text = "[${stringResource(id = R.string.edit_save_ng_input_message)}]")
                                 }
-
                                 is EditException.InvalidIdException -> {
                                     Text(text = "[${stringResource(id = R.string.edit_save_ng_invalid_id_message)}]")
                                 }
-
                                 is EditException.DuplicatedIdException -> {
+                                    Text(text = "[${stringResource(id = R.string.edit_save_ng_duplicate_id_message)}]")
+                                }
+                                is EditException.InvalidKeyException -> {
+                                    // TODO
+                                    Text(text = "[${stringResource(id = R.string.edit_save_ng_duplicate_id_message)}]")
+                                }
+                                is EditException.KeyAccessFailedException -> {
+                                    // TODO
                                     Text(text = "[${stringResource(id = R.string.edit_save_ng_duplicate_id_message)}]")
                                 }
                             }

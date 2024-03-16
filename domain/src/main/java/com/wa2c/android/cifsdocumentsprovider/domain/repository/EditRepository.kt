@@ -1,10 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
+import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
+import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.DocumentFileManager
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
@@ -30,6 +34,8 @@ import javax.inject.Singleton
 @Singleton
 class EditRepository @Inject internal constructor(
     private val storageClientManager: StorageClientManager,
+    private val documentFileManager: DocumentFileManager,
+    private val sshKeyManager: SshKeyManager,
     private val connectionSettingDao: ConnectionSettingDao,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
@@ -134,6 +140,22 @@ class EditRepository @Inject internal constructor(
         logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
         withContext(dispatcher) {
             connectionSettingDao.move(fromPosition, toPosition)
+        }
+    }
+
+    suspend fun loadKeyFile(uri: String): String {
+        return withContext(dispatcher) {
+            val binary = documentFileManager.loadFile(uri) ?: throw EditException.KeyAccessFailedException()
+            if (!sshKeyManager.checkKeyFile(binary)) throw EditException.InvalidKeyException()
+            binary.toString()
+        }
+    }
+
+    suspend fun checkKeyData(uri: String): Boolean {
+        return withContext(dispatcher) {
+            documentFileManager.loadFile(uri)?.let {
+                sshKeyManager.checkKeyFile(it)
+            } ?: false
         }
     }
 

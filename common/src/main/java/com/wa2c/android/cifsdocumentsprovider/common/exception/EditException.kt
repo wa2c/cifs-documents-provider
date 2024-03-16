@@ -7,4 +7,6 @@ sealed class EditException : RuntimeException() {
     class InputRequiredException : EditException()
     class InvalidIdException : EditException()
     class DuplicatedIdException : EditException()
+    class KeyAccessFailedException : EditException()
+    class InvalidKeyException : EditException()
 }

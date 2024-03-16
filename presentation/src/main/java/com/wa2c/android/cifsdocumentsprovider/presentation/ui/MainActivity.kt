@@ -74,7 +74,6 @@ class MainActivity : AppCompatActivity() {
                     showSendScreen = showSendScreen.value,
                     onSendUri = { uris, uri -> mainViewModel.sendUri(uris, uri) },
                     onOpenFile = { startApp(it) },
-                    onGrantFile = { contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) },
                     onCloseApp = {
                         mainViewModel.clearUri()
                         workManager.cancelUniqueWork(SendWorker.WORKER_NAME)

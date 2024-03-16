@@ -1,10 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
-import android.content.Context
-import android.net.Uri
 import android.os.ProxyFileDescriptorCallback
-import android.os.storage.StorageManager
-import androidx.documentfile.provider.DocumentFile
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection

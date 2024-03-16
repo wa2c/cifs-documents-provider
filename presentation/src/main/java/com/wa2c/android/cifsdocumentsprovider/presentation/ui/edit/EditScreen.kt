@@ -3,6 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import InputCheck
 import InputOption
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -42,6 +44,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -94,8 +97,8 @@ fun EditScreen(
     onNavigateBack: () -> Unit,
     onNavigateSearchHost: (connectionId: String) -> Unit,
     onNavigateSelectFolder: (RemoteConnection) -> Unit,
-    onSelectKey: (Uri) -> Unit,
 ) {
+    val context: Context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -104,12 +107,12 @@ fun EditScreen(
 
     val keySelectOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         logD(uri)
-        uri?.let { viewModel.selectKey(it.toString()) }
+        uri?.let { viewModel.selectKey(it) }
     }
 
     val keyImportOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         logD(uri)
-        uri?.let {viewModel.importKey(it.toString()) }
+        uri?.let { viewModel.importKey(it) }
     }
 
     selectedHost?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(host = it) }
@@ -218,6 +221,19 @@ fun EditScreen(
         viewModel.result.collectIn(lifecycleOwner) { result ->
             if (result.isSuccess) {
                 onNavigateBack()
+            } else {
+                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+            }
+        }
+
+        viewModel.keyCheckResult.collectIn(lifecycleOwner) { result ->
+            // TODO fix message
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                scope.showPopup(snackbarHostState, R.string.edit_check_connection_ok_message, ConnectionResult.Success.messageType)
             } else {
                 scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
             }
