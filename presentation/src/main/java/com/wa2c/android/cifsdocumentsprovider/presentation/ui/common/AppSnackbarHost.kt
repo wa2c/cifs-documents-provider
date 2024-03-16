@@ -57,10 +57,7 @@ private fun AppSnackbar(message: PopupMessage, onDismiss: () -> Unit) {
                 )
                 // Error message
                 message.error?.let { error ->
-                    error.localizedMessage?.substringAfter(": ")?.let {
-                        // included message
-                        Text(text = "[$it]")
-                    } ?: error.message
+                    error.localizedMessage?.substringAfter(": ") ?: error.message
                 }?.let {
                     Text(text = "[$it]")
                 }
