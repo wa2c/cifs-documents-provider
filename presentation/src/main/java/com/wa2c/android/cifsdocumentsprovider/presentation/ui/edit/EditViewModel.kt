@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import java.io.IOException
 import javax.inject.Inject
 
 /**
@@ -56,12 +55,6 @@ class EditViewModel @Inject constructor(
     val isChanged: Boolean
         get() = isNew || initConnection != remoteConnection.value
 
-    fun updateConnection(connection: RemoteConnection) {
-        launch {
-            remoteConnection.emit(connection)
-        }
-    }
-
     init {
         launch {
             val connection = paramId?.let {
@@ -85,11 +78,11 @@ class EditViewModel @Inject constructor(
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResult = channelFlow<ConnectionResult?> {
-        var prevConnection = initConnection
         launch { _connectionResult.collect { send(it) } }
         launch {
+            var prevConnection = initConnection
             remoteConnection.collect {
-                if (it.isChangedConnection(prevConnection)) {
+                if (prevConnection != initConnection && it.isChangedConnection(prevConnection)) {
                     send(null)
                 }
                 prevConnection = it
@@ -97,7 +90,7 @@ class EditViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
-    private val _keyCheckResult = MutableSharedFlow<Result<Uri?>>()
+    private val _keyCheckResult = MutableSharedFlow<Result<Unit>>()
     val keyCheckResult = _keyCheckResult.asSharedFlow()
 
     // first: grant permission uri / second: revoke permission uri
@@ -216,7 +209,7 @@ class EditViewModel @Inject constructor(
                 editRepository.loadKeyFile(uri.toString()) // check key
             }.onSuccess {
                 remoteConnection.emit(remoteConnection.value.copy(keyFileUri = uri.toString(), keyData = null))
-                _keyCheckResult.emit(Result.success(uri))
+                _keyCheckResult.emit(Result.success(Unit))
             }.onFailure {
                 _keyCheckResult.emit(Result.failure(it))
             }.also {
@@ -235,7 +228,7 @@ class EditViewModel @Inject constructor(
                 editRepository.loadKeyFile(uri.toString())
             }.onSuccess {
                 remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = it))
-                _keyCheckResult.emit(Result.success(null))
+                _keyCheckResult.emit(Result.success(Unit))
             }.onFailure {
                 _keyCheckResult.emit(Result.failure(it))
             }.also {
@@ -244,6 +237,9 @@ class EditViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Input key
+     */
     fun inputKey(key: String) {
         launch {
             _isBusy.emit(true)
@@ -251,7 +247,7 @@ class EditViewModel @Inject constructor(
                 editRepository.checkKey(key)
             }.onSuccess {
                 remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = key))
-                _keyCheckResult.emit(Result.success(null))
+                _keyCheckResult.emit(Result.success(Unit))
             }.onFailure {
                 _keyCheckResult.emit(Result.failure(it))
             }.also {

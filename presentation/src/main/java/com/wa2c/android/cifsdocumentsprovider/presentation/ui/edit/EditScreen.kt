@@ -55,9 +55,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.exception.KeyCheckException
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.KeyImportType
+import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -77,6 +79,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButto
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingBox
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
@@ -137,16 +140,16 @@ fun EditScreen(
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
         onClickImpotKey = {
             when (it) {
-                KeyImportType.NOT_USED -> {
+                KeyInputType.NOT_USED -> {
                     viewModel.clearKey()
                 }
-                KeyImportType.EXTERNAL_FILE -> {
+                KeyInputType.EXTERNAL_FILE -> {
                     keySelectOpenLauncher.launch(arrayOf("*/*"))
                 }
-                KeyImportType.IMPORTED_FILE -> {
+                KeyInputType.IMPORTED_FILE -> {
                     keyImportOpenLauncher.launch(arrayOf("*/*"))
                 }
-                KeyImportType.INPUT_TEXT -> {
+                KeyInputType.INPUT_TEXT -> {
                     showKeyInputDialog = true
                 }
             }
@@ -236,11 +239,16 @@ fun EditScreen(
         }
 
         viewModel.keyCheckResult.collectIn(lifecycleOwner) { result ->
-            // TODO fix message
             if (result.isSuccess) {
-                scope.showPopup(snackbarHostState, R.string.edit_check_connection_ok_message, ConnectionResult.Success.messageType)
+                scope.showPopup(snackbarHostState, R.string.edit_check_key_ok_messaged, PopupMessageType.Success)
             } else {
-                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+                val exception = result.exceptionOrNull()
+                val labelRes = when (exception) {
+                    is KeyCheckException.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
+                    is KeyCheckException.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
+                    else -> R.string.provider_error_message
+                }
+                scope.showError(snackbarHostState, labelRes, exception)
             }
         }
 
@@ -267,7 +275,7 @@ private fun EditScreenContainer(
     onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
-    onClickImpotKey: (KeyImportType) -> Unit,
+    onClickImpotKey: (KeyInputType) -> Unit,
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
@@ -497,12 +505,19 @@ private fun EditScreenContainer(
                     if (protocol == ProtocolType.SFTP) {
                         var expanded by remember { mutableStateOf(false) }
                         InputText(
-                            title = "秘密鍵",
-                            hint = "秘密鍵は選択されていません。",
-                            value = let {
-                                if (!connectionState.value.keyData.isNullOrEmpty()) "保存されています。"
-                                else if (!connectionState.value.keyFileUri.isNullOrEmpty()) "選択されています。"
-                                else null
+                            title = stringResource(id = R.string.edit_private_key_title),
+                            hint = stringResource(id = R.string.edit_private_key_hint),
+                            value = if (!connectionState.value.keyData.isNullOrEmpty()) {
+                                // import
+                                stringResource(id = R.string.edit_private_key_text_import)
+                            } else if (!connectionState.value.keyFileUri.isNullOrEmpty()) {
+                                // file
+                                val name = connectionState.value.keyFileUri?.fileName ?: ""
+                                stringResource(id = R.string.edit_private_key_text_file) +
+                                        if (name.isNotEmpty()) " ($name)" else ""
+                            } else {
+                                // none
+                                stringResource(id = R.string.edit_private_key_text_none)
                             },
                             focusManager = focusManager,
                             readonly = true,
@@ -524,9 +539,9 @@ private fun EditScreenContainer(
                                 expanded = expanded,
                                 onDismissRequest = { expanded = false },
                             ) {
-                                KeyImportType.entries.forEach {
+                                KeyInputType.entries.forEach {
                                     DropdownMenuItem(
-                                        text = { Text(it.toString()) },
+                                        text = { Text(text = stringResource(id = it.labelRes)) },
                                         onClick = {
                                             onClickImpotKey(it)
                                             expanded = false

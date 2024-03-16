@@ -75,7 +75,8 @@ fun InputText(
         OutlinedTextField(
             value = value ?: "",
             label = { Text(title) },
-            enabled = enabled && !readonly,
+            enabled = enabled,
+            readOnly = readonly,
             placeholder = { Text(hint) },
             onValueChange = { value ->
                 onChange(if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value)
@@ -86,8 +87,8 @@ fun InputText(
             } else {
                 VisualTransformation.None
             },
-            trailingIcon = {
-                if (isPassword) {
+            trailingIcon = if (isPassword) {
+                {
                     IconButton(
                         onClick = { passwordVisible = !passwordVisible }
                     ) {
@@ -97,8 +98,11 @@ fun InputText(
                         )
                     }
                 }
+            } else {
+                null
             },
             maxLines = 1,
+            singleLine = true,
             modifier = Modifier
                 .weight(1f)
                 .align(Alignment.CenterVertically)

@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,10 +12,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 
+/**
+ * Key input dialog.
+ */
 @Composable
 fun KeyInputDialog(
     onInput: (String) -> Unit,
@@ -25,7 +28,7 @@ fun KeyInputDialog(
     var key by remember { mutableStateOf("") }
 
     CommonDialog(
-        title = "鍵の入力",
+        title = stringResource(id = R.string.edit_private_key_title) + "\n" + stringResource(id = R.string.edit_private_key_input_import_text),
         confirmButtons = listOf(
             DialogButton(label = stringResource(id = android.R.string.ok)) {
                 onInput(key)
@@ -37,7 +40,6 @@ fun KeyInputDialog(
         onDismiss = onDismiss
     ) {
         Column {
-            Text("秘密鍵を入力してください。")
             OutlinedTextField(
                 value = key,
                 onValueChange = {

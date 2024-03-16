@@ -1,9 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.common.values
 
 /**
- * Key import type
+ * Key input type
  */
-enum class KeyImportType {
+enum class KeyInputType {
     /** Not used */
     NOT_USED,
     /** External file */

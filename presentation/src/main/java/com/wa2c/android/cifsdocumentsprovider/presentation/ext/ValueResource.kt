@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
+import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -92,4 +93,13 @@ val StorageType.labelRes: Int
         StorageType.APACHE_FTP -> R.string.enum_storage_ftp_apache
         StorageType.APACHE_FTPS -> R.string.enum_storage_ftps_apache
         StorageType.APACHE_SFTP -> R.string.enum_storage_sftp_apache
+    }
+
+val KeyInputType.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        KeyInputType.NOT_USED -> R.string.edit_private_key_input_none
+        KeyInputType.EXTERNAL_FILE -> R.string.edit_private_key_input_file
+        KeyInputType.IMPORTED_FILE -> R.string.edit_private_key_input_import_file
+        KeyInputType.INPUT_TEXT -> R.string.edit_private_key_input_import_text
     }
