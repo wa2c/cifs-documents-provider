@@ -53,6 +53,12 @@ class EditViewModel @Inject constructor(
     val isChanged: Boolean
         get() = isNew || initConnection != remoteConnection.value
 
+    fun updateConnection(connection: RemoteConnection) {
+        launch {
+            remoteConnection.emit(connection)
+        }
+    }
+
     init {
         launch {
             val connection = paramId?.let {
@@ -182,6 +188,22 @@ class EditViewModel @Inject constructor(
                 _isBusy.emit(false)
             }
         }
+    }
+
+    fun selectKey(uri: String) {
+
+    }
+
+    fun importKey(uri: String) {
+
+    }
+
+    fun inputKey(data: String) {
+
+    }
+
+    fun clearKey() {
+        remoteConnection.value = remoteConnection.value.copy(keyFileUri = null, keyData = null)
     }
 
     override fun onCleared() {

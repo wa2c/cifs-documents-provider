@@ -2,11 +2,10 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
-import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
@@ -32,9 +31,10 @@ import javax.inject.Singleton
 class EditRepository @Inject internal constructor(
     private val storageClientManager: StorageClientManager,
     private val connectionSettingDao: ConnectionSettingDao,
-    private val memoryCache: MemoryCache,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
+
+    private var temporaryConnection: RemoteConnection? = null
 
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
@@ -91,7 +91,7 @@ class EditRepository @Inject internal constructor(
      */
     fun loadTemporaryConnection(): RemoteConnection?  {
         logD("loadTemporaryConnection")
-        return memoryCache.temporaryConnection?.toDomainModel()
+        return temporaryConnection
     }
 
     /**
@@ -99,7 +99,7 @@ class EditRepository @Inject internal constructor(
      */
     fun saveTemporaryConnection(connection: RemoteConnection?) {
         logD("saveTemporaryConnection: connection=$connection")
-        memoryCache.temporaryConnection = connection?.toDataModel()
+        temporaryConnection = connection
     }
 
     /**

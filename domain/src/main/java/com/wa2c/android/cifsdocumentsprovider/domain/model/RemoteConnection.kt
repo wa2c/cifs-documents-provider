@@ -26,6 +26,8 @@ data class RemoteConnection(
     val user: String? = null,
     val password: String? = null,
     val anonymous: Boolean = false,
+    val keyFileUri: String? = null,
+    val keyData: String? = null,
     val encoding: String = DEFAULT_ENCODING,
     val isFtpActiveMode: Boolean = false,
     val isFtpsImplicit: Boolean = false,
@@ -54,7 +56,7 @@ data class RemoteConnection(
      * True if connection changed.
      */
     fun isChangedConnection(other: RemoteConnection): Boolean {
-        return  this.id != other.id
+        return this.id != other.id
                 || this.storage != other.storage
                 || this.domain != other.domain
                 || this.host != other.host
@@ -64,9 +66,12 @@ data class RemoteConnection(
                 || this.user != other.user
                 || this.password != other.password
                 || this.anonymous != other.anonymous
+                || this.keyFileUri != other.keyFileUri
+                || this.keyData != other.keyData
                 || this.encoding != other.encoding
                 || this.isFtpActiveMode != other.isFtpActiveMode
                 || this.isFtpsImplicit != other.isFtpsImplicit
+                || this.optionSafeTransfer != other.optionSafeTransfer
     }
 
     companion object {

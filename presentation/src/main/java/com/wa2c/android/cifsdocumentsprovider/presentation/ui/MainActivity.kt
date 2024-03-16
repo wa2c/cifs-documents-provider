@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     // NOTE: Use AppCompatActivity (not ComponentActivity) for Language
 
     /** Main View Model */
-    private val mainViewModel by viewModels<MainViewModel>()
+    private val mainViewModel: MainViewModel by viewModels()
     /** Work manager */
     private val workManager: WorkManager = WorkManager.getInstance(this)
 
@@ -74,6 +74,7 @@ class MainActivity : AppCompatActivity() {
                     showSendScreen = showSendScreen.value,
                     onSendUri = { uris, uri -> mainViewModel.sendUri(uris, uri) },
                     onOpenFile = { startApp(it) },
+                    onGrantFile = { contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) },
                     onCloseApp = {
                         mainViewModel.clearUri()
                         workManager.cancelUniqueWork(SendWorker.WORKER_NAME)

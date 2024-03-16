@@ -53,6 +53,7 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":data:data"))
     implementation(project(":data:storage:interfaces"))
+    implementation(project(":data:storage:manager"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

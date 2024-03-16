@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.manager
 
-import android.content.Context
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
@@ -19,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class StorageClientManager @Inject constructor(
     private val preferences: AppPreferencesDataStore,
+    private val documentFileManager: DocumentFileManager,
 ) {
     private val fileOpenLimit: Int
         get() = runBlocking { preferences.openFileLimitFlow.first() }
@@ -39,7 +39,9 @@ class StorageClientManager @Inject constructor(
     private val apacheFtpsClient = lazy { ApacheFtpClient(true, fileOpenLimit) }
 
     /** Apache SFTP client */
-    private val apacheSftpClient = lazy { ApacheSftpClient(fileOpenLimit) }
+    private val apacheSftpClient = lazy { ApacheSftpClient(fileOpenLimit, { uri ->
+        documentFileManager.loadFile(uri)
+    }) }
 
     /**
      * Get client

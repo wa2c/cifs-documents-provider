@@ -49,7 +49,6 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":data:storage:interfaces"))
 
     // App
 

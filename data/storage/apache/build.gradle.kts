@@ -49,6 +49,7 @@ dependencies {
     implementation("com.jcraft:jsch:0.1.55")
 //    implementation("commons-logging:commons-logging:1.3.0")
 //    implementation("org.apache.commons:commons-lang3:3.14.0")
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
 
 

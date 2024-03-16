@@ -18,9 +18,9 @@ import java.io.OutputStream
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Proxy File Callback for Apache FTP with Random Access
+ * Proxy File Callback for sequential access.
  */
-internal class ApacheFtpProxyFileCallback(
+internal class ApacheProxyFileCallback(
     private val fileObject: FileObject,
     private val accessMode: AccessMode,
     private val onFileRelease: suspend () -> Unit,

@@ -33,6 +33,7 @@ internal fun MainNavHost(
     showSendScreen: Boolean,
     onSendUri: (List<Uri>, Uri) -> Unit,
     onOpenFile: (List<Uri>) -> Unit,
+    onGrantFile: (Uri) -> Unit,
     onCloseApp: () -> Unit,
 ) {
     NavHost(
@@ -100,6 +101,9 @@ internal fun MainNavHost(
                 onNavigateSelectFolder = {
                     navController.navigate(route = FolderScreenName)
                 },
+                onSelectKey = {
+                    onGrantFile(it)
+                }
             )
         }
 
@@ -173,7 +177,7 @@ internal fun MainNavHost(
         ) {
             SendScreen(
                 onNavigateFinish = {
-                    onCloseApp()
+                    navController.popBackStack()
                 }
             )
         }

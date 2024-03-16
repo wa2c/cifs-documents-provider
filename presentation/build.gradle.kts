@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.aboutlibraries)
-
 }
 
 val applicationId: String by rootProject.extra

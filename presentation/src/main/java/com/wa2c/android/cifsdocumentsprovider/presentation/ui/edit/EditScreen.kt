@@ -6,13 +6,11 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -21,7 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,9 +32,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -51,7 +52,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.KeyImportType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -68,6 +71,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.BottomButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingBox
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
@@ -90,11 +94,23 @@ fun EditScreen(
     onNavigateBack: () -> Unit,
     onNavigateSearchHost: (connectionId: String) -> Unit,
     onNavigateSelectFolder: (RemoteConnection) -> Unit,
+    onSelectKey: (Uri) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    val showBackConfirmationDialog = remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showBackConfirmationDialog by remember { mutableStateOf(false) }
+    var showKeyInputDialog by remember { mutableStateOf(false) }
+
+    val keySelectOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        logD(uri)
+        uri?.let { viewModel.selectKey(it.toString()) }
+    }
+
+    val keyImportOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        logD(uri)
+        uri?.let {viewModel.importKey(it.toString()) }
+    }
 
     selectedHost?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(host = it) }
     selectedUri?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(folder = it.path) }
@@ -107,20 +123,36 @@ fun EditScreen(
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickBack = {
             if (viewModel.isChanged) {
-                showBackConfirmationDialog.value = true
+                showBackConfirmationDialog = true
             } else {
                 onNavigateBack()
             }
         },
-        onClickDelete = { showDeleteDialog.value = true },
+        onClickDelete = { showDeleteDialog = true },
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
+        onClickImpotKey = {
+            when (it) {
+                KeyImportType.NOT_USED -> {
+                    viewModel.clearKey()
+                }
+                KeyImportType.EXTERNAL_FILE -> {
+                    keySelectOpenLauncher.launch(arrayOf("*/*"))
+                }
+                KeyImportType.IMPORTED_FILE -> {
+                    keyImportOpenLauncher.launch(arrayOf("*/*"))
+                }
+                KeyImportType.INPUT_TEXT -> {
+                    showKeyInputDialog = true
+                }
+            }
+        },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
         onClickSave = { viewModel.onClickSave() },
     )
 
     // Delete dialog
-    if (showDeleteDialog.value) {
+    if (showDeleteDialog) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -128,10 +160,10 @@ fun EditScreen(
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                showDeleteDialog.value = false
+                showDeleteDialog = false
             },
             onDismiss = {
-                showDeleteDialog.value = false
+                showDeleteDialog = false
             }
         ) {
             Text(stringResource(id = R.string.edit_delete_confirmation_message))
@@ -139,7 +171,7 @@ fun EditScreen(
     }
 
     // Back confirmation dialog
-    if (showBackConfirmationDialog.value) {
+    if (showBackConfirmationDialog) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -147,14 +179,18 @@ fun EditScreen(
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                showBackConfirmationDialog.value = false
+                showBackConfirmationDialog = false
             },
             onDismiss = {
-                showBackConfirmationDialog.value = false
+                showBackConfirmationDialog = false
             }
         ) {
             Text(stringResource(id = R.string.edit_back_confirmation_message))
         }
+    }
+
+    if (showKeyInputDialog) {
+        // TODO
     }
 
     LaunchedEffect(Unit) {
@@ -204,6 +240,7 @@ private fun EditScreenContainer(
     onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
+    onClickImpotKey: (KeyImportType) -> Unit,
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
@@ -429,6 +466,51 @@ private fun EditScreenContainer(
                         connectionState.value = connectionState.value.copy(anonymous = it)
                     }
 
+                    // Key
+                    if (protocol == ProtocolType.SFTP) {
+                        var expanded by remember { mutableStateOf(false) }
+                        InputText(
+                            title = "秘密鍵",
+                            hint = "秘密鍵は選択されていません。",
+                            value = let {
+                                if (connectionState.value.keyData.isNullOrEmpty()) "保存されています。"
+                                else if (connectionState.value.keyFileUri.isNullOrEmpty()) "選択されています。"
+                                else null
+                            },
+                            focusManager = focusManager,
+                            readonly = true,
+                            iconResource = R.drawable.ic_folder,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Uri,
+                                imeAction = ImeAction.Next,
+                            ),
+                            onClickButton = {
+                                expanded = true
+                            }
+                        ) { }
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.End),
+                        ) {
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                            ) {
+                                KeyImportType.entries.forEach {
+                                    DropdownMenuItem(
+                                        text = { Text(it.toString()) },
+                                        onClick = {
+                                            onClickImpotKey(it)
+                                            expanded = false
+                                        },
+
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     // Encoding
                     if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
                         InputOption(
@@ -541,25 +623,7 @@ private fun EditScreenContainer(
                 )
             }
 
-            // isBusy
-            if (isBusy) {
-                val interactionSource = remember { MutableInteractionSource() }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Theme.Colors.LoadingBackground)
-                        .clickable(
-                            indication = null,
-                            interactionSource = interactionSource,
-                            onClick = {}
-                        ),
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                    )
-                }
-            }
+            LoadingBox(isLoading = isBusy)
         }
     }
 
@@ -590,6 +654,7 @@ private fun EditScreenPreview() {
             onClickDelete = {},
             onClickSearchHost = {},
             onClickSelectFolder = {},
+            onClickImpotKey = {},
             onClickCheckConnection = {},
             onClickSave = {},
         )

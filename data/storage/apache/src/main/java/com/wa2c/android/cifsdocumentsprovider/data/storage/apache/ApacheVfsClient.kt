@@ -27,7 +27,7 @@ import org.apache.commons.vfs2.VFS
 import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 
-abstract class ApacheClient(
+abstract class ApacheVfsClient(
     private val openFileLimit: Int,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {

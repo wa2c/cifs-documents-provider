@@ -54,6 +54,7 @@ fun InputText(
     value: String?,
     focusManager: FocusManager,
     enabled: Boolean = true,
+    readonly: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
@@ -74,7 +75,7 @@ fun InputText(
         OutlinedTextField(
             value = value ?: "",
             label = { Text(title) },
-            enabled = enabled,
+            enabled = enabled && !readonly,
             placeholder = { Text(hint) },
             onValueChange = { value ->
                 onChange(if (keyboardOptions.keyboardType == KeyboardType.Number) value.filter { it.isDigit() } else value)
