@@ -1,18 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.common.exception
 
-/**
- * Edit exception.
- */
-sealed class EditException : RuntimeException() {
-    class InputRequiredException : EditException()
-    class InvalidIdException : EditException()
-    class DuplicatedIdException : EditException()
-}
+sealed class Edit: RuntimeException() {
+    sealed class SaveCheck : Edit() {
+        class InputRequiredException : SaveCheck()
+        class InvalidIdException : SaveCheck()
+        class DuplicatedIdException : SaveCheck()
+    }
 
-/**
- * Key check exception.
- */
-sealed class KeyCheckException : RuntimeException() {
-    class AccessFailedException : KeyCheckException()
-    class InvalidException : KeyCheckException()
+    sealed class KeyCheck : Edit() {
+        class AccessFailedException : KeyCheck()
+        class InvalidException : KeyCheck()
+    }
 }

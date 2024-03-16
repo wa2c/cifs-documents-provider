@@ -1,10 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
-import com.wa2c.android.cifsdocumentsprovider.common.exception.KeyCheckException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
@@ -146,15 +144,15 @@ class EditRepository @Inject internal constructor(
 
     suspend fun loadKeyFile(uri: String): String {
         return withContext(dispatcher) {
-            val binary = documentFileManager.loadFile(uri) ?: throw KeyCheckException.AccessFailedException()
-            if (!sshKeyManager.checkKeyFile(binary)) throw KeyCheckException.InvalidException()
+            val binary = documentFileManager.loadFile(uri) ?: throw Edit.KeyCheck.AccessFailedException()
+            if (!sshKeyManager.checkKeyFile(binary)) throw Edit.KeyCheck.InvalidException()
             String(binary)
         }
     }
 
     suspend fun checkKey(key: String) {
         return withContext(dispatcher) {
-            if (!sshKeyManager.checkKeyFile(key.encodeToByteArray())) throw KeyCheckException.InvalidException()
+            if (!sshKeyManager.checkKeyFile(key.encodeToByteArray())) throw Edit.KeyCheck.InvalidException()
         }
     }
 

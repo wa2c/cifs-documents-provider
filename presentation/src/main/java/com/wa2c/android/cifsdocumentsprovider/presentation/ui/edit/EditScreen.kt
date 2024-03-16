@@ -55,7 +55,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.wa2c.android.cifsdocumentsprovider.common.exception.KeyCheckException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -226,7 +225,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 result.getOrNull()?.let { onNavigateSelectFolder(it) }
             } else {
-                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, result.exceptionOrNull())
             }
         }
 
@@ -234,7 +233,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 onNavigateBack()
             } else {
-                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, result.exceptionOrNull())
             }
         }
 
@@ -242,13 +241,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 scope.showPopup(snackbarHostState, R.string.edit_check_key_ok_messaged, PopupMessageType.Success)
             } else {
-                val exception = result.exceptionOrNull()
-                val labelRes = when (exception) {
-                    is KeyCheckException.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
-                    is KeyCheckException.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
-                    else -> R.string.provider_error_message
-                }
-                scope.showError(snackbarHostState, labelRes, exception)
+                scope.showError(snackbarHostState,  result.exceptionOrNull())
             }
         }
 

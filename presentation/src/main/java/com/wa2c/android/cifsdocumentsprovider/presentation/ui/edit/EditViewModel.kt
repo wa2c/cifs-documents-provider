@@ -5,7 +5,7 @@ import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
@@ -171,13 +171,13 @@ class EditViewModel @Inject constructor(
             runCatching {
                 remoteConnection.value.let { con ->
                     if (RemoteConnection.isInvalidConnectionId(con.id)) {
-                        throw EditException.InvalidIdException()
+                        throw Edit.SaveCheck.InvalidIdException()
                     }
                     if (con.name.isEmpty() || con.host.isEmpty()) {
-                        throw EditException.InputRequiredException()
+                        throw Edit.SaveCheck.InputRequiredException()
                     }
                     if (isNew && editRepository.getConnection(con.id) != null) {
-                        throw EditException.DuplicatedIdException()
+                        throw Edit.SaveCheck.DuplicatedIdException()
                     }
                     editRepository.saveConnection(con)
 

@@ -94,11 +94,7 @@ fun SettingsScreen(
             try {
                 context.startActivity(intent)
             } catch (e: Exception) {
-                scope.showError(
-                    snackbarHostState = snackbarHostState,
-                    stringRes = R.string.provider_error_message,
-                    error = e,
-                )
+                scope.showError(snackbarHostState, e)
             }
         },
         onClickBack = {

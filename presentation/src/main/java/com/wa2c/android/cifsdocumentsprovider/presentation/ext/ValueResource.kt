@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
@@ -13,6 +14,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 
+val Throwable?.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        is Edit.SaveCheck.InputRequiredException ->   R.string.edit_save_ng_input_message
+        is Edit.SaveCheck.InvalidIdException -> R.string.edit_save_ng_invalid_id_message
+        is Edit.SaveCheck.DuplicatedIdException ->  R.string.edit_save_ng_duplicate_id_message
+        is Edit.KeyCheck.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
+        is Edit.KeyCheck.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
+        else -> R.string.provider_error_message
+    }
 
 /** ConnectionResult type */
 val ConnectionResult.messageType: PopupMessageType
