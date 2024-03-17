@@ -28,7 +28,7 @@ fun KeyInputDialog(
     var key by remember { mutableStateOf("") }
 
     CommonDialog(
-        title = stringResource(id = R.string.edit_private_key_title) + "\n" + stringResource(id = R.string.edit_private_key_input_import_text),
+        title = stringResource(id = R.string.edit_key_title) + "\n" + stringResource(id = R.string.edit_key_input_import_text),
         confirmButtons = listOf(
             DialogButton(label = stringResource(id = android.R.string.ok)) {
                 onInput(key)

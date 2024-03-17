@@ -17,9 +17,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessag
 val Throwable?.labelRes: Int
     @StringRes
     get() = when (this) {
-        is Edit.SaveCheck.InputRequiredException ->   R.string.edit_save_ng_input_message
-        is Edit.SaveCheck.InvalidIdException -> R.string.edit_save_ng_invalid_id_message
-        is Edit.SaveCheck.DuplicatedIdException ->  R.string.edit_save_ng_duplicate_id_message
+        is Edit.SaveCheck.InputRequiredException ->   R.string.edit_check_save_ng_input_message
+        is Edit.SaveCheck.InvalidIdException -> R.string.edit_check_save_ng_invalid_id_message
+        is Edit.SaveCheck.DuplicatedIdException ->  R.string.edit_check_save_ng_duplicate_id_message
         is Edit.KeyCheck.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
         is Edit.KeyCheck.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
         else -> R.string.provider_error_message
@@ -109,8 +109,8 @@ val StorageType.labelRes: Int
 val KeyInputType.labelRes: Int
     @StringRes
     get() = when (this) {
-        KeyInputType.NOT_USED -> R.string.edit_private_key_input_none
-        KeyInputType.EXTERNAL_FILE -> R.string.edit_private_key_input_file
-        KeyInputType.IMPORTED_FILE -> R.string.edit_private_key_input_import_file
-        KeyInputType.INPUT_TEXT -> R.string.edit_private_key_input_import_text
+        KeyInputType.NOT_USED -> R.string.edit_key_input_none
+        KeyInputType.EXTERNAL_FILE -> R.string.edit_key_input_file
+        KeyInputType.IMPORTED_FILE -> R.string.edit_key_input_import_file
+        KeyInputType.INPUT_TEXT -> R.string.edit_key_input_import_text
     }

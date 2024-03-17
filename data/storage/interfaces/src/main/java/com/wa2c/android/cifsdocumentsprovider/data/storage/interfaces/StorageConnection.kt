@@ -104,6 +104,7 @@ sealed class StorageConnection {
         override val extension: Boolean = false,
         val keyFileUri: String? = null,
         val keyData: String? = null,
+        val keyPassphrase: String? = null,
         val encoding: String,
     ) : StorageConnection()
 }

@@ -165,6 +165,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     keyFileUri = keyFileUri,
                     keyData = keyData,
+                    keyPassphrase = keyPassphrase,
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
@@ -266,6 +267,7 @@ internal object DomainMapper {
                     extension = optionAddExtension,
                     keyFileUri = keyFileUri,
                     keyData = keyData,
+                    keyPassphrase = keyPassphrase,
                     encoding = encoding,
                 )
             }

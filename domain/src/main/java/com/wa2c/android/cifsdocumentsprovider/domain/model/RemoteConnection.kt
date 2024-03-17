@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getPort
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
+import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -28,6 +29,7 @@ data class RemoteConnection(
     val anonymous: Boolean = false,
     val keyFileUri: String? = null,
     val keyData: String? = null,
+    val keyPassphrase: String? = null,
     val encoding: String = DEFAULT_ENCODING,
     val isFtpActiveMode: Boolean = false,
     val isFtpsImplicit: Boolean = false,
@@ -68,6 +70,7 @@ data class RemoteConnection(
                 || this.anonymous != other.anonymous
                 || this.keyFileUri != other.keyFileUri
                 || this.keyData != other.keyData
+                || this.keyPassphrase != other.keyPassphrase
                 || this.encoding != other.encoding
                 || this.isFtpActiveMode != other.isFtpActiveMode
                 || this.isFtpsImplicit != other.isFtpsImplicit

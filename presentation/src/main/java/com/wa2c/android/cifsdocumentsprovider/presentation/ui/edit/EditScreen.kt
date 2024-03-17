@@ -439,9 +439,7 @@ private fun EditScreenContainer(
                     ) {
                         connectionState.value = connectionState.value.copy(port = it)
                     }
-
-
-
+                    
                     // Enable DFS
                     if (protocol == ProtocolType.SMB) {
                         InputCheck(
@@ -498,19 +496,19 @@ private fun EditScreenContainer(
                     if (protocol == ProtocolType.SFTP) {
                         var expanded by remember { mutableStateOf(false) }
                         InputText(
-                            title = stringResource(id = R.string.edit_private_key_title),
-                            hint = stringResource(id = R.string.edit_private_key_hint),
+                            title = stringResource(id = R.string.edit_key_title),
+                            hint = stringResource(id = R.string.edit_key_hint),
                             value = if (!connectionState.value.keyData.isNullOrEmpty()) {
                                 // import
-                                stringResource(id = R.string.edit_private_key_text_import)
+                                stringResource(id = R.string.edit_key_text_import)
                             } else if (!connectionState.value.keyFileUri.isNullOrEmpty()) {
                                 // file
                                 val name = connectionState.value.keyFileUri?.fileName ?: ""
-                                stringResource(id = R.string.edit_private_key_text_file) +
+                                stringResource(id = R.string.edit_key_text_file) +
                                         if (name.isNotEmpty()) " ($name)" else ""
                             } else {
                                 // none
-                                stringResource(id = R.string.edit_private_key_text_none)
+                                stringResource(id = R.string.edit_key_text_none)
                             },
                             focusManager = focusManager,
                             readonly = true,
@@ -544,7 +542,23 @@ private fun EditScreenContainer(
                                 }
                             }
                         }
+
+                        // Passphrase
+                        InputText(
+                            title = stringResource(id = R.string.edit_passphrase_title),
+                            hint = stringResource(id = R.string.edit_passphrase_hint),
+                            value = connectionState.value.keyPassphrase,
+                            focusManager = focusManager,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Next,
+                            ),
+                            autofillType = AutofillType.Password,
+                        ) {
+                            connectionState.value = connectionState.value.copy(keyPassphrase = it)
+                        }
                     }
+
 
                     // Encoding
                     if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS || protocol == ProtocolType.SFTP) {

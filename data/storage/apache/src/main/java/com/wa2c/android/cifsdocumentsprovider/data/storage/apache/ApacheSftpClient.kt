@@ -31,7 +31,7 @@ class ApacheSftpClient(
             (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
                 try { onKeyRead(uri) } catch (e: Exception) { null }
             })?.let { keyBinary ->
-                val identity = BytesIdentityInfo(keyBinary, sftpConnection.password?.encodeToByteArray())
+                val identity = BytesIdentityInfo(keyBinary, sftpConnection.keyPassphrase?.encodeToByteArray())
                 builder.setIdentityProvider(options, identity)
             }
         }
