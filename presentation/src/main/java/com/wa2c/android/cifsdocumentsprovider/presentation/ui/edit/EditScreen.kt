@@ -196,6 +196,7 @@ fun EditScreen(
         }
     }
 
+    // Key input dialog
     if (showKeyInputDialog) {
         KeyInputDialog(
             onInput = {
@@ -208,6 +209,7 @@ fun EditScreen(
         )
     }
 
+    // Key import warning dialog
     if (showKeyImportWarningDialog) {
         CommonDialog(
             title = stringResource(id = R.string.dialog_title_warning),
