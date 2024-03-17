@@ -92,6 +92,16 @@ class EditRepository @Inject internal constructor(
     }
 
     /**
+     * Move connections order
+     */
+    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
+        withContext(dispatcher) {
+            connectionSettingDao.move(fromPosition, toPosition)
+        }
+    }
+
+    /**
      * Load temporary connection
      */
     fun loadTemporaryConnection(): RemoteConnection?  {
@@ -128,17 +138,20 @@ class EditRepository @Inject internal constructor(
         logD("Connection check: ${connection.uri}")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest(null)
-            getClient(request.connection).checkConnection(request)
-        }
-    }
-
-    /**
-     * Move connections order
-     */
-    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
-        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
-        withContext(dispatcher) {
-            connectionSettingDao.move(fromPosition, toPosition)
+            // check connection
+            val result = getClient(request.connection).checkConnection(request)
+            if (result is ConnectionResult.Success) {
+                try {
+                    // check key
+                    connection.keyFileUri?.let { loadKeyFile(it) }
+                    connection.keyData?.let { checkKey(it) }
+                    result
+                } catch (e: Exception) {
+                    ConnectionResult.Warning(e)
+                }
+            } else {
+                result
+            }
         }
     }
 

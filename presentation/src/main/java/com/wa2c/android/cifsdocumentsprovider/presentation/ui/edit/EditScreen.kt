@@ -107,6 +107,7 @@ fun EditScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBackConfirmationDialog by remember { mutableStateOf(false) }
     var showKeyInputDialog by remember { mutableStateOf(false) }
+    var showKeyImportWarningDialog by remember { mutableStateOf(false) }
 
     val keySelectOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         logD(uri)
@@ -207,6 +208,22 @@ fun EditScreen(
         )
     }
 
+    if (showKeyImportWarningDialog) {
+        CommonDialog(
+            title = stringResource(id = R.string.dialog_title_warning),
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    showKeyImportWarningDialog = false
+                },
+            ),
+            onDismiss = {
+                showKeyImportWarningDialog = false
+            }
+        ) {
+            Text(stringResource(id = R.string.edit_warning_key_import_message))
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             scope.showPopup(
@@ -239,6 +256,9 @@ fun EditScreen(
 
         viewModel.keyCheckResult.collectIn(lifecycleOwner) { result ->
             if (result.isSuccess) {
+                if (!viewModel.remoteConnection.value.keyData.isNullOrEmpty()) {
+                    showKeyImportWarningDialog = true
+                }
                 scope.showPopup(snackbarHostState, R.string.edit_check_key_ok_messaged, PopupMessageType.Success)
             } else {
                 scope.showError(snackbarHostState,  result.exceptionOrNull())
