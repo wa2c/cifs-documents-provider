@@ -183,8 +183,7 @@ class EditViewModel @Inject constructor(
 
                     // update permission
                     val grantPermissionUri = con.keyFileUri?.toUri()
-                    val revokePermissionUri = initConnection.keyFileUri?.takeIf { it != con.keyFileUri }?.toUri()
-                    _updatePermission.emit(grantPermissionUri to revokePermissionUri)
+                    _updatePermission.emit(grantPermissionUri to null) // not revoke permission
 
                     currentId = con.id
                     initConnection = con
