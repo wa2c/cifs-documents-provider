@@ -25,7 +25,9 @@ class SmbjProxyFileCallback(
     override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
+    private val fileSize: Long by lazy {
+        processFileIo(coroutineContext) { file.fileInformation.standardInformation.endOfFile }
+    }
 
     private val readerLazy = lazy {
         BackgroundBufferReader(fileSize) { start, array, off, len ->
