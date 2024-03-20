@@ -45,18 +45,10 @@ android {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
-
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":data:storage:interfaces"))
-    implementation(project(":data:storage:jcifsng"))
-    implementation(project(":data:storage:smbj"))
-    implementation(project(":data:storage:apache"))
 
     // App
 
@@ -65,7 +57,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
-    implementation(libs.androidx.documentfile)
 
     // Room
     implementation(libs.androidx.room.runtime)
@@ -76,6 +67,8 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     // Android Network Tools
     implementation(libs.androidnetworktools)
+    // SSH
+    implementation(libs.jsch)
 
     // Test
 

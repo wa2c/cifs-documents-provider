@@ -129,11 +129,7 @@ fun HostScreen(
 
     LaunchedEffect(Unit) {
         viewModel.result.collectIn(lifecycleOwner) {
-            scope.showError(
-                snackbarHostState = snackbarHostState,
-                stringRes = R.string.provider_error_message,
-                error = it.exceptionOrNull()
-            )
+            scope.showError(snackbarHostState, it.exceptionOrNull())
         }
     }
 }

@@ -6,6 +6,7 @@
     <string name="app_summary">访问在线存储</string>
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">关闭</string>
+    <string name="dialog_title_warning">注意力</string>
     <!-- Home Screen -->
     <string name="home_open_file">打开</string>
     <string name="home_open_settings">设置</string>
@@ -33,6 +34,17 @@
     <string name="edit_password_title">密码</string>
     <string name="edit_password_hint">匿名访问时无效</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_key_title">私钥</string>
+    <string name="edit_key_hint">私钥</string>
+    <string name="edit_key_text_none">没用过</string>
+    <string name="edit_key_text_file">引用文件</string>
+    <string name="edit_key_text_import">进口</string>
+    <string name="edit_key_input_none">没用过</string>
+    <string name="edit_key_input_file">请参阅文件</string>
+    <string name="edit_key_input_import_file">导入文件</string>
+    <string name="edit_key_input_import_text">输入并导入</string>
+    <string name="edit_passphrase_title">私钥密码</string>
+    <string name="edit_passphrase_hint">如果不设置，请勿输入</string>
     <string name="edit_encoding_title">字符代码</string>
     <string name="edit_ftp_mode_title">活动模式</string>
     <string name="edit_ftps_implicit_label">隐式SSL/TLS模式</string>
@@ -49,13 +61,17 @@
     <string name="edit_check_connection_ok_message">连接成功。</string>
     <string name="edit_check_connection_wn_message">设置有误。</string>
     <string name="edit_check_connection_ng_message">连接失败。</string>
-    <string name="edit_save_ng_input_message">需要名称和主机。</string>
-    <string name="edit_save_ng_invalid_id_message">ID 无效。</string>
-    <string name="edit_save_ng_duplicate_id_message">ID 重复。</string>
+    <string name="edit_check_save_ng_input_message">需要名称和主机。</string>
+    <string name="edit_check_save_ng_invalid_id_message">ID 无效。</string>
+    <string name="edit_check_save_ng_duplicate_id_message">ID 重复。</string>
+    <string name="edit_check_key_ng_failed_messaged">无法访问私钥。</string>
+    <string name="edit_check_key_ng_invalid_messaged">未能阅读私钥。</string>
+    <string name="edit_check_key_ok_messaged">私钥是有效的。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_delete_button">删除</string>
     <string name="edit_back_confirmation_message">放弃修改？</string>
     <string name="edit_delete_confirmation_message">删除此项设置？</string>
+    <string name="edit_warning_key_import_message">进口的秘密密钥无法保证。\n处理时请小心。</string>
     <!-- Host Screen -->
     <string name="host_title">主机名</string>
     <string name="host_set_manually">手动设置</string>

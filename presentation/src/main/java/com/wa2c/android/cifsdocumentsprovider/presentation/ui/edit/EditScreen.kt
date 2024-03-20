@@ -3,16 +3,16 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 import InputCheck
 import InputOption
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -21,7 +21,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,14 +34,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
@@ -51,7 +55,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
@@ -68,14 +75,17 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbar
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.BottomButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.LoadingBox
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MessageIcon
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.collectAsMutableState
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.InputText
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.KeyInputDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SubsectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.UriText
@@ -91,10 +101,23 @@ fun EditScreen(
     onNavigateSearchHost: (connectionId: String) -> Unit,
     onNavigateSelectFolder: (RemoteConnection) -> Unit,
 ) {
+    val context: Context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    val showBackConfirmationDialog = remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var showBackConfirmationDialog by remember { mutableStateOf(false) }
+    var showKeyInputDialog by remember { mutableStateOf(false) }
+    var showKeyImportWarningDialog by remember { mutableStateOf(false) }
+
+    val keySelectOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        logD(uri)
+        uri?.let { viewModel.selectKey(it) }
+    }
+
+    val keyImportOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        logD(uri)
+        uri?.let { viewModel.importKey(it) }
+    }
 
     selectedHost?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(host = it) }
     selectedUri?.let { viewModel.remoteConnection.value = viewModel.remoteConnection.value.copy(folder = it.path) }
@@ -107,20 +130,36 @@ fun EditScreen(
         connectionResult = viewModel.connectionResult.collectAsStateWithLifecycle().value,
         onClickBack = {
             if (viewModel.isChanged) {
-                showBackConfirmationDialog.value = true
+                showBackConfirmationDialog = true
             } else {
                 onNavigateBack()
             }
         },
-        onClickDelete = { showDeleteDialog.value = true },
+        onClickDelete = { showDeleteDialog = true },
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
+        onClickImpotKey = {
+            when (it) {
+                KeyInputType.NOT_USED -> {
+                    viewModel.clearKey()
+                }
+                KeyInputType.EXTERNAL_FILE -> {
+                    keySelectOpenLauncher.launch(arrayOf("*/*"))
+                }
+                KeyInputType.IMPORTED_FILE -> {
+                    keyImportOpenLauncher.launch(arrayOf("*/*"))
+                }
+                KeyInputType.INPUT_TEXT -> {
+                    showKeyInputDialog = true
+                }
+            }
+        },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
         onClickSave = { viewModel.onClickSave() },
     )
 
     // Delete dialog
-    if (showDeleteDialog.value) {
+    if (showDeleteDialog) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -128,10 +167,10 @@ fun EditScreen(
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                showDeleteDialog.value = false
+                showDeleteDialog = false
             },
             onDismiss = {
-                showDeleteDialog.value = false
+                showDeleteDialog = false
             }
         ) {
             Text(stringResource(id = R.string.edit_delete_confirmation_message))
@@ -139,7 +178,7 @@ fun EditScreen(
     }
 
     // Back confirmation dialog
-    if (showBackConfirmationDialog.value) {
+    if (showBackConfirmationDialog) {
         CommonDialog(
             confirmButtons = listOf(
                 DialogButton(label = stringResource(id = R.string.dialog_accept)) {
@@ -147,13 +186,43 @@ fun EditScreen(
                 },
             ),
             dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
-                showBackConfirmationDialog.value = false
+                showBackConfirmationDialog = false
             },
             onDismiss = {
-                showBackConfirmationDialog.value = false
+                showBackConfirmationDialog = false
             }
         ) {
             Text(stringResource(id = R.string.edit_back_confirmation_message))
+        }
+    }
+
+    // Key input dialog
+    if (showKeyInputDialog) {
+        KeyInputDialog(
+            onInput = {
+                viewModel.inputKey(it)
+                showKeyInputDialog = false
+            },
+            onDismiss = {
+                showKeyInputDialog = false
+            }
+        )
+    }
+
+    // Key import warning dialog
+    if (showKeyImportWarningDialog) {
+        CommonDialog(
+            title = stringResource(id = R.string.dialog_title_warning),
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    showKeyImportWarningDialog = false
+                },
+            ),
+            onDismiss = {
+                showKeyImportWarningDialog = false
+            }
+        ) {
+            Text(stringResource(id = R.string.edit_warning_key_import_message))
         }
     }
 
@@ -175,7 +244,7 @@ fun EditScreen(
             if (result.isSuccess) {
                 result.getOrNull()?.let { onNavigateSelectFolder(it) }
             } else {
-                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, result.exceptionOrNull())
             }
         }
 
@@ -183,8 +252,25 @@ fun EditScreen(
             if (result.isSuccess) {
                 onNavigateBack()
             } else {
-                scope.showError(snackbarHostState, R.string.provider_error_message, result.exceptionOrNull())
+                scope.showError(snackbarHostState, result.exceptionOrNull())
             }
+        }
+
+        viewModel.keyCheckResult.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                if (!viewModel.remoteConnection.value.keyData.isNullOrEmpty()) {
+                    showKeyImportWarningDialog = true
+                }
+                scope.showPopup(snackbarHostState, R.string.edit_check_key_ok_messaged, PopupMessageType.Success)
+            } else {
+                scope.showError(snackbarHostState,  result.exceptionOrNull())
+            }
+        }
+
+        // Update permissions
+        viewModel.updatePermission.collectIn(lifecycleOwner) { (grantPermission, revokePermission) ->
+            revokePermission?.let { context.contentResolver.releasePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
+            grantPermission?.let { context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
         }
     }
 }
@@ -204,6 +290,7 @@ private fun EditScreenContainer(
     onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
+    onClickImpotKey: (KeyInputType) -> Unit,
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
@@ -374,9 +461,7 @@ private fun EditScreenContainer(
                     ) {
                         connectionState.value = connectionState.value.copy(port = it)
                     }
-
-
-
+                    
                     // Enable DFS
                     if (protocol == ProtocolType.SMB) {
                         InputCheck(
@@ -429,8 +514,76 @@ private fun EditScreenContainer(
                         connectionState.value = connectionState.value.copy(anonymous = it)
                     }
 
+                    // Key
+                    if (protocol == ProtocolType.SFTP) {
+                        var expanded by remember { mutableStateOf(false) }
+                        InputText(
+                            title = stringResource(id = R.string.edit_key_title),
+                            hint = stringResource(id = R.string.edit_key_hint),
+                            value = if (!connectionState.value.keyData.isNullOrEmpty()) {
+                                // import
+                                stringResource(id = R.string.edit_key_text_import)
+                            } else if (!connectionState.value.keyFileUri.isNullOrEmpty()) {
+                                // file
+                                val name = connectionState.value.keyFileUri?.fileName ?: ""
+                                stringResource(id = R.string.edit_key_text_file) +
+                                        if (name.isNotEmpty()) " ($name)" else ""
+                            } else {
+                                // none
+                                stringResource(id = R.string.edit_key_text_none)
+                            },
+                            focusManager = focusManager,
+                            readonly = true,
+                            iconResource = R.drawable.ic_key,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Uri,
+                                imeAction = ImeAction.Next,
+                            ),
+                            onClickButton = {
+                                expanded = true
+                            }
+                        ) { }
+
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.End),
+                        ) {
+                            DropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false },
+                            ) {
+                                KeyInputType.entries.forEach {
+                                    DropdownMenuItem(
+                                        text = { Text(text = stringResource(id = it.labelRes)) },
+                                        onClick = {
+                                            onClickImpotKey(it)
+                                            expanded = false
+                                        },
+
+                                    )
+                                }
+                            }
+                        }
+
+                        // Passphrase
+                        InputText(
+                            title = stringResource(id = R.string.edit_passphrase_title),
+                            hint = stringResource(id = R.string.edit_passphrase_hint),
+                            value = connectionState.value.keyPassphrase,
+                            focusManager = focusManager,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Next,
+                            ),
+                            autofillType = AutofillType.Password,
+                        ) {
+                            connectionState.value = connectionState.value.copy(keyPassphrase = it)
+                        }
+                    }
+
+
                     // Encoding
-                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS) {
+                    if (protocol == ProtocolType.FTP || protocol == ProtocolType.FTPS || protocol == ProtocolType.SFTP) {
                         InputOption(
                             title = stringResource(id = R.string.edit_encoding_title),
                             items = Charset.availableCharsets()
@@ -541,25 +694,7 @@ private fun EditScreenContainer(
                 )
             }
 
-            // isBusy
-            if (isBusy) {
-                val interactionSource = remember { MutableInteractionSource() }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Theme.Colors.LoadingBackground)
-                        .clickable(
-                            indication = null,
-                            interactionSource = interactionSource,
-                            onClick = {}
-                        ),
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                    )
-                }
-            }
+            LoadingBox(isLoading = isBusy)
         }
     }
 
@@ -590,6 +725,7 @@ private fun EditScreenPreview() {
             onClickDelete = {},
             onClickSearchHost = {},
             onClickSelectFolder = {},
+            onClickImpotKey = {},
             onClickCheckConnection = {},
             onClickSave = {},
         )

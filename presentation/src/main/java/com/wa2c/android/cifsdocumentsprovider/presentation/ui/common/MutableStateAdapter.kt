@@ -3,7 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.common
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -27,6 +27,6 @@ internal class MutableStateAdapter<T>(
 internal fun <T> MutableStateFlow<T>.collectAsMutableState(
     context: CoroutineContext = EmptyCoroutineContext
 ): MutableState<T> = MutableStateAdapter(
-    state = collectAsState(context),
+    state = collectAsStateWithLifecycle(context = context),
     mutate = { value = it }
 )

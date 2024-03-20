@@ -6,6 +6,7 @@
     <string name="app_summary">Access online storage</string>
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">Close</string>
+    <string name="dialog_title_warning">Attention</string>
     <!-- Home Screen -->
     <string name="home_open_file">Open</string>
     <string name="home_open_settings">Settings</string>
@@ -33,6 +34,17 @@
     <string name="edit_password_title">Password</string>
     <string name="edit_password_hint">Invalid if anonymous</string>
     <string name="edit_anonymous_label">Anonymous</string>
+    <string name="edit_key_title">Private Key</string>
+    <string name="edit_key_hint">Private Key</string>
+    <string name="edit_key_text_none">Unused</string>
+    <string name="edit_key_text_file">File referenced</string>
+    <string name="edit_key_text_import">Imported</string>
+    <string name="edit_key_input_none">Unused</string>
+    <string name="edit_key_input_file">Refer to file</string>
+    <string name="edit_key_input_import_file">Import file</string>
+    <string name="edit_key_input_import_text">Enter and import</string>
+    <string name="edit_passphrase_title">Private key passphrase</string>
+    <string name="edit_passphrase_hint">Not entered if not set</string>
     <string name="edit_encoding_title">Character Code</string>
     <string name="edit_ftp_mode_title">Active Mode</string>
     <string name="edit_ftps_implicit_label">Implicit SSL/TLS Mode</string>
@@ -49,13 +61,17 @@
     <string name="edit_check_connection_ok_message">Connection successful.</string>
     <string name="edit_check_connection_wn_message">Settings has an error.</string>
     <string name="edit_check_connection_ng_message">Connection failed.</string>
-    <string name="edit_save_ng_input_message">Name and host are required.</string>
-    <string name="edit_save_ng_invalid_id_message">ID is invalid.</string>
-    <string name="edit_save_ng_duplicate_id_message">ID is duplicated.</string>
+    <string name="edit_check_save_ng_input_message">Name and host are required.</string>
+    <string name="edit_check_save_ng_invalid_id_message">ID is invalid.</string>
+    <string name="edit_check_save_ng_duplicate_id_message">ID is duplicated.</string>
+    <string name="edit_check_key_ng_failed_messaged">Failed to access the private key.</string>
+    <string name="edit_check_key_ng_invalid_messaged">Failed to read the private key.</string>
+    <string name="edit_check_key_ok_messaged">The private key is valid.</string>
     <string name="edit_save_button">Save</string>
     <string name="edit_delete_button">Delete</string>
     <string name="edit_back_confirmation_message">Discard your changes?</string>
     <string name="edit_delete_confirmation_message">Delete this settings?</string>
+    <string name="edit_warning_key_import_message">The imported secret key is not guaranteed.\nPlease be careful when handling.</string>
     <!-- Host Screen -->
     <string name="host_title">Host</string>
     <string name="host_set_manually">Set manually</string>

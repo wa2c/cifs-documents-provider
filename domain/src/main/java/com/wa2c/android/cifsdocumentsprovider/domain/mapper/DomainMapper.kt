@@ -34,12 +34,15 @@ internal object DomainMapper {
         return when (type) {
             StorageType.JCIFS,
             StorageType.SMBJ,
-            StorageType.JCIFS_LEGACY -> {
+            StorageType.JCIFS_LEGACY, -> {
                 formatter.decodeFromString<StorageConnection.Cifs>(json)
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS, -> {
                 formatter.decodeFromString<StorageConnection.Ftp>(json)
+            }
+            StorageType.APACHE_SFTP, -> {
+                formatter.decodeFromString<StorageConnection.Sftp>(json)
             }
         }
     }
@@ -149,6 +152,26 @@ internal object DomainMapper {
                     optionAddExtension = extension,
                 )
             }
+            is StorageConnection.Sftp -> {
+                RemoteConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    keyFileUri = keyFileUri,
+                    keyData = keyData,
+                    keyPassphrase = keyPassphrase,
+                    encoding = encoding,
+                    optionSafeTransfer = safeTransfer,
+                    optionReadOnly = readOnly,
+                    optionAddExtension = extension,
+                )
+            }
         }
     }
 
@@ -209,7 +232,7 @@ internal object DomainMapper {
                 )
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS, -> {
                 StorageConnection.Ftp(
                     id = id,
                     name = name,
@@ -226,6 +249,26 @@ internal object DomainMapper {
                     encoding = encoding,
                     isActiveMode = isFtpActiveMode,
                     isImplicitMode = isFtpsImplicit,
+                )
+            }
+            StorageType.APACHE_SFTP, -> {
+                StorageConnection.Sftp(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    safeTransfer = optionSafeTransfer,
+                    readOnly = optionReadOnly,
+                    extension = optionAddExtension,
+                    keyFileUri = keyFileUri,
+                    keyData = keyData,
+                    keyPassphrase = keyPassphrase,
+                    encoding = encoding,
                 )
             }
         }

@@ -6,6 +6,7 @@
     <string name="app_summary">オンラインストレージにアクセス</string>
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">閉じる</string>
+    <string name="dialog_title_warning">注意</string>
     <!-- Home Screen -->
     <string name="home_open_file">開く</string>
     <string name="home_open_settings">設定</string>
@@ -33,6 +34,17 @@
     <string name="edit_password_title">パスワード</string>
     <string name="edit_password_hint">匿名の場合は無効</string>
     <string name="edit_anonymous_label">匿名</string>
+    <string name="edit_key_title">秘密鍵</string>
+    <string name="edit_key_hint">秘密鍵</string>
+    <string name="edit_key_text_none">使用しない</string>
+    <string name="edit_key_text_file">ファイル参照済み</string>
+    <string name="edit_key_text_import">インポート済み</string>
+    <string name="edit_key_input_none">使用しない</string>
+    <string name="edit_key_input_file">ファイルを参照</string>
+    <string name="edit_key_input_import_file">ファイルをインポート</string>
+    <string name="edit_key_input_import_text">入力してインポート</string>
+    <string name="edit_passphrase_title">秘密鍵のパスフレーズ</string>
+    <string name="edit_passphrase_hint">未設定の場合は入力しない</string>
     <string name="edit_encoding_title">文字コード</string>
     <string name="edit_ftp_mode_title">アクティブモード</string>
     <string name="edit_ftps_implicit_label">暗黙的SSL/TLSモード</string>
@@ -49,13 +61,17 @@
     <string name="edit_check_connection_ok_message">接続に成功しました。</string>
     <string name="edit_check_connection_wn_message">設定にエラーがあります。</string>
     <string name="edit_check_connection_ng_message">接続に失敗しました。</string>
-    <string name="edit_save_ng_input_message">名前とホストは必須です。</string>
-    <string name="edit_save_ng_invalid_id_message">IDの文字列が不正です。</string>
-    <string name="edit_save_ng_duplicate_id_message">IDが重複しています。</string>
+    <string name="edit_check_save_ng_input_message">名前とホストは必須です。</string>
+    <string name="edit_check_save_ng_invalid_id_message">IDの文字列が不正です。</string>
+    <string name="edit_check_save_ng_duplicate_id_message">IDが重複しています。</string>
+    <string name="edit_check_key_ng_failed_messaged">秘密鍵にアクセスできません。</string>
+    <string name="edit_check_key_ng_invalid_messaged">秘密鍵が読み込めません。</string>
+    <string name="edit_check_key_ok_messaged">秘密鍵は有効です。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_delete_button">削除</string>
     <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
     <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
+    <string name="edit_warning_key_import_message">インポートされた秘密鍵の安全性は保証しません。\n取り扱いにはご注意ください。</string>
     <!-- Host Screen -->
     <string name="host_title">ホスト</string>
     <string name="host_set_manually">手動で設定</string>

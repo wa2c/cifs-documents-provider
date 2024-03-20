@@ -1,9 +1,11 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
@@ -76,17 +78,24 @@ class EditViewModel @Inject constructor(
 
     private val _connectionResult = MutableSharedFlow<ConnectionResult?>()
     val connectionResult = channelFlow<ConnectionResult?> {
-        var prevConnection = initConnection
         launch { _connectionResult.collect { send(it) } }
         launch {
+            var prevConnection = initConnection
             remoteConnection.collect {
-                if (it.isChangedConnection(prevConnection)) {
+                if (prevConnection != initConnection && it.isChangedConnection(prevConnection)) {
                     send(null)
                 }
                 prevConnection = it
             }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
+
+    private val _keyCheckResult = MutableSharedFlow<Result<Unit>>()
+    val keyCheckResult = _keyCheckResult.asSharedFlow()
+
+    // first: grant permission uri / second: revoke permission uri
+    private val _updatePermission = MutableSharedFlow<Pair<Uri?, Uri?>>()
+    val updatePermission = _updatePermission.asSharedFlow()
 
     /**
      * Check connection
@@ -162,25 +171,93 @@ class EditViewModel @Inject constructor(
             runCatching {
                 remoteConnection.value.let { con ->
                     if (RemoteConnection.isInvalidConnectionId(con.id)) {
-                        throw EditException.InvalidIdException()
+                        throw Edit.SaveCheck.InvalidIdException()
                     }
                     if (con.name.isEmpty() || con.host.isEmpty()) {
-                        throw EditException.InputRequiredException()
+                        throw Edit.SaveCheck.InputRequiredException()
                     }
                     if (isNew && editRepository.getConnection(con.id) != null) {
-                        throw EditException.DuplicatedIdException()
+                        throw Edit.SaveCheck.DuplicatedIdException()
                     }
                     editRepository.saveConnection(con)
+
+                    // update permission
+                    val grantPermissionUri = con.keyFileUri?.toUri()
+                    _updatePermission.emit(grantPermissionUri to null) // not revoke permission
+
                     currentId = con.id
                     initConnection = con
                 }
             }.onSuccess {
                 _result.emit(Result.success(Unit))
-                _isBusy.emit(false)
             }.onFailure {
                 _result.emit(Result.failure(it))
+            }.also {
                 _isBusy.emit(false)
             }
+        }
+    }
+
+    /**
+     * Select external key
+     */
+    fun selectKey(uri: Uri) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.loadKeyFile(uri.toString()) // check key
+            }.onSuccess {
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = uri.toString(), keyData = null))
+                _keyCheckResult.emit(Result.success(Unit))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
+    }
+
+    /**
+     * Import external key
+     */
+    fun importKey(uri: Uri) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.loadKeyFile(uri.toString())
+            }.onSuccess {
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = it))
+                _keyCheckResult.emit(Result.success(Unit))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
+    }
+
+    /**
+     * Input key
+     */
+    fun inputKey(key: String) {
+        launch {
+            _isBusy.emit(true)
+            runCatching {
+                editRepository.checkKey(key)
+            }.onSuccess {
+                remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = key))
+                _keyCheckResult.emit(Result.success(Unit))
+            }.onFailure {
+                _keyCheckResult.emit(Result.failure(it))
+            }.also {
+                _isBusy.emit(false)
+            }
+        }
+    }
+
+    fun clearKey() {
+        launch {
+            remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = null))
         }
     }
 

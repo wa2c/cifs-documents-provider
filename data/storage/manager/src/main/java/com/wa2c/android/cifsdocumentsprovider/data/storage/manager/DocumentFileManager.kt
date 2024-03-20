@@ -1,8 +1,9 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.storage.manager
 
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.wa2c.android.cifsdocumentsprovider.common.utils.getFileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -57,6 +58,10 @@ class DocumentFileManager @Inject constructor(
                 df.uri
             }
         }
+    }
+
+    fun loadFile(uri: String): ByteArray? {
+        return context.contentResolver.openInputStream(uri.toUri())?.use { it.readBytes() }
     }
 
     /**

@@ -82,11 +82,7 @@ fun HomeScreen(
                 try {
                     fileOpenLauncher.launch(arrayOf("*/*"))
                 } catch (e: Exception) {
-                    scope.showError(
-                        snackbarHostState = snackbarHostState,
-                        stringRes = R.string.provider_error_message,
-                        error = e,
-                    )
+                    scope.showError(snackbarHostState, e)
                 }
             } else {
                 scope.showPopup(

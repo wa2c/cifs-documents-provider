@@ -4,6 +4,7 @@ Component,String Resource Name,Language,,,,
 Common,app_summary,Access online storage,オンラインストレージにアクセス,Prístup online úložiska,访问在线存储,الوصول إلى التخزين عبر الإنترنت
 ,dialog_accept,OK,OK,OK,OK,حسنا
 ,dialog_close,Close,閉じる,Zatvoriť,关闭,إغلاق
+,dialog_title_warning,Attention,注意,Pozornosť,注意力,انتباه
 ,,,,,,
 Home Screen,home_open_file,Open,開く,Otvoriť,打开,فتح
 ,home_open_settings,Settings,設定,Nastavenie,设置,الإعدادات
@@ -31,6 +32,17 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_password_title,Password,パスワード,Heslo,密码,كلمة المرور
 ,edit_password_hint,Invalid if anonymous,匿名の場合は無効,Neplatí pre anonymné prihlásenie,匿名访问时无效,باطل إذا كان مجهول
 ,edit_anonymous_label,Anonymous,匿名,Anonymné prihlásenie,匿名,مجهول
+,edit_key_title,Private Key,秘密鍵,Súkromný kľúč,私钥,مفتاح سري
+,edit_key_hint,Private Key,秘密鍵,Súkromný kľúč,私钥,مفتاح سري
+,edit_key_text_none,Unused,使用しない,Nevyužitý,没用过,غير مستعمل
+,edit_key_text_file,File referenced,ファイル参照済み,Uvedený súbor,引用文件,ملف مشار إليه
+,edit_key_text_import,Imported,インポート済み,Dovážaný,进口,مستورد
+,edit_key_input_none,Unused,使用しない,Nevyužitý,没用过,غير مستعمل
+,edit_key_input_file,Refer to file,ファイルを参照,Pozrite sa na súbor,请参阅文件,الرجوع إلى الملف
+,edit_key_input_import_file,Import file,ファイルをインポート,Importovaný súbor,导入文件,استيراد ملف
+,edit_key_input_import_text,Enter and import,入力してインポート,Zadajte a importujte,输入并导入,أدخل واستيراد
+,edit_passphrase_title,Private key passphrase,秘密鍵のパスフレーズ,Súkromná priechodná fráza,私钥密码,شعار المارة الخاص
+,edit_passphrase_hint,Not entered if not set,未設定の場合は入力しない,"Nezadajte, ak nie je nastavená",如果不设置，请勿输入,لا تدخل إذا لم يتم تعيينها
 ,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
 ,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
 ,edit_ftps_implicit_label,Implicit SSL/TLS Mode,暗黙的SSL/TLSモード,Implicitný režim SSL/TLS,隐式SSL/TLS模式,وضع SSL/TLS الضمني
@@ -47,13 +59,22 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_check_connection_ok_message,Connection successful.,接続に成功しました。,Pripojenie úspešné.,连接成功。,نجح الاتصال
 ,edit_check_connection_wn_message,Settings has an error.,設定にエラーがあります。,Nastavenia majú chybu.,设置有误。,الإعدادات فيها خطأ
 ,edit_check_connection_ng_message,Connection failed.,接続に失敗しました。,Pripojenie zlyhalo.,连接失败。,فشل الإتصال
-,edit_save_ng_input_message,Name and host are required.,名前とホストは必須です。,Vyžaduje sa meno a hostiteľ.,需要名称和主机。,الاسم والمضيف مطلوب.
-,edit_save_ng_invalid_id_message,ID is invalid.,IDの文字列が不正です。,ID je neplatné.,ID 无效。,المعرف غير صالح
-,edit_save_ng_duplicate_id_message,ID is duplicated.,IDが重複しています。,ID je duplikované.,ID 重复。,معرف مكرر.
+,edit_check_save_ng_input_message,Name and host are required.,名前とホストは必須です。,Vyžaduje sa meno a hostiteľ.,需要名称和主机。,الاسم والمضيف مطلوب.
+,edit_check_save_ng_invalid_id_message,ID is invalid.,IDの文字列が不正です。,ID je neplatné.,ID 无效。,المعرف غير صالح
+,edit_check_save_ng_duplicate_id_message,ID is duplicated.,IDが重複しています。,ID je duplikované.,ID 重复。,معرف مكرر.
+,edit_check_key_ng_failed_messaged,Failed to access the private key.,秘密鍵にアクセスできません。,Nepodarilo sa získať prístup k súkromnému kľúču.,无法访问私钥。,فشل في الوصول إلى المفتاح الخاص.
+,edit_check_key_ng_invalid_messaged,Failed to read the private key.,秘密鍵が読み込めません。,Nepodarilo sa čítať súkromný kľúč.,未能阅读私钥。,فشل في قراءة المفتاح الخاص.
+,edit_check_key_ok_messaged,The private key is valid.,秘密鍵は有効です。,Súkromný kľúč je platný.,私钥是有效的。,المفتاح الخاص صالح.
 ,edit_save_button,Save,保存,Uložiť,保存,حفظ
 ,edit_delete_button,Delete,削除,Zmazať,删除,حذف
 ,edit_back_confirmation_message,Discard your changes?,変更を破棄しますか？,Zahodiť zmeny?,放弃修改？,أهمل التغييرات؟
 ,edit_delete_confirmation_message,Delete this settings?,設定を削除しますか？,Naozaj vymazať toto pripojenie?,删除此项设置？,إحذف الإعدادات؟
+,edit_warning_key_import_message,"The imported secret key is not guaranteed.
+Please be careful when handling.","インポートされた秘密鍵の安全性は保証しません。
+取り扱いにはご注意ください。","Dovážaný tajný kľúč nie je zaručený.
+Pri manipulácii buďte opatrní.","进口的秘密密钥无法保证。
+处理时请小心。","المفتاح السري المستورد غير مضمون.
+يرجى توخي الحذر عند التعامل."
 ,,,,,,
 Host Screen,host_title,Host,ホスト,Hostiteľ,主机名,المضيف
 ,host_set_manually,Set manually,手動で設定,Nastaviť ručne,手动设置,تحديد يدويا

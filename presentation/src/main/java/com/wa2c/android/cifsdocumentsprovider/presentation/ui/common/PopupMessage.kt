@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarVisuals
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -93,8 +94,9 @@ fun CoroutineScope.showPopup(
 
 fun CoroutineScope.showError(
     snackbarHostState: SnackbarHostState,
-    @StringRes stringRes: Int,
     error: Throwable? = null,
+    @StringRes stringRes: Int? = null,
 ) {
-    showPopup(snackbarHostState, stringRes, PopupMessageType.Error, error)
+    val labelRes = stringRes ?: error.labelRes
+    showPopup(snackbarHostState, labelRes, PopupMessageType.Error, error)
 }

@@ -22,6 +22,7 @@ guava = "27.0.1-android"
 hiltAndroid = "2.50"
 hiltNavigationCompose = "1.1.0"
 jcifsNg = "2.1.10"
+jsch = "0.1.55"
 junit = "4.13.2"
 kotlin = "1.9.22"
 kotlinCompilerExtension = "1.5.9"
@@ -69,6 +70,7 @@ guava = { module = "com.google.guava:guava", version.ref = "guava" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 jcifs-ng = { module = "eu.agno3.jcifs:jcifs-ng", version.ref = "jcifsNg" }
+jsch = { module = "com.jcraft:jsch", version.ref = "jsch" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }

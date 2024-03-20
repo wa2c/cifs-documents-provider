@@ -3,8 +3,10 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
+import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -12,6 +14,16 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 
+val Throwable?.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        is Edit.SaveCheck.InputRequiredException ->   R.string.edit_check_save_ng_input_message
+        is Edit.SaveCheck.InvalidIdException -> R.string.edit_check_save_ng_invalid_id_message
+        is Edit.SaveCheck.DuplicatedIdException ->  R.string.edit_check_save_ng_duplicate_id_message
+        is Edit.KeyCheck.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
+        is Edit.KeyCheck.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
+        else -> R.string.provider_error_message
+    }
 
 /** ConnectionResult type */
 val ConnectionResult.messageType: PopupMessageType
@@ -91,4 +103,14 @@ val StorageType.labelRes: Int
         StorageType.JCIFS_LEGACY ->R.string.enum_storage_smb1_jcifsng
         StorageType.APACHE_FTP -> R.string.enum_storage_ftp_apache
         StorageType.APACHE_FTPS -> R.string.enum_storage_ftps_apache
+        StorageType.APACHE_SFTP -> R.string.enum_storage_sftp_apache
+    }
+
+val KeyInputType.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        KeyInputType.NOT_USED -> R.string.edit_key_input_none
+        KeyInputType.EXTERNAL_FILE -> R.string.edit_key_input_file
+        KeyInputType.IMPORTED_FILE -> R.string.edit_key_input_import_file
+        KeyInputType.INPUT_TEXT -> R.string.edit_key_input_import_text
     }

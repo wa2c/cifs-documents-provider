@@ -1,12 +1,14 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
+import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.data.MemoryCache
-import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
+import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.DocumentFileManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
@@ -31,10 +33,13 @@ import javax.inject.Singleton
 @Singleton
 class EditRepository @Inject internal constructor(
     private val storageClientManager: StorageClientManager,
+    private val documentFileManager: DocumentFileManager,
+    private val sshKeyManager: SshKeyManager,
     private val connectionSettingDao: ConnectionSettingDao,
-    private val memoryCache: MemoryCache,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
+
+    private var temporaryConnection: RemoteConnection? = null
 
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
@@ -87,11 +92,21 @@ class EditRepository @Inject internal constructor(
     }
 
     /**
+     * Move connections order
+     */
+    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
+        withContext(dispatcher) {
+            connectionSettingDao.move(fromPosition, toPosition)
+        }
+    }
+
+    /**
      * Load temporary connection
      */
     fun loadTemporaryConnection(): RemoteConnection?  {
         logD("loadTemporaryConnection")
-        return memoryCache.temporaryConnection?.toDomainModel()
+        return temporaryConnection
     }
 
     /**
@@ -99,7 +114,7 @@ class EditRepository @Inject internal constructor(
      */
     fun saveTemporaryConnection(connection: RemoteConnection?) {
         logD("saveTemporaryConnection: connection=$connection")
-        memoryCache.temporaryConnection = connection?.toDataModel()
+        temporaryConnection = connection
     }
 
     /**
@@ -123,17 +138,34 @@ class EditRepository @Inject internal constructor(
         logD("Connection check: ${connection.uri}")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest(null)
-            getClient(request.connection).checkConnection(request)
+            // check connection
+            val result = getClient(request.connection).checkConnection(request)
+            if (result is ConnectionResult.Success) {
+                try {
+                    // check key
+                    connection.keyFileUri?.let { loadKeyFile(it) }
+                    connection.keyData?.let { checkKey(it) }
+                    result
+                } catch (e: Exception) {
+                    ConnectionResult.Warning(e)
+                }
+            } else {
+                result
+            }
         }
     }
 
-    /**
-     * Move connections order
-     */
-    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
-        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
-        withContext(dispatcher) {
-            connectionSettingDao.move(fromPosition, toPosition)
+    suspend fun loadKeyFile(uri: String): String {
+        return withContext(dispatcher) {
+            val binary = documentFileManager.loadFile(uri) ?: throw Edit.KeyCheck.AccessFailedException()
+            if (!sshKeyManager.checkKeyFile(binary)) throw Edit.KeyCheck.InvalidException()
+            String(binary)
+        }
+    }
+
+    suspend fun checkKey(key: String) {
+        return withContext(dispatcher) {
+            if (!sshKeyManager.checkKeyFile(key.encodeToByteArray())) throw Edit.KeyCheck.InvalidException()
         }
     }
 
