@@ -30,40 +30,52 @@ CIFS Documents Provider
 ```mermaid
 graph TD
 
-subgraph "app"
+subgraph "app package"
   app_module[app]
 end
 
-subgraph "presetntation"
+subgraph "presetntation package"
   presetntation_module[presetntation]
+
   app_module --> presetntation_module
 end
 
-subgraph "domain"
+subgraph "domain package"
   domain_module[domain]
+
   presetntation_module --> domain_module
 end
  
-subgraph "data"
-  subgraph "storage"
+subgraph "data package"
+  subgraph "storage package"
+    data_storage_manager[manager]
     data_storage_modules[jcifs, smbj, ...]
     data_storage_interfaces_module[interfaces]
-    data_storage_modules --> data_storage_interfaces_module
+
+    data_storage_manager --> data_storage_modules
+    data_storage_manager --> data_storage_interfaces_module
+    domain_module --> data_storage_manager
     domain_module --> data_storage_interfaces_module
   end
-  data_data_module[data]
-  domain_module -->  data_data_module[data]
-  data_data_module --> data_storage_interfaces_module
-  data_data_module --> data_storage_modules
+
+  subgraph "data package"
+    data_data_module[data]
+
+    data_storage_manager --> data_data_module
+    domain_module --> data_data_module
+  end
+
 end
 
 subgraph "common"
   common_module[common]
+
   app_module --> common_module
   presetntation_module --> common_module
   domain_module --> common_module
   data_data_module --> common_module
   data_storage_modules --> common_module
+  data_storage_manager --> common_module
   data_storage_interfaces_module --> common_module
 end
 ```
