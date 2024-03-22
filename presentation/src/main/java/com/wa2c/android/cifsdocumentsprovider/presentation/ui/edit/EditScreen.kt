@@ -138,7 +138,7 @@ fun EditScreen(
         onClickDelete = { showDeleteDialog = true },
         onClickSearchHost = { viewModel.onClickSearchHost() },
         onClickSelectFolder = { viewModel.onClickSelectFolder() },
-        onClickImpotKey = {
+        onClickImportKey = {
             when (it) {
                 KeyInputType.NOT_USED -> {
                     viewModel.clearKey()
@@ -290,7 +290,7 @@ private fun EditScreenContainer(
     onClickDelete: () -> Unit,
     onClickSearchHost: () -> Unit,
     onClickSelectFolder: () -> Unit,
-    onClickImpotKey: (KeyInputType) -> Unit,
+    onClickImportKey: (KeyInputType) -> Unit,
     onClickCheckConnection: () -> Unit,
     onClickSave: () -> Unit,
 ) {
@@ -556,7 +556,7 @@ private fun EditScreenContainer(
                                     DropdownMenuItem(
                                         text = { Text(text = stringResource(id = it.labelRes)) },
                                         onClick = {
-                                            onClickImpotKey(it)
+                                            onClickImportKey(it)
                                             expanded = false
                                         },
 
@@ -725,7 +725,7 @@ private fun EditScreenPreview() {
             onClickDelete = {},
             onClickSearchHost = {},
             onClickSelectFolder = {},
-            onClickImpotKey = {},
+            onClickImportKey = {},
             onClickCheckConnection = {},
             onClickSave = {},
         )
