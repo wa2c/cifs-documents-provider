@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -222,10 +223,13 @@ private fun ConnectionItem(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1f)
+                    .align(alignment = Alignment.CenterVertically)
             )
             Text(
-                text = stringResource(id = connection.storage.labelRes),
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(id = connection.storage.labelRes)
+                    .replace("(", "\n("),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.End,
                 modifier = Modifier
                     .padding(start = Theme.Sizes.S)
                     .align(alignment = Alignment.CenterVertically)
@@ -256,15 +260,15 @@ private fun HomeScreenContainerPreview() {
             connectionList = listOf(
                 RemoteConnectionIndex(
                     id = "",
-                    name = "PC1",
+                    name = "PC1PC1PC1PC1",
                     storage = StorageType.JCIFS,
-                    uri = "",
+                    uri = "content://com.wa2c.android.cifsdocumentsprovider.provider/"
                 ),
                 RemoteConnectionIndex(
                     id = "",
-                    name = "PC2",
+                    name = "PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2",
                     storage = StorageType.JCIFS,
-                    uri = "",
+                    uri = "content://com.wa2c.android.cifsdocumentsprovider.provider/test",
                 ),
                 RemoteConnectionIndex(
                     id = "",

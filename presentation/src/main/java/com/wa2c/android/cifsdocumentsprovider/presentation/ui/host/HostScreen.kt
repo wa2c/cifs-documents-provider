@@ -82,9 +82,9 @@ fun HostScreen(
 
     // Sort dialog
     if (showSortDialog.value) {
-        val types =  HostSortType.values()
+        val types =  HostSortType.entries
         SingleChoiceDialog(
-            items = HostSortType.values().map { stringResource(id = it.labelRes) },
+            items = types.map { stringResource(id = it.labelRes) },
             selectedIndex = types.indexOfFirst { it == viewModel.sortType.value },
             dismissButton = DialogButton(
                 label = stringResource(id = R.string.dialog_close),
