@@ -157,15 +157,24 @@ class EditRepository @Inject internal constructor(
 
     suspend fun loadKeyFile(uri: String): String {
         return withContext(dispatcher) {
-            val binary = documentFileManager.loadFile(uri) ?: throw Edit.KeyCheck.AccessFailedException()
-            if (!sshKeyManager.checkKeyFile(binary)) throw Edit.KeyCheck.InvalidException()
-            String(binary)
+            val binary = try {
+                documentFileManager.loadFile(uri)
+            } catch (e: Exception) {
+                throw Edit.KeyCheck.AccessFailedException(e)
+            }
+            String(binary).also {
+                checkKey(it)
+            }
         }
     }
 
     suspend fun checkKey(key: String) {
-        return withContext(dispatcher) {
-            if (!sshKeyManager.checkKeyFile(key.encodeToByteArray())) throw Edit.KeyCheck.InvalidException()
+        withContext(dispatcher) {
+            try {
+                sshKeyManager.checkKeyFile(key.encodeToByteArray())
+            } catch (e: Exception) {
+                throw Edit.KeyCheck.InvalidException(e)
+            }
         }
     }
 

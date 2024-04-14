@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.FileNotFoundException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,8 +61,10 @@ class DocumentFileManager @Inject constructor(
         }
     }
 
-    fun loadFile(uri: String): ByteArray? {
-        return context.contentResolver.openInputStream(uri.toUri())?.use { it.readBytes() }
+    fun loadFile(uri: String): ByteArray {
+        return context.contentResolver.openInputStream(uri.toUri())?.use {
+            it.readBytes()
+        } ?: throw FileNotFoundException()
     }
 
     /**

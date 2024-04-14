@@ -14,7 +14,7 @@ import java.time.Duration
 
 class ApacheSftpClient(
     openFileLimit: Int,
-    private val onKeyRead: (String) -> ByteArray?,
+    private val onKeyRead: (String) -> ByteArray,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): ApacheVfsClient(openFileLimit, dispatcher) {
 
