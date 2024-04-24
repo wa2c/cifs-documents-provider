@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
+import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
@@ -282,6 +283,14 @@ abstract class ApacheVfsClient(
             }
             getProxyFileDescriptorCallback(file, mode, release)
         }
+    }
+
+    override suspend fun getThumbnailDescriptor(
+        request: StorageRequest,
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor? {
+        // TODO("Not yet implemented")
+        return null
     }
 
     override suspend fun close() {

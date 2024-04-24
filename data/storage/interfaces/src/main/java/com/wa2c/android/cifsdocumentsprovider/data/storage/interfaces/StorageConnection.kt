@@ -22,6 +22,7 @@ sealed class StorageConnection {
     abstract val anonymous: Boolean
     abstract val safeTransfer: Boolean
     abstract val readOnly: Boolean
+    abstract val thumbnailEnabled: Boolean
     abstract val extension: Boolean
 
     open val uri: String
@@ -55,6 +56,7 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
+        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
         val domain: String?,
         val enableDfs: Boolean,
@@ -76,6 +78,7 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
+        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
         val encoding: String,
         val isActiveMode: Boolean,
@@ -101,6 +104,7 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
+        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
         val keyFileUri: String? = null,
         val keyData: String? = null,

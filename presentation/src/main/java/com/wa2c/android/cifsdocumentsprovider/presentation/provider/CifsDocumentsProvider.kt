@@ -237,7 +237,38 @@ class CifsDocumentsProvider : DocumentsProvider() {
         sizeHint: Point?,
         signal: CancellationSignal?,
     ): AssetFileDescriptor? {
-        return null
+        if (!documentId.mimeType.startsWith("image")) return null
+        val accessMode = AccessMode.R
+        return runOnFileHandler {
+            val id = storageRepository.getDocumentId(documentId)
+            storageRepository.getFileCallback(id, accessMode) { } ?: let {
+                throw StorageException.FileNotFoundException()
+            }
+        }.let { callback ->
+            // NOTE: not inside runOnFileHandler
+            storageManager.openProxyFileDescriptor(
+                ParcelFileDescriptor.parseMode(accessMode.safMode),
+                callback,
+                fileHandler
+            )
+        }.let { fd ->
+            // NOTE: not inside runOnFileHandler
+            AssetFileDescriptor(fd, 0, fd.statSize)
+        }
+//        return runOnFileHandler {
+//            //val id = storageRepository.getDocumentId(documentId)
+////            storageRepository.getThumbnailCallback(id) {
+////                signal?.throwIfCanceled()
+////            } ?: let {
+////                signal?.throwIfCanceled()
+////                throw StorageException.FileNotFoundException()
+////            }
+//            if (!documentId.mimeType.startsWith("image/")) return@runOnFileHandler null
+//            openDocument(documentId, AccessMode.R.safMode, signal)
+//        }?.let { fd ->
+//            // NOTE: not inside runOnFileHandler
+//            AssetFileDescriptor(fd, 0, fd.statSize)
+//        }
     }
 
     override fun openDocument(
@@ -248,9 +279,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
         logD("openDocument: documentId=$documentId")
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
-            storageRepository.getDocumentId(documentId).takeIf { !it.isRoot && !it.isPathRoot }?.let { id ->
-                storageRepository.getCallback(id, accessMode) { }
-            } ?: let {
+            val id = storageRepository.getDocumentId(documentId)
+            storageRepository.getFileCallback(id, accessMode) { } ?: let {
                 throw StorageException.FileNotFoundException()
             }
         }.let { callback ->
@@ -426,7 +456,8 @@ class CifsDocumentsProvider : DocumentsProvider() {
                                 DocumentsContract.Document.FLAG_SUPPORTS_MOVE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_DELETE or
                                 DocumentsContract.Document.FLAG_SUPPORTS_REMOVE or
-                                DocumentsContract.Document.FLAG_SUPPORTS_RENAME
+                                DocumentsContract.Document.FLAG_SUPPORTS_RENAME or
+                                DocumentsContract.Document.FLAG_SUPPORTS_THUMBNAIL
                     )
                 }
             }

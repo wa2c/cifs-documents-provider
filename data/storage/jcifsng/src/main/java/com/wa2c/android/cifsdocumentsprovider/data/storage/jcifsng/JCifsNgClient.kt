@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
+import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
@@ -8,6 +9,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
+import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -27,8 +29,12 @@ import jcifs.smb.NtlmPasswordAuthenticator
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.util.Properties
 
 
@@ -293,6 +299,31 @@ class JCifsNgClient(
                 JCifsNgProxyFileCallbackSafe(file, mode, release)
             } else {
                 JCifsNgProxyFileCallback(file, mode, release)
+            }
+        }
+    }
+
+    override suspend fun getThumbnailDescriptor(
+        request: StorageRequest,
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor? {
+        return withContext(dispatcher) {
+            try {
+                val smbFile = getSmbFile(request)
+                val pipe = ParcelFileDescriptor.createReliablePipe()
+                CoroutineScope(dispatcher).launch {
+                    ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                        smbFile.inputStream.use { input ->
+                            input.copyTo(output, BUFFER_SIZE)
+                            onFileRelease()
+                        }
+                    }
+                }
+                pipe[0]
+            } catch (e: IOException) {
+                logE(e)
+                onFileRelease()
+                throw e
             }
         }
     }

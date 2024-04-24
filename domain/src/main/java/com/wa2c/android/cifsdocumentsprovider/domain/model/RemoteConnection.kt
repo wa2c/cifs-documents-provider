@@ -36,6 +36,7 @@ data class RemoteConnection(
     // Options
     val optionSafeTransfer: Boolean = false,
     val optionReadOnly: Boolean = false,
+    val optionThumbnailEnabled: Boolean = false,
     val optionAddExtension: Boolean = false,
 ): Parcelable, java.io.Serializable {
 

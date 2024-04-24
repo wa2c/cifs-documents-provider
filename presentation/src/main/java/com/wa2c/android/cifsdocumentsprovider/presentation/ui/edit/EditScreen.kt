@@ -657,6 +657,15 @@ private fun EditScreenContainer(
                         connectionState.value = connectionState.value.copy(optionReadOnly = it)
                     }
 
+
+                    InputCheck(
+                        title = "サムネイル利用", // TODO
+                        value = connectionState.value.optionThumbnailEnabled,
+                        focusManager = focusManager,
+                    ) {
+                        connectionState.value = connectionState.value.copy(optionThumbnailEnabled = it)
+                    }
+
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
                         value = connectionState.value.optionAddExtension,

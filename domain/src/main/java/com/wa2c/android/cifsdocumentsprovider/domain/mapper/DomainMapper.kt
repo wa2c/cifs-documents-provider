@@ -130,6 +130,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
+                    optionThumbnailEnabled = thumbnailEnabled,
                     optionAddExtension = extension,
                 )
             }
@@ -149,6 +150,7 @@ internal object DomainMapper {
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
+                    optionThumbnailEnabled = thumbnailEnabled,
                     optionAddExtension = extension,
                 )
             }
@@ -169,6 +171,7 @@ internal object DomainMapper {
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
+                    optionThumbnailEnabled = thumbnailEnabled,
                     optionAddExtension = extension,
                 )
             }
@@ -225,8 +228,9 @@ internal object DomainMapper {
                     password = password,
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
-                    extension = optionAddExtension,
                     readOnly = optionReadOnly,
+                    thumbnailEnabled = optionThumbnailEnabled,
+                    extension = optionAddExtension,
                     domain = domain,
                     enableDfs = enableDfs,
                 )
@@ -245,6 +249,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
+                    thumbnailEnabled = optionThumbnailEnabled,
                     extension = optionAddExtension,
                     encoding = encoding,
                     isActiveMode = isFtpActiveMode,
@@ -264,6 +269,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
+                    thumbnailEnabled = optionThumbnailEnabled,
                     extension = optionAddExtension,
                     keyFileUri = keyFileUri,
                     keyData = keyData,
