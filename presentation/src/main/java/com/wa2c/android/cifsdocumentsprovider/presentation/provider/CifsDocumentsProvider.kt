@@ -8,10 +8,7 @@ import android.graphics.Point
 import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
-import android.os.Handler
-import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
-import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import android.provider.DocumentsProvider
 import androidx.lifecycle.lifecycleScope
@@ -35,7 +32,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideStorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.ProviderWorker
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
-import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -51,21 +47,11 @@ class CifsDocumentsProvider : DocumentsProvider() {
     /** Context */
     private val providerContext: Context by lazy { context!! }
 
-    /** Storage Manager */
-    private val storageManager: StorageManager by lazy { providerContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager }
-
     /** Cifs Repository */
     private val storageRepository: StorageRepository by lazy { provideStorageRepository(providerContext) }
 
     /** Current files */
     private val currentFiles: MutableSet<RemoteFile> = mutableSetOf()
-
-    /** File handler */
-    private val fileHandler: Handler by lazy {
-        HandlerThread(this.javaClass.simpleName)
-            .apply { start() }
-            .let { Handler(it.looper) }
-    }
 
     /** WorkManager */
     private val workManager: WorkManager by lazy { WorkManager.getInstance(providerContext) }
@@ -93,7 +79,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
      * Run on fileHandler
      */
     private fun <T> runOnFileHandler(function: suspend () -> T): T {
-        return runBlocking(fileHandler.asCoroutineDispatcher()) {
+        return runBlocking {
             try {
                 function()
             } catch (e: Exception) {
@@ -236,39 +222,16 @@ class CifsDocumentsProvider : DocumentsProvider() {
         documentId: String?,
         sizeHint: Point?,
         signal: CancellationSignal?,
-    ): AssetFileDescriptor? {
-        if (!documentId.mimeType.startsWith("image")) return null
-        val accessMode = AccessMode.R
+    ): AssetFileDescriptor {
         return runOnFileHandler {
             val id = storageRepository.getDocumentId(documentId)
-            storageRepository.getFileCallback(id, accessMode) { } ?: let {
+            storageRepository.getThumbnailDescriptor(id) { signal?.cancel() } ?: let {
                 throw StorageException.FileNotFoundException()
             }
-        }.let { callback ->
-            // NOTE: not inside runOnFileHandler
-            storageManager.openProxyFileDescriptor(
-                ParcelFileDescriptor.parseMode(accessMode.safMode),
-                callback,
-                fileHandler
-            )
         }.let { fd ->
             // NOTE: not inside runOnFileHandler
             AssetFileDescriptor(fd, 0, fd.statSize)
         }
-//        return runOnFileHandler {
-//            //val id = storageRepository.getDocumentId(documentId)
-////            storageRepository.getThumbnailCallback(id) {
-////                signal?.throwIfCanceled()
-////            } ?: let {
-////                signal?.throwIfCanceled()
-////                throw StorageException.FileNotFoundException()
-////            }
-//            if (!documentId.mimeType.startsWith("image/")) return@runOnFileHandler null
-//            openDocument(documentId, AccessMode.R.safMode, signal)
-//        }?.let { fd ->
-//            // NOTE: not inside runOnFileHandler
-//            AssetFileDescriptor(fd, 0, fd.statSize)
-//        }
     }
 
     override fun openDocument(
@@ -280,16 +243,9 @@ class CifsDocumentsProvider : DocumentsProvider() {
         val accessMode = AccessMode.fromSafMode(mode)
         return runOnFileHandler {
             val id = storageRepository.getDocumentId(documentId)
-            storageRepository.getFileCallback(id, accessMode) { } ?: let {
+            storageRepository.getFileDescriptor(id, accessMode) { } ?: let {
                 throw StorageException.FileNotFoundException()
             }
-        }.let { callback ->
-            // NOTE: not inside runOnFileHandler
-            storageManager.openProxyFileDescriptor(
-                ParcelFileDescriptor.parseMode(accessMode.safMode),
-                callback,
-                fileHandler
-            )
         }
     }
 
@@ -367,7 +323,6 @@ class CifsDocumentsProvider : DocumentsProvider() {
         lifecycleOwner.stop()
         runOnFileHandler { storageRepository.closeAllSessions() }
         workManager.cancelUniqueWork(ProviderWorker.WORKER_NAME)
-        fileHandler.looper.quit()
     }
 
     private fun Array<String>?.toRootProjection(): Array<String> {

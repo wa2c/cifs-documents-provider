@@ -25,7 +25,7 @@ interface StorageClient {
 
     suspend fun deleteFile(request: StorageRequest): Boolean
 
-    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback
+    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ParcelFileDescriptor
 
     suspend fun getThumbnailDescriptor(request: StorageRequest, onFileRelease: suspend () -> Unit): ParcelFileDescriptor?
 

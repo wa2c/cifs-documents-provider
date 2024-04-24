@@ -1,7 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import android.os.ParcelFileDescriptor
-import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
@@ -14,7 +13,6 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageCon
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
-import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.addExtension
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
@@ -236,12 +234,10 @@ class StorageRepository @Inject internal constructor(
         }
     }
 
-    /**
-     * Get ProxyFileDescriptorCallback
-     */
-    suspend fun getFileCallback(documentId: DocumentId, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
-        logD("getCallback: documentId=$documentId, mode=$mode")
+    suspend fun getFileDescriptor(documentId: DocumentId, mode: AccessMode, onFileRelease: () -> Unit): ParcelFileDescriptor? {
+        logD("getFileDescriptor: documentId=$documentId, mode=$mode")
         if (documentId.isRoot || documentId.isPathRoot) return null
+
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
             if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.ReadOnlyException()
@@ -260,12 +256,14 @@ class StorageRepository @Inject internal constructor(
         }
     }
 
-    suspend fun getThumbnailCallback(documentId: DocumentId, onFileRelease: () -> Unit): ParcelFileDescriptor? {
+    suspend fun getThumbnailDescriptor(documentId: DocumentId, onFileRelease: () -> Unit): ParcelFileDescriptor? {
         logD("getThumbnailCallback: documentId=$documentId")
         if (documentId.isRoot || documentId.isPathRoot) return null
+
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            //if (request.connection.)
+            if (!request.connection.thumbnailEnabled) return@withContext null
+
             try {
                 addBlockingQueue(request)
                 getClient(request.connection).getThumbnailDescriptor(request) {

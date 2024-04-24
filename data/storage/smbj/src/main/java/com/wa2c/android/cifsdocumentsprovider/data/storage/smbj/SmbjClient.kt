@@ -48,6 +48,7 @@ import kotlinx.coroutines.withContext
  */
 class SmbjClient(
     private val openFileLimit: Int,
+    private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -359,7 +360,11 @@ class SmbjClient(
         }
     }
 
-    override suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(
+        request: StorageRequest,
+        mode: AccessMode,
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor {
         return withContext(dispatcher) {
             val diskFile = useDiskShare(request) {
                 openDiskFile(it, request.sharePath, isRead = mode == AccessMode.R, existsRequired = true)
@@ -373,6 +378,8 @@ class SmbjClient(
                 SmbjProxyFileCallbackSafe(diskFile, mode, release)
             } else {
                 SmbjProxyFileCallback(diskFile, mode, release)
+            }.let {
+                fileDescriptorProvider(mode, it)
             }
         }
     }

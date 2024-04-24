@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
+import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
@@ -14,9 +15,10 @@ import java.time.Duration
 
 class ApacheSftpClient(
     openFileLimit: Int,
+    fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     private val onKeyRead: (String) -> ByteArray,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): ApacheVfsClient(openFileLimit, dispatcher) {
+): ApacheVfsClient(openFileLimit, fileDescriptorProvider, dispatcher) {
 
     override fun applyOptions(options: FileSystemOptions, storageConnection: StorageConnection) {
         val sftpConnection = storageConnection as StorageConnection.Sftp

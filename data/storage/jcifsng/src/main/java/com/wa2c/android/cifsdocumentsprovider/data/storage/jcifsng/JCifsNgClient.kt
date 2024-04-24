@@ -31,7 +31,6 @@ import jcifs.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -44,6 +43,7 @@ import java.util.Properties
 class JCifsNgClient(
     private val isSmb1: Boolean,
     private val openFileLimit: Int,
+    private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -287,7 +287,11 @@ class JCifsNgClient(
     /**
      * Get ParcelFileDescriptor
      */
-    override suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback {
+    override suspend fun getFileDescriptor(
+        request: StorageRequest,
+        mode: AccessMode,
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor {
         return withContext(dispatcher) {
             val file = getSmbFile(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.FileNotFoundException()
             val release: suspend () -> Unit = {
@@ -299,6 +303,8 @@ class JCifsNgClient(
                 JCifsNgProxyFileCallbackSafe(file, mode, release)
             } else {
                 JCifsNgProxyFileCallback(file, mode, release)
+            }.let {
+                fileDescriptorProvider(mode, it)
             }
         }
     }

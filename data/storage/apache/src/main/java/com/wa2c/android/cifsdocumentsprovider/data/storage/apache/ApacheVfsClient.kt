@@ -30,6 +30,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 
 abstract class ApacheVfsClient(
     private val openFileLimit: Int,
+    private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -273,15 +274,15 @@ abstract class ApacheVfsClient(
     override suspend fun getFileDescriptor(
         request: StorageRequest,
         mode: AccessMode,
-        onFileRelease: suspend () -> Unit,
-    ): ProxyFileDescriptorCallback {
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor {
         return withContext(dispatcher) {
             val file = getFileObject(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.FileNotFoundException()
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }
-            getProxyFileDescriptorCallback(file, mode, release)
+            fileDescriptorProvider(mode, getProxyFileDescriptorCallback(file, mode, release))
         }
     }
 
