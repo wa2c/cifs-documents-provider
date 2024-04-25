@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -130,7 +131,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
-                    optionThumbnailEnabled = thumbnailEnabled,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
                     optionAddExtension = extension,
                 )
             }
@@ -150,7 +151,7 @@ internal object DomainMapper {
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
-                    optionThumbnailEnabled = thumbnailEnabled,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
                     optionAddExtension = extension,
                 )
             }
@@ -171,7 +172,7 @@ internal object DomainMapper {
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
-                    optionThumbnailEnabled = thumbnailEnabled,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
                     optionAddExtension = extension,
                 )
             }
@@ -229,7 +230,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
-                    thumbnailEnabled = optionThumbnailEnabled,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
                     extension = optionAddExtension,
                     domain = domain,
                     enableDfs = enableDfs,
@@ -249,7 +250,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
-                    thumbnailEnabled = optionThumbnailEnabled,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
                     extension = optionAddExtension,
                     encoding = encoding,
                     isActiveMode = isFtpActiveMode,
@@ -269,7 +270,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
-                    thumbnailEnabled = optionThumbnailEnabled,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
                     extension = optionAddExtension,
                     keyFileUri = keyFileUri,
                     keyData = keyData,

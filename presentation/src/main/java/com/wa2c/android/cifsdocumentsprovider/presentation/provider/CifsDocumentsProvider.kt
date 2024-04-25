@@ -225,7 +225,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
     ): AssetFileDescriptor {
         return runOnFileHandler {
             val id = storageRepository.getDocumentId(documentId)
-            storageRepository.getThumbnailDescriptor(id) { signal?.cancel() } ?: let {
+            storageRepository.getThumbnailDescriptor(id) {  } ?: let {
                 throw StorageException.FileNotFoundException()
             }
         }.let { fd ->

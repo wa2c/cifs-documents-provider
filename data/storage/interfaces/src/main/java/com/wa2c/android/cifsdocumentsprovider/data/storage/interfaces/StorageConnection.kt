@@ -22,8 +22,8 @@ sealed class StorageConnection {
     abstract val anonymous: Boolean
     abstract val safeTransfer: Boolean
     abstract val readOnly: Boolean
-    abstract val thumbnailEnabled: Boolean
     abstract val extension: Boolean
+    abstract val thumbnailTypes: List<String>
 
     open val uri: String
         get() = getUriText(storage, host, port, folder, true) ?: ""
@@ -56,8 +56,8 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
-        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
+        override val thumbnailTypes: List<String> = emptyList(),
         val domain: String?,
         val enableDfs: Boolean,
     ) : StorageConnection()
@@ -78,8 +78,8 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
-        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
+        override val thumbnailTypes: List<String> = emptyList(),
         val encoding: String,
         val isActiveMode: Boolean,
         val isImplicitMode: Boolean = false,
@@ -104,8 +104,8 @@ sealed class StorageConnection {
         override val anonymous: Boolean = false,
         override val safeTransfer: Boolean = false,
         override val readOnly: Boolean = false,
-        override val thumbnailEnabled: Boolean = false,
         override val extension: Boolean = false,
+        override val thumbnailTypes: List<String> = emptyList(),
         val keyFileUri: String? = null,
         val keyData: String? = null,
         val keyPassphrase: String? = null,

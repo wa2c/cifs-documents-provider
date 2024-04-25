@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
+import android.media.MediaMetadataRetriever
 import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
@@ -9,11 +10,11 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -290,7 +291,7 @@ class JCifsNgClient(
     override suspend fun getFileDescriptor(
         request: StorageRequest,
         mode: AccessMode,
-        onFileRelease: suspend () -> Unit
+        onFileRelease: suspend () -> Unit,
     ): ParcelFileDescriptor {
         return withContext(dispatcher) {
             val file = getSmbFile(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.FileNotFoundException()
@@ -311,26 +312,40 @@ class JCifsNgClient(
 
     override suspend fun getThumbnailDescriptor(
         request: StorageRequest,
-        onFileRelease: suspend () -> Unit
+        onFileRelease: suspend () -> Unit,
     ): ParcelFileDescriptor? {
-        return withContext(dispatcher) {
-            try {
-                val smbFile = getSmbFile(request)
-                val pipe = ParcelFileDescriptor.createReliablePipe()
-                CoroutineScope(dispatcher).launch {
-                    ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
-                        smbFile.inputStream.use { input ->
-                            input.copyTo(output, BUFFER_SIZE)
-                            onFileRelease()
+        return try {
+            when (request.thumbnailType) {
+                ThumbnailType.IMAGE -> {
+                    getFileDescriptor(request, AccessMode.R, onFileRelease)
+                }
+                ThumbnailType.AUDIO,
+                ThumbnailType.VIDEO, -> {
+                    val pipe = ParcelFileDescriptor.createReliablePipe()
+                    CoroutineScope(dispatcher).launch {
+                        ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                            try {
+                                MediaMetadataRetriever().use { mmr ->
+                                    val fd = getFileDescriptor(request, AccessMode.R, onFileRelease)
+                                    mmr.setDataSource(fd.fileDescriptor)
+                                    mmr.embeddedPicture
+                                }?.let { imageBytes ->
+                                    imageBytes.inputStream().use { input ->
+                                        input.copyTo(output)
+                                    }
+                                }
+                            } catch (e: IOException) {
+                                logE(e)
+                            }
                         }
                     }
+                    pipe[0]
                 }
-                pipe[0]
-            } catch (e: IOException) {
-                logE(e)
-                onFileRelease()
-                throw e
+                else -> null
             }
+        } catch (e: IOException) {
+            logE(e)
+            throw e
         }
     }
 

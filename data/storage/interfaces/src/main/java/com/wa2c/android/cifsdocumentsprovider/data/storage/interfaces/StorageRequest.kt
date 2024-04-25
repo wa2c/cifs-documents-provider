@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
 import com.wa2c.android.cifsdocumentsprovider.common.utils.appendChild
+import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 
@@ -15,6 +17,15 @@ data class StorageRequest(
     /** URI */
     val uri: String
         get() = connection.uri.appendChild(path ?: "", false)
+
+    val mimeType: String
+        get() = uri.mimeType
+
+    /*** Thumbnail type (null if disabled) */
+    val thumbnailType: ThumbnailType?
+        get() = ThumbnailType.findByType(mimeType)?.takeIf {
+            connection.thumbnailTypes.contains(it.type)
+        }
 
     /** Share name */
     val shareName: String

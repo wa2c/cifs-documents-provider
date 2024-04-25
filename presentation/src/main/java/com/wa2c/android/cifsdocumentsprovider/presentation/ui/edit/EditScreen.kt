@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import InputCheck
 import InputOption
+import InputMultiSelect
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -61,6 +62,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
@@ -657,21 +659,22 @@ private fun EditScreenContainer(
                         connectionState.value = connectionState.value.copy(optionReadOnly = it)
                     }
 
-
-                    InputCheck(
-                        title = "サムネイル利用", // TODO
-                        value = connectionState.value.optionThumbnailEnabled,
-                        focusManager = focusManager,
-                    ) {
-                        connectionState.value = connectionState.value.copy(optionThumbnailEnabled = it)
-                    }
-
                     InputCheck(
                         title = stringResource(id = R.string.edit_option_extension_label),
                         value = connectionState.value.optionAddExtension,
                         focusManager = focusManager,
                     ) {
                         connectionState.value = connectionState.value.copy(optionAddExtension = it)
+                    }
+
+                    InputMultiSelect(
+                        title = "サムネイル",
+                        items = ThumbnailType.entries.map { OptionItem(it, it.type) },
+                        values = connectionState.value.optionThumbnailTypes.toSet(),
+                        focusManager = focusManager,
+                        enabled = true,
+                    ) {
+                        connectionState.value = connectionState.value.copy(optionThumbnailTypes = it.toList())
                     }
 
                     // URI

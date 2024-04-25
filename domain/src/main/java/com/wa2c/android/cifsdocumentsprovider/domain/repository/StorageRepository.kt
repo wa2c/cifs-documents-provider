@@ -262,7 +262,7 @@ class StorageRepository @Inject internal constructor(
 
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            if (!request.connection.thumbnailEnabled) return@withContext null
+            if (request.thumbnailType == null) return@withContext null
 
             try {
                 addBlockingQueue(request)

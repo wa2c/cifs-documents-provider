@@ -6,6 +6,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.getUriText
 import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -36,8 +37,8 @@ data class RemoteConnection(
     // Options
     val optionSafeTransfer: Boolean = false,
     val optionReadOnly: Boolean = false,
-    val optionThumbnailEnabled: Boolean = false,
     val optionAddExtension: Boolean = false,
+    val optionThumbnailTypes: List<ThumbnailType> = emptyList(),
 ): Parcelable, java.io.Serializable {
 
     var isInvalid: Boolean
