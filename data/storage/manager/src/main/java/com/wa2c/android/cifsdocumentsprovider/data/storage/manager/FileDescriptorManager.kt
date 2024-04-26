@@ -63,19 +63,19 @@ class FileDescriptorManager @Inject internal constructor(
         CoroutineScope(Dispatchers.IO + Job()).launch {
             try {
                 ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
-                    MediaMetadataRetriever().use { mmr ->
-                        getFileDescriptor()?.let {fd ->
+                    getFileDescriptor()?.use { fd ->
+                        MediaMetadataRetriever().use { mmr ->
                             mmr.setDataSource(fd.fileDescriptor)
                             mmr.embeddedPicture
-                        }
-                    }?.let { imageBytes ->
-                        imageBytes.inputStream().use { input ->
-                            val buffer = ByteArray(BUFFER_SIZE)
-                            var bytes = input.read(buffer)
-                            while (bytes >= 0) {
-                                if (isActive.not()) break
-                                output.write(buffer, 0, bytes)
-                                bytes = input.read(buffer)
+                        }?.let { imageBytes ->
+                            imageBytes.inputStream().use { input ->
+                                val buffer = ByteArray(BUFFER_SIZE)
+                                var bytes = input.read(buffer)
+                                while (bytes >= 0) {
+                                    if (isActive.not()) break
+                                    output.write(buffer, 0, bytes)
+                                    bytes = input.read(buffer)
+                                }
                             }
                         }
                     }
@@ -83,8 +83,8 @@ class FileDescriptorManager @Inject internal constructor(
             } catch (e: IOException) {
                 logE(e)
             } finally {
-                onFileRelease()
                 thumbnailJobs.remove(this.coroutineContext.job)
+                onFileRelease()
             }
         }.also {
             thumbnailJobs.add(it)
