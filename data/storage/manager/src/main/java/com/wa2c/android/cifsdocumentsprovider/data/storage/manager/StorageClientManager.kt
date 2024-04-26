@@ -1,22 +1,15 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.manager
 
-import android.content.Context
-import android.os.Handler
-import android.os.HandlerThread
 import android.os.ParcelFileDescriptor
-import android.os.ProxyFileDescriptorCallback
-import android.os.storage.StorageManager
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
-import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheSftpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
+import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
 import com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng.JCifsNgClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.smbj.SmbjClient
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,66 +18,46 @@ import javax.inject.Singleton
  */
 @Singleton
 class StorageClientManager @Inject constructor(
-    private val preferences: AppPreferencesDataStore,
     private val documentFileManager: DocumentFileManager,
     private val fileDescriptorManager: FileDescriptorManager,
 ) {
 
     /** jCIFS NG (SMB2,3) client */
     private val jCifsNgClient = lazy {
-        JCifsNgClient(
-            isSmb1 = false,
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
-        )
+        JCifsNgClient(isSmb1 = false)
     }
 
     /** SMBJ (SMB2,3) client */
     private val smbjClient = lazy {
-        SmbjClient(
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
-        )
+        SmbjClient()
     }
 
     /** jCIFS NG (SMB1) client */
     private val jCifsNgLegacyClient = lazy {
-        JCifsNgClient(
-            isSmb1 = true,
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
-        )
+        JCifsNgClient(isSmb1 = true)
     }
 
     /** Apache FTP client */
     private val apacheFtpClient = lazy {
-        ApacheFtpClient(
-            isFtps = false,
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
-        )
+        ApacheFtpClient(isFtps = false)
     }
 
     /** Apache FTPS client */
     private val apacheFtpsClient = lazy {
-        ApacheFtpClient(
-            isFtps = true,
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
-        )
+        ApacheFtpClient(isFtps = true)
     }
 
     /** Apache SFTP client */
     private val apacheSftpClient = lazy {
-        ApacheSftpClient(
-            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
-            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor,
-            onKeyRead = documentFileManager::loadFile
-        )
+        ApacheSftpClient(onKeyRead = documentFileManager::loadFile)
     }
 
     fun cancelThumbnailLoading() {
         fileDescriptorManager.cancelThumbnailLoading()
+    }
+
+    fun getClient(request: StorageRequest): StorageClient {
+        return getClient(request.connection.storage)
     }
 
     /**
@@ -112,6 +85,36 @@ class StorageClientManager @Inject constructor(
         if (apacheFtpsClient.isInitialized()) apacheFtpsClient.value.close()
         if (apacheSftpClient.isInitialized()) apacheSftpClient.value.close()
         fileDescriptorManager.close()
+    }
+
+    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ParcelFileDescriptor {
+        return fileDescriptorManager.getFileDescriptor(
+            accessMode = mode,
+            callback = getClient(request).getProxyFileDescriptorCallback(request, mode, onFileRelease)
+        )
+    }
+
+    suspend fun getThumbnailDescriptor(
+        request: StorageRequest,
+        onFileRelease: suspend () -> Unit
+    ): ParcelFileDescriptor? {
+        return when (request.thumbnailType) {
+            ThumbnailType.IMAGE -> {
+                getFileDescriptor(
+                    request = request,
+                    mode = AccessMode.R,
+                    onFileRelease = onFileRelease
+                )
+            }
+            ThumbnailType.AUDIO,
+            ThumbnailType.VIDEO, -> {
+                fileDescriptorManager.getThumbnailDescriptor(
+                    getFileDescriptor = { getFileDescriptor(request, AccessMode.R) {} },
+                    onFileRelease = onFileRelease
+                )
+            }
+            else -> null
+        }
     }
 
 }

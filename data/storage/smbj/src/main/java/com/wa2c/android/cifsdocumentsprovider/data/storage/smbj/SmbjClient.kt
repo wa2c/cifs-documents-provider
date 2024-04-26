@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.smbj
 
-import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
 import com.hierynomus.msdtyp.AccessMask
@@ -31,7 +30,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
-import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -49,8 +47,6 @@ import kotlinx.coroutines.withContext
  * SMBJ Client
  */
 class SmbjClient(
-    private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
-    private val thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -362,11 +358,11 @@ class SmbjClient(
         }
     }
 
-    override suspend fun getFileDescriptor(
+    override suspend fun getProxyFileDescriptorCallback(
         request: StorageRequest,
         mode: AccessMode,
         onFileRelease: suspend () -> Unit
-    ): ParcelFileDescriptor {
+    ): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val diskFile = useDiskShare(request) {
                 openDiskFile(it, request.sharePath, isRead = mode == AccessMode.R, existsRequired = true)
@@ -380,18 +376,7 @@ class SmbjClient(
                 SmbjProxyFileCallbackSafe(diskFile, mode, release)
             } else {
                 SmbjProxyFileCallback(diskFile, mode, release)
-            }.let {
-                fileDescriptorProvider(mode, it)
             }
-        }
-    }
-
-    override suspend fun getThumbnailDescriptor(
-        request: StorageRequest,
-        onFileRelease: suspend () -> Unit
-    ): ParcelFileDescriptor? {
-        return thumbnailProvider(request.thumbnailType) {
-            getFileDescriptor(request, AccessMode.R, onFileRelease)
         }
     }
 

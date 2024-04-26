@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
-import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
@@ -11,7 +10,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
-import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -31,8 +29,6 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 
 abstract class ApacheVfsClient(
-    private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
-    private val thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -53,15 +49,6 @@ abstract class ApacheVfsClient(
         options: FileSystemOptions,
         storageConnection: StorageConnection,
     )
-
-    /**
-     * Get ProxyFileDescriptorCallback
-     */
-    protected abstract fun getProxyFileDescriptorCallback(
-        fileObject: FileObject,
-        accessMode: AccessMode,
-        onFileRelease: suspend () -> Unit,
-    ) : ProxyFileDescriptorCallback
 
     /**
      * Get context
@@ -273,27 +260,18 @@ abstract class ApacheVfsClient(
         }
     }
 
-    override suspend fun getFileDescriptor(
+    override suspend fun getProxyFileDescriptorCallback(
         request: StorageRequest,
         mode: AccessMode,
         onFileRelease: suspend () -> Unit
-    ): ParcelFileDescriptor {
+    ): ProxyFileDescriptorCallback {
         return withContext(dispatcher) {
             val file = getFileObject(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.FileNotFoundException()
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
             }
-            fileDescriptorProvider(mode, getProxyFileDescriptorCallback(file, mode, release))
-        }
-    }
-
-    override suspend fun getThumbnailDescriptor(
-        request: StorageRequest,
-        onFileRelease: suspend () -> Unit
-    ): ParcelFileDescriptor? {
-        return thumbnailProvider(request.thumbnailType) {
-            getFileDescriptor(request, AccessMode.R, onFileRelease)
+            ApacheProxyFileCallback(file, mode, release)
         }
     }
 

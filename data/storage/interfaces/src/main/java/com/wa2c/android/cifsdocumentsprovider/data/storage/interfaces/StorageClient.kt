@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
-import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -25,9 +24,7 @@ interface StorageClient {
 
     suspend fun deleteFile(request: StorageRequest): Boolean
 
-    suspend fun getFileDescriptor(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ParcelFileDescriptor
-
-    suspend fun getThumbnailDescriptor(request: StorageRequest, onFileRelease: suspend () -> Unit): ParcelFileDescriptor?
+    suspend fun getProxyFileDescriptorCallback(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback
 
     suspend fun close()
 

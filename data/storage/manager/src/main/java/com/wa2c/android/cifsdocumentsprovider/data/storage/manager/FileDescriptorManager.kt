@@ -10,7 +10,6 @@ import android.os.storage.StorageManager
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.BUFFER_SIZE
-import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +39,7 @@ class FileDescriptorManager @Inject internal constructor(
     }
 
 
-    fun provideFileDescriptor(
+    fun getFileDescriptor(
         accessMode: AccessMode,
         callback: ProxyFileDescriptorCallback
     ): ParcelFileDescriptor {
@@ -56,53 +55,41 @@ class FileDescriptorManager @Inject internal constructor(
     /**
      * Get thumbnail descriptor
      */
-    suspend fun getThumbnailDescriptor(
-        thumbnailType: ThumbnailType?,
+    fun getThumbnailDescriptor(
         getFileDescriptor: suspend () -> ParcelFileDescriptor?,
+        onFileRelease: suspend () -> Unit,
     ): ParcelFileDescriptor? {
-        return try {
-            when (thumbnailType) {
-                ThumbnailType.IMAGE -> {
-                    getFileDescriptor()
-                }
-                ThumbnailType.AUDIO,
-                ThumbnailType.VIDEO, -> {
-                    val pipe = ParcelFileDescriptor.createReliablePipe()
-                    CoroutineScope(Dispatchers.IO + Job()).launch {
-                        ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
-                            try {
-                                MediaMetadataRetriever().use { mmr ->
-                                    getFileDescriptor()?.let {fd ->
-                                        mmr.setDataSource(fd.fileDescriptor)
-                                        mmr.embeddedPicture
-                                    }
-                                }?.let { imageBytes ->
-                                    imageBytes.inputStream().use { input ->
-                                        val buffer = ByteArray(BUFFER_SIZE)
-                                        var bytes = input.read(buffer)
-                                        while (bytes >= 0) {
-                                            if (isActive.not()) break
-                                            output.write(buffer, 0, bytes)
-                                            bytes = input.read(buffer)
-                                        }
-                                    }
-                                }
-                            } catch (e: IOException) {
-                                logE(e)
+        val pipe = ParcelFileDescriptor.createReliablePipe()
+        CoroutineScope(Dispatchers.IO + Job()).launch {
+            try {
+                ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
+                    MediaMetadataRetriever().use { mmr ->
+                        getFileDescriptor()?.let {fd ->
+                            mmr.setDataSource(fd.fileDescriptor)
+                            mmr.embeddedPicture
+                        }
+                    }?.let { imageBytes ->
+                        imageBytes.inputStream().use { input ->
+                            val buffer = ByteArray(BUFFER_SIZE)
+                            var bytes = input.read(buffer)
+                            while (bytes >= 0) {
+                                if (isActive.not()) break
+                                output.write(buffer, 0, bytes)
+                                bytes = input.read(buffer)
                             }
                         }
-                        thumbnailJobs.remove(this.coroutineContext.job)
-                    }.also {
-                        thumbnailJobs.add(it)
                     }
-                    pipe[0]
                 }
-                else -> null
+            } catch (e: IOException) {
+                logE(e)
+            } finally {
+                onFileRelease()
+                thumbnailJobs.remove(this.coroutineContext.job)
             }
-        } catch (e: IOException) {
-            logE(e)
-            throw e
+        }.also {
+            thumbnailJobs.add(it)
         }
+        return pipe[0]
     }
 
     fun cancelThumbnailLoading() {
