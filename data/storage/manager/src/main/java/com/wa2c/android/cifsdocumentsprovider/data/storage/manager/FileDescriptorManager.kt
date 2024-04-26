@@ -56,14 +56,14 @@ class FileDescriptorManager @Inject internal constructor(
      * Get thumbnail descriptor
      */
     fun getThumbnailDescriptor(
-        getFileDescriptor: suspend () -> ParcelFileDescriptor?,
+        getFileDescriptor: suspend () -> ParcelFileDescriptor,
         onFileRelease: suspend () -> Unit,
     ): ParcelFileDescriptor? {
         val pipe = ParcelFileDescriptor.createReliablePipe()
         CoroutineScope(Dispatchers.IO + Job()).launch {
             try {
                 ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
-                    getFileDescriptor()?.use { fd ->
+                    getFileDescriptor().use { fd ->
                         MediaMetadataRetriever().use { mmr ->
                             mmr.setDataSource(fd.fileDescriptor)
                             mmr.embeddedPicture
