@@ -54,6 +54,11 @@
     <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
     <string name="edit_option_read_only_label">يقرأ فقط</string>
     <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
+    <string name="edit_option_thumbnail_label">ظفري</string>
+    <string name="edit_option_thumbnail_image">صورة</string>
+    <string name="edit_option_thumbnail_audio">صوتي</string>
+    <string name="edit_option_thumbnail_video">فيديو</string>
+    <string name="edit_option_thumbnail_disabled">عاجز</string>
     <string name="edit_info_section_title">معلومات</string>
     <string name="edit_storage_uri_title">عنوان التخزين</string>
     <string name="edit_provider_uri_title">عنوان التشارك</string>

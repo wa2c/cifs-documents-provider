@@ -54,6 +54,11 @@
     <string name="edit_option_safe_transfer_label">安全的数据传输</string>
     <string name="edit_option_read_only_label">只读</string>
     <string name="edit_option_extension_label">保存时添加扩展名</string>
+    <string name="edit_option_thumbnail_label">缩略图</string>
+    <string name="edit_option_thumbnail_image">图像</string>
+    <string name="edit_option_thumbnail_audio">声音的</string>
+    <string name="edit_option_thumbnail_video">视频</string>
+    <string name="edit_option_thumbnail_disabled">残疾人</string>
     <string name="edit_info_section_title">信息</string>
     <string name="edit_storage_uri_title">存储 URI</string>
     <string name="edit_provider_uri_title">分享 URI</string>

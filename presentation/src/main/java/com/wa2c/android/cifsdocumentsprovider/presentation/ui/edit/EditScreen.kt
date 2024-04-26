@@ -668,8 +668,9 @@ private fun EditScreenContainer(
                     }
 
                     InputMultiSelect(
-                        title = "サムネイル",
-                        items = ThumbnailType.entries.map { OptionItem(it, it.type) },
+                        title = stringResource(id = R.string.edit_option_thumbnail_label),
+                        items =  ThumbnailType.entries.map { OptionItem(it, stringResource(id = it.labelRes)) },
+                        emptyLabel = stringResource(id = R.string.edit_option_thumbnail_disabled),
                         values = connectionState.value.optionThumbnailTypes.toSet(),
                         focusManager = focusManager,
                         enabled = true,

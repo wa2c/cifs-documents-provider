@@ -54,6 +54,11 @@
     <string name="edit_option_safe_transfer_label">Safe data transfer</string>
     <string name="edit_option_read_only_label">Read only</string>
     <string name="edit_option_extension_label">Add extension when saving</string>
+    <string name="edit_option_thumbnail_label">Thumbnail</string>
+    <string name="edit_option_thumbnail_image">Image</string>
+    <string name="edit_option_thumbnail_audio">Audio</string>
+    <string name="edit_option_thumbnail_video">Video</string>
+    <string name="edit_option_thumbnail_disabled">Disabled</string>
     <string name="edit_info_section_title">Information</string>
     <string name="edit_storage_uri_title">Storage URI</string>
     <string name="edit_provider_uri_title">Shared URI</string>

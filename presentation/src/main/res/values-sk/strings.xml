@@ -54,6 +54,11 @@
     <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>
     <string name="edit_option_read_only_label">Iba na čítanie</string>
     <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
+    <string name="edit_option_thumbnail_label">Miniatúra</string>
+    <string name="edit_option_thumbnail_image">Obrázok</string>
+    <string name="edit_option_thumbnail_audio">Audio</string>
+    <string name="edit_option_thumbnail_video">Video</string>
+    <string name="edit_option_thumbnail_disabled">Zakázané</string>
     <string name="edit_info_section_title">Informácie</string>
     <string name="edit_storage_uri_title">Zdieľanie URI</string>
     <string name="edit_provider_uri_title">Zdieľaný identifikátor URI</string>

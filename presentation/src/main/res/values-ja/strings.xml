@@ -54,6 +54,11 @@
     <string name="edit_option_safe_transfer_label">安全なデータ転送</string>
     <string name="edit_option_read_only_label">読込み専用</string>
     <string name="edit_option_extension_label">保存時に拡張子を付与</string>
+    <string name="edit_option_thumbnail_label">サムネイル</string>
+    <string name="edit_option_thumbnail_image">画像</string>
+    <string name="edit_option_thumbnail_audio">音声</string>
+    <string name="edit_option_thumbnail_video">動画</string>
+    <string name="edit_option_thumbnail_disabled">無効</string>
     <string name="edit_info_section_title">情報</string>
     <string name="edit_storage_uri_title">ストレージURI</string>
     <string name="edit_provider_uri_title">共有URI</string>

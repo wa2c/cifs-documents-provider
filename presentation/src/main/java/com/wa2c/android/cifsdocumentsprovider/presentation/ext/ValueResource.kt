@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
@@ -113,4 +114,12 @@ val KeyInputType.labelRes: Int
         KeyInputType.EXTERNAL_FILE -> R.string.edit_key_input_file
         KeyInputType.IMPORTED_FILE -> R.string.edit_key_input_import_file
         KeyInputType.INPUT_TEXT -> R.string.edit_key_input_import_text
+    }
+
+val ThumbnailType.labelRes: Int
+    @StringRes
+    get() = when (this) {
+        ThumbnailType.IMAGE -> R.string.edit_option_thumbnail_image
+        ThumbnailType.AUDIO -> R.string.edit_option_thumbnail_audio
+        ThumbnailType.VIDEO -> R.string.edit_option_thumbnail_video
     }

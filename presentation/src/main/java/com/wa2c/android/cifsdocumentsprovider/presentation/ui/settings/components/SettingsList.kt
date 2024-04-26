@@ -15,6 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MIN
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getLabel
@@ -60,6 +62,8 @@ internal fun SettingsList(
             SettingsInputNumberItem(
                 text = stringResource(id = R.string.settings_open_file_limit),
                 value = openFileLimit,
+                maxValue = OPEN_FILE_LIMIT_MAX,
+                minValue = OPEN_FILE_LIMIT_MIN,
             )
 
             // Use Foreground Service

@@ -21,8 +21,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
@@ -34,6 +36,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOn
 fun <T> InputMultiSelect(
     title: String,
     items: List<OptionItem<T>>,
+    emptyLabel: String,
     values: Set<T>,
     focusManager: FocusManager,
     enabled: Boolean = true,
@@ -50,7 +53,7 @@ fun <T> InputMultiSelect(
     ) {
         OutlinedTextField(
             value = items.filter { checkedValues.contains(it.value) }.let { list ->
-                if (list.isEmpty()) "None" else list.joinToString(", ") { it.label }
+                if (list.isEmpty()) emptyLabel else list.joinToString(", ") { it.label }
             },
             label = { Text(title) },
             enabled = enabled,
@@ -79,7 +82,11 @@ fun <T> InputMultiSelect(
                                 checked = checkedValues.contains(item.value),
                                 onCheckedChange = null,
                             )
-                            Text(item.label)
+                            Text(
+                                text = item.label,
+                                modifier = Modifier
+                                    .padding(start = Theme.Sizes.S)
+                            )
                         }
 
                    },
@@ -109,11 +116,12 @@ fun <T> InputMultiSelect(
 @Composable
 private fun InputMultiSelectPreview() {
     Theme.AppTheme {
-        val items = ThumbnailType.entries.map { OptionItem(it, it.type) }
+        val items = ThumbnailType.entries.map { OptionItem(it, stringResource(id = it.labelRes)) }
         InputMultiSelect(
             title = "Title",
             items = items,
             values = setOf(ThumbnailType.IMAGE, ThumbnailType.VIDEO),
+            emptyLabel = "None",
             focusManager = LocalFocusManager.current,
             enabled = true,
         ) {

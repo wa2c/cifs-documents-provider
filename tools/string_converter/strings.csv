@@ -52,6 +52,11 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_option_safe_transfer_label,Safe data transfer,安全なデータ転送,Bezpečný prenos dát,安全的数据传输,نقل بيانات آمن
 ,edit_option_read_only_label,Read only,読込み専用,Iba na čítanie,只读,يقرأ فقط
 ,edit_option_extension_label,Add extension when saving,保存時に拡張子を付与,Pridať príponu pri ukladaní súborov,保存时添加扩展名,أضف وصلة عند الحفظ
+,edit_option_thumbnail_label,Thumbnail,サムネイル,Miniatúra,缩略图,ظفري
+,edit_option_thumbnail_image,Image,画像,Obrázok,图像,صورة
+,edit_option_thumbnail_audio,Audio,音声,Audio,声音的,صوتي
+,edit_option_thumbnail_video,Video,動画,Video,视频,فيديو
+,edit_option_thumbnail_disabled,Disabled,無効,Zakázané,残疾人,عاجز
 ,edit_info_section_title,Information,情報,Informácie,信息,معلومات
 ,edit_storage_uri_title,Storage URI,ストレージURI,Zdieľanie URI,存储 URI,عنوان التخزين
 ,edit_provider_uri_title,Shared URI,共有URI,Zdieľaný identifikátor URI,分享 URI,عنوان التشارك
