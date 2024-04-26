@@ -115,6 +115,7 @@ class StorageRepository @Inject internal constructor(
     suspend fun getFileChildren(parentDocumentId: DocumentId): List<RemoteFile> {
         logD("getFileChildren: parentDocumentId=$parentDocumentId")
         return withContext(dispatcher) {
+            storageClientManager.cancelThumbnailLoading()
             if (parentDocumentId.isRoot) {
                 connectionSettingDao.getList().first().mapNotNull { entity ->
                     entity.toItem()

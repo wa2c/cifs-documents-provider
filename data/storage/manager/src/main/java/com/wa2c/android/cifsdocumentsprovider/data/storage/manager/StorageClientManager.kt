@@ -25,67 +25,74 @@ import javax.inject.Singleton
  */
 @Singleton
 class StorageClientManager @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val preferences: AppPreferencesDataStore,
     private val documentFileManager: DocumentFileManager,
+    private val fileDescriptorManager: FileDescriptorManager,
 ) {
-
-    private val fileHandler = lazy {
-        Handler(
-            HandlerThread(this.javaClass.simpleName)
-                .apply { start() }
-                .looper
-        )
-    }
-
-    private val storageManager: StorageManager by lazy {
-        context.getSystemService(Context.STORAGE_SERVICE) as StorageManager
-    }
-
-    private fun provideFileDescriptor(
-        accessMode: AccessMode,
-        callback: ProxyFileDescriptorCallback
-    ): ParcelFileDescriptor {
-        return storageManager.openProxyFileDescriptor(
-            ParcelFileDescriptor.parseMode(accessMode.safMode),
-            callback,
-            fileHandler.value
-        )
-    }
-
     private val fileOpenLimit: Int
         get() = runBlocking { preferences.openFileLimitFlow.first() }
 
     /** jCIFS NG (SMB2,3) client */
     private val jCifsNgClient = lazy {
-        JCifsNgClient(false, fileOpenLimit, ::provideFileDescriptor)
+        JCifsNgClient(
+            isSmb1 = false,
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
+        )
     }
 
     /** SMBJ (SMB2,3) client */
     private val smbjClient = lazy {
-        SmbjClient(fileOpenLimit, ::provideFileDescriptor)
+        SmbjClient(
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
+        )
     }
 
     /** jCIFS NG (SMB1) client */
     private val jCifsNgLegacyClient = lazy {
-        JCifsNgClient(true, fileOpenLimit, ::provideFileDescriptor)
+        JCifsNgClient(
+            isSmb1 = true,
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
+        )
     }
 
     /** Apache FTP client */
     private val apacheFtpClient = lazy {
-        ApacheFtpClient(false, fileOpenLimit, ::provideFileDescriptor)
+        ApacheFtpClient(
+            isFtps = false,
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
+        )
     }
 
     /** Apache FTPS client */
     private val apacheFtpsClient = lazy {
-        ApacheFtpClient(true, fileOpenLimit, ::provideFileDescriptor)
+        ApacheFtpClient(
+            isFtps = true,
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
+        )
     }
 
     /** Apache SFTP client */
     private val apacheSftpClient = lazy {
-        ApacheSftpClient(fileOpenLimit, ::provideFileDescriptor, { uri ->
-            documentFileManager.loadFile(uri)
-        })
+        ApacheSftpClient(
+            openFileLimit = fileOpenLimit,
+            fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
+            thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor,
+            onKeyRead = documentFileManager::loadFile
+        )
+    }
+
+    fun cancelThumbnailLoading() {
+        fileDescriptorManager.cancelThumbnailLoading()
     }
 
     /**
@@ -112,7 +119,7 @@ class StorageClientManager @Inject constructor(
         if (apacheFtpClient.isInitialized()) apacheFtpClient.value.close()
         if (apacheFtpsClient.isInitialized()) apacheFtpsClient.value.close()
         if (apacheSftpClient.isInitialized()) apacheSftpClient.value.close()
-        if (fileHandler.isInitialized()) fileHandler.value.looper.quit()
+        fileDescriptorManager.close()
     }
 
 }

@@ -5,6 +5,7 @@ import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +22,9 @@ class ApacheFtpClient(
     private val isFtps: Boolean,
     openFileLimit: Int,
     fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
+    thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): ApacheVfsClient(openFileLimit, fileDescriptorProvider, dispatcher) {
+): ApacheVfsClient(openFileLimit, fileDescriptorProvider, thumbnailProvider, dispatcher) {
 
     override fun applyOptions(options: FileSystemOptions, storageConnection: StorageConnection) {
         val ftpConnection = storageConnection as StorageConnection.Ftp

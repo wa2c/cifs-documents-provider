@@ -1,6 +1,5 @@
 package com.wa2c.android.cifsdocumentsprovider.data.storage.jcifsng
 
-import android.media.MediaMetadataRetriever
 import android.os.ParcelFileDescriptor
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
@@ -30,11 +29,8 @@ import jcifs.smb.NtlmPasswordAuthenticator
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.util.Properties
 
 
@@ -45,6 +41,7 @@ class JCifsNgClient(
     private val isSmb1: Boolean,
     private val openFileLimit: Int,
     private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
+    private val thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -314,38 +311,8 @@ class JCifsNgClient(
         request: StorageRequest,
         onFileRelease: suspend () -> Unit,
     ): ParcelFileDescriptor? {
-        return try {
-            when (request.thumbnailType) {
-                ThumbnailType.IMAGE -> {
-                    getFileDescriptor(request, AccessMode.R, onFileRelease)
-                }
-                ThumbnailType.AUDIO,
-                ThumbnailType.VIDEO, -> {
-                    val pipe = ParcelFileDescriptor.createReliablePipe()
-                    CoroutineScope(dispatcher).launch {
-                        ParcelFileDescriptor.AutoCloseOutputStream(pipe[1]).use { output ->
-                            try {
-                                MediaMetadataRetriever().use { mmr ->
-                                    val fd = getFileDescriptor(request, AccessMode.R, onFileRelease)
-                                    mmr.setDataSource(fd.fileDescriptor)
-                                    mmr.embeddedPicture
-                                }?.let { imageBytes ->
-                                    imageBytes.inputStream().use { input ->
-                                        input.copyTo(output)
-                                    }
-                                }
-                            } catch (e: IOException) {
-                                logE(e)
-                            }
-                        }
-                    }
-                    pipe[0]
-                }
-                else -> null
-            }
-        } catch (e: IOException) {
-            logE(e)
-            throw e
+        return thumbnailProvider(request.thumbnailType) {
+            getFileDescriptor(request, AccessMode.R, onFileRelease)
         }
     }
 

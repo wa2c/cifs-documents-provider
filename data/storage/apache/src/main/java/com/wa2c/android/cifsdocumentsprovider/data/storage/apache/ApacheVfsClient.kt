@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -31,6 +32,7 @@ import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 abstract class ApacheVfsClient(
     private val openFileLimit: Int,
     private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
+    private val thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): StorageClient {
 
@@ -290,8 +292,9 @@ abstract class ApacheVfsClient(
         request: StorageRequest,
         onFileRelease: suspend () -> Unit
     ): ParcelFileDescriptor? {
-        // TODO("Not yet implemented")
-        return null
+        return thumbnailProvider(request.thumbnailType) {
+            getFileDescriptor(request, AccessMode.R, onFileRelease)
+        }
     }
 
     override suspend fun close() {
