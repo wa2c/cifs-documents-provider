@@ -29,14 +29,11 @@ class StorageClientManager @Inject constructor(
     private val documentFileManager: DocumentFileManager,
     private val fileDescriptorManager: FileDescriptorManager,
 ) {
-    private val fileOpenLimit: Int
-        get() = runBlocking { preferences.openFileLimitFlow.first() }
 
     /** jCIFS NG (SMB2,3) client */
     private val jCifsNgClient = lazy {
         JCifsNgClient(
             isSmb1 = false,
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
         )
@@ -45,7 +42,6 @@ class StorageClientManager @Inject constructor(
     /** SMBJ (SMB2,3) client */
     private val smbjClient = lazy {
         SmbjClient(
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
         )
@@ -55,7 +51,6 @@ class StorageClientManager @Inject constructor(
     private val jCifsNgLegacyClient = lazy {
         JCifsNgClient(
             isSmb1 = true,
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
         )
@@ -65,7 +60,6 @@ class StorageClientManager @Inject constructor(
     private val apacheFtpClient = lazy {
         ApacheFtpClient(
             isFtps = false,
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
         )
@@ -75,7 +69,6 @@ class StorageClientManager @Inject constructor(
     private val apacheFtpsClient = lazy {
         ApacheFtpClient(
             isFtps = true,
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor
         )
@@ -84,7 +77,6 @@ class StorageClientManager @Inject constructor(
     /** Apache SFTP client */
     private val apacheSftpClient = lazy {
         ApacheSftpClient(
-            openFileLimit = fileOpenLimit,
             fileDescriptorProvider = fileDescriptorManager::provideFileDescriptor,
             thumbnailProvider = fileDescriptorManager::getThumbnailDescriptor,
             onKeyRead = documentFileManager::loadFile

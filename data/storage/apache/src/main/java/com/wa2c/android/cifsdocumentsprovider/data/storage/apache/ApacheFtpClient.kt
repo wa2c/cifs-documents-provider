@@ -20,11 +20,10 @@ import java.time.Duration
 
 class ApacheFtpClient(
     private val isFtps: Boolean,
-    openFileLimit: Int,
     fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): ApacheVfsClient(openFileLimit, fileDescriptorProvider, thumbnailProvider, dispatcher) {
+): ApacheVfsClient(fileDescriptorProvider, thumbnailProvider, dispatcher) {
 
     override fun applyOptions(options: FileSystemOptions, storageConnection: StorageConnection) {
         val ftpConnection = storageConnection as StorageConnection.Ftp

@@ -15,12 +15,11 @@ import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
 import java.time.Duration
 
 class ApacheSftpClient(
-    openFileLimit: Int,
     fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val onKeyRead: (String) -> ByteArray,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
-): ApacheVfsClient(openFileLimit, fileDescriptorProvider, thumbnailProvider, dispatcher) {
+): ApacheVfsClient(fileDescriptorProvider, thumbnailProvider, dispatcher) {
 
     override fun applyOptions(options: FileSystemOptions, storageConnection: StorageConnection) {
         val sftpConnection = storageConnection as StorageConnection.Sftp

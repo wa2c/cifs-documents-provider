@@ -10,6 +10,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -30,7 +31,6 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder
 
 abstract class ApacheVfsClient(
-    private val openFileLimit: Int,
     private val fileDescriptorProvider: (AccessMode, ProxyFileDescriptorCallback) -> ParcelFileDescriptor,
     private val thumbnailProvider: suspend (ThumbnailType?, suspend () -> ParcelFileDescriptor?) -> ParcelFileDescriptor?,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
@@ -39,7 +39,7 @@ abstract class ApacheVfsClient(
     private val fileManager = VFS.getManager()
 
     /** Context cache */
-    private val contextCache = object : LruCache<StorageConnection, FileSystemOptions>(openFileLimit) {
+    private val contextCache = object : LruCache<StorageConnection, FileSystemOptions>(OPEN_FILE_LIMIT_MAX) {
         override fun entryRemoved(evicted: Boolean, key: StorageConnection?, oldValue: FileSystemOptions?, newValue: FileSystemOptions?) {
             super.entryRemoved(evicted, key, oldValue, newValue)
             logD("Context Removed: $key")
