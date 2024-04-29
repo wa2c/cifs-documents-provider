@@ -25,7 +25,7 @@ class ApacheSftpClient(
             builder.setPreferredAuthentications(options, "publickey,password")
             builder.setStrictHostKeyChecking(options, "ask")
             builder.setFileNameEncoding(options, sftpConnection.encoding)
-            builder.setUserDirIsRoot(options, true)
+            builder.setUserDirIsRoot(options, false) // true occurs path mismatch
             builder.setKnownHosts(options, File(knownHostPath))
             // Key
             (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
