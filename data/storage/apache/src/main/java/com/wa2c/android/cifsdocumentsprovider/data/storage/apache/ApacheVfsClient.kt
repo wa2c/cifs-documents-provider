@@ -23,7 +23,6 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.vfs2.FileNotFolderException
 import org.apache.commons.vfs2.FileNotFoundException
 import org.apache.commons.vfs2.FileObject
-import org.apache.commons.vfs2.FileSystemException
 import org.apache.commons.vfs2.FileSystemOptions
 import org.apache.commons.vfs2.Selectors
 import org.apache.commons.vfs2.VFS

@@ -35,7 +35,7 @@ sealed class StorageConnection {
         get() = user.isNullOrEmpty() || user.equals(USER_GUEST, ignoreCase = true)
 
     fun getRelativePath(targetUri: String): String {
-        return targetUri.replace(uri, "").let {
+        return targetUri.replace(uri, "", true).let {
             if (it == targetUri) "" else it
         }
     }
