@@ -4,6 +4,7 @@ import android.os.ParcelFileDescriptor
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
+import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheFtpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.apache.ApacheSftpClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 class StorageClientManager @Inject constructor(
     private val documentFileManager: DocumentFileManager,
     private val fileDescriptorManager: FileDescriptorManager,
+    private val sshKeyManager: SshKeyManager,
 ) {
 
     /** jCIFS NG (SMB2,3) client */
@@ -49,7 +51,10 @@ class StorageClientManager @Inject constructor(
 
     /** Apache SFTP client */
     private val apacheSftpClient = lazy {
-        ApacheSftpClient(onKeyRead = documentFileManager::loadFile)
+        ApacheSftpClient(
+            knownHostPath = sshKeyManager.knownHostPath,
+            onKeyRead = documentFileManager::loadFile
+        )
     }
 
     fun cancelThumbnailLoading() {

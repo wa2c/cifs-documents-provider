@@ -15,4 +15,6 @@ sealed class StorageException(message: String) : IOException(message) {
     class DocumentIdException : StorageException("Invalid document id.")
 
     class RandomAccessNotPermittedException : StorageException("This type does not support random writing.")
+
+    class UnknownHostException : StorageException("Unknown host.")
 }

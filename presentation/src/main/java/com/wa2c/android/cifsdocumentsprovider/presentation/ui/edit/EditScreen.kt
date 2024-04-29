@@ -56,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
@@ -110,6 +111,7 @@ fun EditScreen(
     var showBackConfirmationDialog by remember { mutableStateOf(false) }
     var showKeyInputDialog by remember { mutableStateOf(false) }
     var showKeyImportWarningDialog by remember { mutableStateOf(false) }
+    var showKnownHostDialog by remember { mutableStateOf(false) }
 
     val keySelectOpenLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         logD(uri)
@@ -228,6 +230,24 @@ fun EditScreen(
         }
     }
 
+    if (showKnownHostDialog) {
+        // TODO
+        CommonDialog(
+            title = stringResource(id = R.string.dialog_title_warning),
+            confirmButtons = listOf(
+                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                    viewModel.addKnownHost()
+                    showKnownHostDialog = false
+                },
+            ),
+            onDismiss = {
+                showKnownHostDialog = false
+            }
+        ) {
+            Text("Add hosts")
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
             scope.showPopup(
@@ -236,6 +256,9 @@ fun EditScreen(
                 type = result?.messageType,
                 error = result?.cause
             )
+            if (result?.cause is StorageException.UnknownHostException) {
+                showKnownHostDialog = true
+            }
         }
 
         viewModel.navigateSearchHost.collectIn(lifecycleOwner) { connectionId ->

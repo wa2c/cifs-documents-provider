@@ -261,6 +261,19 @@ class EditViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Add known host
+     */
+    fun addKnownHost() {
+        launch {
+            runCatching {
+                editRepository.addKnownHost(remoteConnection.value)
+            }.onFailure {
+                _result.emit(Result.failure(it))
+            }
+        }
+    }
+
     override fun onCleared() {
         runBlocking {
             editRepository.saveTemporaryConnection(null)

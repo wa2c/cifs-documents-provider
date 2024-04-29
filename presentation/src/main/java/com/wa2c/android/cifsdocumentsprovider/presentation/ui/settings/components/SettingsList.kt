@@ -33,6 +33,7 @@ internal fun SettingsList(
     openFileLimit: MutableState<Int>,
     useForeground: MutableState<Boolean>,
     useAsLocal: MutableState<Boolean>,
+    onShowKnownHosts: () -> Unit,
     onShowLibraries: () -> Unit,
     onStartIntent: (Intent) -> Unit,
 ) {
@@ -81,6 +82,11 @@ internal fun SettingsList(
             // Information Title
             TitleItem(text = stringResource(id = R.string.settings_section_info))
 
+            // Known Hosts
+            SettingsItem(text = "Known Hosts") {
+                onShowKnownHosts()
+            }
+
             // Libraries
             SettingsItem(text = stringResource(id = R.string.settings_info_libraries)) {
                 onShowLibraries()
@@ -124,6 +130,7 @@ private fun SettingsListPreview() {
             openFileLimit = remember { mutableIntStateOf(OPEN_FILE_LIMIT_DEFAULT) },
             useForeground = remember { mutableStateOf(false) },
             useAsLocal = remember { mutableStateOf(false) },
+            onShowKnownHosts = {},
             onShowLibraries = {},
             onStartIntent = {},
         )

@@ -7,9 +7,11 @@ import kotlinx.coroutines.Dispatchers
 import org.apache.commons.vfs2.FileSystemOptions
 import org.apache.commons.vfs2.provider.sftp.BytesIdentityInfo
 import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder
+import java.io.File
 import java.time.Duration
 
 class ApacheSftpClient(
+    private val knownHostPath: String,
     private val onKeyRead: (String) -> ByteArray,
     dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): ApacheVfsClient(dispatcher) {
@@ -21,8 +23,9 @@ class ApacheSftpClient(
             builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setSessionTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setPreferredAuthentications(options, "publickey,password")
-            builder.setStrictHostKeyChecking(options, "no")
+            builder.setStrictHostKeyChecking(options, "ask")
             builder.setFileNameEncoding(options, sftpConnection.encoding)
+            builder.setKnownHosts(options, File(knownHostPath))
             // Key
             (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
                 try { onKeyRead(uri) } catch (e: Exception) { null }

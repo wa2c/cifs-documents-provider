@@ -3,6 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
 import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
@@ -175,6 +176,16 @@ class EditRepository @Inject internal constructor(
             } catch (e: Exception) {
                 throw Edit.KeyCheck.InvalidException(e)
             }
+        }
+    }
+
+    suspend fun addKnownHost(connection: RemoteConnection) {
+        withContext(dispatcher) {
+            sshKeyManager.addKnownHost(
+                host = connection.host,
+                port = connection.port?.toIntOrNull(),
+                username = connection.user ?: USER_GUEST,
+            )
         }
     }
 

@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.apache
 
 import android.os.ProxyFileDescriptorCallback
 import android.util.LruCache
+import com.jcraft.jsch.JSchUnknownHostKeyException
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
@@ -22,6 +23,7 @@ import kotlinx.coroutines.withContext
 import org.apache.commons.vfs2.FileNotFolderException
 import org.apache.commons.vfs2.FileNotFoundException
 import org.apache.commons.vfs2.FileObject
+import org.apache.commons.vfs2.FileSystemException
 import org.apache.commons.vfs2.FileSystemOptions
 import org.apache.commons.vfs2.Selectors
 import org.apache.commons.vfs2.VFS
@@ -95,9 +97,17 @@ abstract class ApacheVfsClient(
         existsRequired: Boolean = false,
     ): FileObject {
         return withContext(dispatcher) {
-            val connection = request.connection
-            fileManager.resolveFile(request.uri, getContext(connection, ignoreCache)).also {
-                if (existsRequired && !it.exists()) throw StorageException.FileNotFoundException()
+            try {
+                val connection = request.connection
+                fileManager.resolveFile(request.uri, getContext(connection, ignoreCache)).also {
+                    if (existsRequired && !it.exists()) throw StorageException.FileNotFoundException()
+                }
+            } catch (e: Exception) {
+                if (e.cause?.cause is JSchUnknownHostKeyException) {
+                    throw StorageException.UnknownHostException()
+                } else {
+                    throw e
+                }
             }
         }
     }
@@ -128,19 +138,28 @@ abstract class ApacheVfsClient(
                 ConnectionResult.Success
             } catch (e: Exception) {
                 logW(e)
-                val c = e.getCause()
-                when (c) {
-                    is FileNotFoundException,
-                    is FileNotFolderException,
-                    is StorageException -> {
-                        // Warning
-                        ConnectionResult.Warning(c)
+
+                when (e) {
+                    is StorageException.UnknownHostException -> {
+                        ConnectionResult.Failure(e)
                     }
                     else -> {
-                        // Failure
-                        ConnectionResult.Failure(c)
+                        val c = e.getCause()
+                        when (c) {
+                            is FileNotFoundException,
+                            is FileNotFolderException,
+                            is StorageException -> {
+                                // Warning
+                                ConnectionResult.Warning(c)
+                            }
+                            else -> {
+                                // Failure
+                                ConnectionResult.Failure(c)
+                            }
+                        }
                     }
                 }
+
             } finally {
                 contextCache.remove(request.connection)
             }

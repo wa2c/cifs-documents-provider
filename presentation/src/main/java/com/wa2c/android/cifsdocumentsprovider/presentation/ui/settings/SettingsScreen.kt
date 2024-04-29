@@ -17,10 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +38,7 @@ import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
+import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
@@ -42,6 +46,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStat
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsKnownHostList
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsList
 
 /**
@@ -55,7 +60,6 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val showLibraries = remember { mutableStateOf(false) }
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -86,10 +90,8 @@ fun SettingsScreen(
             state = viewModel.useAsLocalFlow.collectAsStateWithLifecycle(initialValue = false),
             mutate = viewModel::setUseAsLocal,
         ),
-        showLibraries = showLibraries.value,
-        onClickLibraries = {
-            showLibraries.value = true
-        },
+        knownHosts = viewModel.knownHostsFlow.collectAsStateWithLifecycle(emptyList()),
+        onDeleteKnownHost = viewModel::deleteKnownHost,
         onStartIntent = { intent ->
             try {
                 context.startActivity(intent)
@@ -98,11 +100,7 @@ fun SettingsScreen(
             }
         },
         onClickBack = {
-            if (showLibraries.value) {
-                showLibraries.value = false
-            } else {
-                onNavigateBack()
-            }
+            onNavigateBack()
         }
     )
 }
@@ -119,18 +117,29 @@ private fun SettingsScreenContainer(
     openFileLimit: MutableState<Int>,
     useForeground:  MutableState<Boolean>,
     useAsLocal:  MutableState<Boolean>,
-    showLibraries: Boolean,
-    onClickLibraries: () -> Unit,
+    knownHosts: State<List<KnownHost>>,
+    onDeleteKnownHost: (KnownHost) -> Unit,
     onStartIntent: (Intent) -> Unit,
     onClickBack: () -> Unit,
 ) {
+    var showLibraries by remember { mutableStateOf(false) }
+    var showKnownHosts by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.settings_title)) },
                 colors = getAppTopAppBarColors(),
                 navigationIcon = {
-                    IconButton(onClick = { onClickBack() }) {
+                    IconButton(onClick = {
+                        if (showKnownHosts) {
+                            showKnownHosts = false
+                        } else if (showLibraries) {
+                            showLibraries = false
+                        } else {
+                            onClickBack()
+                        }
+                    }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
                             contentDescription = "",
@@ -146,7 +155,12 @@ private fun SettingsScreenContainer(
                 .fillMaxHeight()
                 .padding(paddingValues)
         ) {
-            if (showLibraries) {
+            if (showKnownHosts) {
+                SettingsKnownHostList(
+                    knownHosts = knownHosts,
+                    onDelete = onDeleteKnownHost,
+                )
+            } else if (showLibraries) {
                 // Libraries screen
                 LibrariesContainer(
                     colors = LibraryDefaults.libraryColors(
@@ -162,7 +176,8 @@ private fun SettingsScreenContainer(
                     openFileLimit = openFileLimit,
                     useForeground = useForeground,
                     useAsLocal = useAsLocal,
-                    onShowLibraries = onClickLibraries,
+                    onShowKnownHosts = { showKnownHosts = true },
+                    onShowLibraries = { showLibraries = true },
                     onStartIntent = onStartIntent,
                 )
             }
@@ -170,7 +185,15 @@ private fun SettingsScreenContainer(
     }
 
     // Back button
-    BackHandler { onClickBack() }
+    BackHandler {
+        if (showKnownHosts) {
+            showKnownHosts = false
+        } else if (showLibraries) {
+            showLibraries = false
+        } else {
+            onClickBack()
+        }
+    }
 }
 
 /**
@@ -192,8 +215,8 @@ private fun SettingsScreenContainerPreview() {
             openFileLimit = remember { mutableIntStateOf(OPEN_FILE_LIMIT_DEFAULT) },
             useForeground = remember { mutableStateOf(false) },
             useAsLocal = remember { mutableStateOf(false) },
-            showLibraries = false,
-            onClickLibraries = {},
+            knownHosts = remember { mutableStateOf(emptyList()) },
+            onDeleteKnownHost = {},
             onStartIntent = {},
             onClickBack = {},
         )
