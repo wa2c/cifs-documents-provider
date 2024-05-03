@@ -13,5 +13,7 @@ data class KnownHost(
     /** Type */
     val type: String,
     /** Key */
-    val key: String
+    val key: String,
+    /** Connection list */
+    val connections: List<RemoteConnection>,
 ): Parcelable

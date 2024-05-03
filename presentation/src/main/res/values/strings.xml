@@ -7,6 +7,10 @@
     <string name="dialog_accept">OK</string>
     <string name="dialog_close">Close</string>
     <string name="dialog_title_warning">Attention</string>
+    <string name="common_yes">Yes</string>
+    <string name="common_no">No</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_back">Back</string>
     <!-- Home Screen -->
     <string name="home_open_file">Open</string>
     <string name="home_open_settings">Settings</string>
@@ -73,10 +77,10 @@
     <string name="edit_check_key_ng_invalid_messaged">Failed to read the private key.</string>
     <string name="edit_check_key_ok_messaged">The private key is valid.</string>
     <string name="edit_save_button">Save</string>
-    <string name="edit_delete_button">Delete</string>
     <string name="edit_back_confirmation_message">Discard your changes?</string>
     <string name="edit_delete_confirmation_message">Delete this settings?</string>
     <string name="edit_warning_key_import_message">The imported secret key is not guaranteed.\nPlease be careful when handling.</string>
+    <string name="edit_warning_known_host_message">The configured SSH destination has been connected for the first time or the key has been changed. \nDo you want to trust the destination and connect?</string>
     <!-- Host Screen -->
     <string name="host_title">Host</string>
     <string name="host_set_manually">Set manually</string>
@@ -105,8 +109,13 @@
     <string name="settings_set_use_foreground">Show notification when opening files</string>
     <string name="settings_set_use_as_local">Use as local storage\n(Device reboot required)</string>
     <string name="settings_section_info">Information</string>
-    <string name="settings_info_contributors">Contributors</string>
+    <string name="settings_info_known_hosts">Known Hosts</string>
+    <string name="settings_info_known_hosts_host">Host</string>
+    <string name="settings_info_known_hosts_type">Type</string>
+    <string name="settings_info_known_hosts_key">Key</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">Delete this key?</string>
     <string name="settings_info_libraries">Libraries</string>
+    <string name="settings_info_contributors">Contributors</string>
     <string name="settings_info_app">App</string>
     <!-- Send Screen -->
     <string name="send_title">File Transfer</string>

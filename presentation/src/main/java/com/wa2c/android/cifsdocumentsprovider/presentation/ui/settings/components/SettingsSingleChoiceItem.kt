@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.OptionItem
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.SingleChoiceDialog
@@ -32,7 +33,7 @@ internal fun <T> SettingsSingleChoiceItem(
             items = items.map { it.label },
             selectedIndex = items.indexOfFirst { it.value == selectedItem.value },
             title = title,
-            dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
                 showDialog.value = false
             },
             onDismiss = { showDialog.value = false }

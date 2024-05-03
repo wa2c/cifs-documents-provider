@@ -1,8 +1,13 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
+import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
+import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,6 +19,7 @@ import javax.inject.Singleton
 class AppRepository @Inject internal constructor(
     private val appPreferences: AppPreferencesDataStore,
     private val sshKeyManager: SshKeyManager,
+    private val connectionSettingDao: ConnectionSettingDao,
 ) {
 
     /** UI Theme */
@@ -40,12 +46,21 @@ class AppRepository @Inject internal constructor(
     /** Use foreground to make the app resilient to closing by Android OS */
     suspend fun setUseForeground(value: Boolean) = appPreferences.setUseForeground(value)
 
-    /** Known host list */
-    val knownHosts: List<KnownHost>
-        get() = sshKeyManager.knownHostList.map {
-            KnownHost(it.host, it.type, it.key)
+    /**
+     * Get known hosts
+     */
+    suspend fun getKnownHosts(): List<KnownHost> {
+        val sshList = connectionSettingDao.getTypedList(StorageType.entries.filter { it.protocol == ProtocolType.SFTP }
+            .map { it.value })
+            .map { it.toDataModel() }.map { it.toDomainModel() }
+        return sshKeyManager.knownHostList.map { entity ->
+            KnownHost(entity.host, entity.type, entity.key, sshList.filter { it.host == entity.host })
         }
+    }
 
+    /**
+     * Delete known host
+     */
     fun deleteKnownHost(knownHost: KnownHost) {
         sshKeyManager.deleteKnownHost(knownHost.host, knownHost.type)
     }

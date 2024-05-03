@@ -231,34 +231,36 @@ fun EditScreen(
     }
 
     if (showKnownHostDialog) {
-        // TODO
         CommonDialog(
             title = stringResource(id = R.string.dialog_title_warning),
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
-                    viewModel.addKnownHost()
+                DialogButton(label = stringResource(id = R.string.common_yes)) {
+                    viewModel.onClickCheckConnection(addKnownHost = true)
                     showKnownHostDialog = false
                 },
             ),
+            dismissButton = DialogButton(label = stringResource(id = R.string.common_no)) {
+                showKnownHostDialog = false
+            },
             onDismiss = {
                 showKnownHostDialog = false
             }
         ) {
-            Text("Add hosts")
+            Text(text = stringResource(id = R.string.edit_warning_known_host_message))
         }
     }
 
     LaunchedEffect(Unit) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
+            if (result?.cause is StorageException.UnknownHostException) {
+                showKnownHostDialog = true
+            }
             scope.showPopup(
                 snackbarHostState = snackbarHostState,
                 stringRes = result?.messageRes,
                 type = result?.messageType,
                 error = result?.cause
             )
-            if (result?.cause is StorageException.UnknownHostException) {
-                showKnownHostDialog = true
-            }
         }
 
         viewModel.navigateSearchHost.collectIn(lifecycleOwner) { connectionId ->
@@ -359,7 +361,7 @@ private fun EditScreenContainer(
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            contentDescription = stringResource(id = R.string.edit_delete_button),
+                            contentDescription = stringResource(id = R.string.common_delete),
                         )
                     }
                 },
@@ -367,7 +369,7 @@ private fun EditScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = "",
+                            contentDescription = stringResource(id = R.string.common_back),
                         )
                     }
                 },

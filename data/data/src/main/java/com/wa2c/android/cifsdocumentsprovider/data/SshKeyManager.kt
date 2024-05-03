@@ -15,6 +15,7 @@ class SshKeyManager @Inject constructor(
     @ApplicationContext private val context: Context,
 ) {
 
+    /** JSch */
     private val jsch: JSch by lazy {
         JSch().apply {
             val file = File(context.filesDir, KNOWN_HOSTS_FILE)
@@ -23,9 +24,11 @@ class SshKeyManager @Inject constructor(
         }
     }
 
+    /** Known host file path */
     val knownHostPath: String
         get() = jsch.hostKeyRepository.knownHostsRepositoryID
 
+    /** Known host list. */
     val knownHostList: List<HostKeyEntity>
         get() = jsch.hostKeyRepository.hostKey.map {
             HostKeyEntity(it.host, it.type, it.key)
@@ -39,6 +42,9 @@ class SshKeyManager @Inject constructor(
         k.dispose()
     }
 
+    /**
+     * Add known host.
+     */
     fun addKnownHost(
         host: String,
         port: Int?,
@@ -55,16 +61,29 @@ class SshKeyManager @Inject constructor(
         }
     }
 
+    /**
+     * Delete known host.
+     */
     fun deleteKnownHost(
         host: String,
         type: String,
     ) {
         jsch.hostKeyRepository.remove(host, type)
+        jsch.getSession(host).disconnect()
+
+        val file = File(context.filesDir, KNOWN_HOSTS_FILE)
+        jsch.setKnownHosts(file.absolutePath)
     }
 
+    /**
+     * Known host key entity.
+     */
     data class HostKeyEntity(
+        /** Host */
         val host: String,
+        /** Key type */
         val type: String,
+        /** Key */
         val key: String,
     )
 

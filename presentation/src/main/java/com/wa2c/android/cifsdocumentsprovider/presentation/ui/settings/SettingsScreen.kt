@@ -16,6 +16,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -39,6 +40,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
+import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
@@ -55,6 +57,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.component
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    onTransitEdit: (RemoteConnection) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -92,6 +95,7 @@ fun SettingsScreen(
         ),
         knownHosts = viewModel.knownHostsFlow.collectAsStateWithLifecycle(emptyList()),
         onDeleteKnownHost = viewModel::deleteKnownHost,
+        onTransitEdit = onTransitEdit,
         onStartIntent = { intent ->
             try {
                 context.startActivity(intent)
@@ -103,6 +107,11 @@ fun SettingsScreen(
             onNavigateBack()
         }
     )
+
+    LaunchedEffect(Unit) {
+        viewModel.initialize()
+    }
+
 }
 
 /**
@@ -119,6 +128,7 @@ private fun SettingsScreenContainer(
     useAsLocal:  MutableState<Boolean>,
     knownHosts: State<List<KnownHost>>,
     onDeleteKnownHost: (KnownHost) -> Unit,
+    onTransitEdit: (RemoteConnection) -> Unit,
     onStartIntent: (Intent) -> Unit,
     onClickBack: () -> Unit,
 ) {
@@ -142,7 +152,7 @@ private fun SettingsScreenContainer(
                     }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = "",
+                            contentDescription = stringResource(id = R.string.common_back),
                         )
                     }
                 }
@@ -158,7 +168,8 @@ private fun SettingsScreenContainer(
             if (showKnownHosts) {
                 SettingsKnownHostList(
                     knownHosts = knownHosts,
-                    onDelete = onDeleteKnownHost,
+                    onClickDelete = onDeleteKnownHost,
+                    onClickConnection = onTransitEdit,
                 )
             } else if (showLibraries) {
                 // Libraries screen
@@ -217,6 +228,7 @@ private fun SettingsScreenContainerPreview() {
             useAsLocal = remember { mutableStateOf(false) },
             knownHosts = remember { mutableStateOf(emptyList()) },
             onDeleteKnownHost = {},
+            onTransitEdit = {},
             onStartIntent = {},
             onClickBack = {},
         )

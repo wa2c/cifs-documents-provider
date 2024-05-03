@@ -119,7 +119,7 @@ fun FolderScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = "",
+                            contentDescription = stringResource(id = R.string.common_back),
                         )
                     }
                 },

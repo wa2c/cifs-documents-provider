@@ -19,6 +19,14 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val appRepository: AppRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
+
+    /**
+     * Initialize
+     */
+    fun initialize() {
+        updateKnownHosts()
+    }
+
     /** UI Theme */
     val uiThemeFlow = appRepository.uiThemeFlow
 
@@ -43,8 +51,17 @@ class SettingsViewModel @Inject constructor(
     /** Use foreground to make the app resilient to closing by Android OS */
     fun setUseForeground(value: Boolean) = launch { appRepository.setUseForeground(value)}
 
-    private val _knownHostsFlow = MutableStateFlow(appRepository.knownHosts)
+    private val _knownHostsFlow = MutableStateFlow(emptyList<KnownHost>())
     val knownHostsFlow = _knownHostsFlow.asStateFlow()
+
+    /**
+     * Update known hosts
+     */
+    private fun updateKnownHosts() {
+        launch {
+            _knownHostsFlow.emit(appRepository.getKnownHosts())
+        }
+    }
 
     /**
      * Delete known host
@@ -52,7 +69,7 @@ class SettingsViewModel @Inject constructor(
     fun deleteKnownHost(knownHost: KnownHost) {
         launch {
             appRepository.deleteKnownHost(knownHost)
-            _knownHostsFlow.value = appRepository.knownHosts
+            updateKnownHosts()
         }
     }
 

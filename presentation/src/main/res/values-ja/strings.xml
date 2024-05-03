@@ -77,6 +77,7 @@
     <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
     <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
     <string name="edit_warning_key_import_message">インポートされた秘密鍵の安全性は保証しません。\n取り扱いにはご注意ください。</string>
+    <string name="edit_warning_known_host_message">設定したSSHの通信先は、初回接続または鍵が変更されています。\n通信先を信用して接続しますか？</string>
     <!-- Host Screen -->
     <string name="host_title">ホスト</string>
     <string name="host_set_manually">手動で設定</string>

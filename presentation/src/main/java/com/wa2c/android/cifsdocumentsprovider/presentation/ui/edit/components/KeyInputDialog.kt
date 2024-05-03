@@ -30,11 +30,11 @@ fun KeyInputDialog(
     CommonDialog(
         title = stringResource(id = R.string.edit_key_title) + "\n" + stringResource(id = R.string.edit_key_input_import_text),
         confirmButtons = listOf(
-            DialogButton(label = stringResource(id = android.R.string.ok)) {
+            DialogButton(label = stringResource(id = R.string.dialog_accept)) {
                 onInput(key)
             }
         ),
-        dismissButton = DialogButton(label = stringResource(id = android.R.string.cancel)) {
+        dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
             onDismiss()
         },
         onDismiss = onDismiss

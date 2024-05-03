@@ -29,6 +29,7 @@ class ApacheFtpClient(
             builder.setDataTimeout(options, Duration.ofMillis(READ_TIMEOUT.toLong()))
             builder.setFileType(options, FtpFileType.BINARY)
             builder.setControlEncoding(options, ftpConnection.encoding)
+            builder.setUserDirIsRoot(options, false) // true occurs path mismatch
         }
         if (isFtps) {
             FtpsFileSystemConfigBuilder.getInstance().also { builder ->

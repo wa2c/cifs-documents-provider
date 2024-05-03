@@ -83,7 +83,7 @@ internal fun SettingsList(
             TitleItem(text = stringResource(id = R.string.settings_section_info))
 
             // Known Hosts
-            SettingsItem(text = "Known Hosts") {
+            SettingsItem(text = stringResource(id = R.string.settings_info_known_hosts)) {
                 onShowKnownHosts()
             }
 

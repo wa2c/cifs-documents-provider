@@ -122,9 +122,7 @@ internal fun MainNavHost(
                     if (backStackEntry.arguments?.getString(HostScreenParamId) == null) {
                         navController.navigate(
                             route = EditScreenRouteName + "?host=${host}",
-                            navOptions = navOptions {
-                                this.popUpTo(HomeScreenName)
-                            })
+                            navOptions = navOptions { this.popUpTo(HomeScreenName) })
                     } else {
                         navController.previousBackStackEntry?.savedStateHandle?.set(
                             HostScreenResultKey,
@@ -134,9 +132,10 @@ internal fun MainNavHost(
                     }
                 },
                 onSetManually = {
-                    navController.navigate(route = EditScreenRouteName, navOptions = navOptions {
-                        this.popUpTo(HomeScreenName)
-                    })
+                    navController.navigate(
+                        route = EditScreenRouteName,
+                        navOptions = navOptions { this.popUpTo(HomeScreenName) }
+                    )
                 }
             )
         }
@@ -161,6 +160,15 @@ internal fun MainNavHost(
             route = SettingsScreenName,
         ) {
             SettingsScreen(
+                onTransitEdit = {
+                    // from Known Key
+                    navController.navigate(
+                        route = EditScreenRouteName + "?$EditScreenParamId=${it.id}",
+                        navOptions = navOptions {
+                            this.popUpTo(HomeScreenName)
+                        }
+                    )
+                },
                 onNavigateBack = {
                     navController.popBackStack()
                 }
@@ -198,9 +206,10 @@ internal fun MainNavHost(
             ReceiveFile(
                 uriList = uriList,
                 onNavigateFinish = {
-                    navController.navigate(route = SendScreenName, navOptions = navOptions {
-                        this.popUpTo(SendScreenName)
-                    })
+                    navController.navigate(
+                        route = SendScreenName,
+                        navOptions = navOptions { this.popUpTo(SendScreenName) }
+                    )
                 }
             ) {
                 onSendUri(uriList, it)
@@ -209,9 +218,10 @@ internal fun MainNavHost(
 
         // Navigate SendScreen if sending
         if (showSendScreen) {
-            navController.navigate(route = SendScreenName, navOptions = navOptions {
-                this.popUpTo(SendScreenName)
-            })
+            navController.navigate(
+                route = SendScreenName,
+                navOptions = navOptions { this.popUpTo(SendScreenName) }
+            )
             return@NavHost
         }
     }

@@ -100,11 +100,14 @@ class EditViewModel @Inject constructor(
     /**
      * Check connection
      */
-    fun onClickCheckConnection() {
+    fun onClickCheckConnection(addKnownHost: Boolean = false) {
         launch {
             _isBusy.emit(true)
             runCatching {
                 _connectionResult.emit(null)
+                if (addKnownHost) {
+                    editRepository.addKnownHost(remoteConnection.value)
+                }
                 editRepository.checkConnection(remoteConnection.value)
             }.fold(
                 onSuccess = { _connectionResult.emit(it) },
@@ -258,19 +261,6 @@ class EditViewModel @Inject constructor(
     fun clearKey() {
         launch {
             remoteConnection.emit(remoteConnection.value.copy(keyFileUri = null, keyData = null))
-        }
-    }
-
-    /**
-     * Add known host
-     */
-    fun addKnownHost() {
-        launch {
-            runCatching {
-                editRepository.addKnownHost(remoteConnection.value)
-            }.onFailure {
-                _result.emit(Result.failure(it))
-            }
         }
     }
 
