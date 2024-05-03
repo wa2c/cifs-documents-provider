@@ -1,14 +1,17 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.text.format.DateUtils
 import android.text.format.Formatter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
+import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.MainActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -73,4 +76,19 @@ fun SendData.getSummaryText(context: Context): String {
             context.getString(state.labelRes)
         }
     }
+}
+
+fun Context.createAuthenticatePendingIntent(id: String): PendingIntent {
+    return PendingIntent.getActivity(
+        this,
+        100,
+        Intent(this, MainActivity::class.java).also {
+             it.putExtra("STORAGE_ID", id)
+        },
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
+}
+
+fun Intent.getStorageId(): String? {
+    return getStringExtra("STORAGE_ID")
 }

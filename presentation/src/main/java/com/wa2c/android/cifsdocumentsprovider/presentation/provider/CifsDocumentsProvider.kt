@@ -32,6 +32,7 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.StorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.createAuthenticatePendingIntent
 import com.wa2c.android.cifsdocumentsprovider.presentation.provideStorageRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.ProviderWorker
 import com.wa2c.android.cifsdocumentsprovider.presentation.worker.WorkerLifecycleOwner
@@ -93,13 +94,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                         throw UnsupportedOperationException(e)
                     }
                     is StorageException.Security -> {
-                        val pendingIntent = PendingIntent.getActivity(
-                            providerContext,
-                            100,
-                            Intent(providerContext, CifsDocumentsProvider::class.java),
-                            PendingIntent.FLAG_IMMUTABLE,
-                        )
-                        throw AuthenticationRequiredException(e, pendingIntent)
+                        throw AuthenticationRequiredException(e, providerContext.createAuthenticatePendingIntent(e.id))
                     }
                     is StorageException.Transaction -> {
                         throw IllegalStateException(e)

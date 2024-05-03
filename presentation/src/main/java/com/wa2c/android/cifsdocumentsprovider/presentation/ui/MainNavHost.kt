@@ -3,10 +3,14 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,6 +20,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
@@ -29,6 +34,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsS
  */
 @Composable
 internal fun MainNavHost(
+    viewModel: MainViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     navController: NavHostController,
     showSendScreen: Boolean,
     onSendUri: (List<Uri>, Uri) -> Unit,
@@ -39,7 +46,6 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = HomeScreenName,
     ) {
-
         // Home Screen
         composable(
             route = HomeScreenName,
@@ -223,6 +229,18 @@ internal fun MainNavHost(
                 navOptions = navOptions { this.popUpTo(SendScreenName) }
             )
             return@NavHost
+        }
+    }
+
+    LaunchedEffect(null) {
+        // from SAF picker
+        viewModel.showEdit.collectIn(lifecycleOwner) { storageId ->
+            navController.navigate(
+                route = EditScreenRouteName + "?$EditScreenParamId=${storageId}",
+                navOptions = navOptions {
+                    this.popUpTo(HomeScreenName)
+                }
+            )
         }
     }
 }

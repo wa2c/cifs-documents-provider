@@ -187,7 +187,7 @@ class SmbjClient(
     }
 
     override suspend fun checkConnection(request: StorageRequest): ConnectionResult {
-        return  try {
+        return try {
                 getChildren(request, true)
                 ConnectionResult.Success
             } catch (e: Exception) {
@@ -207,7 +207,7 @@ class SmbjClient(
     }
 
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             if (request.isRoot || request.isShareRoot) {
                 StorageFile(
                     request.connection.name,
@@ -227,7 +227,7 @@ class SmbjClient(
     }
 
     override suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean): List<StorageFile> {
-        return runHandling {
+        return runHandling(request) {
             if (request.isRoot) {
                 // Root
                 val connection = request.connection as StorageConnection.Cifs
@@ -273,7 +273,7 @@ class SmbjClient(
     override suspend fun createDirectory(
         request: StorageRequest,
     ): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             useDiskShare(request) { diskShare ->
                 diskShare.mkdir(request.sharePath)
                 diskShare.getFileInformation(request.sharePath)
@@ -282,7 +282,7 @@ class SmbjClient(
     }
 
     override suspend fun createFile(request: StorageRequest): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath, isRead = false).use { f ->
                     f.fileInformation
@@ -291,8 +291,11 @@ class SmbjClient(
         }
     }
 
-    override suspend fun copyFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile {
-        return runHandling {
+    override suspend fun copyFile(
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
+    ): StorageFile {
+        return runHandling(sourceRequest) {
             useDiskShare(sourceRequest) { diskShare ->
                 useDiskShare(targetRequest) { targetDiskShare ->
                     openDiskFile(diskShare, sourceRequest.sharePath, isRead = true, existsRequired = true).use { sourceEntry ->
@@ -307,8 +310,11 @@ class SmbjClient(
         }
     }
 
-    override suspend fun renameFile(request: StorageRequest, newName: String): StorageFile {
-        return runHandling {
+    override suspend fun renameFile(
+        request: StorageRequest,
+        newName: String,
+    ): StorageFile {
+        return runHandling(request) {
             useDiskShare(request) { diskShare ->
                 openDiskFile(diskShare, request.sharePath, isRead = false, existsRequired = true).use { diskEntry ->
                     val newPath = request.sharePath.rename(newName)
@@ -319,8 +325,11 @@ class SmbjClient(
         }
     }
 
-    override suspend fun moveFile(sourceRequest: StorageRequest, targetRequest: StorageRequest): StorageFile {
-        return runHandling {
+    override suspend fun moveFile(
+        sourceRequest: StorageRequest,
+        targetRequest: StorageRequest,
+    ): StorageFile {
+        return runHandling(sourceRequest) {
             useDiskShare(sourceRequest) { diskShare ->
                 openDiskFile(diskShare, sourceRequest.sharePath, isRead = false, existsRequired = true).use { diskEntry ->
                     diskEntry.rename(targetRequest.sharePath.toUncSeparator())
@@ -331,7 +340,7 @@ class SmbjClient(
     }
 
     override suspend fun deleteFile(request: StorageRequest): Boolean {
-        return runHandling {
+        return runHandling(request) {
             try {
                 useDiskShare(request) { diskShare ->
                     diskShare.rm(request.sharePath)
@@ -349,7 +358,7 @@ class SmbjClient(
         mode: AccessMode,
         onFileRelease: suspend () -> Unit
     ): ProxyFileDescriptorCallback {
-        return runHandling {
+        return runHandling(request) {
             val diskFile = useDiskShare(request) {
                 openDiskFile(it, request.sharePath, isRead = mode == AccessMode.R, existsRequired = true)
             }.takeIf { !it.fileInformation.standardInformation.isDirectory } ?: throw StorageException.File.NotFound()
@@ -372,6 +381,7 @@ class SmbjClient(
     }
 
     private suspend fun <T> runHandling(
+        request: StorageRequest,
         block: suspend CoroutineScope.() -> T
     ): T {
         return withContext(dispatcher) {
@@ -384,7 +394,7 @@ class SmbjClient(
                 when (c) {
                     is SMBApiException -> {
                         if (c.status == NtStatus.STATUS_ACCESS_DENIED || c.status == NtStatus.STATUS_LOGON_FAILURE) {
-                            throw StorageException.Security.Auth(e)
+                            throw StorageException.Security.Auth(e, request.connection.id)
                         } else if (c.status == NtStatus.STATUS_BAD_NETWORK_NAME || c.status == NtStatus.STATUS_BAD_NETWORK_PATH) {
                             throw StorageException.File.NotFound(e)
                         }

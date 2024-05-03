@@ -23,9 +23,9 @@ sealed class StorageException(message: String?, cause: Throwable?) : IOException
         class RandomAccessNotPermitted(cause: Throwable? = null) : Operation("This type does not support random writing.", cause)
     }
 
-    sealed class Security(message: String?, cause: Throwable?) : StorageException(message, cause) {
-        class Auth(cause: Throwable) : Security(cause.localizedMessage ?: "Authentication failed.", cause)
-        class UnknownHost(cause: Throwable) : Security(cause.localizedMessage ?: "Unknown host.", cause)
+    sealed class Security(message: String?, cause: Throwable?, val id: String) : StorageException(message, cause) {
+        class Auth(cause: Throwable, id: String) : Security(cause.localizedMessage ?: "Authentication failed.", cause, id)
+        class UnknownHost(cause: Throwable, id: String) : Security(cause.localizedMessage ?: "Unknown host.", cause, id)
     }
 
     sealed class Transaction(message: String?, cause: Throwable?) : StorageException(message, cause) {

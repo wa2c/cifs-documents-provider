@@ -94,33 +94,66 @@ abstract class ApacheVfsClient(
     /**
      * Get file object
      */
-    private suspend fun getFileObject(
+    private fun getFileObject(
         request: StorageRequest,
         ignoreCache: Boolean = false,
         existsRequired: Boolean = false,
     ): FileObject {
-        return runHandling {
-            val connection = request.connection
-            fileManager.resolveFile(request.uri, getContext(connection, ignoreCache)).also {
-                if (existsRequired && !it.exists()) throw StorageException.File.NotFound()
-            }
+        val connection = request.connection
+        return fileManager.resolveFile(request.uri, getContext(connection, ignoreCache)).also {
+            if (existsRequired && !it.exists()) throw StorageException.File.NotFound()
         }
     }
 
     /**
      * Convert to StorageFile
      */
-    private suspend fun FileObject.toStorageFile(): StorageFile {
+    private fun FileObject.toStorageFile(): StorageFile {
         val urlText = url.toString()
-        return runHandling {
-            val isDir = urlText.isDirectoryUri || isFolder
-            StorageFile(
-                name = name.baseName,
-                uri = urlText,
-                size = if (isDir || !isFile) 0 else content.size,
-                lastModified = content.lastModifiedTime,
-                isDirectory = isDir,
-            )
+        val isDir = urlText.isDirectoryUri || isFolder
+        return StorageFile(
+            name = name.baseName,
+            uri = urlText,
+            size = if (isDir || !isFile) 0 else content.size,
+            lastModified = content.lastModifiedTime,
+            isDirectory = isDir,
+        )
+    }
+
+    private suspend fun <T> runHandling(
+        request: StorageRequest,
+        block: suspend CoroutineScope.() -> T,
+    ): T {
+        return withContext(dispatcher) {
+            try {
+                return@withContext block()
+            } catch (e: Exception) {
+                logE(e)
+                val c = e.getCause()
+                c.throwStorageCommonException()
+                when (c) {
+                    is FileNotFoundException,
+                    is FileNotFolderException -> {
+                        throw StorageException.File.NotFound(c)
+                    }
+                    is JSchUnknownHostKeyException -> {
+                        throw StorageException.Security.UnknownHost(c, request.connection.id)
+                    }
+                    is JSchException -> {
+                        if (c.message?.contains("Auth fail") == true) {
+                            throw StorageException.Security.Auth(c, request.connection.id)
+                        }
+                    }
+                    is FileSystemException -> {
+                        if (c.code == "vfs.provider.ftp/login.error") {
+                            throw StorageException.Security.Auth(c, request.connection.id)
+                        } else if (c.code == "vfs.provider.sftp/connect.error") {
+                            throw StorageException.Transaction.HostNotFound(c)
+                        }
+                    }
+                }
+                throw StorageException.Error(e)
+            }
         }
     }
 
@@ -145,7 +178,7 @@ abstract class ApacheVfsClient(
         request: StorageRequest,
         ignoreCache: Boolean,
     ): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             if (request.isRoot || request.isShareRoot) {
                 StorageFile(
                     name = request.connection.name,
@@ -166,7 +199,7 @@ abstract class ApacheVfsClient(
         request: StorageRequest,
         ignoreCache: Boolean,
     ): List<StorageFile> {
-        return runHandling {
+        return runHandling(request) {
             getFileObject(request, ignoreCache = ignoreCache, existsRequired = true).use { file ->
                 file.children.filter { it.exists() }.map { it.toStorageFile() }
             }
@@ -176,7 +209,7 @@ abstract class ApacheVfsClient(
     override suspend fun createDirectory(
         request: StorageRequest,
     ): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             getFileObject(request).use { file ->
                 file.createFolder()
                 file.toStorageFile()
@@ -187,7 +220,7 @@ abstract class ApacheVfsClient(
     override suspend fun createFile(
         request: StorageRequest,
     ): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             getFileObject(request).use { file ->
                 file.createFile()
                 file.toStorageFile()
@@ -199,7 +232,7 @@ abstract class ApacheVfsClient(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
     ): StorageFile {
-        return runHandling {
+        return runHandling(sourceRequest) {
             getFileObject(sourceRequest, existsRequired = true).use { source ->
                 getFileObject(targetRequest).use { target ->
                     target.copyFrom(source, Selectors.SELECT_SELF_AND_CHILDREN)
@@ -213,7 +246,7 @@ abstract class ApacheVfsClient(
         request: StorageRequest,
         newName: String,
     ): StorageFile {
-        return runHandling {
+        return runHandling(request) {
             getFileObject(request, existsRequired = true).use { source ->
                 val targetUri = request.uri.rename(newName)
                 getFileObject(request.replacePathByUri(targetUri)).use { target ->
@@ -228,7 +261,7 @@ abstract class ApacheVfsClient(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
     ): StorageFile {
-        return runHandling {
+        return runHandling(sourceRequest) {
             getFileObject(sourceRequest, existsRequired = true).use { source ->
                 getFileObject(targetRequest).use { target ->
                     source.moveTo(target)
@@ -241,7 +274,7 @@ abstract class ApacheVfsClient(
     override suspend fun deleteFile(
         request: StorageRequest,
     ): Boolean {
-        return runHandling {
+        return runHandling(request) {
             try {
                 getFileObject(request, existsRequired = true).use { file ->
                     file.delete()
@@ -259,7 +292,7 @@ abstract class ApacheVfsClient(
         mode: AccessMode,
         onFileRelease: suspend () -> Unit,
     ): ProxyFileDescriptorCallback {
-        return runHandling {
+        return runHandling(request) {
             val file = getFileObject(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.File.NotFound()
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
@@ -272,43 +305,6 @@ abstract class ApacheVfsClient(
     override suspend fun close() {
         contextCache.evictAll()
         fileManager.close()
-    }
-
-
-    private suspend fun <T> runHandling(
-        block: suspend CoroutineScope.() -> T,
-    ): T {
-        return withContext(dispatcher) {
-            try {
-                return@withContext block()
-            } catch (e: Exception) {
-                logE(e)
-                val c = e.getCause()
-                c.throwStorageCommonException()
-                when (c) {
-                    is FileNotFoundException,
-                    is FileNotFolderException -> {
-                        throw StorageException.File.NotFound(c)
-                    }
-                    is JSchUnknownHostKeyException -> {
-                        throw StorageException.Security.UnknownHost(c)
-                    }
-                    is JSchException -> {
-                        if (c.message?.contains("Auth fail") == true) {
-                            throw StorageException.Security.Auth(c)
-                        }
-                    }
-                    is FileSystemException -> {
-                        if (c.code == "vfs.provider.ftp/login.error") {
-                            throw StorageException.Security.Auth(c)
-                        } else if (c.code == "vfs.provider.sftp/connect.error") {
-                            throw StorageException.Transaction.HostNotFound(c)
-                        }
-                    }
-                }
-                throw StorageException.Error(e)
-            }
-        }
     }
 
     companion object {

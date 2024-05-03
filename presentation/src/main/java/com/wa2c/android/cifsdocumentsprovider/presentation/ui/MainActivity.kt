@@ -22,6 +22,7 @@ import androidx.work.WorkManager
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.getCurrentReady
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getStorageId
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
@@ -95,6 +96,13 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.getStorageId()?.let {
+            mainViewModel.showEditScreen(it)
         }
     }
 
