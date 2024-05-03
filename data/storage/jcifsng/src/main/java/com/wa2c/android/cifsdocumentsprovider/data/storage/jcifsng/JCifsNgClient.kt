@@ -7,6 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.isDirectoryUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
+import com.wa2c.android.cifsdocumentsprovider.common.utils.throwStorageCommonException
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
@@ -25,9 +26,12 @@ import jcifs.context.BaseContext
 import jcifs.context.CIFSContextWrapper
 import jcifs.smb.NtStatus
 import jcifs.smb.NtlmPasswordAuthenticator
+import jcifs.smb.SmbAuthException
 import jcifs.smb.SmbException
 import jcifs.smb.SmbFile
+import jcifs.smb.SmbUnsupportedOperationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Properties
@@ -97,14 +101,14 @@ class JCifsNgClient(
      * Get SMB file
      */
     private suspend fun getSmbFile(request: StorageRequest, ignoreCache: Boolean = false, existsRequired: Boolean = false): SmbFile {
-        return withContext(dispatcher) {
+        return runHandling {
             val connection = request.connection as StorageConnection.Cifs
             val context = getCifsContext(connection, ignoreCache)
             SmbFile(request.uri, context).apply {
                 connectTimeout = CONNECTION_TIMEOUT
                 readTimeout = READ_TIMEOUT
             }.also {
-                if (existsRequired && !it.exists()) throw StorageException.FileNotFoundException()
+                if (existsRequired && !it.exists()) throw StorageException.File.NotFound()
             }
         }
     }
@@ -114,7 +118,7 @@ class JCifsNgClient(
      */
     private suspend fun SmbFile.toStorageFile(): StorageFile {
         val urlText = url.toString()
-        return withContext(dispatcher) {
+        return runHandling {
             val isDir = urlText.isDirectoryUri || isDirectory
             StorageFile(
                 name = name.trim('/'),
@@ -130,26 +134,18 @@ class JCifsNgClient(
      * Check setting connectivity.
      */
     override suspend fun checkConnection(request: StorageRequest): ConnectionResult {
-        return withContext(dispatcher) {
-            try {
-                getChildren(request, true).let {
-                    ConnectionResult.Success
-                }
-            } catch (e: Exception) {
-                logW(e)
-                val c = e.getCause()
-                if (c is SmbException && c.ntStatus in warningStatus) {
-                    // Warning
-                    ConnectionResult.Warning(c)
-                } else if (c is StorageException.FileNotFoundException) {
-                    ConnectionResult.Warning(c)
-                } else {
-                    // Failure
-                    ConnectionResult.Failure(c)
-                }
-            } finally {
-                contextCache.remove(request.connection)
+        return  try {
+            getChildren(request, true).let {
+                ConnectionResult.Success
             }
+        } catch (e: Exception) {
+            if (e is StorageException.File) {
+                ConnectionResult.Warning(e)
+            } else {
+                ConnectionResult.Failure(e)
+            }
+        } finally {
+            contextCache.remove(request.connection)
         }
     }
 
@@ -157,7 +153,7 @@ class JCifsNgClient(
      * Get file
      */
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile {
-        return  withContext(dispatcher) {
+        return  runHandling {
             getSmbFile(request, ignoreCache = ignoreCache, existsRequired = true).use { it.toStorageFile() }
         }
     }
@@ -166,7 +162,7 @@ class JCifsNgClient(
      * Get children StorageFile list
      */
     override suspend fun getChildren(request: StorageRequest, ignoreCache: Boolean): List<StorageFile> {
-        return  withContext(dispatcher) {
+        return  runHandling {
             getSmbFile(request, ignoreCache = ignoreCache).use { parent ->
                 parent.listFiles().map { child ->
                     child.use { it.toStorageFile() }
@@ -179,7 +175,7 @@ class JCifsNgClient(
      * Create new directory.
      */
     override suspend fun createDirectory(request: StorageRequest): StorageFile {
-        return withContext(dispatcher) {
+        return runHandling {
             getSmbFile(request).use {
                 it.mkdir()
                 it.toStorageFile()
@@ -191,7 +187,7 @@ class JCifsNgClient(
      * Create new file.
      */
     override suspend fun createFile(request: StorageRequest): StorageFile {
-        return withContext(dispatcher) {
+        return runHandling {
             getSmbFile(request).use { file ->
                 file.createNewFile()
                 file.toStorageFile()
@@ -206,7 +202,7 @@ class JCifsNgClient(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
     ): StorageFile {
-        return withContext(dispatcher) {
+        return runHandling {
             getSmbFile(sourceRequest, existsRequired = true).use { source ->
                 getSmbFile(targetRequest).use { target ->
                     source.copyTo(target)
@@ -223,7 +219,7 @@ class JCifsNgClient(
         request: StorageRequest,
         newName: String,
     ): StorageFile {
-        return withContext(dispatcher) {
+        return runHandling {
             getSmbFile(request, existsRequired = true).use { source ->
                 val targetUri = request.uri.rename(newName)
                 getSmbFile(request.replacePathByUri(targetUri)).use { target ->
@@ -241,7 +237,7 @@ class JCifsNgClient(
         sourceRequest: StorageRequest,
         targetRequest: StorageRequest,
     ): StorageFile {
-        return withContext(dispatcher) {
+        return runHandling {
             if (sourceRequest.connection == targetRequest.connection) {
                 // Same connection
                 getSmbFile(sourceRequest, existsRequired = true).use { source ->
@@ -265,7 +261,7 @@ class JCifsNgClient(
     override suspend fun deleteFile(
         request: StorageRequest,
     ): Boolean {
-        return withContext(dispatcher) {
+        return runHandling {
             try {
                 getSmbFile(request, existsRequired = true).use {
                     it.delete()
@@ -286,8 +282,8 @@ class JCifsNgClient(
         mode: AccessMode,
         onFileRelease: suspend () -> Unit
     ): ProxyFileDescriptorCallback {
-        return withContext(dispatcher) {
-            val file = getSmbFile(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.FileNotFoundException()
+        return runHandling {
+            val file = getSmbFile(request, existsRequired = true).takeIf { it.isFile } ?: throw StorageException.File.NotFound()
             val release: suspend () -> Unit = {
                 try { file.close() } catch (e: Exception) { logE(e) }
                 onFileRelease()
@@ -303,6 +299,33 @@ class JCifsNgClient(
 
     override suspend fun close() {
         contextCache.evictAll()
+    }
+
+    private suspend fun <T> runHandling(
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        return withContext(dispatcher) {
+            try {
+                return@withContext block()
+            } catch (e: Exception) {
+                logE(e)
+                val c = e.getCause()
+                c.throwStorageCommonException()
+                when (c) {
+                    is SmbUnsupportedOperationException -> {
+                        throw StorageException.Operation.Unsupported(e)
+                    }
+                    is SmbAuthException -> {
+                        throw StorageException.Security.Auth(e)
+                    }
+                    is SmbException -> {
+                        if (c.ntStatus in warningStatus) throw StorageException.File.NotFound(e)
+                        else throw StorageException.Error(e)
+                    }
+                }
+                throw StorageException.Error(e)
+            }
+        }
     }
 
     companion object {

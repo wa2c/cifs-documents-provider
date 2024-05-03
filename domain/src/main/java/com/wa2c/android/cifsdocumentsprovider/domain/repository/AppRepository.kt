@@ -50,11 +50,16 @@ class AppRepository @Inject internal constructor(
      * Get known hosts
      */
     suspend fun getKnownHosts(): List<KnownHost> {
-        val sshList = connectionSettingDao.getTypedList(StorageType.entries.filter { it.protocol == ProtocolType.SFTP }
+        val hostList = connectionSettingDao.getTypedList(StorageType.entries.filter { it.protocol == ProtocolType.SFTP }
             .map { it.value })
-            .map { it.toDataModel() }.map { it.toDomainModel() }
+            .map { it.toDataModel() }
         return sshKeyManager.knownHostList.map { entity ->
-            KnownHost(entity.host, entity.type, entity.key, sshList.filter { it.host == entity.host })
+            KnownHost(
+                host = entity.host,
+                type = entity.type,
+                key = entity.key,
+                connections = hostList.filter { it.host.equals(entity.host, true) }.map { it.toDomainModel() }
+            )
         }
     }
 

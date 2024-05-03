@@ -1,6 +1,9 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.provider
 
+import android.app.AuthenticationRequiredException
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.res.AssetFileDescriptor
 import android.database.Cursor
 import android.database.MatrixCursor
@@ -37,7 +40,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.security.AccessControlException
 
 /**
  * CIFS DocumentsProvider
@@ -84,11 +86,27 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 function()
             } catch (e: Exception) {
                 when (e) {
-                    is StorageException.DocumentIdException,
-                    is StorageException.FileNotFoundException -> throw FileNotFoundException(e.message)
-                    is StorageException.AccessModeException,
-                    is StorageException.ReadOnlyException -> throw AccessControlException(e.message)
-                    else -> throw IOException(e)
+                    is StorageException.File -> {
+                        throw FileNotFoundException(e.localizedMessage)
+                    }
+                    is StorageException.Operation -> {
+                        throw UnsupportedOperationException(e)
+                    }
+                    is StorageException.Security -> {
+                        val pendingIntent = PendingIntent.getActivity(
+                            providerContext,
+                            100,
+                            Intent(providerContext, CifsDocumentsProvider::class.java),
+                            PendingIntent.FLAG_IMMUTABLE,
+                        )
+                        throw AuthenticationRequiredException(e, pendingIntent)
+                    }
+                    is StorageException.Transaction -> {
+                        throw IllegalStateException(e)
+                    }
+                    else -> {
+                        throw IOException(e)
+                    }
                 }
             }
         }
@@ -130,7 +148,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 // File / Directory
                 storageRepository.getFile(id)?.let { file ->
                     includeFile(cursor, file)
-                } ?: throw StorageException.FileNotFoundException()
+                } ?: throw StorageException.File.NotFound()
             }
         }
         return cursor
@@ -226,7 +244,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             val id = storageRepository.getDocumentId(documentId)
             storageRepository.getThumbnailDescriptor(id) {  } ?: let {
-                throw StorageException.FileNotFoundException()
+                throw StorageException.File.NotFound()
             }
         }.let { fd ->
             // NOTE: not inside runOnFileHandler
@@ -244,7 +262,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
         return runOnFileHandler {
             val id = storageRepository.getDocumentId(documentId)
             storageRepository.getFileDescriptor(id, accessMode) { } ?: let {
-                throw StorageException.FileNotFoundException()
+                throw StorageException.File.NotFound()
             }
         }
     }
@@ -264,7 +282,7 @@ class CifsDocumentsProvider : DocumentsProvider() {
                 isDirectory = mimeType == DocumentsContract.Document.MIME_TYPE_DIR
             )?.let {
                 getResultDocumentId(id, it)
-            } ?: throw StorageException.FileNotFoundException()
+            } ?: throw StorageException.File.NotFound()
         }
     }
 

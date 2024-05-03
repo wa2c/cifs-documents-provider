@@ -1,8 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit
 
 import InputCheck
-import InputOption
 import InputMultiSelect
+import InputOption
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -252,7 +252,7 @@ fun EditScreen(
 
     LaunchedEffect(Unit) {
         viewModel.connectionResult.collectIn(lifecycleOwner) { result ->
-            if (result?.cause is StorageException.UnknownHostException) {
+            if (result?.cause is StorageException.Security.UnknownHost) {
                 showKnownHostDialog = true
             }
             scope.showPopup(

@@ -140,7 +140,7 @@ class StorageRepository @Inject internal constructor(
                     r
                 }
             } ?: return@withContext null
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
                 if (isDirectory) {
@@ -161,7 +161,7 @@ class StorageRepository @Inject internal constructor(
         logD("deleteFile: documentId=$documentId")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext false
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
                 storageClientManager.getClient(request).deleteFile(request)
@@ -176,7 +176,7 @@ class StorageRepository @Inject internal constructor(
         logD("renameFile: documentId:=$documentId:, newName=$newName")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
                 storageClientManager.getClient(request).renameFile(request, newName).let {
@@ -195,7 +195,7 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
-            if (targetRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (targetRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
@@ -217,7 +217,7 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
-            if (sourceRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (sourceRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
@@ -235,7 +235,7 @@ class StorageRepository @Inject internal constructor(
 
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.Operation.ReadOnly()
             try {
                 addBlockingQueue(request)
                 storageClientManager.getFileDescriptor(request, mode) {
@@ -283,7 +283,7 @@ class StorageRepository @Inject internal constructor(
                 val path = uriText.substringAfter(it.uri)
                 DocumentId.fromConnection(it.id, path, idText)
             }
-        } ?: throw StorageException.DocumentIdException()
+        } ?: throw StorageException.File.DocumentId()
     }
 
     /**

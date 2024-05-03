@@ -104,7 +104,7 @@ internal class ApacheProxyFileCallback(
                 null
             } else if (writePointer != fp) {
                 closeWriter()
-                throw StorageException.RandomAccessNotPermittedException()
+                throw StorageException.Operation.RandomAccessNotPermitted()
             } else {
                 access
             }

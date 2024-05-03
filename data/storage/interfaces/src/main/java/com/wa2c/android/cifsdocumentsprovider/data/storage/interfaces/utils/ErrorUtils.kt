@@ -42,6 +42,6 @@ fun Throwable.getCause(): Throwable {
  */
 fun checkAccessMode(mode: AccessMode) {
     if (mode != AccessMode.W) {
-        throw StorageException.AccessModeException()
+        throw StorageException.Operation.AccessMode()
     }
 }
