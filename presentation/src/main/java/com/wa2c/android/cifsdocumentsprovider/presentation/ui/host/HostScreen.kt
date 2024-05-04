@@ -87,7 +87,7 @@ fun HostScreen(
             items = types.map { stringResource(id = it.labelRes) },
             selectedIndex = types.indexOfFirst { it == viewModel.sortType.value },
             dismissButton = DialogButton(
-                label = stringResource(id = R.string.dialog_close),
+                label = stringResource(id = R.string.general_close),
                 onClick = { showSortDialog.value = false }
             ),
             onDismiss = { showSortDialog.value = false },
@@ -112,7 +112,7 @@ fun HostScreen(
                         selectedHost.value = null
                     }
                 ),
-                dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                     selectedHost.value = null
                 },
                 onDismiss = {
@@ -174,7 +174,7 @@ fun HostScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = stringResource(id = R.string.common_back),
+                            contentDescription = stringResource(id = R.string.general_back),
                         )
                     }
                 },

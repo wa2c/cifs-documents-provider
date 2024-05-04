@@ -4,9 +4,9 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">オンラインストレージにアクセス</string>
-    <string name="dialog_accept">OK</string>
-    <string name="dialog_close">閉じる</string>
-    <string name="dialog_title_warning">注意</string>
+    <string name="general_accept">OK</string>
+    <string name="general_close">閉じる</string>
+    <string name="general_warning">注意</string>
     <!-- Home Screen -->
     <string name="home_open_file">開く</string>
     <string name="home_open_settings">設定</string>

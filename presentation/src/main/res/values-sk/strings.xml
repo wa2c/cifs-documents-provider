@@ -4,9 +4,9 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">Prístup online úložiska</string>
-    <string name="dialog_accept">OK</string>
-    <string name="dialog_close">Zatvoriť</string>
-    <string name="dialog_title_warning">Pozornosť</string>
+    <string name="general_accept">OK</string>
+    <string name="general_close">Zatvoriť</string>
+    <string name="general_warning">Pozornosť</string>
     <!-- Home Screen -->
     <string name="home_open_file">Otvoriť</string>
     <string name="home_open_settings">Nastavenie</string>

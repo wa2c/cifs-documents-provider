@@ -152,7 +152,7 @@ private fun SettingsScreenContainer(
                     }) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = stringResource(id = R.string.common_back),
+                            contentDescription = stringResource(id = R.string.general_back),
                         )
                     }
                 }

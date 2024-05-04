@@ -166,11 +166,11 @@ fun EditScreen(
     if (showDeleteDialog) {
         CommonDialog(
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     viewModel.onClickDelete()
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 showDeleteDialog = false
             },
             onDismiss = {
@@ -185,11 +185,11 @@ fun EditScreen(
     if (showBackConfirmationDialog) {
         CommonDialog(
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     onNavigateBack()
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 showBackConfirmationDialog = false
             },
             onDismiss = {
@@ -216,9 +216,9 @@ fun EditScreen(
     // Key import warning dialog
     if (showKeyImportWarningDialog) {
         CommonDialog(
-            title = stringResource(id = R.string.dialog_title_warning),
+            title = stringResource(id = R.string.general_warning),
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     showKeyImportWarningDialog = false
                 },
             ),
@@ -232,14 +232,14 @@ fun EditScreen(
 
     if (showKnownHostDialog) {
         CommonDialog(
-            title = stringResource(id = R.string.dialog_title_warning),
+            title = stringResource(id = R.string.general_warning),
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.common_yes)) {
+                DialogButton(label = stringResource(id = R.string.general_yes)) {
                     viewModel.onClickCheckConnection(addKnownHost = true)
                     showKnownHostDialog = false
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.common_no)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_no)) {
                 showKnownHostDialog = false
             },
             onDismiss = {
@@ -361,7 +361,7 @@ private fun EditScreenContainer(
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                            contentDescription = stringResource(id = R.string.common_delete),
+                            contentDescription = stringResource(id = R.string.general_delete),
                         )
                     }
                 },
@@ -369,7 +369,7 @@ private fun EditScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = stringResource(id = R.string.common_back),
+                            contentDescription = stringResource(id = R.string.general_back),
                         )
                     }
                 },

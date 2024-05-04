@@ -30,11 +30,11 @@ fun KeyInputDialog(
     CommonDialog(
         title = stringResource(id = R.string.edit_key_title) + "\n" + stringResource(id = R.string.edit_key_input_import_text),
         confirmButtons = listOf(
-            DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+            DialogButton(label = stringResource(id = R.string.general_accept)) {
                 onInput(key)
             }
         ),
-        dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+        dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
             onDismiss()
         },
         onDismiss = onDismiss

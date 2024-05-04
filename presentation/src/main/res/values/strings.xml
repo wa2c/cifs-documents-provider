@@ -4,13 +4,13 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">Access online storage</string>
-    <string name="dialog_accept">OK</string>
-    <string name="dialog_close">Close</string>
-    <string name="dialog_title_warning">Attention</string>
-    <string name="common_yes">Yes</string>
-    <string name="common_no">No</string>
-    <string name="common_delete">Delete</string>
-    <string name="common_back">Back</string>
+    <string name="general_accept">OK</string>
+    <string name="general_close">Close</string>
+    <string name="general_warning">Attention</string>
+    <string name="general_yes">Yes</string>
+    <string name="general_no">No</string>
+    <string name="general_delete">Delete</string>
+    <string name="general_back">Back</string>
     <!-- Home Screen -->
     <string name="home_open_file">Open</string>
     <string name="home_open_settings">Settings</string>
@@ -49,6 +49,7 @@
     <string name="edit_key_input_import_text">Enter and import</string>
     <string name="edit_passphrase_title">Private key passphrase</string>
     <string name="edit_passphrase_hint">Not entered if not set</string>
+    <string name="edit_ignore_known_hosts_label">Ignore known hosts</string>
     <string name="edit_encoding_title">Character Code</string>
     <string name="edit_ftp_mode_title">Active Mode</string>
     <string name="edit_ftps_implicit_label">Implicit SSL/TLS Mode</string>

@@ -103,7 +103,7 @@ private fun KnownHostItem(
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_delete),
-                    contentDescription = stringResource(R.string.common_delete),
+                    contentDescription = stringResource(R.string.general_delete),
                 )
             }
         }
@@ -135,12 +135,12 @@ private fun KnownHostItem(
     if (showDeleteDialog) {
         CommonDialog(
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     onClickDelete()
                     showDeleteDialog = false
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 showDeleteDialog = false
             },
             onDismiss = {

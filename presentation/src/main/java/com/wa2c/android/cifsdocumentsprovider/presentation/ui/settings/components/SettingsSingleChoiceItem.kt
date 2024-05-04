@@ -33,7 +33,7 @@ internal fun <T> SettingsSingleChoiceItem(
             items = items.map { it.label },
             selectedIndex = items.indexOfFirst { it.value == selectedItem.value },
             title = title,
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 showDialog.value = false
             },
             onDismiss = { showDialog.value = false }

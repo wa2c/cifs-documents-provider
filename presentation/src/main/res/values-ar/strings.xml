@@ -4,9 +4,9 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">الوصول إلى التخزين عبر الإنترنت</string>
-    <string name="dialog_accept">حسنا</string>
-    <string name="dialog_close">إغلاق</string>
-    <string name="dialog_title_warning">انتباه</string>
+    <string name="general_accept">حسنا</string>
+    <string name="general_close">إغلاق</string>
+    <string name="general_warning">انتباه</string>
     <!-- Home Screen -->
     <string name="home_open_file">فتح</string>
     <string name="home_open_settings">الإعدادات</string>
