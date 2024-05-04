@@ -606,6 +606,15 @@ private fun EditScreenContainer(
                         ) {
                             connectionState.value = connectionState.value.copy(keyPassphrase = it)
                         }
+
+                        // Ignore known hosts
+                        InputCheck(
+                            title = stringResource(id = R.string.edit_ignore_known_hosts_label),
+                            value = connectionState.value.ignoreKnownHosts,
+                            focusManager = focusManager
+                        ) {
+                            connectionState.value = connectionState.value.copy(ignoreKnownHosts = it)
+                        }
                     }
 
 

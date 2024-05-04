@@ -169,6 +169,7 @@ internal object DomainMapper {
                     keyFileUri = keyFileUri,
                     keyData = keyData,
                     keyPassphrase = keyPassphrase,
+                    ignoreKnownHosts = ignoreKnownHosts,
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
@@ -275,6 +276,7 @@ internal object DomainMapper {
                     keyFileUri = keyFileUri,
                     keyData = keyData,
                     keyPassphrase = keyPassphrase,
+                    ignoreKnownHosts = ignoreKnownHosts,
                     encoding = encoding,
                 )
             }

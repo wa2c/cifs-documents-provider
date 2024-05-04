@@ -31,6 +31,7 @@ data class RemoteConnection(
     val keyFileUri: String? = null,
     val keyData: String? = null,
     val keyPassphrase: String? = null,
+    val ignoreKnownHosts: Boolean = false,
     val encoding: String = DEFAULT_ENCODING,
     val isFtpActiveMode: Boolean = false,
     val isFtpsImplicit: Boolean = false,
@@ -76,6 +77,7 @@ data class RemoteConnection(
                 || this.keyFileUri != other.keyFileUri
                 || this.keyData != other.keyData
                 || this.keyPassphrase != other.keyPassphrase
+                || this.ignoreKnownHosts != other.ignoreKnownHosts
                 || this.encoding != other.encoding
                 || this.isFtpActiveMode != other.isFtpActiveMode
                 || this.isFtpsImplicit != other.isFtpsImplicit

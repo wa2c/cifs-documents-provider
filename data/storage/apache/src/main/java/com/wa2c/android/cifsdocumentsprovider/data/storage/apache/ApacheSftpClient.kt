@@ -23,9 +23,10 @@ class ApacheSftpClient(
             builder.setConnectTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setSessionTimeout(options, Duration.ofMillis(CONNECTION_TIMEOUT.toLong()))
             builder.setPreferredAuthentications(options, "publickey,password")
-            builder.setStrictHostKeyChecking(options, "ask")
             builder.setFileNameEncoding(options, sftpConnection.encoding)
             builder.setUserDirIsRoot(options, false) // true occurs path mismatch
+            // Known hosts
+            builder.setStrictHostKeyChecking(options, if (storageConnection.ignoreKnownHosts) "no" else "ask")
             builder.setKnownHosts(options, File(knownHostPath))
             // Key
             (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->

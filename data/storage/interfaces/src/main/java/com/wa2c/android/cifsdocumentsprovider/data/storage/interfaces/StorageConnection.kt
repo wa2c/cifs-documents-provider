@@ -109,6 +109,7 @@ sealed class StorageConnection {
         val keyFileUri: String? = null,
         val keyData: String? = null,
         val keyPassphrase: String? = null,
+        val ignoreKnownHosts: Boolean = false,
         val encoding: String,
     ) : StorageConnection()
 }

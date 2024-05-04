@@ -157,6 +157,7 @@ class EditRepository @Inject internal constructor(
     }
 
     suspend fun loadKeyFile(uri: String): String {
+        logD("Load key file: uri=$uri")
         return withContext(dispatcher) {
             val binary = try {
                 documentFileManager.loadFile(uri)
@@ -170,6 +171,7 @@ class EditRepository @Inject internal constructor(
     }
 
     suspend fun checkKey(key: String) {
+        logD("Check key: key=$key")
         withContext(dispatcher) {
             try {
                 sshKeyManager.checkKeyFile(key.encodeToByteArray())
@@ -180,6 +182,7 @@ class EditRepository @Inject internal constructor(
     }
 
     suspend fun addKnownHost(connection: RemoteConnection) {
+        logD("Add known host: connection=$connection")
         withContext(dispatcher) {
             sshKeyManager.addKnownHost(
                 host = connection.host,
