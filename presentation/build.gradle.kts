@@ -79,6 +79,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.reorderable)
     implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.multifab)
     // Lifecycle
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

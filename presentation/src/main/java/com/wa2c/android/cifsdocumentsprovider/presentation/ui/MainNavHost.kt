@@ -58,7 +58,8 @@ internal fun MainNavHost(
                     navController.navigate(route = SettingsScreenName)
                 },
                 onNavigateEdit = { connection ->
-                    navController.navigate(route = EditScreenRouteName + "?$EditScreenParamId=${connection.id}")
+                    val route = EditScreenRouteName + if (connection != null) "?$EditScreenParamId=${connection.id}" else ""
+                    navController.navigate(route = route)
                 },
                 onNavigateHost = {
                     navController.navigate(route = HostScreenName)

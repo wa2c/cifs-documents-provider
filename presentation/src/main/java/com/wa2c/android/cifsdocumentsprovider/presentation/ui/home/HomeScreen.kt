@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.iamageo.multifablibrary.FabIcon
+import com.iamageo.multifablibrary.FabOption
+import com.iamageo.multifablibrary.MultiFabItem
+import com.iamageo.multifablibrary.MultiFloatingActionButton
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnectionIndex
@@ -64,7 +66,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onNavigateSettings: () -> Unit,
-    onNavigateEdit: (RemoteConnectionIndex) -> Unit,
+    onNavigateEdit: (RemoteConnectionIndex?) -> Unit,
     onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,7 +97,8 @@ fun HomeScreen(
         },
         onClickMenuSettings = { onNavigateSettings() },
         onClickItem = { onNavigateEdit(it) },
-        onClickAddItem = { onNavigateHost() },
+        onClickAddItem = { onNavigateEdit(null) },
+        onClickSearchItem = { onNavigateHost() },
         onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
     )
 }
@@ -112,6 +115,7 @@ fun HomeScreenContainer(
     onClickMenuSettings: () -> Unit,
     onClickItem: (RemoteConnectionIndex) -> Unit,
     onClickAddItem: () -> Unit,
+    onClickSearchItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
     Scaffold(
@@ -140,16 +144,49 @@ fun HomeScreenContainer(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                shape = FloatingActionButtonDefaults.largeShape,
-                containerColor = MaterialTheme.colorScheme.primary,
-                onClick = { onClickAddItem() }
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_folder),
-                    contentDescription = "Add Connection",
-                )
-            }
+            val list = listOf(
+                MultiFabItem(
+                    icon = R.drawable.ic_edit,
+                    label = "",
+                    labelColor = MaterialTheme.colorScheme.onSurface,
+                ),
+                MultiFabItem(
+                    icon = R.drawable.ic_search,
+                    label = "",
+                    labelColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            )
+            MultiFloatingActionButton(
+                fabIcon = FabIcon(
+                    iconRes = R.drawable.ic_add_folder,
+                    iconResAfterRotate = R.drawable.ic_add_folder,
+                ),
+                fabOption = FabOption(
+                    iconTint = MaterialTheme.colorScheme.onSurface,
+                    showLabels = false,
+                    backgroundTint = MaterialTheme.colorScheme.primary,
+                ),
+                itemsMultiFab = list,
+                onFabItemClicked = {
+                    if (list.indexOf(it) == 0) {
+                        onClickAddItem()
+                    } else if (list.indexOf(it) == 1) {
+                        onClickSearchItem()
+                    }
+                },
+                fabTitle = "",
+                showFabTitle = false
+            )
+//            FloatingActionButton(
+//                shape = FloatingActionButtonDefaults.largeShape,
+//                containerColor = MaterialTheme.colorScheme.primary,
+//                onClick = { onClickAddItem() }
+//            ) {
+//                Icon(
+//                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_folder),
+//                    contentDescription = "Add Connection",
+//                )
+//            }
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -279,6 +316,7 @@ private fun HomeScreenContainerPreview() {
             ),
             onClickItem = {},
             onClickAddItem = {},
+            onClickSearchItem = {},
             onDragAndDrop = { _, _ -> },
             onClickMenuOpenFile = {},
             onClickMenuSettings = {},
