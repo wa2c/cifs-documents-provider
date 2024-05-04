@@ -2,9 +2,13 @@ Component,String Resource Name,Language,,,,
 ,,English,日本語 (Japanese),Slovenský (Slovak),简体中文 (Simplified Chinese),العربية (Arabic)
 ,,en,ja,sk,zh-rCN,ar
 Common,app_summary,Access online storage,オンラインストレージにアクセス,Prístup online úložiska,访问在线存储,الوصول إلى التخزين عبر الإنترنت
-,dialog_accept,OK,OK,OK,OK,حسنا
-,dialog_close,Close,閉じる,Zatvoriť,关闭,إغلاق
-,dialog_title_warning,Attention,注意,Pozornosť,注意力,انتباه
+,general_accept,OK,OK,OK,OK,حسنا
+,general_close,Close,閉じる,Zatvoriť,关闭,إغلاق
+,general_warning,Attention,注意,Pozornosť,注意力,انتباه
+,general_yes,Yes,はい,Áno,是的,نعم
+,general_no,No,いいえ,Nie,不,لا
+,general_delete,Delete,削除,Odstrániť,删除,يمسح
+,general_back,Back,戻る,späť,后退,خلف
 ,,,,,,
 Home Screen,home_open_file,Open,開く,Otvoriť,打开,فتح
 ,home_open_settings,Settings,設定,Nastavenie,设置,الإعدادات
@@ -43,6 +47,7 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_key_input_import_text,Enter and import,入力してインポート,Zadajte a importujte,输入并导入,أدخل واستيراد
 ,edit_passphrase_title,Private key passphrase,秘密鍵のパスフレーズ,Súkromná priechodná fráza,私钥密码,شعار المارة الخاص
 ,edit_passphrase_hint,Not entered if not set,未設定の場合は入力しない,"Nezadajte, ak nie je nastavená",如果不设置，请勿输入,لا تدخل إذا لم يتم تعيينها
+,edit_ignore_known_hosts_label,Do not check trusted hosts,信頼済みホストをチェックしない,Nekontrolujte dôveryhodných hostiteľov,不检查受信任的主机,لا تتحقق من المضيفين الموثوق بهم
 ,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
 ,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
 ,edit_ftps_implicit_label,Implicit SSL/TLS Mode,暗黙的SSL/TLSモード,Implicitný režim SSL/TLS,隐式SSL/TLS模式,وضع SSL/TLS الضمني
@@ -71,7 +76,6 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_check_key_ng_invalid_messaged,Failed to read the private key.,秘密鍵が読み込めません。,Nepodarilo sa čítať súkromný kľúč.,未能阅读私钥。,فشل في قراءة المفتاح الخاص.
 ,edit_check_key_ok_messaged,The private key is valid.,秘密鍵は有効です。,Súkromný kľúč je platný.,私钥是有效的。,المفتاح الخاص صالح.
 ,edit_save_button,Save,保存,Uložiť,保存,حفظ
-,edit_delete_button,Delete,削除,Zmazať,删除,حذف
 ,edit_back_confirmation_message,Discard your changes?,変更を破棄しますか？,Zahodiť zmeny?,放弃修改？,أهمل التغييرات؟
 ,edit_delete_confirmation_message,Delete this settings?,設定を削除しますか？,Naozaj vymazať toto pripojenie?,删除此项设置？,إحذف الإعدادات؟
 ,edit_warning_key_import_message,"The imported secret key is not guaranteed.
@@ -80,6 +84,12 @@ Please be careful when handling.","インポートされた秘密鍵の安全性
 Pri manipulácii buďte opatrní.","进口的秘密密钥无法保证。
 处理时请小心。","المفتاح السري المستورد غير مضمون.
 يرجى توخي الحذر عند التعامل."
+,edit_warning_known_host_message,"The configured SSH destination has been connected for the first time or the key has been changed. 
+Do you want to trust the destination and connect?","設定したSSHの通信先は、初回接続または鍵が変更されています。
+通信先を信頼して接続しますか？","Konfigurovaný cieľ SSH bol prvýkrát pripojený alebo bol zmenený kľúč.
+Chcete dôverovať cieľu a pripojiť sa?","配置的 SSH 目标已首次连接或密钥已更改。
+您想信任目的地并连接吗？","تم توصيل وجهة SSH التي تم تكوينها لأول مرة أو تم تغيير المفتاح.
+هل تريد أن تثق بالوجهة وتتصل؟"
 ,,,,,,
 Host Screen,host_title,Host,ホスト,Hostiteľ,主机名,المضيف
 ,host_set_manually,Set manually,手動で設定,Nastaviť ručne,手动设置,تحديد يدويا
@@ -118,8 +128,13 @@ Settings Screen,settings_title,Settings,設定,Nastavenie,设置,الإعداد�
 (需要重新启动应用程序)","محاكاة الذاكرة المحلية
 (مطلوب إعادة تشغيل الجهاز)"
 ,settings_section_info,Information,情報,Informácie,信息,معلومات
-,settings_info_contributors,Contributors,貢献者,Prispievatelia,贡献者,المساهمين
+,settings_info_known_hosts,Trusted host,信頼済みホスト,Dôveryhodný hostiteľ,值得信赖的主机,مضيف موثوق به
+,settings_info_known_hosts_host,Host,ホスト,Hostiteľ,主机名,المضيف
+,settings_info_known_hosts_type,Key type,鍵種別,Typ kľúča,钥匙类型,نوع المفتاح
+,settings_info_known_hosts_key,Key,鍵,kľúč,钥匙,مفتاح
+,settings_info_known_hosts_delete_confirmation_message,Do you want to remove this host?,このホストを削除しますか?,Chcete odstrániť tohto hostiteľa?,您想删除该主机吗？,هل تريد إزالة هذا المضيف؟
 ,settings_info_libraries,Libraries,ライブラリ,Knižnice,图书馆,المكتبات
+,settings_info_contributors,Contributors,貢献者,Prispievatelia,贡献者,المساهمين
 ,settings_info_app,App,アプリ,App,应用程序,التطبيق
 ,,,,,,
 Send Screen,send_title,File Transfer,ファイル転送,Prenos súborov,发送文件,نقل الملف

@@ -7,6 +7,10 @@
     <string name="general_accept">OK</string>
     <string name="general_close">閉じる</string>
     <string name="general_warning">注意</string>
+    <string name="general_yes">はい</string>
+    <string name="general_no">いいえ</string>
+    <string name="general_delete">削除</string>
+    <string name="general_back">戻る</string>
     <!-- Home Screen -->
     <string name="home_open_file">開く</string>
     <string name="home_open_settings">設定</string>
@@ -45,6 +49,7 @@
     <string name="edit_key_input_import_text">入力してインポート</string>
     <string name="edit_passphrase_title">秘密鍵のパスフレーズ</string>
     <string name="edit_passphrase_hint">未設定の場合は入力しない</string>
+    <string name="edit_ignore_known_hosts_label">信頼済みホストをチェックしない</string>
     <string name="edit_encoding_title">文字コード</string>
     <string name="edit_ftp_mode_title">アクティブモード</string>
     <string name="edit_ftps_implicit_label">暗黙的SSL/TLSモード</string>
@@ -73,11 +78,10 @@
     <string name="edit_check_key_ng_invalid_messaged">秘密鍵が読み込めません。</string>
     <string name="edit_check_key_ok_messaged">秘密鍵は有効です。</string>
     <string name="edit_save_button">保存</string>
-    <string name="edit_delete_button">削除</string>
     <string name="edit_back_confirmation_message">変更を破棄しますか？</string>
     <string name="edit_delete_confirmation_message">設定を削除しますか？</string>
     <string name="edit_warning_key_import_message">インポートされた秘密鍵の安全性は保証しません。\n取り扱いにはご注意ください。</string>
-    <string name="edit_warning_known_host_message">設定したSSHの通信先は、初回接続または鍵が変更されています。\n通信先を信用して接続しますか？</string>
+    <string name="edit_warning_known_host_message">設定したSSHの通信先は、初回接続または鍵が変更されています。\n通信先を信頼して接続しますか？</string>
     <!-- Host Screen -->
     <string name="host_title">ホスト</string>
     <string name="host_set_manually">手動で設定</string>
@@ -106,8 +110,13 @@
     <string name="settings_set_use_foreground">ファイル利用時に通知を表示</string>
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
     <string name="settings_section_info">情報</string>
-    <string name="settings_info_contributors">貢献者</string>
+    <string name="settings_info_known_hosts">信頼済みホスト</string>
+    <string name="settings_info_known_hosts_host">ホスト</string>
+    <string name="settings_info_known_hosts_type">鍵種別</string>
+    <string name="settings_info_known_hosts_key">鍵</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">このホストを削除しますか?</string>
     <string name="settings_info_libraries">ライブラリ</string>
+    <string name="settings_info_contributors">貢献者</string>
     <string name="settings_info_app">アプリ</string>
     <!-- Send Screen -->
     <string name="send_title">ファイル転送</string>

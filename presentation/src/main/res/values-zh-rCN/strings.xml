@@ -7,6 +7,10 @@
     <string name="general_accept">OK</string>
     <string name="general_close">关闭</string>
     <string name="general_warning">注意力</string>
+    <string name="general_yes">是的</string>
+    <string name="general_no">不</string>
+    <string name="general_delete">删除</string>
+    <string name="general_back">后退</string>
     <!-- Home Screen -->
     <string name="home_open_file">打开</string>
     <string name="home_open_settings">设置</string>
@@ -45,6 +49,7 @@
     <string name="edit_key_input_import_text">输入并导入</string>
     <string name="edit_passphrase_title">私钥密码</string>
     <string name="edit_passphrase_hint">如果不设置，请勿输入</string>
+    <string name="edit_ignore_known_hosts_label">不检查受信任的主机</string>
     <string name="edit_encoding_title">字符代码</string>
     <string name="edit_ftp_mode_title">活动模式</string>
     <string name="edit_ftps_implicit_label">隐式SSL/TLS模式</string>
@@ -73,10 +78,10 @@
     <string name="edit_check_key_ng_invalid_messaged">未能阅读私钥。</string>
     <string name="edit_check_key_ok_messaged">私钥是有效的。</string>
     <string name="edit_save_button">保存</string>
-    <string name="edit_delete_button">删除</string>
     <string name="edit_back_confirmation_message">放弃修改？</string>
     <string name="edit_delete_confirmation_message">删除此项设置？</string>
     <string name="edit_warning_key_import_message">进口的秘密密钥无法保证。\n处理时请小心。</string>
+    <string name="edit_warning_known_host_message">配置的 SSH 目标已首次连接或密钥已更改。\n您想信任目的地并连接吗？</string>
     <!-- Host Screen -->
     <string name="host_title">主机名</string>
     <string name="host_set_manually">手动设置</string>
@@ -105,8 +110,13 @@
     <string name="settings_set_use_foreground">打开文件时显示通知</string>
     <string name="settings_set_use_as_local">用作本地存储\n(需要重新启动应用程序)</string>
     <string name="settings_section_info">信息</string>
-    <string name="settings_info_contributors">贡献者</string>
+    <string name="settings_info_known_hosts">值得信赖的主机</string>
+    <string name="settings_info_known_hosts_host">主机名</string>
+    <string name="settings_info_known_hosts_type">钥匙类型</string>
+    <string name="settings_info_known_hosts_key">钥匙</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">您想删除该主机吗？</string>
     <string name="settings_info_libraries">图书馆</string>
+    <string name="settings_info_contributors">贡献者</string>
     <string name="settings_info_app">应用程序</string>
     <!-- Send Screen -->
     <string name="send_title">发送文件</string>

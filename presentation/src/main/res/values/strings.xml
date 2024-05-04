@@ -49,7 +49,7 @@
     <string name="edit_key_input_import_text">Enter and import</string>
     <string name="edit_passphrase_title">Private key passphrase</string>
     <string name="edit_passphrase_hint">Not entered if not set</string>
-    <string name="edit_ignore_known_hosts_label">Ignore known hosts</string>
+    <string name="edit_ignore_known_hosts_label">Do not check trusted hosts</string>
     <string name="edit_encoding_title">Character Code</string>
     <string name="edit_ftp_mode_title">Active Mode</string>
     <string name="edit_ftps_implicit_label">Implicit SSL/TLS Mode</string>
@@ -110,11 +110,11 @@
     <string name="settings_set_use_foreground">Show notification when opening files</string>
     <string name="settings_set_use_as_local">Use as local storage\n(Device reboot required)</string>
     <string name="settings_section_info">Information</string>
-    <string name="settings_info_known_hosts">Known Hosts</string>
+    <string name="settings_info_known_hosts">Trusted host</string>
     <string name="settings_info_known_hosts_host">Host</string>
-    <string name="settings_info_known_hosts_type">Type</string>
+    <string name="settings_info_known_hosts_type">Key type</string>
     <string name="settings_info_known_hosts_key">Key</string>
-    <string name="settings_info_known_hosts_delete_confirmation_message">Delete this key?</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">Do you want to remove this host?</string>
     <string name="settings_info_libraries">Libraries</string>
     <string name="settings_info_contributors">Contributors</string>
     <string name="settings_info_app">App</string>

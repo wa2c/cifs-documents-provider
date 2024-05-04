@@ -7,6 +7,10 @@
     <string name="general_accept">حسنا</string>
     <string name="general_close">إغلاق</string>
     <string name="general_warning">انتباه</string>
+    <string name="general_yes">نعم</string>
+    <string name="general_no">لا</string>
+    <string name="general_delete">يمسح</string>
+    <string name="general_back">خلف</string>
     <!-- Home Screen -->
     <string name="home_open_file">فتح</string>
     <string name="home_open_settings">الإعدادات</string>
@@ -45,6 +49,7 @@
     <string name="edit_key_input_import_text">أدخل واستيراد</string>
     <string name="edit_passphrase_title">شعار المارة الخاص</string>
     <string name="edit_passphrase_hint">لا تدخل إذا لم يتم تعيينها</string>
+    <string name="edit_ignore_known_hosts_label">لا تتحقق من المضيفين الموثوق بهم</string>
     <string name="edit_encoding_title">رمز الحرف</string>
     <string name="edit_ftp_mode_title">الوضع النشط</string>
     <string name="edit_ftps_implicit_label">وضع SSL/TLS الضمني</string>
@@ -73,10 +78,10 @@
     <string name="edit_check_key_ng_invalid_messaged">فشل في قراءة المفتاح الخاص.</string>
     <string name="edit_check_key_ok_messaged">المفتاح الخاص صالح.</string>
     <string name="edit_save_button">حفظ</string>
-    <string name="edit_delete_button">حذف</string>
     <string name="edit_back_confirmation_message">أهمل التغييرات؟</string>
     <string name="edit_delete_confirmation_message">إحذف الإعدادات؟</string>
     <string name="edit_warning_key_import_message">المفتاح السري المستورد غير مضمون.\nيرجى توخي الحذر عند التعامل.</string>
+    <string name="edit_warning_known_host_message">تم توصيل وجهة SSH التي تم تكوينها لأول مرة أو تم تغيير المفتاح.\nهل تريد أن تثق بالوجهة وتتصل؟</string>
     <!-- Host Screen -->
     <string name="host_title">المضيف</string>
     <string name="host_set_manually">تحديد يدويا</string>
@@ -105,8 +110,13 @@
     <string name="settings_set_use_foreground">أظهر الإشعارات عند فتح الملفات</string>
     <string name="settings_set_use_as_local">محاكاة الذاكرة المحلية\n(مطلوب إعادة تشغيل الجهاز)</string>
     <string name="settings_section_info">معلومات</string>
-    <string name="settings_info_contributors">المساهمين</string>
+    <string name="settings_info_known_hosts">مضيف موثوق به</string>
+    <string name="settings_info_known_hosts_host">المضيف</string>
+    <string name="settings_info_known_hosts_type">نوع المفتاح</string>
+    <string name="settings_info_known_hosts_key">مفتاح</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">هل تريد إزالة هذا المضيف؟</string>
     <string name="settings_info_libraries">المكتبات</string>
+    <string name="settings_info_contributors">المساهمين</string>
     <string name="settings_info_app">التطبيق</string>
     <!-- Send Screen -->
     <string name="send_title">نقل الملف</string>
