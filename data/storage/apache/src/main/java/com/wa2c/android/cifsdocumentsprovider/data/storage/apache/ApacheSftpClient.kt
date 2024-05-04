@@ -26,8 +26,12 @@ class ApacheSftpClient(
             builder.setFileNameEncoding(options, sftpConnection.encoding)
             builder.setUserDirIsRoot(options, false) // true occurs path mismatch
             // Known hosts
-            builder.setStrictHostKeyChecking(options, if (storageConnection.ignoreKnownHosts) "no" else "ask")
-            builder.setKnownHosts(options, File(knownHostPath))
+            if (storageConnection.ignoreKnownHosts) {
+                builder.setStrictHostKeyChecking(options, "no")
+            } else {
+                builder.setStrictHostKeyChecking(options, "ask")
+                builder.setKnownHosts(options, File(knownHostPath))
+            }
             // Key
             (sftpConnection.keyData?.encodeToByteArray() ?: sftpConnection.keyFileUri?.let { uri ->
                 try { onKeyRead(uri) } catch (e: Exception) { null }

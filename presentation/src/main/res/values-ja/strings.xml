@@ -49,7 +49,7 @@
     <string name="edit_key_input_import_text">入力してインポート</string>
     <string name="edit_passphrase_title">秘密鍵のパスフレーズ</string>
     <string name="edit_passphrase_hint">未設定の場合は入力しない</string>
-    <string name="edit_ignore_known_hosts_label">信頼済みホストをチェックしない</string>
+    <string name="edit_ignore_known_hosts_label">SSH 信頼済みホストをチェックしない</string>
     <string name="edit_encoding_title">文字コード</string>
     <string name="edit_ftp_mode_title">アクティブモード</string>
     <string name="edit_ftps_implicit_label">暗黙的SSL/TLSモード</string>
@@ -110,7 +110,7 @@
     <string name="settings_set_use_foreground">ファイル利用時に通知を表示</string>
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
     <string name="settings_section_info">情報</string>
-    <string name="settings_info_known_hosts">信頼済みホスト</string>
+    <string name="settings_info_known_hosts">SSH 信頼済みホスト</string>
     <string name="settings_info_known_hosts_host">ホスト</string>
     <string name="settings_info_known_hosts_type">鍵種別</string>
     <string name="settings_info_known_hosts_key">鍵</string>

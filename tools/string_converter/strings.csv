@@ -47,7 +47,7 @@ Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_key_input_import_text,Enter and import,入力してインポート,Zadajte a importujte,输入并导入,أدخل واستيراد
 ,edit_passphrase_title,Private key passphrase,秘密鍵のパスフレーズ,Súkromná priechodná fráza,私钥密码,شعار المارة الخاص
 ,edit_passphrase_hint,Not entered if not set,未設定の場合は入力しない,"Nezadajte, ak nie je nastavená",如果不设置，请勿输入,لا تدخل إذا لم يتم تعيينها
-,edit_ignore_known_hosts_label,Do not check trusted hosts,信頼済みホストをチェックしない,Nekontrolujte dôveryhodných hostiteľov,不检查受信任的主机,لا تتحقق من المضيفين الموثوق بهم
+,edit_ignore_known_hosts_label,Do not check SSH trusted hosts,SSH 信頼済みホストをチェックしない,Nekontrolujte dôveryhodných hostiteľov SSH,不检查 SSH 可信主机,لا تتحقق من مضيفي SSH الموثوقين
 ,edit_encoding_title,Character Code,文字コード,Kód postavy,字符代码,رمز الحرف
 ,edit_ftp_mode_title,Active Mode,アクティブモード,Aktívny režim,活动模式,الوضع النشط
 ,edit_ftps_implicit_label,Implicit SSL/TLS Mode,暗黙的SSL/TLSモード,Implicitný režim SSL/TLS,隐式SSL/TLS模式,وضع SSL/TLS الضمني
@@ -128,7 +128,7 @@ Settings Screen,settings_title,Settings,設定,Nastavenie,设置,الإعداد�
 (需要重新启动应用程序)","محاكاة الذاكرة المحلية
 (مطلوب إعادة تشغيل الجهاز)"
 ,settings_section_info,Information,情報,Informácie,信息,معلومات
-,settings_info_known_hosts,Trusted host,信頼済みホスト,Dôveryhodný hostiteľ,值得信赖的主机,مضيف موثوق به
+,settings_info_known_hosts,SSH trusted hosts,SSH 信頼済みホスト,SSH dôveryhodní hostitelia,SSH 可信主机,المضيفين الموثوقين عبر SSH
 ,settings_info_known_hosts_host,Host,ホスト,Hostiteľ,主机名,المضيف
 ,settings_info_known_hosts_type,Key type,鍵種別,Typ kľúča,钥匙类型,نوع المفتاح
 ,settings_info_known_hosts_key,Key,鍵,kľúč,钥匙,مفتاح

@@ -49,7 +49,7 @@
     <string name="edit_key_input_import_text">أدخل واستيراد</string>
     <string name="edit_passphrase_title">شعار المارة الخاص</string>
     <string name="edit_passphrase_hint">لا تدخل إذا لم يتم تعيينها</string>
-    <string name="edit_ignore_known_hosts_label">لا تتحقق من المضيفين الموثوق بهم</string>
+    <string name="edit_ignore_known_hosts_label">لا تتحقق من مضيفي SSH الموثوقين</string>
     <string name="edit_encoding_title">رمز الحرف</string>
     <string name="edit_ftp_mode_title">الوضع النشط</string>
     <string name="edit_ftps_implicit_label">وضع SSL/TLS الضمني</string>
@@ -110,7 +110,7 @@
     <string name="settings_set_use_foreground">أظهر الإشعارات عند فتح الملفات</string>
     <string name="settings_set_use_as_local">محاكاة الذاكرة المحلية\n(مطلوب إعادة تشغيل الجهاز)</string>
     <string name="settings_section_info">معلومات</string>
-    <string name="settings_info_known_hosts">مضيف موثوق به</string>
+    <string name="settings_info_known_hosts">المضيفين الموثوقين عبر SSH</string>
     <string name="settings_info_known_hosts_host">المضيف</string>
     <string name="settings_info_known_hosts_type">نوع المفتاح</string>
     <string name="settings_info_known_hosts_key">مفتاح</string>

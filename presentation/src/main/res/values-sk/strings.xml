@@ -49,7 +49,7 @@
     <string name="edit_key_input_import_text">Zadajte a importujte</string>
     <string name="edit_passphrase_title">Súkromná priechodná fráza</string>
     <string name="edit_passphrase_hint">Nezadajte, ak nie je nastavená</string>
-    <string name="edit_ignore_known_hosts_label">Nekontrolujte dôveryhodných hostiteľov</string>
+    <string name="edit_ignore_known_hosts_label">Nekontrolujte dôveryhodných hostiteľov SSH</string>
     <string name="edit_encoding_title">Kód postavy</string>
     <string name="edit_ftp_mode_title">Aktívny režim</string>
     <string name="edit_ftps_implicit_label">Implicitný režim SSL/TLS</string>
@@ -110,7 +110,7 @@
     <string name="settings_set_use_foreground">Pri otváraní súborov zobraziť upozornenia</string>
     <string name="settings_set_use_as_local">Použite ako miestne úložisko\n(Vyžaduje sa reštart zariadenia)</string>
     <string name="settings_section_info">Informácie</string>
-    <string name="settings_info_known_hosts">Dôveryhodný hostiteľ</string>
+    <string name="settings_info_known_hosts">SSH dôveryhodní hostitelia</string>
     <string name="settings_info_known_hosts_host">Hostiteľ</string>
     <string name="settings_info_known_hosts_type">Typ kľúča</string>
     <string name="settings_info_known_hosts_key">kľúč</string>

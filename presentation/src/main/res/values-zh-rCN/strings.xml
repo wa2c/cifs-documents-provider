@@ -49,7 +49,7 @@
     <string name="edit_key_input_import_text">输入并导入</string>
     <string name="edit_passphrase_title">私钥密码</string>
     <string name="edit_passphrase_hint">如果不设置，请勿输入</string>
-    <string name="edit_ignore_known_hosts_label">不检查受信任的主机</string>
+    <string name="edit_ignore_known_hosts_label">不检查 SSH 可信主机</string>
     <string name="edit_encoding_title">字符代码</string>
     <string name="edit_ftp_mode_title">活动模式</string>
     <string name="edit_ftps_implicit_label">隐式SSL/TLS模式</string>
@@ -110,7 +110,7 @@
     <string name="settings_set_use_foreground">打开文件时显示通知</string>
     <string name="settings_set_use_as_local">用作本地存储\n(需要重新启动应用程序)</string>
     <string name="settings_section_info">信息</string>
-    <string name="settings_info_known_hosts">值得信赖的主机</string>
+    <string name="settings_info_known_hosts">SSH 可信主机</string>
     <string name="settings_info_known_hosts_host">主机名</string>
     <string name="settings_info_known_hosts_type">钥匙类型</string>
     <string name="settings_info_known_hosts_key">钥匙</string>
