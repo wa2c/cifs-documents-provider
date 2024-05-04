@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ArrayBlockingQueue
@@ -98,7 +99,7 @@ class StorageRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
             runFileBlocking(request) {
-                storageClientManager.getClient(request).getFile(request).toModel(documentId)
+                storageClientManager.getFile(request).toModel(documentId)
             }
         }
     }
@@ -111,13 +112,13 @@ class StorageRepository @Inject internal constructor(
         return withContext(dispatcher) {
             storageClientManager.cancelThumbnailLoading()
             if (parentDocumentId.isRoot) {
-                connectionSettingDao.getList().first().mapNotNull { entity ->
+                connectionSettingDao.getList().firstOrNull()?.mapNotNull { entity ->
                     entity.toItem()
-                }
+                } ?: emptyList()
             } else {
                 val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
                 runFileBlocking(request) {
-                    storageClientManager.getClient(request).getChildren(request).mapNotNull {
+                    storageClientManager.getChildren(request).mapNotNull {
                         val documentId = DocumentId.fromConnection(request.connection, it) ?: return@mapNotNull null
                         it.toModel(documentId)
                     }
@@ -144,9 +145,9 @@ class StorageRepository @Inject internal constructor(
 
             runFileBlocking(request) {
                 if (isDirectory) {
-                    storageClientManager.getClient(request).createDirectory(request)
+                    storageClientManager.createDirectory(request)
                 } else {
-                    storageClientManager.getClient(request).createFile(request)
+                    storageClientManager.createFile(request)
                 }.let {
                     DocumentId.fromConnection(request.connection, it)
                 }
@@ -164,7 +165,7 @@ class StorageRepository @Inject internal constructor(
             if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
-                storageClientManager.getClient(request).deleteFile(request)
+                storageClientManager.deleteFile(request)
             }
         }
     }
@@ -179,7 +180,7 @@ class StorageRepository @Inject internal constructor(
             if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
-                storageClientManager.getClient(request).renameFile(request, newName).let {
+                storageClientManager.renameFile(request, newName).let {
                     DocumentId.fromConnection(request.connection, it)
                 }
             }
@@ -199,7 +200,7 @@ class StorageRepository @Inject internal constructor(
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    storageClientManager.getClient(sourceRequest).copyFile(sourceRequest, targetRequest).let {
+                    storageClientManager.copyFile(sourceRequest, targetRequest).let {
                         DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }
@@ -221,7 +222,7 @@ class StorageRepository @Inject internal constructor(
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    storageClientManager.getClient(sourceRequest).moveFile(sourceRequest, targetRequest).let {
+                    storageClientManager.moveFile(sourceRequest, targetRequest).let {
                         DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }

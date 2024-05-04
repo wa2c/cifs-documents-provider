@@ -11,7 +11,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.throwStorageCommonException
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
@@ -157,23 +156,6 @@ abstract class ApacheVfsClient(
         }
     }
 
-    override suspend fun checkConnection(
-        request: StorageRequest,
-    ): ConnectionResult {
-        return try {
-            getChildren(request, ignoreCache = true)
-            ConnectionResult.Success
-        } catch (e: Exception) {
-            if (e is StorageException.File) {
-                ConnectionResult.Warning(e)
-            } else {
-                ConnectionResult.Failure(e)
-            }
-        } finally {
-            contextCache.remove(request.connection)
-        }
-    }
-
     override suspend fun getFile(
         request: StorageRequest,
         ignoreCache: Boolean,
@@ -302,8 +284,17 @@ abstract class ApacheVfsClient(
         }
     }
 
+    override suspend fun removeCache(request: StorageRequest?): Boolean {
+        return if (request == null) {
+            contextCache.evictAll()
+            true
+        } else {
+            contextCache.remove(request.connection) != null
+        }
+    }
+
     override suspend fun close() {
-        contextCache.evictAll()
+        removeCache()
         fileManager.close()
     }
 

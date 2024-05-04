@@ -2,11 +2,8 @@ package com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces
 
 import android.os.ProxyFileDescriptorCallback
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 
 interface StorageClient {
-
-    suspend fun checkConnection(request: StorageRequest): ConnectionResult
 
     suspend fun getFile(request: StorageRequest, ignoreCache: Boolean = false): StorageFile
 
@@ -25,6 +22,8 @@ interface StorageClient {
     suspend fun deleteFile(request: StorageRequest): Boolean
 
     suspend fun getProxyFileDescriptorCallback(request: StorageRequest, mode: AccessMode, onFileRelease: suspend () -> Unit): ProxyFileDescriptorCallback
+
+    suspend fun removeCache(request: StorageRequest? = null): Boolean
 
     suspend fun close()
 

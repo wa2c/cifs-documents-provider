@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.data
+package com.wa2c.android.cifsdocumentsprovider.data.storage.manager
 
 import android.content.Context
 import com.jcraft.jsch.JSch

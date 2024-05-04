@@ -1,4 +1,4 @@
-package com.wa2c.android.cifsdocumentsprovider.common.values
+package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 
 /**
  * Key input type

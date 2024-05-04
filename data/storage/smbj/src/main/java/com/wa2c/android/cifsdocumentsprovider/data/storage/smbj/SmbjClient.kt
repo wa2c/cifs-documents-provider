@@ -28,7 +28,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logW
 import com.wa2c.android.cifsdocumentsprovider.common.utils.throwStorageCommonException
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
@@ -186,24 +185,29 @@ class SmbjClient(
         )
     }
 
-    override suspend fun checkConnection(request: StorageRequest): ConnectionResult {
-        return try {
-                getChildren(request, true)
-                ConnectionResult.Success
+    private suspend fun <T> runHandling(
+        request: StorageRequest,
+        block: suspend CoroutineScope.() -> T
+    ): T {
+        return withContext(dispatcher) {
+            try {
+                return@withContext block()
             } catch (e: Exception) {
-                if (e is StorageException.File) {
-                    ConnectionResult.Warning(e)
-                } else {
-                    ConnectionResult.Failure(e)
+                logE(e)
+                val c = e.getCause()
+                c.throwStorageCommonException()
+                when (c) {
+                    is SMBApiException -> {
+                        if (c.status == NtStatus.STATUS_ACCESS_DENIED || c.status == NtStatus.STATUS_LOGON_FAILURE) {
+                            throw StorageException.Security.Auth(e, request.connection.id)
+                        } else if (c.status == NtStatus.STATUS_BAD_NETWORK_NAME || c.status == NtStatus.STATUS_BAD_NETWORK_PATH) {
+                            throw StorageException.File.NotFound(e)
+                        }
+                    }
                 }
-            } finally {
-                try {
-                    sessionCache.remove(request.connection)
-                } catch (e: Exception) {
-                    logE(e)
-                }
+                throw StorageException.Error(e)
             }
-
+        }
     }
 
     override suspend fun getFile(request: StorageRequest, ignoreCache: Boolean): StorageFile {
@@ -375,33 +379,19 @@ class SmbjClient(
         }
     }
 
-    override suspend fun close() {
-        diskShareCache.evictAll()
-        sessionCache.evictAll()
-    }
-
-    private suspend fun <T> runHandling(
-        request: StorageRequest,
-        block: suspend CoroutineScope.() -> T
-    ): T {
-        return withContext(dispatcher) {
-            try {
-                return@withContext block()
-            } catch (e: Exception) {
-                logE(e)
-                val c = e.getCause()
-                c.throwStorageCommonException()
-                when (c) {
-                    is SMBApiException -> {
-                        if (c.status == NtStatus.STATUS_ACCESS_DENIED || c.status == NtStatus.STATUS_LOGON_FAILURE) {
-                            throw StorageException.Security.Auth(e, request.connection.id)
-                        } else if (c.status == NtStatus.STATUS_BAD_NETWORK_NAME || c.status == NtStatus.STATUS_BAD_NETWORK_PATH) {
-                            throw StorageException.File.NotFound(e)
-                        }
-                    }
-                }
-                throw StorageException.Error(e)
-            }
+    override suspend fun removeCache(request: StorageRequest?): Boolean {
+        return if (request == null) {
+            diskShareCache.evictAll()
+            sessionCache.evictAll()
+            true
+        } else {
+            diskShareCache.remove(request.connection)
+            sessionCache.remove(request.connection) != null
         }
     }
+
+    override suspend fun close() {
+        removeCache()
+    }
+
 }

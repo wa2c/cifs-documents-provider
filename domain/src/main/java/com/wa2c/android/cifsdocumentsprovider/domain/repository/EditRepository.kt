@@ -1,13 +1,12 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
+import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
-import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.DocumentFileManager
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
@@ -45,13 +44,6 @@ class EditRepository @Inject internal constructor(
     /** Connection flow */
     val connectionListFlow = connectionSettingDao.getList().map { list ->
         list.map { it.toIndexModel() }
-    }
-
-    /**
-     * Get client
-     */
-    private fun getClient(connection: StorageConnection): StorageClient {
-        return storageClientManager.getClient(connection.storage)
     }
 
     /**
@@ -125,7 +117,7 @@ class EditRepository @Inject internal constructor(
         logD("getFileChildren: connection=$connection, uri=$uri")
         return withContext(dispatcher) {
             val request = connection.toDataModel().toStorageRequest().replacePathByUri(uri.text)
-            getClient(request.connection).getChildren(request).mapNotNull {
+            storageClientManager.getChildren(request).mapNotNull {
                 val documentId = DocumentId.fromConnection(request.connection, it) ?: return@mapNotNull null
                 it.toModel(documentId)
             }
@@ -138,20 +130,26 @@ class EditRepository @Inject internal constructor(
     suspend fun checkConnection(connection: RemoteConnection): ConnectionResult {
         logD("Connection check: ${connection.uri}")
         return withContext(dispatcher) {
-            val request = connection.toDataModel().toStorageRequest(null)
+            val request = connection.toDataModel().toStorageRequest()
             // check connection
-            val result = getClient(request.connection).checkConnection(request)
-            if (result is ConnectionResult.Success) {
+            try {
+                storageClientManager.getChildren(request, true)
                 try {
                     // check key
                     connection.keyFileUri?.let { loadKeyFile(it) }
                     connection.keyData?.let { checkKey(it) }
-                    result
+                    ConnectionResult.Success
                 } catch (e: Exception) {
                     ConnectionResult.Warning(e)
                 }
-            } else {
-                result
+            } catch (e: Exception) {
+                if (e is StorageException.File) {
+                    ConnectionResult.Warning(e)
+                } else {
+                    ConnectionResult.Failure(e)
+                }
+            } finally {
+                storageClientManager.removeCache(request)
             }
         }
     }

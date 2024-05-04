@@ -11,7 +11,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.throwStorageCommonExc
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
 import com.wa2c.android.cifsdocumentsprovider.common.values.CACHE_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.common.values.CONNECTION_TIMEOUT
-import com.wa2c.android.cifsdocumentsprovider.common.values.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_MAX
 import com.wa2c.android.cifsdocumentsprovider.common.values.READ_TIMEOUT
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
@@ -151,25 +150,6 @@ class JCifsNgClient(
                 }
                 throw StorageException.Error(e)
             }
-        }
-    }
-
-    /**
-     * Check setting connectivity.
-     */
-    override suspend fun checkConnection(request: StorageRequest): ConnectionResult {
-        return  try {
-            getChildren(request, true).let {
-                ConnectionResult.Success
-            }
-        } catch (e: Exception) {
-            if (e is StorageException.File) {
-                ConnectionResult.Warning(e)
-            } else {
-                ConnectionResult.Failure(e)
-            }
-        } finally {
-            contextCache.remove(request.connection)
         }
     }
 
@@ -321,8 +301,17 @@ class JCifsNgClient(
         }
     }
 
+    override suspend fun removeCache(request: StorageRequest?): Boolean {
+        return if (request == null) {
+            contextCache.evictAll()
+            true
+        } else {
+            contextCache.remove(request.connection) != null
+        }
+    }
+
     override suspend fun close() {
-        contextCache.evictAll()
+        removeCache()
     }
 
     companion object {

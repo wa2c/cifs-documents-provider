@@ -3,7 +3,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
-import com.wa2c.android.cifsdocumentsprovider.data.SshKeyManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
