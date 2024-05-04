@@ -139,9 +139,7 @@ abstract class ApacheVfsClient(
                         throw StorageException.Security.UnknownHost(c, request.connection.id)
                     }
                     is JSchException -> {
-                        if (c.message?.contains("Auth fail") == true) {
-                            throw StorageException.Security.Auth(c, request.connection.id)
-                        }
+                        throw StorageException.Security.Auth(c, request.connection.id)
                     }
                     is FileSystemException -> {
                         if (c.code == "vfs.provider.ftp/login.error") {
