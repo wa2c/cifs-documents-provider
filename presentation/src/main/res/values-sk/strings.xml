@@ -11,6 +11,7 @@
     <string name="general_no">Nie</string>
     <string name="general_delete">Odstrániť</string>
     <string name="general_back">späť</string>
+    <string name="general_copy_clipboard_message">Skopírované do schránky.</string>
     <!-- Home Screen -->
     <string name="home_open_file">Otvoriť</string>
     <string name="home_open_settings">Nastavenie</string>

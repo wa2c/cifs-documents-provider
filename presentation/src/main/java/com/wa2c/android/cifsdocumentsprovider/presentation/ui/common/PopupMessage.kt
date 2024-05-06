@@ -36,7 +36,7 @@ data class MessageSnackbarVisual(
  */
 sealed class PopupMessage : Parcelable {
     /** Type */
-    abstract val type: PopupMessageType
+    abstract val type: PopupMessageType?
 
     /** Error */
     abstract val error: Throwable?
@@ -45,7 +45,7 @@ sealed class PopupMessage : Parcelable {
     data class Text(
         /** Text */
         val text: CharSequence,
-        override val type: PopupMessageType,
+        override val type: PopupMessageType?,
         override val error: Throwable? = null,
     ) : PopupMessage()
 
@@ -53,7 +53,7 @@ sealed class PopupMessage : Parcelable {
     data class Resource(
         /** Text */
         @StringRes val res: Int,
-        override val type: PopupMessageType,
+        override val type: PopupMessageType?,
         override val error: Throwable? = null,
     ) : PopupMessage()
 }
@@ -74,13 +74,12 @@ enum class PopupMessageType {
 
 fun CoroutineScope.showPopup(
     snackbarHostState: SnackbarHostState,
-    @StringRes stringRes: Int?,
-    type: PopupMessageType?,
+    @StringRes stringRes: Int,
+    type: PopupMessageType? = null,
     error: Throwable? = null,
 ) {
     launch {
         snackbarHostState.currentSnackbarData?.dismiss()
-        if (stringRes == null || type == null) return@launch
         val visual = MessageSnackbarVisual.create(
             popupMessage = PopupMessage.Resource(
                 res = stringRes,

@@ -1,6 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components
 
 import android.content.res.Configuration
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -12,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -43,6 +49,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getTextWidt
 @Composable
 internal fun SettingsKnownHostList(
     knownHosts: State<List<KnownHost>>,
+    onCopyToClipboard: (String) -> Unit,
     onClickDelete: (KnownHost) -> Unit,
     onClickConnection: (RemoteConnection) -> Unit,
 ) {
@@ -55,6 +62,7 @@ internal fun SettingsKnownHostList(
             Column {
                 KnownHostItem(
                     knownHost = knownHost,
+                    onCopyToClipboard = onCopyToClipboard,
                     onClickDelete = { onClickDelete(knownHost) },
                     onClickConnection = onClickConnection,
                 )
@@ -67,6 +75,7 @@ internal fun SettingsKnownHostList(
 @Composable
 private fun KnownHostItem(
     knownHost: KnownHost,
+    onCopyToClipboard: (String) -> Unit,
     onClickDelete: () -> Unit,
     onClickConnection: (RemoteConnection) -> Unit,
 ) {
@@ -90,11 +99,13 @@ private fun KnownHostItem(
                     name = stringResource(id = R.string.settings_info_known_hosts_host),
                     value = knownHost.host,
                     headWidth = headWidth,
+                    onCopyToClipboard = onCopyToClipboard,
                 )
                 KnownHostItemRow(
                     name = stringResource(id = R.string.settings_info_known_hosts_type),
                     value = knownHost.type,
                     headWidth = headWidth,
+                    onCopyToClipboard = onCopyToClipboard,
                 )
             }
 
@@ -112,6 +123,7 @@ private fun KnownHostItem(
             name = stringResource(id = R.string.settings_info_known_hosts_key),
             value = knownHost.key,
             headWidth = headWidth,
+            onCopyToClipboard = onCopyToClipboard,
         )
 
         if (knownHost.connections.isNotEmpty()) {
@@ -157,6 +169,7 @@ private fun KnownHostItemRow(
     name: String,
     value: String,
     headWidth: Dp,
+    onCopyToClipboard: (String) -> Unit,
 ) {
     Row {
         Text(
@@ -165,7 +178,16 @@ private fun KnownHostItemRow(
             modifier = Modifier
                 .width(headWidth)
         )
-        Text(text = value)
+        Text(
+            text = value,
+            style = LocalTextStyle.current.copy(
+                lineBreak = LineBreak.Heading,
+            ),
+            modifier = Modifier
+                .clickable {
+                    onCopyToClipboard(value)
+                }
+        )
     }
 }
 
@@ -199,6 +221,7 @@ private fun SettingsKnownHostListPreview() {
 
         SettingsKnownHostList(
             knownHosts = remember { mutableStateOf(knownHosts) },
+            onCopyToClipboard = {},
             onClickDelete = {},
             onClickConnection = {},
         )

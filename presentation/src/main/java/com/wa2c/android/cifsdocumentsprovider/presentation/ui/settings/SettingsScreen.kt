@@ -12,6 +12,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -27,9 +28,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,11 +48,14 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStateAdapter
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessageType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsKnownHostList
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsList
+import kotlinx.coroutines.launch
 
 /**
  * Settings Screen
@@ -63,6 +69,7 @@ fun SettingsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -94,6 +101,14 @@ fun SettingsScreen(
             mutate = viewModel::setUseAsLocal,
         ),
         knownHosts = viewModel.knownHostsFlow.collectAsStateWithLifecycle(emptyList()),
+        onCopyToClipboard = { text ->
+            clipboardManager.setText(AnnotatedString(text))
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                stringRes = R.string.general_copy_clipboard_message,
+                type = PopupMessageType.Success,
+            )
+        },
         onDeleteKnownHost = viewModel::deleteKnownHost,
         onTransitEdit = onTransitEdit,
         onStartIntent = { intent ->
@@ -127,6 +142,7 @@ private fun SettingsScreenContainer(
     useForeground:  MutableState<Boolean>,
     useAsLocal:  MutableState<Boolean>,
     knownHosts: State<List<KnownHost>>,
+    onCopyToClipboard: (String) -> Unit,
     onDeleteKnownHost: (KnownHost) -> Unit,
     onTransitEdit: (RemoteConnection) -> Unit,
     onStartIntent: (Intent) -> Unit,
@@ -168,6 +184,7 @@ private fun SettingsScreenContainer(
             if (showKnownHosts) {
                 SettingsKnownHostList(
                     knownHosts = knownHosts,
+                    onCopyToClipboard = onCopyToClipboard,
                     onClickDelete = onDeleteKnownHost,
                     onClickConnection = onTransitEdit,
                 )
@@ -227,6 +244,7 @@ private fun SettingsScreenContainerPreview() {
             useForeground = remember { mutableStateOf(false) },
             useAsLocal = remember { mutableStateOf(false) },
             knownHosts = remember { mutableStateOf(emptyList()) },
+            onCopyToClipboard = {},
             onDeleteKnownHost = {},
             onTransitEdit = {},
             onStartIntent = {},

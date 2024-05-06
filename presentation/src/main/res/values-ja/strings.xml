@@ -11,6 +11,7 @@
     <string name="general_no">いいえ</string>
     <string name="general_delete">削除</string>
     <string name="general_back">戻る</string>
+    <string name="general_copy_clipboard_message">クリップボードにコピーしました。</string>
     <!-- Home Screen -->
     <string name="home_open_file">開く</string>
     <string name="home_open_settings">設定</string>

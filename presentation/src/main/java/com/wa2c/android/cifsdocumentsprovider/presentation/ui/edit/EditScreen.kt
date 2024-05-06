@@ -45,11 +45,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,6 +109,7 @@ fun EditScreen(
     val context: Context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBackConfirmationDialog by remember { mutableStateOf(false) }
     var showKeyInputDialog by remember { mutableStateOf(false) }
@@ -159,6 +162,14 @@ fun EditScreen(
             }
         },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
+        onCopyToClipboard = { text ->
+            clipboardManager.setText(AnnotatedString(text))
+            scope.showPopup(
+                snackbarHostState = snackbarHostState,
+                stringRes = R.string.general_copy_clipboard_message,
+                type = PopupMessageType.Success,
+            )
+        },
         onClickSave = { viewModel.onClickSave() },
     )
 
@@ -255,12 +266,14 @@ fun EditScreen(
             if (result?.cause is StorageException.Security.UnknownHost) {
                 showKnownHostDialog = true
             }
-            scope.showPopup(
-                snackbarHostState = snackbarHostState,
-                stringRes = result?.messageRes,
-                type = result?.messageType,
-                error = result?.cause
-            )
+            result?.let {
+                scope.showPopup(
+                    snackbarHostState = snackbarHostState,
+                    stringRes = it.messageRes,
+                    type = it.messageType,
+                    error = it.cause
+                )
+            }
         }
 
         viewModel.navigateSearchHost.collectIn(lifecycleOwner) { connectionId ->
@@ -319,6 +332,7 @@ private fun EditScreenContainer(
     onClickSelectFolder: () -> Unit,
     onClickImportKey: (KeyInputType) -> Unit,
     onClickCheckConnection: () -> Unit,
+    onCopyToClipboard: (String) -> Unit,
     onClickSave: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -723,7 +737,10 @@ private fun EditScreenContainer(
                         text = stringResource(id = R.string.edit_storage_uri_title),
                     )
 
-                    UriText(uriText = connectionState.value.uri.text)
+                    UriText(
+                        uriText = connectionState.value.uri.text,
+                        onCopyToClipboard = onCopyToClipboard,
+                    )
 
                     // Shared URI
                     SubsectionTitle(
@@ -732,7 +749,10 @@ private fun EditScreenContainer(
                     val sharedUri =  DocumentId.fromConnection(connectionState.value.id)?.takeIf { !it.isRoot }?.let{
                         "content$URI_START$URI_AUTHORITY/tree/${Uri.encode(it.idText)}"
                     } ?: ""
-                    UriText(uriText = sharedUri)
+                    UriText(
+                        uriText = sharedUri,
+                        onCopyToClipboard = onCopyToClipboard,
+                    )
                 }
 
                 BottomButton(
@@ -774,6 +794,7 @@ private fun EditScreenPreview() {
             onClickSelectFolder = {},
             onClickImportKey = {},
             onClickCheckConnection = {},
+            onCopyToClipboard = {},
             onClickSave = {},
         )
     }

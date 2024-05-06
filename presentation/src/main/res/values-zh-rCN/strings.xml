@@ -11,6 +11,7 @@
     <string name="general_no">不</string>
     <string name="general_delete">删除</string>
     <string name="general_back">后退</string>
+    <string name="general_copy_clipboard_message">复制到剪贴板。</string>
     <!-- Home Screen -->
     <string name="home_open_file">打开</string>
     <string name="home_open_settings">设置</string>

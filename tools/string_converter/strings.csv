@@ -9,6 +9,7 @@ Common,app_summary,Access online storage,オンラインストレージにアク
 ,general_no,No,いいえ,Nie,不,لا
 ,general_delete,Delete,削除,Odstrániť,删除,يمسح
 ,general_back,Back,戻る,späť,后退,خلف
+,general_copy_clipboard_message,Copied to clipboard.,クリップボードにコピーしました。,Skopírované do schránky.,复制到剪贴板。,نسخ إلى الحافظة.
 ,,,,,,
 Home Screen,home_open_file,Open,開く,Otvoriť,打开,فتح
 ,home_open_settings,Settings,設定,Nastavenie,设置,الإعدادات

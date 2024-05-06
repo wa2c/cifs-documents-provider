@@ -11,6 +11,7 @@
     <string name="general_no">No</string>
     <string name="general_delete">Delete</string>
     <string name="general_back">Back</string>
+    <string name="general_copy_clipboard_message">Copied to clipboard.</string>
     <!-- Home Screen -->
     <string name="home_open_file">Open</string>
     <string name="home_open_settings">Settings</string>

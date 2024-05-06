@@ -11,6 +11,7 @@
     <string name="general_no">لا</string>
     <string name="general_delete">يمسح</string>
     <string name="general_back">خلف</string>
+    <string name="general_copy_clipboard_message">نسخ إلى الحافظة.</string>
     <!-- Home Screen -->
     <string name="home_open_file">فتح</string>
     <string name="home_open_settings">الإعدادات</string>
