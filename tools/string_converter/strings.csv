@@ -14,7 +14,8 @@ Common,app_summary,Access online storage,オンラインストレージにアク
 Home Screen,home_open_file,Open,開く,Otvoriť,打开,فتح
 ,home_open_settings,Settings,設定,Nastavenie,设置,الإعدادات
 ,home_open_file_ng_message,Add any connection.,接続情報を登録してください。,Pridajte pripojenie.,请先添加连接,أضف أي إتصال
-,home_add_connection_a11y,Add,追加,Pridať,添加,أضف
+,home_add_connection_input,Input,入力,Vstup,输入,مدخل
+,home_add_connection_search,Search,検索,Vyhľadávanie,搜索,يبحث
 ,,,,,,
 Edit Screen,edit_title,Connection,接続情報,Pripojenie,连接,إتصال
 ,edit_id_title,ID,ID,ID,ID,بطاقة تعريف

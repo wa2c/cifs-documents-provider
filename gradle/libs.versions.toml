@@ -32,7 +32,6 @@ ksp = "1.9.22-1.0.17"
 lifecycle = "2.7.0"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
 material3 = "1.2.0"
-multifab = "1.0.8"
 navigationCompose = "2.7.7"
 reorderable = "0.9.6"
 room = "2.6.1"
@@ -76,7 +75,6 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 listenablefuture = { module = "com.google.guava:listenablefuture", version.ref = "listenablefuture" }
-multifab = { module = "com.github.iamageo:MultiFab", version.ref = "multifab" }
 reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
 smbj = { module = "com.hierynomus:smbj", version.ref = "smbj" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }

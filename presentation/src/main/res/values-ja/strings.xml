@@ -16,7 +16,8 @@
     <string name="home_open_file">開く</string>
     <string name="home_open_settings">設定</string>
     <string name="home_open_file_ng_message">接続情報を登録してください。</string>
-    <string name="home_add_connection_a11y">追加</string>
+    <string name="home_add_connection_input">入力</string>
+    <string name="home_add_connection_search">検索</string>
     <!-- Edit Screen -->
     <string name="edit_title">接続情報</string>
     <string name="edit_id_title">ID</string>

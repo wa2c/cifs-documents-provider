@@ -16,7 +16,8 @@
     <string name="home_open_file">打开</string>
     <string name="home_open_settings">设置</string>
     <string name="home_open_file_ng_message">请先添加连接</string>
-    <string name="home_add_connection_a11y">添加</string>
+    <string name="home_add_connection_input">输入</string>
+    <string name="home_add_connection_search">搜索</string>
     <!-- Edit Screen -->
     <string name="edit_title">连接</string>
     <string name="edit_id_title">ID</string>

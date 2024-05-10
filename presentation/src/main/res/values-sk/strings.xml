@@ -16,7 +16,8 @@
     <string name="home_open_file">Otvoriť</string>
     <string name="home_open_settings">Nastavenie</string>
     <string name="home_open_file_ng_message">Pridajte pripojenie.</string>
-    <string name="home_add_connection_a11y">Pridať</string>
+    <string name="home_add_connection_input">Vstup</string>
+    <string name="home_add_connection_search">Vyhľadávanie</string>
     <!-- Edit Screen -->
     <string name="edit_title">Pripojenie</string>
     <string name="edit_id_title">ID</string>

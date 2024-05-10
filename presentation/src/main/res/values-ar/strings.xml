@@ -16,7 +16,8 @@
     <string name="home_open_file">فتح</string>
     <string name="home_open_settings">الإعدادات</string>
     <string name="home_open_file_ng_message">أضف أي إتصال</string>
-    <string name="home_add_connection_a11y">أضف</string>
+    <string name="home_add_connection_input">مدخل</string>
+    <string name="home_add_connection_search">يبحث</string>
     <!-- Edit Screen -->
     <string name="edit_title">إتصال</string>
     <string name="edit_id_title">بطاقة تعريف</string>
