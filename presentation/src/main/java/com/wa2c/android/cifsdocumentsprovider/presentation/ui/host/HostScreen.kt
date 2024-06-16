@@ -82,12 +82,12 @@ fun HostScreen(
 
     // Sort dialog
     if (showSortDialog.value) {
-        val types =  HostSortType.values()
+        val types =  HostSortType.entries
         SingleChoiceDialog(
-            items = HostSortType.values().map { stringResource(id = it.labelRes) },
+            items = types.map { stringResource(id = it.labelRes) },
             selectedIndex = types.indexOfFirst { it == viewModel.sortType.value },
             dismissButton = DialogButton(
-                label = stringResource(id = R.string.dialog_close),
+                label = stringResource(id = R.string.general_close),
                 onClick = { showSortDialog.value = false }
             ),
             onDismiss = { showSortDialog.value = false },
@@ -112,7 +112,7 @@ fun HostScreen(
                         selectedHost.value = null
                     }
                 ),
-                dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+                dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                     selectedHost.value = null
                 },
                 onDismiss = {
@@ -129,11 +129,7 @@ fun HostScreen(
 
     LaunchedEffect(Unit) {
         viewModel.result.collectIn(lifecycleOwner) {
-            scope.showError(
-                snackbarHostState = snackbarHostState,
-                stringRes = R.string.provider_error_message,
-                error = it.exceptionOrNull()
-            )
+            scope.showError(snackbarHostState, it.exceptionOrNull())
         }
     }
 }
@@ -178,7 +174,7 @@ fun HostScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = "",
+                            contentDescription = stringResource(id = R.string.general_back),
                         )
                     }
                 },

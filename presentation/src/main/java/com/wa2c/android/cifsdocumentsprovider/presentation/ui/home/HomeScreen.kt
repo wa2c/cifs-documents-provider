@@ -15,9 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +31,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,7 +64,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenFile: (uris: List<Uri>) -> Unit,
     onNavigateSettings: () -> Unit,
-    onNavigateEdit: (RemoteConnectionIndex) -> Unit,
+    onNavigateEdit: (RemoteConnectionIndex?) -> Unit,
     onNavigateHost: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -82,11 +83,7 @@ fun HomeScreen(
                 try {
                     fileOpenLauncher.launch(arrayOf("*/*"))
                 } catch (e: Exception) {
-                    scope.showError(
-                        snackbarHostState = snackbarHostState,
-                        stringRes = R.string.provider_error_message,
-                        error = e,
-                    )
+                    scope.showError(snackbarHostState, e)
                 }
             } else {
                 scope.showPopup(
@@ -98,7 +95,8 @@ fun HomeScreen(
         },
         onClickMenuSettings = { onNavigateSettings() },
         onClickItem = { onNavigateEdit(it) },
-        onClickAddItem = { onNavigateHost() },
+        onClickAddItem = { onNavigateEdit(null) },
+        onClickSearchItem = { onNavigateHost() },
         onDragAndDrop = { from, to -> viewModel.onItemMove(from, to) },
     )
 }
@@ -115,6 +113,7 @@ fun HomeScreenContainer(
     onClickMenuSettings: () -> Unit,
     onClickItem: (RemoteConnectionIndex) -> Unit,
     onClickAddItem: () -> Unit,
+    onClickSearchItem: () -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
     Scaffold(
@@ -143,16 +142,24 @@ fun HomeScreenContainer(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                shape = FloatingActionButtonDefaults.largeShape,
+            MultiFloatingActionButton(
+                icon = ImageVector.vectorResource(id = R.drawable.ic_add_folder),
+                items = arrayListOf(
+                    FabItem(
+                        icon = painterResource(id = R.drawable.ic_edit),
+                        label = stringResource(id = R.string.home_add_connection_input),
+                        onFabItemClicked = onClickAddItem
+                    ),
+                    FabItem(
+                        icon =  painterResource(id = R.drawable.ic_search),
+                        label = stringResource(id = R.string.home_add_connection_search),
+                        onFabItemClicked = onClickSearchItem
+                    ),
+                ),
+                shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.primary,
-                onClick = { onClickAddItem() }
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_add_folder),
-                    contentDescription = "Add Connection",
-                )
-            }
+                showBackgroundEffect = false,
+            )
         },
         snackbarHost = { AppSnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -226,10 +233,13 @@ private fun ConnectionItem(
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .weight(1f)
+                    .align(alignment = Alignment.CenterVertically)
             )
             Text(
-                text = stringResource(id = connection.storage.labelRes),
-                style = MaterialTheme.typography.bodyMedium,
+                text = stringResource(id = connection.storage.labelRes)
+                    .replace("(", "\n("),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.End,
                 modifier = Modifier
                     .padding(start = Theme.Sizes.S)
                     .align(alignment = Alignment.CenterVertically)
@@ -260,15 +270,15 @@ private fun HomeScreenContainerPreview() {
             connectionList = listOf(
                 RemoteConnectionIndex(
                     id = "",
-                    name = "PC1",
+                    name = "PC1PC1PC1PC1",
                     storage = StorageType.JCIFS,
-                    uri = "",
+                    uri = "content://com.wa2c.android.cifsdocumentsprovider.provider/"
                 ),
                 RemoteConnectionIndex(
                     id = "",
-                    name = "PC2",
+                    name = "PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2PC2",
                     storage = StorageType.JCIFS,
-                    uri = "",
+                    uri = "content://com.wa2c.android.cifsdocumentsprovider.provider/test",
                 ),
                 RemoteConnectionIndex(
                     id = "",
@@ -279,6 +289,7 @@ private fun HomeScreenContainerPreview() {
             ),
             onClickItem = {},
             onClickAddItem = {},
+            onClickSearchItem = {},
             onDragAndDrop = { _, _ -> },
             onClickMenuOpenFile = {},
             onClickMenuSettings = {},

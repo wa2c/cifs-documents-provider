@@ -56,6 +56,10 @@ android {
             "META-INF/*",
         ))
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
@@ -63,8 +67,6 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":presentation"))
     implementation(project(":domain"))
-    implementation(project(":data:data"))
-
 
     implementation(libs.androidx.appcompat)
     implementation(libs.hilt.android)

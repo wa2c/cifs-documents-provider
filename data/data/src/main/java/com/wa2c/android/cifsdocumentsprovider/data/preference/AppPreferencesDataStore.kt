@@ -13,6 +13,7 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,7 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class AppPreferencesDataStore @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
 ) {
 
     /** DataStore */

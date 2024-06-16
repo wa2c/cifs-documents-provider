@@ -4,13 +4,20 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">Prístup online úložiska</string>
-    <string name="dialog_accept">OK</string>
-    <string name="dialog_close">Zatvoriť</string>
+    <string name="general_accept">OK</string>
+    <string name="general_close">Zatvoriť</string>
+    <string name="general_warning">Pozornosť</string>
+    <string name="general_yes">Áno</string>
+    <string name="general_no">Nie</string>
+    <string name="general_delete">Odstrániť</string>
+    <string name="general_back">späť</string>
+    <string name="general_copy_clipboard_message">Skopírované do schránky.</string>
     <!-- Home Screen -->
     <string name="home_open_file">Otvoriť</string>
     <string name="home_open_settings">Nastavenie</string>
     <string name="home_open_file_ng_message">Pridajte pripojenie.</string>
-    <string name="home_add_connection_a11y">Pridať</string>
+    <string name="home_add_connection_input">Vstup</string>
+    <string name="home_add_connection_search">Vyhľadávanie</string>
     <!-- Edit Screen -->
     <string name="edit_title">Pripojenie</string>
     <string name="edit_id_title">ID</string>
@@ -33,6 +40,18 @@
     <string name="edit_password_title">Heslo</string>
     <string name="edit_password_hint">Neplatí pre anonymné prihlásenie</string>
     <string name="edit_anonymous_label">Anonymné prihlásenie</string>
+    <string name="edit_key_title">Súkromný kľúč</string>
+    <string name="edit_key_hint">Súkromný kľúč</string>
+    <string name="edit_key_text_none">Nevyužitý</string>
+    <string name="edit_key_text_file">Uvedený súbor</string>
+    <string name="edit_key_text_import">Dovážaný</string>
+    <string name="edit_key_input_none">Nevyužitý</string>
+    <string name="edit_key_input_file">Pozrite sa na súbor</string>
+    <string name="edit_key_input_import_file">Importovaný súbor</string>
+    <string name="edit_key_input_import_text">Zadajte a importujte</string>
+    <string name="edit_passphrase_title">Súkromná priechodná fráza</string>
+    <string name="edit_passphrase_hint">Nezadajte, ak nie je nastavená</string>
+    <string name="edit_ignore_known_hosts_label">Nekontrolujte dôveryhodných hostiteľov SSH</string>
     <string name="edit_encoding_title">Kód postavy</string>
     <string name="edit_ftp_mode_title">Aktívny režim</string>
     <string name="edit_ftps_implicit_label">Implicitný režim SSL/TLS</string>
@@ -42,6 +61,11 @@
     <string name="edit_option_safe_transfer_label">Bezpečný prenos dát</string>
     <string name="edit_option_read_only_label">Iba na čítanie</string>
     <string name="edit_option_extension_label">Pridať príponu pri ukladaní súborov</string>
+    <string name="edit_option_thumbnail_label">Miniatúra</string>
+    <string name="edit_option_thumbnail_image">Obrázok</string>
+    <string name="edit_option_thumbnail_audio">Audio</string>
+    <string name="edit_option_thumbnail_video">Video</string>
+    <string name="edit_option_thumbnail_disabled">Zakázané</string>
     <string name="edit_info_section_title">Informácie</string>
     <string name="edit_storage_uri_title">Zdieľanie URI</string>
     <string name="edit_provider_uri_title">Zdieľaný identifikátor URI</string>
@@ -49,13 +73,17 @@
     <string name="edit_check_connection_ok_message">Pripojenie úspešné.</string>
     <string name="edit_check_connection_wn_message">Nastavenia majú chybu.</string>
     <string name="edit_check_connection_ng_message">Pripojenie zlyhalo.</string>
-    <string name="edit_save_ng_input_message">Vyžaduje sa meno a hostiteľ.</string>
-    <string name="edit_save_ng_invalid_id_message">ID je neplatné.</string>
-    <string name="edit_save_ng_duplicate_id_message">ID je duplikované.</string>
+    <string name="edit_check_save_ng_input_message">Vyžaduje sa meno a hostiteľ.</string>
+    <string name="edit_check_save_ng_invalid_id_message">ID je neplatné.</string>
+    <string name="edit_check_save_ng_duplicate_id_message">ID je duplikované.</string>
+    <string name="edit_check_key_ng_failed_messaged">Nepodarilo sa získať prístup k súkromnému kľúču.</string>
+    <string name="edit_check_key_ng_invalid_messaged">Nepodarilo sa čítať súkromný kľúč.</string>
+    <string name="edit_check_key_ok_messaged">Súkromný kľúč je platný.</string>
     <string name="edit_save_button">Uložiť</string>
-    <string name="edit_delete_button">Zmazať</string>
     <string name="edit_back_confirmation_message">Zahodiť zmeny?</string>
     <string name="edit_delete_confirmation_message">Naozaj vymazať toto pripojenie?</string>
+    <string name="edit_warning_key_import_message">Dovážaný tajný kľúč nie je zaručený.\nPri manipulácii buďte opatrní.</string>
+    <string name="edit_warning_known_host_message">Konfigurovaný cieľ SSH bol prvýkrát pripojený alebo bol zmenený kľúč.\nChcete dôverovať cieľu a pripojiť sa?</string>
     <!-- Host Screen -->
     <string name="host_title">Hostiteľ</string>
     <string name="host_set_manually">Nastaviť ručne</string>
@@ -84,8 +112,13 @@
     <string name="settings_set_use_foreground">Pri otváraní súborov zobraziť upozornenia</string>
     <string name="settings_set_use_as_local">Použite ako miestne úložisko\n(Vyžaduje sa reštart zariadenia)</string>
     <string name="settings_section_info">Informácie</string>
-    <string name="settings_info_contributors">Prispievatelia</string>
+    <string name="settings_info_known_hosts">SSH dôveryhodní hostitelia</string>
+    <string name="settings_info_known_hosts_host">Hostiteľ</string>
+    <string name="settings_info_known_hosts_type">Typ kľúča</string>
+    <string name="settings_info_known_hosts_key">kľúč</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">Chcete odstrániť tohto hostiteľa?</string>
     <string name="settings_info_libraries">Knižnice</string>
+    <string name="settings_info_contributors">Prispievatelia</string>
     <string name="settings_info_app">App</string>
     <!-- Send Screen -->
     <string name="send_title">Prenos súborov</string>

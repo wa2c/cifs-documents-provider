@@ -17,6 +17,8 @@ const val READ_TIMEOUT = 10000
 const val BUFFER_SIZE = 1024 * 1024
 const val CACHE_TIMEOUT = 300 * 1000
 const val OPEN_FILE_LIMIT_DEFAULT = 30
+const val OPEN_FILE_LIMIT_MIN = 1
+const val OPEN_FILE_LIMIT_MAX = 999
 
 const val NOTIFICATION_CHANNEL_ID_SEND = "notification_channel_send"
 const val NOTIFICATION_ID_SEND = 100

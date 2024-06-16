@@ -79,11 +79,7 @@ fun FolderScreen(
 
     LaunchedEffect(Unit) {
         viewModel.result.collectIn(lifecycleOwner) {
-            scope.showError(
-                snackbarHostState = snackbarHostState,
-                stringRes = R.string.provider_error_message,
-                error = it.exceptionOrNull(),
-            )
+            scope.showError(snackbarHostState, it.exceptionOrNull())
         }
     }
 
@@ -123,7 +119,7 @@ fun FolderScreenContainer(
                     IconButton(onClick = onClickBack) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_back),
-                            contentDescription = "",
+                            contentDescription = stringResource(id = R.string.general_back),
                         )
                     }
                 },

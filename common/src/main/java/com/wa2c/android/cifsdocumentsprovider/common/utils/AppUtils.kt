@@ -4,14 +4,20 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.system.ErrnoException
 import android.webkit.MimeTypeMap
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_FTPS_IMPLICIT_PORT
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_SEPARATOR
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
+import java.net.SocketException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.nio.file.Paths
 import java.util.UUID
+import java.util.concurrent.TimeoutException
 
 /**
  * Renew collection elements.
@@ -67,16 +73,15 @@ fun getPort(port: String?, type: StorageType, isFtpsImplicit: Boolean): String? 
  */
 private val String.lastPath: String
     get() = run {
-        val path = trimEnd(URI_SEPARATOR)
-        val startIndex = (path.lastIndexOf(URI_SEPARATOR).takeIf { it > 0 }?.let { it + 1}) ?: 0
-        path.substring(startIndex)
+        val path = trimEnd(':').trimEnd('\\').trimEnd(URI_SEPARATOR)
+        path.substringAfterLast(':').substringAfterLast('\\').substringAfterLast(URI_SEPARATOR)
     }
 
 /**
  * Get file name (last segment)
  */
 val String.fileName: String
-    get() = Uri.decode(this).lastPath
+    get() = Uri.decode(this).substringAfterLast(":").lastPath
 
 /**
  * Get file name
@@ -114,4 +119,26 @@ fun String.appendChild(childName: String, isDirectory: Boolean): String {
  */
 fun generateUUID(): String {
     return UUID.randomUUID().toString()
+}
+
+/**
+ * Throw storage common exception
+ */
+fun Throwable.throwStorageCommonException() {
+    when (this) {
+        is SocketTimeoutException,
+        is TimeoutException -> {
+            throw StorageException.Transaction.Timeout(this)
+        }
+        is UnknownHostException -> {
+            throw StorageException.Transaction.HostNotFound(this)
+        }
+        is SocketException,
+        is ErrnoException -> {
+            throw StorageException.Transaction.Network(this)
+        }
+        is StorageException -> {
+            throw this
+        }
+    }
 }

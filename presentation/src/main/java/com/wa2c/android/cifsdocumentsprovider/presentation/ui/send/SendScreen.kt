@@ -77,11 +77,11 @@ fun SendScreen(
     if (confirmCount > 0) {
         CommonDialog(
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     viewModel.onStartSend(true)
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 viewModel.onStartSend(false)
             },
             onDismiss = {
@@ -96,11 +96,11 @@ fun SendScreen(
     if (showCloseDialog.value) {
         CommonDialog(
             confirmButtons = listOf(
-                DialogButton(label = stringResource(id = R.string.dialog_accept)) {
+                DialogButton(label = stringResource(id = R.string.general_accept)) {
                     onNavigateFinish()
                 },
             ),
-            dismissButton = DialogButton(label = stringResource(id = R.string.dialog_close)) {
+            dismissButton = DialogButton(label = stringResource(id = R.string.general_close)) {
                 showCloseDialog.value = false
             },
             onDismiss = {
@@ -216,7 +216,7 @@ private fun SendDataItem(
             style = MaterialTheme.typography.bodyMedium,
         )
         LinearProgressIndicator(
-            progress = (sendData.progress.toFloat() / 100),
+            progress = { (sendData.progress.toFloat() / 100) },
             modifier = Modifier
                 .fillMaxWidth()
                 .alpha(if (sendData.state.inProgress) 1f else 0f),

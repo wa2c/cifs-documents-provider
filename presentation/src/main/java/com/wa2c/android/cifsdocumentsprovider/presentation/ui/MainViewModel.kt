@@ -10,7 +10,9 @@ import com.wa2c.android.cifsdocumentsprovider.domain.repository.SendRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -32,6 +34,9 @@ class MainViewModel @Inject constructor(
     /** True if showing send screen */
     val showSend = sendRepository.sendDataList.map { it.isNotEmpty() }.distinctUntilChanged()
 
+    private val _showEdit =  MutableSharedFlow<String>()
+    val showEdit = _showEdit.asSharedFlow()
+
     /**
      * Send URI
      */
@@ -46,6 +51,12 @@ class MainViewModel @Inject constructor(
     fun clearUri() {
         launch {
             sendRepository.clear()
+        }
+    }
+
+    fun showEditScreen(storageId: String) {
+        launch {
+            _showEdit.emit(storageId)
         }
     }
 

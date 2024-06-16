@@ -44,8 +44,10 @@ dependencies {
     implementation(project(":data:storage:interfaces"))
 
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.documentfile)
     implementation(libs.apache.commons.net)
     implementation(libs.apache.commons.vfs)
+    implementation(libs.jsch)
 
     testImplementation(libs.junit)
 }

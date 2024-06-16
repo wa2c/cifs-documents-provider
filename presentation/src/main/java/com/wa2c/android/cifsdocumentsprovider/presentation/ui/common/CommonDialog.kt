@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 fun CommonDialog(
     title: String? = null,
     confirmButtons: List<DialogButton>?,
-    dismissButton: DialogButton?,
+    dismissButton: DialogButton? = null,
     onDismiss: (() -> Unit)? = null,
     content: @Composable (() -> Unit)? = null
 ) {

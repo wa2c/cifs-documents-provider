@@ -4,13 +4,20 @@
     <!-- Source: https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/edit#gid=0 -->
     <!-- Common -->
     <string name="app_summary">الوصول إلى التخزين عبر الإنترنت</string>
-    <string name="dialog_accept">حسنا</string>
-    <string name="dialog_close">إغلاق</string>
+    <string name="general_accept">حسنا</string>
+    <string name="general_close">إغلاق</string>
+    <string name="general_warning">انتباه</string>
+    <string name="general_yes">نعم</string>
+    <string name="general_no">لا</string>
+    <string name="general_delete">يمسح</string>
+    <string name="general_back">خلف</string>
+    <string name="general_copy_clipboard_message">نسخ إلى الحافظة.</string>
     <!-- Home Screen -->
     <string name="home_open_file">فتح</string>
     <string name="home_open_settings">الإعدادات</string>
     <string name="home_open_file_ng_message">أضف أي إتصال</string>
-    <string name="home_add_connection_a11y">أضف</string>
+    <string name="home_add_connection_input">مدخل</string>
+    <string name="home_add_connection_search">يبحث</string>
     <!-- Edit Screen -->
     <string name="edit_title">إتصال</string>
     <string name="edit_id_title">بطاقة تعريف</string>
@@ -33,6 +40,18 @@
     <string name="edit_password_title">كلمة المرور</string>
     <string name="edit_password_hint">باطل إذا كان مجهول</string>
     <string name="edit_anonymous_label">مجهول</string>
+    <string name="edit_key_title">مفتاح سري</string>
+    <string name="edit_key_hint">مفتاح سري</string>
+    <string name="edit_key_text_none">غير مستعمل</string>
+    <string name="edit_key_text_file">ملف مشار إليه</string>
+    <string name="edit_key_text_import">مستورد</string>
+    <string name="edit_key_input_none">غير مستعمل</string>
+    <string name="edit_key_input_file">الرجوع إلى الملف</string>
+    <string name="edit_key_input_import_file">استيراد ملف</string>
+    <string name="edit_key_input_import_text">أدخل واستيراد</string>
+    <string name="edit_passphrase_title">شعار المارة الخاص</string>
+    <string name="edit_passphrase_hint">لا تدخل إذا لم يتم تعيينها</string>
+    <string name="edit_ignore_known_hosts_label">لا تتحقق من مضيفي SSH الموثوقين</string>
     <string name="edit_encoding_title">رمز الحرف</string>
     <string name="edit_ftp_mode_title">الوضع النشط</string>
     <string name="edit_ftps_implicit_label">وضع SSL/TLS الضمني</string>
@@ -42,6 +61,11 @@
     <string name="edit_option_safe_transfer_label">نقل بيانات آمن</string>
     <string name="edit_option_read_only_label">يقرأ فقط</string>
     <string name="edit_option_extension_label">أضف وصلة عند الحفظ</string>
+    <string name="edit_option_thumbnail_label">ظفري</string>
+    <string name="edit_option_thumbnail_image">صورة</string>
+    <string name="edit_option_thumbnail_audio">صوتي</string>
+    <string name="edit_option_thumbnail_video">فيديو</string>
+    <string name="edit_option_thumbnail_disabled">عاجز</string>
     <string name="edit_info_section_title">معلومات</string>
     <string name="edit_storage_uri_title">عنوان التخزين</string>
     <string name="edit_provider_uri_title">عنوان التشارك</string>
@@ -49,13 +73,17 @@
     <string name="edit_check_connection_ok_message">نجح الاتصال</string>
     <string name="edit_check_connection_wn_message">الإعدادات فيها خطأ</string>
     <string name="edit_check_connection_ng_message">فشل الإتصال</string>
-    <string name="edit_save_ng_input_message">الاسم والمضيف مطلوب.</string>
-    <string name="edit_save_ng_invalid_id_message">المعرف غير صالح</string>
-    <string name="edit_save_ng_duplicate_id_message">معرف مكرر.</string>
+    <string name="edit_check_save_ng_input_message">الاسم والمضيف مطلوب.</string>
+    <string name="edit_check_save_ng_invalid_id_message">المعرف غير صالح</string>
+    <string name="edit_check_save_ng_duplicate_id_message">معرف مكرر.</string>
+    <string name="edit_check_key_ng_failed_messaged">فشل في الوصول إلى المفتاح الخاص.</string>
+    <string name="edit_check_key_ng_invalid_messaged">فشل في قراءة المفتاح الخاص.</string>
+    <string name="edit_check_key_ok_messaged">المفتاح الخاص صالح.</string>
     <string name="edit_save_button">حفظ</string>
-    <string name="edit_delete_button">حذف</string>
     <string name="edit_back_confirmation_message">أهمل التغييرات؟</string>
     <string name="edit_delete_confirmation_message">إحذف الإعدادات؟</string>
+    <string name="edit_warning_key_import_message">المفتاح السري المستورد غير مضمون.\nيرجى توخي الحذر عند التعامل.</string>
+    <string name="edit_warning_known_host_message">تم توصيل وجهة SSH التي تم تكوينها لأول مرة أو تم تغيير المفتاح.\nهل تريد أن تثق بالوجهة وتتصل؟</string>
     <!-- Host Screen -->
     <string name="host_title">المضيف</string>
     <string name="host_set_manually">تحديد يدويا</string>
@@ -84,8 +112,13 @@
     <string name="settings_set_use_foreground">أظهر الإشعارات عند فتح الملفات</string>
     <string name="settings_set_use_as_local">محاكاة الذاكرة المحلية\n(مطلوب إعادة تشغيل الجهاز)</string>
     <string name="settings_section_info">معلومات</string>
-    <string name="settings_info_contributors">المساهمين</string>
+    <string name="settings_info_known_hosts">المضيفين الموثوقين عبر SSH</string>
+    <string name="settings_info_known_hosts_host">المضيف</string>
+    <string name="settings_info_known_hosts_type">نوع المفتاح</string>
+    <string name="settings_info_known_hosts_key">مفتاح</string>
+    <string name="settings_info_known_hosts_delete_confirmation_message">هل تريد إزالة هذا المضيف؟</string>
     <string name="settings_info_libraries">المكتبات</string>
+    <string name="settings_info_contributors">المساهمين</string>
     <string name="settings_info_app">التطبيق</string>
     <!-- Send Screen -->
     <string name="send_title">نقل الملف</string>

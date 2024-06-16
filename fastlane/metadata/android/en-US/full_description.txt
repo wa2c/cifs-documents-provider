@@ -4,7 +4,7 @@
 
 * Provide other apps with access to shared online storage via the Storage Access Framework (SAF).
 * Provides access to files and directories.
-* Supports SMB, FTP, and FTPS.
+* Supports SMB, FTP, FTPS and SFTP.
 * Share and transfer files on online storage.
 * Multiple connection settings can be stored.
 * Supports multiple languages.

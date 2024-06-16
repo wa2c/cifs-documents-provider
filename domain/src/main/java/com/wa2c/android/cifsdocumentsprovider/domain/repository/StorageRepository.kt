@@ -1,19 +1,17 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import android.os.ProxyFileDescriptorCallback
+import android.os.ParcelFileDescriptor
+import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
 import com.wa2c.android.cifsdocumentsprovider.common.values.AccessMode
-import com.wa2c.android.cifsdocumentsprovider.data.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore.Companion.getFirst
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageClient
-import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
-import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.addExtension
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toItem
@@ -27,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ArrayBlockingQueue
@@ -82,10 +81,6 @@ class StorageRepository @Inject internal constructor(
         }
     }
 
-    private fun getClient(connection: StorageConnection): StorageClient {
-        return storageClientManager.getClient(connection.storage)
-    }
-
     /**
      * Get storage request from URI
      */
@@ -104,7 +99,7 @@ class StorageRepository @Inject internal constructor(
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
             runFileBlocking(request) {
-                getClient(request.connection).getFile(request).toModel(documentId)
+                storageClientManager.getFile(request).toModel(documentId)
             }
         }
     }
@@ -115,14 +110,15 @@ class StorageRepository @Inject internal constructor(
     suspend fun getFileChildren(parentDocumentId: DocumentId): List<RemoteFile> {
         logD("getFileChildren: parentDocumentId=$parentDocumentId")
         return withContext(dispatcher) {
+            storageClientManager.cancelThumbnailLoading()
             if (parentDocumentId.isRoot) {
-                connectionSettingDao.getList().first().mapNotNull { entity ->
+                connectionSettingDao.getList().firstOrNull()?.mapNotNull { entity ->
                     entity.toItem()
-                }
+                } ?: emptyList()
             } else {
                 val request = getStorageRequest(parentDocumentId) ?: return@withContext emptyList()
                 runFileBlocking(request) {
-                    getClient(request.connection).getChildren(request).mapNotNull {
+                    storageClientManager.getChildren(request).mapNotNull {
                         val documentId = DocumentId.fromConnection(request.connection, it) ?: return@mapNotNull null
                         it.toModel(documentId)
                     }
@@ -145,13 +141,13 @@ class StorageRepository @Inject internal constructor(
                     r
                 }
             } ?: return@withContext null
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
                 if (isDirectory) {
-                    getClient(request.connection).createDirectory(request)
+                    storageClientManager.createDirectory(request)
                 } else {
-                    getClient(request.connection).createFile(request)
+                    storageClientManager.createFile(request)
                 }.let {
                     DocumentId.fromConnection(request.connection, it)
                 }
@@ -166,10 +162,10 @@ class StorageRepository @Inject internal constructor(
         logD("deleteFile: documentId=$documentId")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext false
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
-                getClient(request.connection).deleteFile(request)
+                storageClientManager.deleteFile(request)
             }
         }
     }
@@ -181,10 +177,10 @@ class StorageRepository @Inject internal constructor(
         logD("renameFile: documentId:=$documentId:, newName=$newName")
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            if (request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (request.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(request) {
-                getClient(request.connection).renameFile(request, newName).let {
+                storageClientManager.renameFile(request, newName).let {
                     DocumentId.fromConnection(request.connection, it)
                 }
             }
@@ -200,11 +196,11 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
-            if (targetRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (targetRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    getClient(sourceRequest.connection).copyFile(sourceRequest, targetRequest).let {
+                    storageClientManager.copyFile(sourceRequest, targetRequest).let {
                         DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }
@@ -222,11 +218,11 @@ class StorageRepository @Inject internal constructor(
             val sourceRequest = getStorageRequest(sourceDocumentId) ?: return@withContext null
             val targetDocumentId = targetParentDocumentId.appendChild(sourceRequest.uri.fileName) ?: return@withContext null
             val targetRequest = getStorageRequest(targetDocumentId) ?: return@withContext null
-            if (sourceRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (sourceRequest.connection.readOnly || targetRequest.connection.readOnly) throw StorageException.Operation.ReadOnly()
 
             runFileBlocking(sourceRequest) {
                 runFileBlocking(targetRequest) {
-                    getClient(sourceRequest.connection).moveFile(sourceRequest, targetRequest).let {
+                    storageClientManager.moveFile(sourceRequest, targetRequest).let {
                         DocumentId.fromConnection(targetRequest.connection, it)
                     }
                 }
@@ -234,18 +230,40 @@ class StorageRepository @Inject internal constructor(
         }
     }
 
-    /**
-     * Get ProxyFileDescriptorCallback
-     */
-    suspend fun getCallback(documentId: DocumentId, mode: AccessMode, onFileRelease: () -> Unit): ProxyFileDescriptorCallback? {
-        logD("getCallback: documentId=$documentId, mode=$mode")
+    suspend fun getFileDescriptor(documentId: DocumentId, mode: AccessMode, onFileRelease: () -> Unit): ParcelFileDescriptor? {
+        logD("getFileDescriptor: documentId=$documentId, mode=$mode")
+        if (documentId.isRoot || documentId.isPathRoot) return null
+
         return withContext(dispatcher) {
             val request = getStorageRequest(documentId) ?: return@withContext null
-            if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.ReadOnlyException()
+            if (mode == AccessMode.W && request.connection.readOnly) throw StorageException.Operation.ReadOnly()
             try {
                 addBlockingQueue(request)
-                getClient(request.connection).getFileDescriptor(request, mode) {
-                    logD("releaseCallback: request=$request, mode=$mode")
+                storageClientManager.getFileDescriptor(request, mode) {
+                    logD("release FileDescriptor: request=$request, mode=$mode")
+                    onFileRelease()
+                    removeBlockingQueue(request)
+                }
+            } catch (e: Exception) {
+                logE(e)
+                removeBlockingQueue(request)
+                throw e
+            }
+        }
+    }
+
+    suspend fun getThumbnailDescriptor(documentId: DocumentId, onFileRelease: () -> Unit): ParcelFileDescriptor? {
+        logD("getThumbnailCallback: documentId=$documentId")
+        if (documentId.isRoot || documentId.isPathRoot) return null
+
+        return withContext(dispatcher) {
+            val request = getStorageRequest(documentId) ?: return@withContext null
+            if (request.thumbnailType == null) return@withContext null
+
+            try {
+                addBlockingQueue(request)
+                storageClientManager.getThumbnailDescriptor(request) {
+                    logD("release ThumbnailDescriptor : request=$request")
                     onFileRelease()
                     removeBlockingQueue(request)
                 }
@@ -266,7 +284,7 @@ class StorageRepository @Inject internal constructor(
                 val path = uriText.substringAfter(it.uri)
                 DocumentId.fromConnection(it.id, path, idText)
             }
-        } ?: throw StorageException.DocumentIdException()
+        } ?: throw StorageException.File.DocumentId()
     }
 
     /**

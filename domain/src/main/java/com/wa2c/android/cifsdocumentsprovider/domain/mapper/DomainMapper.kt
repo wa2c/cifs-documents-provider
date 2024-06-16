@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
@@ -34,12 +35,15 @@ internal object DomainMapper {
         return when (type) {
             StorageType.JCIFS,
             StorageType.SMBJ,
-            StorageType.JCIFS_LEGACY -> {
+            StorageType.JCIFS_LEGACY, -> {
                 formatter.decodeFromString<StorageConnection.Cifs>(json)
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS, -> {
                 formatter.decodeFromString<StorageConnection.Ftp>(json)
+            }
+            StorageType.APACHE_SFTP, -> {
+                formatter.decodeFromString<StorageConnection.Sftp>(json)
             }
         }
     }
@@ -127,6 +131,7 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
                     optionAddExtension = extension,
                 )
             }
@@ -146,6 +151,29 @@ internal object DomainMapper {
                     encoding = encoding,
                     optionSafeTransfer = safeTransfer,
                     optionReadOnly = readOnly,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
+                    optionAddExtension = extension,
+                )
+            }
+            is StorageConnection.Sftp -> {
+                RemoteConnection(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    keyFileUri = keyFileUri,
+                    keyData = keyData,
+                    keyPassphrase = keyPassphrase,
+                    ignoreKnownHosts = ignoreKnownHosts,
+                    encoding = encoding,
+                    optionSafeTransfer = safeTransfer,
+                    optionReadOnly = readOnly,
+                    optionThumbnailTypes = thumbnailTypes.mapNotNull { ThumbnailType.findByType(it) },
                     optionAddExtension = extension,
                 )
             }
@@ -202,14 +230,15 @@ internal object DomainMapper {
                     password = password,
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
-                    extension = optionAddExtension,
                     readOnly = optionReadOnly,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
+                    extension = optionAddExtension,
                     domain = domain,
                     enableDfs = enableDfs,
                 )
             }
             StorageType.APACHE_FTP,
-            StorageType.APACHE_FTPS -> {
+            StorageType.APACHE_FTPS, -> {
                 StorageConnection.Ftp(
                     id = id,
                     name = name,
@@ -222,10 +251,33 @@ internal object DomainMapper {
                     anonymous = anonymous,
                     safeTransfer = optionSafeTransfer,
                     readOnly = optionReadOnly,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
                     extension = optionAddExtension,
                     encoding = encoding,
                     isActiveMode = isFtpActiveMode,
                     isImplicitMode = isFtpsImplicit,
+                )
+            }
+            StorageType.APACHE_SFTP, -> {
+                StorageConnection.Sftp(
+                    id = id,
+                    name = name,
+                    storage = storage,
+                    host = host,
+                    port = port,
+                    folder = folder,
+                    user = user,
+                    password = password,
+                    anonymous = anonymous,
+                    safeTransfer = optionSafeTransfer,
+                    readOnly = optionReadOnly,
+                    thumbnailTypes = optionThumbnailTypes.map { it.type },
+                    extension = optionAddExtension,
+                    keyFileUri = keyFileUri,
+                    keyData = keyData,
+                    keyPassphrase = keyPassphrase,
+                    ignoreKnownHosts = ignoreKnownHosts,
+                    encoding = encoding,
                 )
             }
         }

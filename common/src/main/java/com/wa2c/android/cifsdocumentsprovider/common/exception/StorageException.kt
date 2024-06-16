@@ -3,16 +3,35 @@ package com.wa2c.android.cifsdocumentsprovider.common.exception
 import java.io.IOException
 
 /**
- * Edit exception.
+ * Storage exception.
  */
-sealed class StorageException(message: String) : IOException(message) {
-    class FileNotFoundException : StorageException("File is not found.")
+sealed class StorageException(message: String?, cause: Throwable?) : IOException(message, cause) {
+    class Error : StorageException {
+        constructor(cause: Throwable) : super(cause.localizedMessage, cause)
+        constructor(message: String) : super(message, null)
+    }
 
-    class AccessModeException : StorageException("Writing is not allowed in reading mode.")
+    sealed class File(message: String?, cause: Throwable?) : StorageException(message, cause) {
+        class NotFound(cause: Throwable? = null) : File(cause?.localizedMessage ?: "File is not found.", cause)
+        class DocumentId(cause: Throwable? = null) : File(cause?.localizedMessage ?: "Invalid document id.", cause)
+    }
 
-    class ReadOnlyException : StorageException("Writing is not allowed in options.")
+    sealed class Operation(message: String?, cause: Throwable?) : StorageException(message, cause) {
+        class Unsupported(cause: Throwable) : Operation(cause.localizedMessage ?: "Unsupported operation.", cause)
+        class AccessMode(cause: Throwable? = null) : Operation("Writing is not allowed in reading mode.", cause)
+        class ReadOnly(cause: Throwable? = null) : Operation("Writing is not allowed in options.", cause)
+        class RandomAccessNotPermitted(cause: Throwable? = null) : Operation("This type does not support random writing.", cause)
+    }
 
-    class DocumentIdException : StorageException("Invalid document id.")
+    sealed class Security(message: String?, cause: Throwable?, val id: String) : StorageException(message, cause) {
+        class Auth(cause: Throwable, id: String) : Security(cause.localizedMessage ?: "Authentication failed.", cause, id)
+        class UnknownHost(cause: Throwable, id: String) : Security(cause.localizedMessage ?: "Unknown host.", cause, id)
+    }
 
-    class RandomAccessNotPermittedException : StorageException("This type does not support random writing.")
+    sealed class Transaction(message: String?, cause: Throwable?) : StorageException(message, cause) {
+        class HostNotFound(cause: Throwable) : Transaction(cause.localizedMessage ?: "Host not found.", cause)
+        class Timeout(cause: Throwable) : Transaction(cause.localizedMessage ?:  "Connection timeout.", cause)
+        class Network(cause: Throwable) : Transaction(cause.localizedMessage ?: "Network disconnected.", cause)
+    }
+
 }

@@ -43,7 +43,7 @@ class HostFinder @Inject constructor() {
                         }
                     }
                 })
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             _hostFlow.emit(null)
             throw e
         }
@@ -55,7 +55,7 @@ class HostFinder @Inject constructor() {
     suspend fun stopDiscovery() {
         try {
             SubnetDevices.fromLocalAddress().cancel()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             logE(e)
         } finally {
             _hostFlow.emit(null)

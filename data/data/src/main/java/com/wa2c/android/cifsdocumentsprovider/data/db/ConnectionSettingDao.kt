@@ -5,6 +5,8 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
+import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -25,6 +27,9 @@ interface ConnectionSettingDao {
 
     @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} ORDER BY sort_order")
     fun getList(): Flow<List<ConnectionSettingEntity>>
+
+    @Query("SELECT * FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE type IN (:types) ORDER BY sort_order")
+    suspend fun getTypedList(types: Collection<String>): List<ConnectionSettingEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: ConnectionSettingEntity)

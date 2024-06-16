@@ -3,10 +3,14 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ui
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,6 +20,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.EditScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.folder.FolderScreen
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.home.HomeScreen
@@ -29,6 +34,8 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsS
  */
 @Composable
 internal fun MainNavHost(
+    viewModel: MainViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     navController: NavHostController,
     showSendScreen: Boolean,
     onSendUri: (List<Uri>, Uri) -> Unit,
@@ -39,7 +46,6 @@ internal fun MainNavHost(
         navController = navController,
         startDestination = HomeScreenName,
     ) {
-
         // Home Screen
         composable(
             route = HomeScreenName,
@@ -52,7 +58,8 @@ internal fun MainNavHost(
                     navController.navigate(route = SettingsScreenName)
                 },
                 onNavigateEdit = { connection ->
-                    navController.navigate(route = EditScreenRouteName + "?$EditScreenParamId=${connection.id}")
+                    val route = EditScreenRouteName + if (connection != null) "?$EditScreenParamId=${connection.id}" else ""
+                    navController.navigate(route = route)
                 },
                 onNavigateHost = {
                     navController.navigate(route = HostScreenName)
@@ -122,9 +129,7 @@ internal fun MainNavHost(
                     if (backStackEntry.arguments?.getString(HostScreenParamId) == null) {
                         navController.navigate(
                             route = EditScreenRouteName + "?host=${host}",
-                            navOptions = navOptions {
-                                this.popUpTo(HomeScreenName)
-                            })
+                            navOptions = navOptions { this.popUpTo(HomeScreenName) })
                     } else {
                         navController.previousBackStackEntry?.savedStateHandle?.set(
                             HostScreenResultKey,
@@ -134,9 +139,10 @@ internal fun MainNavHost(
                     }
                 },
                 onSetManually = {
-                    navController.navigate(route = EditScreenRouteName, navOptions = navOptions {
-                        this.popUpTo(HomeScreenName)
-                    })
+                    navController.navigate(
+                        route = EditScreenRouteName,
+                        navOptions = navOptions { this.popUpTo(HomeScreenName) }
+                    )
                 }
             )
         }
@@ -161,6 +167,15 @@ internal fun MainNavHost(
             route = SettingsScreenName,
         ) {
             SettingsScreen(
+                onTransitEdit = {
+                    // from Known Key
+                    navController.navigate(
+                        route = EditScreenRouteName + "?$EditScreenParamId=${it.id}",
+                        navOptions = navOptions {
+                            this.popUpTo(HomeScreenName)
+                        }
+                    )
+                },
                 onNavigateBack = {
                     navController.popBackStack()
                 }
@@ -198,9 +213,10 @@ internal fun MainNavHost(
             ReceiveFile(
                 uriList = uriList,
                 onNavigateFinish = {
-                    navController.navigate(route = SendScreenName, navOptions = navOptions {
-                        this.popUpTo(SendScreenName)
-                    })
+                    navController.navigate(
+                        route = SendScreenName,
+                        navOptions = navOptions { this.popUpTo(SendScreenName) }
+                    )
                 }
             ) {
                 onSendUri(uriList, it)
@@ -209,10 +225,23 @@ internal fun MainNavHost(
 
         // Navigate SendScreen if sending
         if (showSendScreen) {
-            navController.navigate(route = SendScreenName, navOptions = navOptions {
-                this.popUpTo(SendScreenName)
-            })
+            navController.navigate(
+                route = SendScreenName,
+                navOptions = navOptions { this.popUpTo(SendScreenName) }
+            )
             return@NavHost
+        }
+    }
+
+    LaunchedEffect(null) {
+        // from SAF picker
+        viewModel.showEdit.collectIn(lifecycleOwner) { storageId ->
+            navController.navigate(
+                route = EditScreenRouteName + "?$EditScreenParamId=${storageId}",
+                navOptions = navOptions {
+                    this.popUpTo(HomeScreenName)
+                }
+            )
         }
     }
 }

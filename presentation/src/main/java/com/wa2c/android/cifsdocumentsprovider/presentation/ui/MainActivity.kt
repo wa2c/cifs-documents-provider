@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.ActivityCompat
 import androidx.core.util.Consumer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -18,10 +19,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.getCurrentReady
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.getStorageId
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.isDark
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
     // NOTE: Use AppCompatActivity (not ComponentActivity) for Language
 
     /** Main View Model */
-    private val mainViewModel by viewModels<MainViewModel>()
+    private val mainViewModel: MainViewModel by viewModels()
     /** Work manager */
     private val workManager: WorkManager = WorkManager.getInstance(this)
 
@@ -62,8 +63,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            val systemUiController = rememberSystemUiController()
-            systemUiController.setStatusBarColor(Theme.Colors.StatusBackground)
+            window.statusBarColor = Theme.Colors.StatusBackground.toArgb()
 
             Theme.AppTheme(
                 darkTheme = mainViewModel.uiThemeFlow.collectAsStateWithLifecycle().value.isDark()
@@ -96,6 +96,13 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.getStorageId()?.let {
+            mainViewModel.showEditScreen(it)
         }
     }
 

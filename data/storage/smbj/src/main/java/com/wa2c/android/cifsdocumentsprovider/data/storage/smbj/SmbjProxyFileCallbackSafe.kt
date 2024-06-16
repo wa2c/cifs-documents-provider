@@ -24,7 +24,9 @@ class SmbjProxyFileCallbackSafe(
     override val coroutineContext: CoroutineContext = Dispatchers.IO + Job()
 
     /** File size */
-    private val fileSize: Long by lazy { file.fileInformation.standardInformation.endOfFile }
+    private val fileSize: Long by lazy {
+        processFileIo(coroutineContext) { file.fileInformation.standardInformation.endOfFile }
+    }
 
     @Throws(ErrnoException::class)
     override fun onGetSize(): Long {

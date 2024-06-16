@@ -8,13 +8,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal object AppModule {
+internal object DataModule {
 
     /** AppDatabase */
     @Singleton
@@ -36,48 +34,4 @@ internal object AppModule {
         @ApplicationContext context: Context
     ): AppPreferencesDataStore = AppPreferencesDataStore(context)
 
-    /** StorageClientManager */
-    @Singleton
-    @Provides
-    fun provideStorageClientManager(
-        preferences: AppPreferencesDataStore,
-    ): StorageClientManager {
-        return StorageClientManager(runBlocking { preferences.openFileLimitFlow.first() })
-    }
 }
-//
-//@Module
-//@InstallIn(SingletonComponent::class)
-//object CoroutineDispatcherModule {
-//    @DefaultDispatcher
-//    @Provides
-//    fun provideDefaultDispatcher(): CoroutineDispatcher {
-//        return Dispatchers.Default
-//    }
-//
-//    @IoDispatcher
-//    @Provides
-//    fun provideIODispatcher(): CoroutineDispatcher {
-//        return Dispatchers.IO
-//    }
-//
-//    @MainDispatcher
-//    @Provides
-//    fun provideMainDispatcher(): CoroutineDispatcher {
-//        Dispatchers.Unconfined
-//        return Dispatchers.Main
-//    }
-//}
-//
-//
-//@Qualifier
-//@Retention(AnnotationRetention.BINARY)
-//annotation class IoDispatcher
-//
-//@Qualifier
-//@Retention(AnnotationRetention.BINARY)
-//annotation class MainDispatcher
-//
-//@Qualifier
-//@Retention(AnnotationRetention.BINARY)
-//annotation class DefaultDispatcher

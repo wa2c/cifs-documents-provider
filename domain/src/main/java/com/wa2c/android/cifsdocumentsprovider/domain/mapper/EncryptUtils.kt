@@ -1,9 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.mapper
 
-import android.annotation.SuppressLint
 import android.util.Base64
 import com.wa2c.android.cifsdocumentsprovider.domain.BuildConfig
-import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
