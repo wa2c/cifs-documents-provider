@@ -19,6 +19,8 @@ enum class Language(
     SLOVAK("sk"),
     /** Chinese */
     CHINESE("zh"),
+    /** Russian */
+    RUSSIAN("ru"),
     ;
 
     /** Index */

@@ -1,42 +1,48 @@
 <strong>CIFS Documents Provider</strong>は、共有オンラインストレージへのアクセスを提供するAndroidアプリです。
 
-<strong><font color="#339933">[機能・仕様]</font></strong>
+<strong>機能・仕様</strong>
 
-* Storage Access Framework (SAF) を介した、共有オンラインストレージへのアクセスを他のアプリに提供します。
-* ファイルおよびディレクトリに対するアクセスを提供します。
-* SMB、FTP、FTPS、SFTPをサポートしています。
-* オンラインストレージのファイル共有、転送を行うことができます。
-* 複数の接続設定を保存することができます。
-* 複数の言語に対応しています。
-* ダークモードに対応しています。
-* ローカルストレージとして扱うことができます。(要設定)
-* 通知を表示してタスクキルを防止できます。(要設定)
+<ul>
+<li>Storage Access Framework (SAF) を介した、共有オンラインストレージへのアクセスを他のアプリに提供します。</li>
+<li>ファイルおよびディレクトリに対するアクセスを提供します。</li>
+<li>SMB、FTP、FTPS、SFTPをサポートしています。</li>
+<li>オンラインストレージのファイル共有、転送を行うことができます。</li>
+<li>複数の接続設定を保存することができます。</li>
+<li>複数の言語に対応しています。</li>
+<li>ダークモードに対応しています。</li>
+<li>ローカルストレージとして扱うことができます。(要設定)</li>
+<li>通知を表示してタスクキルを防止できます。(要設定)</li>
+</ul>
 
-<strong><font color="#339933">[主な用途]</font></strong>
+<strong>主な用途</strong>
 
-* アプリで作成したファイルのインポートおよびエクスポート。
-* ストレージ管理アプリによるファイルおよびディレクトリの操作。
-* メディアプレイヤーアプリによる、音楽、動画等の再生。
-* カメラアプリで撮影した写真の保存。
+<ul>
+<li>アプリで作成したファイルのインポートおよびエクスポート。</li>
+<li>ストレージ管理アプリによるファイルおよびディレクトリの操作。</li>
+<li>メディアプレイヤーアプリによる、音楽、動画等の再生。</li>
+<li>カメラアプリで撮影した写真の保存。</li>
+</ul>
 
-<strong><font color="#339933">[注意]</font></strong>
+<strong>注意</strong>
 
-* 本アプリにファイル管理機能はありません。
-* 他のアプリから利用するためには、SAF(Storage Access Framework)をサポートしている必要があります。
-* ローカルストレージを前提としたアプリでは、正常に動作しない場合があります。
-* 音声や動画のストリーミングデータの保存先に指定すると、アプリがクラッシュする場合があります。
+<ul>
+<li>本アプリにファイル管理機能はありません。</li>
+<li>他のアプリから利用するためには、SAF(Storage Access Framework)をサポートしている必要があります。</li>
+<li>ローカルストレージを前提としたアプリでは、正常に動作しない場合があります。</li>
+<li>音声や動画のストリーミングデータの保存先に指定すると、アプリがクラッシュする場合があります。</li>
+</ul>
 
-<strong><font color="#339933">[使用方法]</font></strong>
+<strong>使用方法</strong>
 
 次のページを参照してください。
 https://github.com/wa2c/cifs-documents-provider/wiki/Manual-ja
 
-<strong><font color="#339933">[ソースコード]</font></strong>
+<strong>ソースコード</strong>
 
 GitHub
 https://github.com/wa2c/cifs-documents-provider
 
-<strong><font color="#339933">[課題管理]</font></strong>
+<strong>課題管理</strong>
 
 GitHub Issue
 https://github.com/wa2c/cifs-documents-provider/issues

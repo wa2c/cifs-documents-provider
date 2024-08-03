@@ -1,42 +1,47 @@
 <strong>CIFS Documents Provider</strong> is an Android app to provide access to shared online storage.
 
-<strong><font color="#339933">[Feature]</font></strong>
+<strong>Features</strong>
 
-* Provide other apps with access to shared online storage via the Storage Access Framework (SAF).
-* Provides access to files and directories.
-* Supports SMB, FTP, FTPS and SFTP.
-* Share and transfer files on online storage.
-* Multiple connection settings can be stored.
-* Supports multiple languages.
-* Supports dark mode.
-* Can be treated as local storage. (Configuration required)
-* Notifications can be displayed to prevent task kills. (configuration required)
+<ul>
+<li>Provide other apps with access to shared network storage via the Storage Access Framework (SAF).</li>
+<li>Provides access to files and directories.</li>
+<li>Supports SMB (Samba, Common Internet File System (CIFS), Windows Network Shared Folder), FTP, FTPS and SFTP.</li>
+<li>Share and transfer files on online storage.</li>
+<li>Multiple connection settings can be stored.</li>
+<li>Supports dark mode.</li>
+<li>Can be treated as local storage (configuration required).</li>
+<li>Notifications can be displayed to prevent task kills (configuration required).</li>
+</ul>
 
-<strong><font color="#339933">[Objective]</font></strong>
+<strong>Objective</strong>
 
-* Import and export of files created by the app.
-* Manage files and directories with the Storage Manager app.
-* Play music, videos, etc. with the media player app.
-* Direct saving of photos taken with the camera app.
+<ul>
+<li>Import and export of files created by the app.</li>
+<li>Manage files and directories with the Storage Manager app.</li>
+<li>Play music, videos, etc. with the media player app.</li>
+<li>Direct saving of photos taken with the camera app.</li>
+</ul>
 
-<strong><font color="#339933">[Note]</font></strong>
+<strong>Note</strong>
 
-* No file management function in this app.
-* To use this app, your apps must support SAF (Storage Access Framework).
-* Apps that assume local storage may not work properly.
-* Apps may crash when specified as a storage destination for streaming audio or video data.
+<ul>
+<li>No file management function in this app.</li>
+<li>To use this app, your apps must support SAF (Storage Access Framework).</li>
+<li>Apps that assume local storage may not work properly.</li>
+<li>Apps may crash when specified as a storage destination for streaming audio or video data.</li>
+</ul>
 
-<strong><font color="#339933">[How to use]</font></strong>
+<strong>How to use</strong>
 
 See the following page. (Japanese)
 https://github.com/wa2c/cifs-documents-provider/wiki/Manual-ja
 
-<strong><font color="#339933">[Source]</font></strong>
+<strong>Source</strong>
 
 GitHub
 https://github.com/wa2c/cifs-documents-provider
 
-<strong><font color="#339933">[Issue]</font></strong>
+<strong>Issues</strong>
 
 GitHub Issue
 https://github.com/wa2c/cifs-documents-provider/issues
