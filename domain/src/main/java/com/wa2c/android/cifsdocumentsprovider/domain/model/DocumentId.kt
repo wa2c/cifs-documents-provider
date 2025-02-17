@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
  * [Document ID format: <connectionId>:<path>]
  */
 @Parcelize
-data class DocumentId internal constructor(
+data class DocumentId(
     val connectionId: String,
     val path: String,
     val legacyId: String? = null,

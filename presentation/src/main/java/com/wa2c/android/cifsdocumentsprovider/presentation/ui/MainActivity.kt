@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            @Suppress("DEPRECATION")
             window.statusBarColor = Theme.Colors.StatusBackground.toArgb()
 
             Theme.AppTheme(
