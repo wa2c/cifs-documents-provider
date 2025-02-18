@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
 }
 
@@ -51,7 +51,7 @@ dependencies {
 
     // Libraries
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.documentfile)
     implementation(libs.jsch)

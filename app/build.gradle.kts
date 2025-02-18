@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kapt)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
 }
 
@@ -72,10 +72,5 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.hilt.android)
     implementation(libs.androidx.work.runtime)
-    kapt(libs.hilt.android.compiler)
-}
-
-kapt {
-    // https://kotlinlang.org/docs/kapt.html
-    correctErrorTypes = true
+    ksp(libs.hilt.android.compiler)
 }
