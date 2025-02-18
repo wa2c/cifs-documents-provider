@@ -23,15 +23,6 @@ android {
         buildConfigField("String", "K", "\"com.wa2c.android\"")
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion

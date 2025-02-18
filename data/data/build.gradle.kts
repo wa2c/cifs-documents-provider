@@ -24,16 +24,7 @@ android {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
+    
     compileOptions {
         sourceCompatibility = javaVersion
         targetCompatibility = javaVersion
