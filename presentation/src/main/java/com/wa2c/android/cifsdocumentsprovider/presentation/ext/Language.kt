@@ -19,10 +19,9 @@ enum class Language(
     SLOVAK("sk"),
     /** Chinese */
     CHINESE("zh"),
+    /** Burmese */
+    MYANMAR("my"),
     ;
-
-    /** Index */
-    val index: Int = this.ordinal
 
     companion object {
         val default: Language
@@ -30,12 +29,12 @@ enum class Language(
 
         /** Find value or default by code */
         fun findByCodeOrDefault(code: String?): Language {
-            return entries.firstOrNull { it.code == code } ?: ENGLISH
+            val locale = Locale.getDefault()
+            return entries.firstOrNull { it.code == code }
+                ?: entries.firstOrNull { it.code == locale.toLanguageTag() }
+                ?: entries.firstOrNull { it.code == locale.language }
+                ?: ENGLISH
         }
 
-        /** Find value or default by index. */
-        fun findByIndexOrDefault(index: Int?): Language {
-            return entries.firstOrNull { it.index == index } ?: ENGLISH
-        }
     }
 }
