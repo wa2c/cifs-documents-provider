@@ -30,5 +30,15 @@ task("clean", Delete::class) {
 }
 
 tasks.register("convertString") {
+    // Spreadsheet URL
+    System.setProperty(
+        "string_converter_spreadsheet_url",
+        "https://docs.google.com/spreadsheets/d/1y71DyM31liwjcAUuPIk3CuIqxJD2l9Y2Q-YZ0I0XE_E/export?format=csv#gid=0"
+    )
+    // res folder path
+    System.setProperty(
+        "string_converter_res_path",
+        "../../presentation/src/main/res/"
+    )
     dependsOn(gradle.includedBuild("string_converter").task(":convertString"))
 }
