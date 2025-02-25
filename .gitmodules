@@ -1,0 +1,3 @@
+[submodule "tools/string_converter"]
+	path = tools/string_converter
+	url = https://github.com/wa2c/android-string-converter.git
