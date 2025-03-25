@@ -8,17 +8,17 @@
     <string name="app_summary">访问在线存储</string>
     <string name="general_accept">OK</string>
     <string name="general_close">关闭</string>
-    <string name="general_warning">注意力</string>
-    <string name="general_yes">是的</string>
-    <string name="general_no">不</string>
+    <string name="general_warning">警告</string>
+    <string name="general_yes">是</string>
+    <string name="general_no">否</string>
     <string name="general_delete">删除</string>
-    <string name="general_back">后退</string>
-    <string name="general_copy_clipboard_message">复制到剪贴板。</string>
+    <string name="general_back">返回</string>
+    <string name="general_copy_clipboard_message">已复制到剪贴板</string>
     
     <!-- Home Screen -->
     <string name="home_open_file">打开</string>
     <string name="home_open_settings">设置</string>
-    <string name="home_open_file_ng_message">请先添加连接</string>
+    <string name="home_open_file_ng_message">请先添加一个连接</string>
     <string name="home_add_connection_input">输入</string>
     <string name="home_add_connection_search">搜索</string>
     
@@ -48,7 +48,7 @@
     <string name="edit_key_hint">私钥</string>
     <string name="edit_key_text_none">没用过</string>
     <string name="edit_key_text_file">引用文件</string>
-    <string name="edit_key_text_import">进口</string>
+    <string name="edit_key_text_import">已导入</string>
     <string name="edit_key_input_none">没用过</string>
     <string name="edit_key_input_file">请参阅文件</string>
     <string name="edit_key_input_import_file">导入文件</string>
@@ -66,10 +66,10 @@
     <string name="edit_option_read_only_label">只读</string>
     <string name="edit_option_extension_label">保存时添加扩展名</string>
     <string name="edit_option_thumbnail_label">缩略图</string>
-    <string name="edit_option_thumbnail_image">图像</string>
-    <string name="edit_option_thumbnail_audio">声音的</string>
+    <string name="edit_option_thumbnail_image">图片</string>
+    <string name="edit_option_thumbnail_audio">音频</string>
     <string name="edit_option_thumbnail_video">视频</string>
-    <string name="edit_option_thumbnail_disabled">残疾人</string>
+    <string name="edit_option_thumbnail_disabled">禁用</string>
     <string name="edit_info_section_title">信息</string>
     <string name="edit_storage_uri_title">存储 URI</string>
     <string name="edit_provider_uri_title">分享 URI</string>
@@ -81,12 +81,12 @@
     <string name="edit_check_save_ng_invalid_id_message">ID 无效。</string>
     <string name="edit_check_save_ng_duplicate_id_message">ID 重复。</string>
     <string name="edit_check_key_ng_failed_messaged">无法访问私钥。</string>
-    <string name="edit_check_key_ng_invalid_messaged">未能阅读私钥。</string>
+    <string name="edit_check_key_ng_invalid_messaged">未能读取私钥。</string>
     <string name="edit_check_key_ok_messaged">私钥是有效的。</string>
     <string name="edit_save_button">保存</string>
     <string name="edit_back_confirmation_message">放弃修改？</string>
     <string name="edit_delete_confirmation_message">删除此项设置？</string>
-    <string name="edit_warning_key_import_message">进口的秘密密钥无法保证。\n处理时请小心。</string>
+    <string name="edit_warning_key_import_message">导入的密钥无法验证。\n处理时请小心。</string>
     <string name="edit_warning_known_host_message">配置的 SSH 目标已首次连接或密钥已更改。\n您想信任目的地并连接吗？</string>
     
     <!-- Host Screen -->
@@ -124,9 +124,9 @@
     <string name="settings_info_known_hosts_type">钥匙类型</string>
     <string name="settings_info_known_hosts_key">钥匙</string>
     <string name="settings_info_known_hosts_delete_confirmation_message">您想删除该主机吗？</string>
-    <string name="settings_info_libraries">图书馆</string>
+    <string name="settings_info_libraries">使用的库</string>
     <string name="settings_info_contributors">贡献者</string>
-    <string name="settings_info_app">应用程序</string>
+    <string name="settings_info_app">应用程序信息</string>
     
     <!-- Send Screen -->
     <string name="send_title">发送文件</string>
@@ -147,12 +147,12 @@
     
     <!-- Notification -->
     <string name="notification_channel_name_provider">文件打开</string>
-    <string name="notification_title_provider">打开文件</string>
-    <string name="notification_channel_name_send">数据传输</string>
-    <string name="notification_title_send_completed">成功</string>
+    <string name="notification_title_provider">正在打开文件</string>
+    <string name="notification_channel_name_send">正在数据传输</string>
+    <string name="notification_title_send_completed">完成</string>
     
     <!-- Theme Enum -->
     <string name="enum_theme_default">默认</string>
-    <string name="enum_theme_light">淺色主題</string>
+    <string name="enum_theme_light">浅色主題</string>
     <string name="enum_theme_dark">深色主題</string>
 </resources>
