@@ -40,5 +40,10 @@ tasks.register("convertString") {
         "string_converter_res_path",
         "../../presentation/src/main/res/"
     )
+    // res file name
+    System.setProperty(
+        "string_converter_res_name",
+        "strings"
+    )
     dependsOn(gradle.includedBuild("string_converter").task(":convertString"))
 }

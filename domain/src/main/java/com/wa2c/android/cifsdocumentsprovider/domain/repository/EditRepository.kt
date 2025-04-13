@@ -1,6 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
+import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
@@ -160,7 +160,7 @@ class EditRepository @Inject internal constructor(
             val binary = try {
                 documentFileManager.loadFile(uri)
             } catch (e: Exception) {
-                throw Edit.KeyCheck.AccessFailedException(e)
+                throw EditException.KeyCheck.AccessFailedException(e)
             }
             String(binary).also {
                 checkKey(it)
@@ -174,7 +174,7 @@ class EditRepository @Inject internal constructor(
             try {
                 sshKeyManager.checkKeyFile(key.encodeToByteArray())
             } catch (e: Exception) {
-                throw Edit.KeyCheck.InvalidException(e)
+                throw EditException.KeyCheck.InvalidException(e)
             }
         }
     }

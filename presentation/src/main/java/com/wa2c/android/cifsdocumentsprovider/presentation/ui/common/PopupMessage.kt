@@ -74,6 +74,25 @@ enum class PopupMessageType {
 
 fun CoroutineScope.showPopup(
     snackbarHostState: SnackbarHostState,
+    text: String,
+    type: PopupMessageType? = null,
+    error: Throwable? = null,
+) {
+    launch {
+        snackbarHostState.currentSnackbarData?.dismiss()
+        val visual = MessageSnackbarVisual.create(
+            popupMessage = PopupMessage.Text(
+                text = text,
+                type = type,
+                error = error,
+            )
+        )
+        snackbarHostState.showSnackbar(visual)
+    }
+}
+
+fun CoroutineScope.showPopup(
+    snackbarHostState: SnackbarHostState,
     @StringRes stringRes: Int,
     type: PopupMessageType? = null,
     error: Throwable? = null,

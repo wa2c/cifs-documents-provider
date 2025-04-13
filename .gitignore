@@ -43,6 +43,7 @@ captures/
 .idea/gradle.xml
 .idea/assetWizardSettings.xml
 .idea/appInsightsSettings.xml
+.idea/deploymentTargetSelector
 .idea/dictionaries
 .idea/libraries
 .idea/other.xml

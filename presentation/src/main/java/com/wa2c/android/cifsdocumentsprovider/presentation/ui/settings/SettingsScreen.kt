@@ -36,6 +36,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
@@ -45,6 +47,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStateAdapter
@@ -63,6 +66,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onTransitEdit: (RemoteConnection) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -125,6 +129,29 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initialize()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.exportResult.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    val message = context.getString(R.string.settings_transfer_export_message, it)
+                    scope.showPopup(snackbarHostState, message, PopupMessageType.Success)
+                }
+            } else {
+                scope.showError(snackbarHostState, result.exceptionOrNull())
+            }
+        }
+        viewModel.importResult.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    val message = context.getString(R.string.settings_transfer_import_message, it)
+                    scope.showPopup(snackbarHostState, message, PopupMessageType.Success)
+                }
+            } else {
+                scope.showError(snackbarHostState, result.exceptionOrNull())
+            }
+        }
     }
 
 }

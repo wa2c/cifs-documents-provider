@@ -55,6 +55,8 @@ dependencies {
     implementation(libs.androidx.room.paging)
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+    // Serializer
+    implementation(libs.kotlinx.serialization.json)
     // Android Network Tools
     implementation(libs.androidnetworktools)
 

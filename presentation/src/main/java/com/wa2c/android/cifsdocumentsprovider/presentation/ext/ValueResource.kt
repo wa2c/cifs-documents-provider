@@ -3,7 +3,8 @@ package com.wa2c.android.cifsdocumentsprovider.presentation.ext
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
+import com.wa2c.android.cifsdocumentsprovider.common.exception.AppException
+import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.HostSortType
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
@@ -16,11 +17,13 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.PopupMessag
 val Throwable?.labelRes: Int
     @StringRes
     get() = when (this) {
-        is Edit.SaveCheck.InputRequiredException ->   R.string.edit_check_save_ng_input_message
-        is Edit.SaveCheck.InvalidIdException -> R.string.edit_check_save_ng_invalid_id_message
-        is Edit.SaveCheck.DuplicatedIdException ->  R.string.edit_check_save_ng_duplicate_id_message
-        is Edit.KeyCheck.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
-        is Edit.KeyCheck.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
+        is EditException.SaveCheck.InputRequiredException ->   R.string.edit_check_save_ng_input_message
+        is EditException.SaveCheck.InvalidIdException -> R.string.edit_check_save_ng_invalid_id_message
+        is EditException.SaveCheck.DuplicatedIdException ->  R.string.edit_check_save_ng_duplicate_id_message
+        is EditException.KeyCheck.AccessFailedException -> R.string.edit_check_key_ng_failed_messaged
+        is EditException.KeyCheck.InvalidException -> R.string.edit_check_key_ng_invalid_messaged
+        is AppException.Settings.Export -> R.string.settings_transfer_export_error
+        is AppException.Settings.Import -> R.string.settings_transfer_import_error
         else -> R.string.provider_error_message
     }
 

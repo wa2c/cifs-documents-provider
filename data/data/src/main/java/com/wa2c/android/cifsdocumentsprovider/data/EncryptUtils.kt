@@ -1,7 +1,6 @@
-package com.wa2c.android.cifsdocumentsprovider.domain.mapper
+package com.wa2c.android.cifsdocumentsprovider.data
 
 import android.util.Base64
-import com.wa2c.android.cifsdocumentsprovider.domain.BuildConfig
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -9,9 +8,7 @@ import javax.crypto.spec.SecretKeySpec
 /**
  * Json Converter
  */
-internal object EncryptUtils {
-
-    private const val SECRET_KEY = BuildConfig.K
+object EncryptUtils {
 
     private const val ALGORITHM: String = "AES"
 
@@ -22,9 +19,9 @@ internal object EncryptUtils {
     /**
      * Encrypt key.
      */
-    fun encrypt(originalString: String): String {
+    fun encrypt(originalString: String, secretKey: String): String {
         val originalBytes = originalString.toByteArray()
-        val secretKeyBytes = SECRET_KEY.toByteArray()
+        val secretKeyBytes = secretKey.padEnd(16, '0') .toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, spec)
@@ -36,9 +33,9 @@ internal object EncryptUtils {
     /**
      * Decrypt key.
      */
-    fun decrypt(encryptBytesBase64String: String): String {
+    fun decrypt(encryptBytesBase64String: String, secretKey: String): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
-        val secretKeyBytes = SECRET_KEY.toByteArray()
+        val secretKeyBytes = secretKey.padEnd(16, '0').toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, spec)

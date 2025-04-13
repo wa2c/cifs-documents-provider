@@ -5,8 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
-import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -33,6 +31,9 @@ interface ConnectionSettingDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(entity: ConnectionSettingEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(entities: List<ConnectionSettingEntity>)
 
     @Query("DELETE FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE id = :id")
     suspend fun delete(id: String)
