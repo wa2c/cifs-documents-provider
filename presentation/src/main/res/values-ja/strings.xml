@@ -120,12 +120,12 @@
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
     <string name="settings_section_transfer">エクスポート / インポート</string>
     <string name="settings_transfer_export">接続設定のエクスポート</string>
-    <string name="settings_transfer_export_dialog_password">パスワード</string>
+    <string name="settings_transfer_export_dialog_password">パスワード (1-32文字)</string>
     <string name="settings_transfer_export_dialog_button">エクスポート</string>
     <string name="settings_transfer_export_message">%1$d件のデータを書き出しました。</string>
     <string name="settings_transfer_export_error">データの書き出しに失敗しました。</string>
     <string name="settings_transfer_import">接続設定のインポート</string>
-    <string name="settings_transfer_import_dialog_password">パスワード</string>
+    <string name="settings_transfer_import_dialog_password">パスワード (1-32文字)</string>
     <string name="settings_transfer_import_dialog_option">ID重複データ</string>
     <string name="settings_transfer_import_dialog_option_overwrite">上書き</string>
     <string name="settings_transfer_import_dialog_option_ignore">無視</string>

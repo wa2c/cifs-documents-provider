@@ -28,7 +28,7 @@ class ConnectionIO @Inject constructor(
         withContext(Dispatchers.IO) {
              context.contentResolver.openOutputStream(uriText.toUri())?.use {
                  val json = formatter.encodeToString(connectionList)
-                 val encryptedJson = EncryptUtils.encrypt(json, password)
+                 val encryptedJson = EncryptUtils.encrypt(json, password, true)
                  it.write(encryptedJson.toByteArray(Charsets.UTF_8))
              }
         }
@@ -42,7 +42,7 @@ class ConnectionIO @Inject constructor(
             val uri = uriText.toUri()
             context.contentResolver.openInputStream(uri)?.use {
                 val encryptedJson = it.readBytes().toString(Charsets.UTF_8)
-                val json = EncryptUtils.decrypt(encryptedJson, password)
+                val json = EncryptUtils.decrypt(encryptedJson, password, true)
                 formatter.decodeFromString(json)
             } ?: emptyList()
         }

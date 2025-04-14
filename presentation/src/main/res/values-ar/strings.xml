@@ -120,12 +120,12 @@
     <string name="settings_set_use_as_local">محاكاة الذاكرة المحلية\n(مطلوب إعادة تشغيل الجهاز)</string>
     <string name="settings_section_transfer">استيراد / تصدير</string>
     <string name="settings_transfer_export">تصدير إعدادات الاتصال</string>
-    <string name="settings_transfer_export_dialog_password">كلمة المرور</string>
+    <string name="settings_transfer_export_dialog_password">كلمة المرور (1-32 حرفًا)</string>
     <string name="settings_transfer_export_dialog_button">يصدّر</string>
     <string name="settings_transfer_export_message">تم تصدير %1$d من البيانات.</string>
     <string name="settings_transfer_export_error">فشل تصدير البيانات.</string>
     <string name="settings_transfer_import">استيراد إعدادات الاتصال</string>
-    <string name="settings_transfer_import_dialog_password">كلمة المرور</string>
+    <string name="settings_transfer_import_dialog_password">كلمة المرور (1-32 حرفًا)</string>
     <string name="settings_transfer_import_dialog_option">معرف البيانات المكررة</string>
     <string name="settings_transfer_import_dialog_option_overwrite">الكتابة فوق</string>
     <string name="settings_transfer_import_dialog_option_ignore">يتجاهل</string>

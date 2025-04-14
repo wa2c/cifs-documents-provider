@@ -120,12 +120,12 @@
     <string name="settings_set_use_as_local">ဒေသတွင်းသိုလှောင်မှုအဖြစ် အသုံးပြုပါ။\n(စက်ပစ္စည်းကို ပြန်လည်စတင်ရန် လိုအပ်သည်)</string>
     <string name="settings_section_transfer">သွင်းကုန်/ပို့ကုန်</string>
     <string name="settings_transfer_export">ချိတ်ဆက်မှုဆက်တင်များကို ထုတ်ယူပါ။</string>
-    <string name="settings_transfer_export_dialog_password">စကားဝှက်</string>
+    <string name="settings_transfer_export_dialog_password">စကားဝှက် (၁-၃၂ လုံး)</string>
     <string name="settings_transfer_export_dialog_button">တင်ပို့ခြင်း။</string>
     <string name="settings_transfer_export_message">ဒေတာ %1$d ကို ထုတ်ယူပြီးပါပြီ။</string>
     <string name="settings_transfer_export_error">ဒေတာကို ထုတ်ယူ၍မရပါ။</string>
     <string name="settings_transfer_import">ချိတ်ဆက်မှု ဆက်တင်များကို တင်သွင်းပါ။</string>
-    <string name="settings_transfer_import_dialog_password">စကားဝှက်</string>
+    <string name="settings_transfer_import_dialog_password">စကားဝှက် (၁-၃၂ လုံး)</string>
     <string name="settings_transfer_import_dialog_option">ID ဒေတာပွား</string>
     <string name="settings_transfer_import_dialog_option_overwrite">ထပ်ရေးပါ။</string>
     <string name="settings_transfer_import_dialog_option_ignore">လျစ်လျူရှုပါ။</string>

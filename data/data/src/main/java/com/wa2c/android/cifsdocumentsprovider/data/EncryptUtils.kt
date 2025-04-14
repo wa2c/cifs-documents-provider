@@ -1,6 +1,8 @@
 package com.wa2c.android.cifsdocumentsprovider.data
 
 import android.util.Base64
+import com.wa2c.android.cifsdocumentsprovider.common.values.PASSWORD_LENGTH_16
+import com.wa2c.android.cifsdocumentsprovider.common.values.PASSWORD_LENGTH_32
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -19,9 +21,10 @@ object EncryptUtils {
     /**
      * Encrypt key.
      */
-    fun encrypt(originalString: String, secretKey: String): String {
+    fun encrypt(originalString: String, secretKey: String, is256: Boolean = false): String {
         val originalBytes = originalString.toByteArray()
-        val secretKeyBytes = secretKey.padEnd(16, '0') .toByteArray()
+        val passwordLength = if (is256) PASSWORD_LENGTH_32 else PASSWORD_LENGTH_16
+        val secretKeyBytes = secretKey.padEnd(passwordLength, '0') .toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, spec)
@@ -33,9 +36,10 @@ object EncryptUtils {
     /**
      * Decrypt key.
      */
-    fun decrypt(encryptBytesBase64String: String, secretKey: String): String {
+    fun decrypt(encryptBytesBase64String: String, secretKey: String, is256: Boolean = false): String {
         val encryptBytes = Base64.decode(encryptBytesBase64String, Base64.DEFAULT)
-        val secretKeyBytes = secretKey.padEnd(16, '0').toByteArray()
+        val passwordLength = if (is256) PASSWORD_LENGTH_32 else PASSWORD_LENGTH_16
+        val secretKeyBytes = secretKey.padEnd(passwordLength, '0').toByteArray()
         val secretKeySpec = SecretKeySpec(secretKeyBytes, ALGORITHM)
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, spec)

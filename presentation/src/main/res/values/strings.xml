@@ -120,12 +120,12 @@
     <string name="settings_set_use_as_local">Use as local storage\n(Device reboot required)</string>
     <string name="settings_section_transfer">Import / Export</string>
     <string name="settings_transfer_export">Export connection settings</string>
-    <string name="settings_transfer_export_dialog_password">Password</string>
+    <string name="settings_transfer_export_dialog_password">Password (1-32 characters)</string>
     <string name="settings_transfer_export_dialog_button">Export</string>
     <string name="settings_transfer_export_message">%1$d data exported.</string>
     <string name="settings_transfer_export_error">Failed to export data.</string>
     <string name="settings_transfer_import">Import connection settings</string>
-    <string name="settings_transfer_import_dialog_password">Password</string>
+    <string name="settings_transfer_import_dialog_password">Password (1-32 characters)</string>
     <string name="settings_transfer_import_dialog_option">ID duplicate data</string>
     <string name="settings_transfer_import_dialog_option_overwrite">Overwrite</string>
     <string name="settings_transfer_import_dialog_option_ignore">Ignore</string>
