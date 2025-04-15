@@ -126,7 +126,8 @@
     <string name="settings_transfer_export_error">ဒေတာကို ထုတ်ယူ၍မရပါ။</string>
     <string name="settings_transfer_import">ချိတ်ဆက်မှု ဆက်တင်များကို တင်သွင်းပါ။</string>
     <string name="settings_transfer_import_dialog_password">စကားဝှက် (၁-၃၂ လုံး)</string>
-    <string name="settings_transfer_import_dialog_option">ID ဒေတာပွား</string>
+    <string name="settings_transfer_import_dialog_option_replace">ဒေတာအားလုံးကို အစားထိုးပါ။</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">ID ပြောင်းရန် (မျှဝေထားသော URI ကိုပြောင်းရန်)</string>
     <string name="settings_transfer_import_dialog_option_overwrite">ထပ်ရေးပါ။</string>
     <string name="settings_transfer_import_dialog_option_ignore">လျစ်လျူရှုပါ။</string>
     <string name="settings_transfer_import_dialog_option_append">ID ပြောင်းလဲခြင်း (URL အပြောင်းအလဲများ)</string>

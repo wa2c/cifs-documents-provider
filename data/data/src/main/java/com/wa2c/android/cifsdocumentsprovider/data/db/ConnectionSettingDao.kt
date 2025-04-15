@@ -38,8 +38,17 @@ interface ConnectionSettingDao {
     @Query("DELETE FROM ${ConnectionSettingEntity.TABLE_NAME} WHERE id = :id")
     suspend fun delete(id: String)
 
+    @Query("DELETE FROM ${ConnectionSettingEntity.TABLE_NAME}")
+    suspend fun deleteAll()
+
     @Query("UPDATE ${ConnectionSettingEntity.TABLE_NAME} SET sort_order = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: String, sortOrder: Int)
+
+    @Transaction
+    suspend fun replace(entities: List<ConnectionSettingEntity>) {
+        deleteAll()
+        insertAll(entities)
+    }
 
     @Transaction
     suspend fun move(fromPosition: Int, toPosition: Int) {

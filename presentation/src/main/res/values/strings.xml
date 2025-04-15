@@ -126,10 +126,11 @@
     <string name="settings_transfer_export_error">Failed to export data.</string>
     <string name="settings_transfer_import">Import connection settings</string>
     <string name="settings_transfer_import_dialog_password">Password (1-32 characters)</string>
-    <string name="settings_transfer_import_dialog_option">ID duplicate data</string>
+    <string name="settings_transfer_import_dialog_option_replace">Replace all data</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">ID duplicate data</string>
     <string name="settings_transfer_import_dialog_option_overwrite">Overwrite</string>
     <string name="settings_transfer_import_dialog_option_ignore">Ignore</string>
-    <string name="settings_transfer_import_dialog_option_append">Change ID (Change URL)</string>
+    <string name="settings_transfer_import_dialog_option_append">Change ID (Change Shared URI)</string>
     <string name="settings_transfer_import_dialog_button">Import</string>
     <string name="settings_transfer_import_message">%1$d data imported.</string>
     <string name="settings_transfer_import_error">Failed to import data.</string>

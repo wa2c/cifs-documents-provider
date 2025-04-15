@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
@@ -82,4 +83,11 @@ fun Modifier.moveFocusOnTab(focusManager: FocusManager) = composed {
             }
         }
     }
+}
+
+/**
+ * Enabled style
+ */
+fun Modifier.enabledStyle(enabled: Boolean): Modifier {
+    return if (enabled) this else this.alpha(0.5f)
 }

@@ -126,7 +126,8 @@
     <string name="settings_transfer_export_error">Export údajov zlyhal.</string>
     <string name="settings_transfer_import">Importujte nastavenia pripojenia</string>
     <string name="settings_transfer_import_dialog_password">Heslo (1-32 znakov)</string>
-    <string name="settings_transfer_import_dialog_option">ID duplicitné údaje</string>
+    <string name="settings_transfer_import_dialog_option_replace">Vymeňte všetky údaje</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">Zmeniť ID (Zmeniť zdieľaný URI)</string>
     <string name="settings_transfer_import_dialog_option_overwrite">Prepísať</string>
     <string name="settings_transfer_import_dialog_option_ignore">Ignorovať</string>
     <string name="settings_transfer_import_dialog_option_append">Zmena ID (zmeny adresy URL)</string>

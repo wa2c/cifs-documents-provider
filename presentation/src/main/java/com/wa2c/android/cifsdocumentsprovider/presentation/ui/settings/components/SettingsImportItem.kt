@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -38,6 +39,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.CommonDialog
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.DialogButton
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
+import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.enabledStyle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.SettingsViewModel
 
 /**
@@ -110,6 +112,7 @@ private fun ImportDialogContent(
     importOption: MutableState<ImportOption?>,
 ) {
     var passwordVisible: Boolean by remember { mutableStateOf(false) }
+    var isReplace = (importOption.value == ImportOption.Replace)
 
     Column(
         modifier = Modifier
@@ -141,22 +144,49 @@ private fun ImportDialogContent(
             },
         )
 
-        Text(
-            text = stringResource(R.string.settings_transfer_import_dialog_option),
+        Row(
             modifier = Modifier
-                .padding(vertical = Theme.Sizes.M)
+                .fillMaxWidth()
+                .clickable(
+                    onClick = {
+                        importOption.value = if (isReplace) null else ImportOption.Replace
+                    }
+                )
+                .padding(vertical = Theme.Sizes.SS)
+        ) {
+            Checkbox(
+                checked = isReplace,
+                onCheckedChange = null,
+                modifier = Modifier
+                    .size(Theme.Sizes.Button)
+            )
+            Text(
+                text = stringResource(R.string.settings_transfer_import_dialog_option_replace),
+                modifier = Modifier
+                    .align(alignment = Alignment.CenterVertically)
+                    .weight(weight = 1f, fill = true)
+                ,
+            )
+        }
+
+        Text(
+            text = stringResource(R.string.settings_transfer_import_dialog_option_duplicate),
+            modifier = Modifier
+                .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.M)
+                .enabledStyle(!isReplace)
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
-                    enabled = true,
+                    enabled = !isReplace,
                     onClick = { importOption.value = ImportOption.Overwrite })
                 .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.SS)
         ) {
             RadioButton(
                 selected = importOption.value == ImportOption.Overwrite,
+                enabled = !isReplace,
                 onClick = null,
                 modifier = Modifier
                     .size(Theme.Sizes.Button)
@@ -166,17 +196,21 @@ private fun ImportDialogContent(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterVertically)
                     .weight(weight = 1f, fill = true)
-                ,
+                    .enabledStyle(!isReplace),
             )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = true, onClick = { importOption.value = ImportOption.Ignore })
+                .clickable(
+                    enabled = !isReplace,
+                    onClick = { importOption.value = ImportOption.Ignore },
+                )
                 .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.SS)
         ) {
             RadioButton(
                 selected = importOption.value == ImportOption.Ignore,
+                enabled = !isReplace,
                 onClick = null,
                 modifier = Modifier
                     .size(Theme.Sizes.Button)
@@ -186,17 +220,21 @@ private fun ImportDialogContent(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterVertically)
                     .weight(weight = 1f, fill = true)
-                ,
+                    .enabledStyle(!isReplace),
             )
         }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(enabled = true, onClick = { importOption.value = ImportOption.Append })
+                .clickable(
+                    enabled = !isReplace,
+                    onClick = { importOption.value = ImportOption.Append },
+                )
                 .padding(horizontal = Theme.Sizes.S, vertical = Theme.Sizes.SS)
         ) {
             RadioButton(
                 selected = importOption.value == ImportOption.Append,
+                enabled = !isReplace,
                 onClick = null,
                 modifier = Modifier
                     .size(Theme.Sizes.Button)
@@ -206,7 +244,7 @@ private fun ImportDialogContent(
                 modifier = Modifier
                     .align(alignment = Alignment.CenterVertically)
                     .weight(weight = 1f, fill = true)
-                ,
+                    .enabledStyle(!isReplace),
             )
         }
     }
@@ -244,7 +282,7 @@ private fun ImportDialogContentPreview() {
     Theme.AppTheme {
         ImportDialogContent(
             password = remember { mutableStateOf<String>("") },
-            importOption = remember { mutableStateOf<ImportOption?>(ImportOption.Overwrite) },
+            importOption = remember { mutableStateOf<ImportOption?>(ImportOption.Replace) },
         )
     }
 }

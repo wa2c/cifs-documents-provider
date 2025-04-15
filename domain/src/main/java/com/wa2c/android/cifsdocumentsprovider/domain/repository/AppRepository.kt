@@ -111,6 +111,11 @@ class AppRepository @Inject internal constructor(
             try {
                 val list = connectionIO.importConnections(uriText, password)
                 when (importOption) {
+                    ImportOption.Replace -> {
+                        connectionSettingDao.replace(list)
+                        list.size
+                    }
+
                     ImportOption.Overwrite -> {
                         connectionSettingDao.insertAll(list)
                         list.size

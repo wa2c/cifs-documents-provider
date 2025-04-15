@@ -126,7 +126,8 @@
     <string name="settings_transfer_export_error">导出数据失败。</string>
     <string name="settings_transfer_import">导入连接设置</string>
     <string name="settings_transfer_import_dialog_password">密码（1-32个字符）</string>
-    <string name="settings_transfer_import_dialog_option">ID重复数据</string>
+    <string name="settings_transfer_import_dialog_option_replace">替换所有数据</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">更改 ID（更改共享 URI）</string>
     <string name="settings_transfer_import_dialog_option_overwrite">覆盖</string>
     <string name="settings_transfer_import_dialog_option_ignore">忽略</string>
     <string name="settings_transfer_import_dialog_option_append">ID变更（URL变更）</string>

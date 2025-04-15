@@ -126,10 +126,11 @@
     <string name="settings_transfer_export_error">データの書き出しに失敗しました。</string>
     <string name="settings_transfer_import">接続設定のインポート</string>
     <string name="settings_transfer_import_dialog_password">パスワード (1-32文字)</string>
-    <string name="settings_transfer_import_dialog_option">ID重複データ</string>
+    <string name="settings_transfer_import_dialog_option_replace">全データ置換え</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">ID重複データ</string>
     <string name="settings_transfer_import_dialog_option_overwrite">上書き</string>
     <string name="settings_transfer_import_dialog_option_ignore">無視</string>
-    <string name="settings_transfer_import_dialog_option_append">ID変更 (URLが変わります)</string>
+    <string name="settings_transfer_import_dialog_option_append">ID変更 (共有URIが変わります)</string>
     <string name="settings_transfer_import_dialog_button">インポート</string>
     <string name="settings_transfer_import_message">%1$d件のデータを取り込みました。</string>
     <string name="settings_transfer_import_error">データの取り込みに失敗しました。</string>
