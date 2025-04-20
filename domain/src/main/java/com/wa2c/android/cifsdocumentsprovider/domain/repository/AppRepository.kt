@@ -86,10 +86,11 @@ class AppRepository @Inject internal constructor(
     suspend fun exportSettings(
         uriText: String,
         password: String,
+        checkedId: Set<String>,
     ): Int {
         return withContext(dispatcher) {
             try {
-                val list = connectionSettingDao.getList().first()
+                val list = connectionSettingDao.getList().first().filter { checkedId.contains(it.id) }
                 connectionIO.exportConnections(uriText, password, list)
                 list.size
             } catch (e: Exception) {

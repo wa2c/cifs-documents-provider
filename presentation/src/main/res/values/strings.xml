@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">Import / Export</string>
     <string name="settings_transfer_export">Export connection settings</string>
     <string name="settings_transfer_export_dialog_password">Password (1-32 characters)</string>
+    <string name="settings_transfer_export_dialog_check">Export target</string>
     <string name="settings_transfer_export_dialog_button">Export</string>
     <string name="settings_transfer_export_message">%1$d data exported.</string>
     <string name="settings_transfer_export_error">Failed to export data.</string>

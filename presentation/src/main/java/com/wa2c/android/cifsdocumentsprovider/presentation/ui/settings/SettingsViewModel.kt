@@ -1,22 +1,21 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.common.exception.AppException
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.common.utils.logE
+import androidx.lifecycle.viewModelScope
 import com.wa2c.android.cifsdocumentsprovider.common.values.ImportOption
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appRepository: AppRepository,
+    private val editRepository: EditRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _exportResult = MutableSharedFlow<Result<Int>>()
@@ -33,6 +33,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _importResult = MutableSharedFlow<Result<Int>>()
     val importResult = _importResult.asSharedFlow()
+
+    val connectionListFlow = editRepository.connectionListFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     /**
      * Initialize
@@ -90,10 +93,14 @@ class SettingsViewModel @Inject constructor(
     /**
      * Export settings
      */
-    fun exportSettings(uriText: String, password: String) {
+    fun exportSettings(
+        uriText: String,
+        password: String,
+        checkedId: Set<String>,
+    ) {
         launch {
             runCatching {
-                appRepository.exportSettings(uriText, password)
+                appRepository.exportSettings(uriText, password, checkedId)
             }.onSuccess {
                 _exportResult.emit(Result.success(it))
             }.onFailure { e ->

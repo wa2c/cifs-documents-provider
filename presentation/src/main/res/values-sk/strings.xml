@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">Import / Export</string>
     <string name="settings_transfer_export">Exportovať nastavenia pripojenia</string>
     <string name="settings_transfer_export_dialog_password">Heslo (1-32 znakov)</string>
+    <string name="settings_transfer_export_dialog_check">Cieľ exportu</string>
     <string name="settings_transfer_export_dialog_button">Exportovať</string>
     <string name="settings_transfer_export_message">Exportované údaje: %1$d.</string>
     <string name="settings_transfer_export_error">Export údajov zlyhal.</string>

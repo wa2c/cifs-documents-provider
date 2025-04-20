@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">进口/出口</string>
     <string name="settings_transfer_export">导出连接设置</string>
     <string name="settings_transfer_export_dialog_password">密码（1-32个字符）</string>
+    <string name="settings_transfer_export_dialog_check">出口目标</string>
     <string name="settings_transfer_export_dialog_button">出口</string>
     <string name="settings_transfer_export_message">%1$d 数据已导出。</string>
     <string name="settings_transfer_export_error">导出数据失败。</string>

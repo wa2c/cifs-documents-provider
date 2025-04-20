@@ -130,7 +130,7 @@ private fun ImportDialogContent(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Default,
+                imeAction = ImeAction.Done,
             ),
             trailingIcon = {
                 IconButton(

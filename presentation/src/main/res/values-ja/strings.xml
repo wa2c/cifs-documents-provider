@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">エクスポート / インポート</string>
     <string name="settings_transfer_export">接続設定のエクスポート</string>
     <string name="settings_transfer_export_dialog_password">パスワード (1-32文字)</string>
+    <string name="settings_transfer_export_dialog_check">エクスポート対象</string>
     <string name="settings_transfer_export_dialog_button">エクスポート</string>
     <string name="settings_transfer_export_message">%1$d件のデータを書き出しました。</string>
     <string name="settings_transfer_export_error">データの書き出しに失敗しました。</string>

@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">استيراد / تصدير</string>
     <string name="settings_transfer_export">تصدير إعدادات الاتصال</string>
     <string name="settings_transfer_export_dialog_password">كلمة المرور (1-32 حرفًا)</string>
+    <string name="settings_transfer_export_dialog_check">هدف التصدير</string>
     <string name="settings_transfer_export_dialog_button">يصدّر</string>
     <string name="settings_transfer_export_message">تم تصدير %1$d من البيانات.</string>
     <string name="settings_transfer_export_error">فشل تصدير البيانات.</string>

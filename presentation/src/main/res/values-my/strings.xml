@@ -121,6 +121,7 @@
     <string name="settings_section_transfer">သွင်းကုန်/ပို့ကုန်</string>
     <string name="settings_transfer_export">ချိတ်ဆက်မှုဆက်တင်များကို ထုတ်ယူပါ။</string>
     <string name="settings_transfer_export_dialog_password">စကားဝှက် (၁-၃၂ လုံး)</string>
+    <string name="settings_transfer_export_dialog_check">တင်ပို့ရန်ပစ်မှတ်</string>
     <string name="settings_transfer_export_dialog_button">တင်ပို့ခြင်း။</string>
     <string name="settings_transfer_export_message">ဒေတာ %1$d ကို ထုတ်ယူပြီးပါပြီ။</string>
     <string name="settings_transfer_export_error">ဒေတာကို ထုတ်ယူ၍မရပါ။</string>
