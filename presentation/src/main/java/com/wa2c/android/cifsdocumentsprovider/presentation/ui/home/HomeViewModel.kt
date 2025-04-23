@@ -1,7 +1,7 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
+import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -13,10 +13,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val editRepository: EditRepository
+    private val appRepository: AppRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
-    val connectionListFlow = editRepository.connectionListFlow
+    val connectionListFlow = appRepository.connectionListFlow
 
     /**
      * Move item.
@@ -24,7 +24,7 @@ class HomeViewModel @Inject constructor(
     fun onItemMove(fromPosition: Int, toPosition: Int) {
         runBlocking {
             // run blocking for drag animation
-            editRepository.moveConnection(fromPosition, toPosition)
+            appRepository.moveConnection(fromPosition, toPosition)
         }
     }
 

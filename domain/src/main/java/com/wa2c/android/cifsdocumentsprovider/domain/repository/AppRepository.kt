@@ -2,6 +2,7 @@ package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
 import com.wa2c.android.cifsdocumentsprovider.common.exception.AppException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
 import com.wa2c.android.cifsdocumentsprovider.common.values.ImportOption
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
@@ -13,9 +14,11 @@ import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toIndexModel
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -31,6 +34,21 @@ class AppRepository @Inject internal constructor(
     private val connectionIO: ConnectionIO,
     @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
+    /** Connection flow */
+    val connectionListFlow = connectionSettingDao.getList().map { list ->
+        list.map { it.toIndexModel() }
+    }
+
+    /**
+     * Move connections order
+     */
+    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
+        withContext(dispatcher) {
+            connectionSettingDao.move(fromPosition, toPosition)
+        }
+    }
+
 
     /** UI Theme */
     val uiThemeFlow = appPreferences.uiThemeFlow

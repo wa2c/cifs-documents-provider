@@ -6,7 +6,6 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.ImportOption
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import com.wa2c.android.cifsdocumentsprovider.domain.repository.AppRepository
-import com.wa2c.android.cifsdocumentsprovider.domain.repository.EditRepository
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.MainCoroutineScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -25,7 +24,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val appRepository: AppRepository,
-    private val editRepository: EditRepository,
 ): ViewModel(), CoroutineScope by MainCoroutineScope() {
 
     private val _exportResult = MutableSharedFlow<Result<Int>>()
@@ -34,7 +32,7 @@ class SettingsViewModel @Inject constructor(
     private val _importResult = MutableSharedFlow<Result<Int>>()
     val importResult = _importResult.asSharedFlow()
 
-    val connectionListFlow = editRepository.connectionListFlow
+    val connectionListFlow = appRepository.connectionListFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     /**

@@ -41,11 +41,6 @@ class EditRepository @Inject internal constructor(
 
     private var temporaryConnection: RemoteConnection? = null
 
-    /** Connection flow */
-    val connectionListFlow = connectionSettingDao.getList().map { list ->
-        list.map { it.toIndexModel() }
-    }
-
     /**
      * Get connection
      */
@@ -81,16 +76,6 @@ class EditRepository @Inject internal constructor(
         logD("deleteConnection: id=$id")
         withContext(dispatcher) {
             connectionSettingDao.delete(id)
-        }
-    }
-
-    /**
-     * Move connections order
-     */
-    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
-        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
-        withContext(dispatcher) {
-            connectionSettingDao.move(fromPosition, toPosition)
         }
     }
 
