@@ -237,8 +237,6 @@ private fun ExportDialogContent(
                             .weight(weight = 1f, fill = true)
                     )
                 }
-
-                DividerThin()
             }
         }
     }
