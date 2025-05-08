@@ -12,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,6 +40,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
+import com.mikepenz.aboutlibraries.ui.compose.libraryColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.Language
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
@@ -58,7 +58,6 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsKnownHostList
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings.components.SettingsList
-import kotlinx.coroutines.launch
 
 /**
  * Settings Screen

@@ -5,24 +5,23 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.room)
 }
 
 val applicationId: String by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
+val androidCompileSdk: Int by rootProject.extra
+val androidMinSdk: Int by rootProject.extra
 
 android {
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    compileSdk = androidCompileSdk
     namespace = "${applicationId}.data"
 
     defaultConfig {
-        minSdk = libs.versions.androidMinSdk.get().toInt()
+        minSdk = androidMinSdk
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
     
     compileOptions {
@@ -35,6 +34,10 @@ android {
             languageVersion.set(JavaLanguageVersion.of(javaVersion.majorVersion))
         }
     }
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {

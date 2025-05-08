@@ -7,9 +7,13 @@ plugins {
 
 val applicationId: String by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
+val androidCompileSdk: Int by rootProject.extra
+val androidMinSdk: Int by rootProject.extra
+val appVersionName: String by rootProject.extra
+val appVersionCode: Int by rootProject.extra
 
 android {
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    compileSdk = androidCompileSdk
     namespace = applicationId
     compileOptions {
         sourceCompatibility = javaVersion
@@ -18,10 +22,10 @@ android {
 
     defaultConfig {
         applicationId = applicationId
-        minSdk = libs.versions.androidMinSdk.get().toInt()
-        targetSdk = libs.versions.androidCompileSdk.get().toInt()
-        versionCode = libs.versions.appVersionCode.get().toInt()
-        versionName = libs.versions.appVersionName.get()
+        minSdk = androidMinSdk
+        targetSdk = androidCompileSdk
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1,8 +1,14 @@
+import org.gradle.kotlin.dsl.extra
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 // Global Definition
 val applicationId by extra ("com.wa2c.android.cifsdocumentsprovider")
 val javaVersion by extra (JavaVersion.VERSION_21)
+val androidCompileSdk by extra (35)
+val androidMinSdk by extra (26)
+val appVersionName by extra ("2.3.0")
+val appVersionCode by extra (29)
 
 plugins {
     alias(libs.plugins.kotlin.android) apply false
@@ -14,6 +20,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.aboutlibraries) apply false
     alias(libs.plugins.hilt.android) apply false
+    alias(libs.plugins.room) apply false
 }
 
 allprojects {
