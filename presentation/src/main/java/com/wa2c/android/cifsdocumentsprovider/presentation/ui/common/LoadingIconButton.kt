@@ -10,7 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -29,8 +29,8 @@ fun LoadingIconButton(
     IconButton(
         onClick = { onClick() }
     ) {
-        val currentRotation = remember { mutableStateOf(0f) }
-        val rotation = remember { Animatable(currentRotation.value) }
+        val currentRotation = remember { mutableFloatStateOf(0f) }
+        val rotation = remember { Animatable(currentRotation.floatValue) }
 
         Icon(
             imageVector = imageVector,
@@ -44,13 +44,13 @@ fun LoadingIconButton(
             if (isLoading) {
                 // Infinite repeatable rotation when is playing
                 rotation.animateTo(
-                    targetValue = currentRotation.value + 360f,
+                    targetValue = currentRotation.floatValue + 360f,
                     animationSpec = infiniteRepeatable(
                         animation = tween(3000, easing = LinearEasing),
                         repeatMode = RepeatMode.Restart
                     )
                 ) {
-                    currentRotation.value = value
+                    currentRotation.floatValue = value
                 }
             } else {
                 // Slow down rotation on pause
@@ -61,7 +61,7 @@ fun LoadingIconButton(
                         easing = LinearOutSlowInEasing
                     )
                 ) {
-                    currentRotation.value = 0f
+                    currentRotation.floatValue = 0f
                 }
             }
         }
