@@ -79,6 +79,16 @@ internal fun SettingsList(
                 checked = useAsLocal,
             )
 
+            TitleItem(text = stringResource(R.string.settings_section_transfer))
+
+            SettingsExportItem(
+                text = stringResource(R.string.settings_transfer_export),
+            )
+
+            SettingsImportItem(
+                text = stringResource(R.string.settings_transfer_import),
+            )
+
             // Information Title
             TitleItem(text = stringResource(id = R.string.settings_section_info))
 

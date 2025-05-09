@@ -7,6 +7,7 @@ import com.wa2c.android.cifsdocumentsprovider.common.values.DEFAULT_ENCODING
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -24,6 +25,7 @@ data class RemoteConnection(
     val host: String,
     val port: String? = null,
     val enableDfs: Boolean = false,
+    val enableEncryption: Boolean = false,
     val folder: String? = null,
     val user: String? = null,
     val password: String? = null,
@@ -42,6 +44,7 @@ data class RemoteConnection(
     val optionThumbnailTypes: List<ThumbnailType> = emptyList(),
 ): Parcelable, java.io.Serializable {
 
+    @IgnoredOnParcel
     var isInvalid: Boolean
         private set
 
@@ -70,6 +73,7 @@ data class RemoteConnection(
                 || this.host != other.host
                 || this.port != other.port
                 || this.enableDfs != other.enableDfs
+                || this.enableEncryption != other.enableEncryption
                 || this.folder != other.folder
                 || this.user != other.user
                 || this.password != other.password

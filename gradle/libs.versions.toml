@@ -1,42 +1,37 @@
 [versions]
-appVersionName = "2.3.0"
-appVersionCode = "29"
-androidCompileSdk = "35"
-androidMinSdk = "26"
-
-aboutlibraries = "11.6.2"
+aboutlibraries = "12.1.0"
 accompanistSystemuicontroller = "0.36.0"
 androidnetworktools = "0.4.5.3"
 androidxJunit = "1.2.1"
-androixUi = "1.7.8"
-apacheCommonsNet = "3.10.0"
-apacheCommonsVfs = "2.9.0"
+androixUi = "1.7.9"
+apacheCommonsNet = "3.11.1"
+apacheCommonsVfs = "2.10.0"
 appcompat = "1.7.0"
-androidxComposeBom = "2025.02.00"
-coreKtx = "1.15.0"
-datastorePreferences = "1.1.2"
-dcerpc = "0.12.0"
+androidxComposeBom = "2025.04.01"
+coreKtx = "1.16.0"
+datastorePreferences = "1.1.4"
+dcerpc = "0.12.12"
 documentfile = "1.0.1"
-gradle = "8.8.1"
-guava = "33.0.0-android"
-hiltAndroid = "2.55"
+gradle = "8.10.0"
+guava = "33.4.8-android"
+hiltAndroid = "2.56.2"
 hiltNavigationCompose = "1.2.0"
 jcifsNg = "2.1.10"
-jsch = "0.2.23"
+jsch = "0.2.26"
 junit = "4.13.2"
-kotlin = "2.1.10"
-kotlinxCoroutinesAndroid = "1.10.1"
-kotlinxSerializationJson = "1.8.0"
-ksp = "2.1.10-1.0.30"
+kotlin = "2.1.20"
+kotlinxCoroutinesAndroid = "1.10.2"
+kotlinxSerializationJson = "1.8.1"
+ksp = "2.1.20-2.0.1"
 lifecycle = "2.8.7"
 listenablefuture = "9999.0-empty-to-avoid-conflict-with-guava"
-material3 = "1.3.1"
-navigationCompose = "2.8.7"
-reorderable = "0.9.6"
-room = "2.6.1"
+material3 = "1.3.2"
+navigationCompose = "2.8.9"
+reorderable = "2.4.3"
+room = "2.7.1"
 smbj = "0.14.0"
 timber = "4.7.1" # TODO: Update after supporting Kotlin static call
-workRuntimeKtx = "2.10.0"
+workRuntimeKtx = "2.10.1"
 
 [libraries]
 aboutlibraries = { module = "com.mikepenz:aboutlibraries", version.ref = "aboutlibraries" }
@@ -74,7 +69,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 listenablefuture = { module = "com.google.guava:listenablefuture", version.ref = "listenablefuture" }
-reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 smbj = { module = "com.hierynomus:smbj", version.ref = "smbj" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
@@ -88,5 +83,6 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }
 
 [bundles]

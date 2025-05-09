@@ -1,27 +1,25 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
-import com.wa2c.android.cifsdocumentsprovider.common.exception.Edit
+import com.wa2c.android.cifsdocumentsprovider.common.exception.EditException
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.common.values.USER_GUEST
-import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.DocumentFileManager
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
 import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.StorageClientManager
 import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toEntityModel
-import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toIndexModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toStorageRequest
+import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.Date
 import javax.inject.Inject
@@ -40,11 +38,6 @@ class EditRepository @Inject internal constructor(
 ) {
 
     private var temporaryConnection: RemoteConnection? = null
-
-    /** Connection flow */
-    val connectionListFlow = connectionSettingDao.getList().map { list ->
-        list.map { it.toIndexModel() }
-    }
 
     /**
      * Get connection
@@ -81,16 +74,6 @@ class EditRepository @Inject internal constructor(
         logD("deleteConnection: id=$id")
         withContext(dispatcher) {
             connectionSettingDao.delete(id)
-        }
-    }
-
-    /**
-     * Move connections order
-     */
-    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
-        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
-        withContext(dispatcher) {
-            connectionSettingDao.move(fromPosition, toPosition)
         }
     }
 
@@ -160,7 +143,7 @@ class EditRepository @Inject internal constructor(
             val binary = try {
                 documentFileManager.loadFile(uri)
             } catch (e: Exception) {
-                throw Edit.KeyCheck.AccessFailedException(e)
+                throw EditException.KeyCheck.AccessFailedException(e)
             }
             String(binary).also {
                 checkKey(it)
@@ -174,7 +157,7 @@ class EditRepository @Inject internal constructor(
             try {
                 sshKeyManager.checkKeyFile(key.encodeToByteArray())
             } catch (e: Exception) {
-                throw Edit.KeyCheck.InvalidException(e)
+                throw EditException.KeyCheck.InvalidException(e)
             }
         }
     }

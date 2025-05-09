@@ -1,5 +1,6 @@
 package com.wa2c.android.cifsdocumentsprovider.presentation.ui.settings
 
+import android.content.ClipData
 import android.content.Intent
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
@@ -12,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,23 +28,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.Language
+import com.mikepenz.aboutlibraries.ui.compose.libraryColors
 import com.wa2c.android.cifsdocumentsprovider.common.values.OPEN_FILE_LIMIT_DEFAULT
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.Language
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.mode
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.AppSnackbarHost
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.MutableStateAdapter
@@ -63,13 +67,14 @@ import kotlinx.coroutines.launch
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     onTransitEdit: (RemoteConnection) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
 
     SettingsScreenContainer(
         snackbarHostState = snackbarHostState,
@@ -102,12 +107,14 @@ fun SettingsScreen(
         ),
         knownHosts = viewModel.knownHostsFlow.collectAsStateWithLifecycle(emptyList()),
         onCopyToClipboard = { text ->
-            clipboardManager.setText(AnnotatedString(text))
-            scope.showPopup(
-                snackbarHostState = snackbarHostState,
-                stringRes = R.string.general_copy_clipboard_message,
-                type = PopupMessageType.Success,
-            )
+            scope.launch {
+                clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("text", text)))
+                showPopup(
+                    snackbarHostState = snackbarHostState,
+                    stringRes = R.string.general_copy_clipboard_message,
+                    type = PopupMessageType.Success,
+                )
+            }
         },
         onDeleteKnownHost = viewModel::deleteKnownHost,
         onTransitEdit = onTransitEdit,
@@ -125,6 +132,29 @@ fun SettingsScreen(
 
     LaunchedEffect(Unit) {
         viewModel.initialize()
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.exportResult.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    val message = context.getString(R.string.settings_transfer_export_message, it)
+                    scope.showPopup(snackbarHostState, message, PopupMessageType.Success)
+                }
+            } else {
+                scope.showError(snackbarHostState, result.exceptionOrNull())
+            }
+        }
+        viewModel.importResult.collectIn(lifecycleOwner) { result ->
+            if (result.isSuccess) {
+                result.getOrNull()?.let {
+                    val message = context.getString(R.string.settings_transfer_import_message, it)
+                    scope.showPopup(snackbarHostState, message, PopupMessageType.Success)
+                }
+            } else {
+                scope.showError(snackbarHostState, result.exceptionOrNull())
+            }
+        }
     }
 
 }

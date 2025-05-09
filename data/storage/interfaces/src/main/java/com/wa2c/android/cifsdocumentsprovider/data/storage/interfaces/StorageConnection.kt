@@ -60,6 +60,7 @@ sealed class StorageConnection {
         override val thumbnailTypes: List<String> = emptyList(),
         val domain: String?,
         val enableDfs: Boolean,
+        val enableEncryption: Boolean = false,
     ) : StorageConnection()
 
     /**

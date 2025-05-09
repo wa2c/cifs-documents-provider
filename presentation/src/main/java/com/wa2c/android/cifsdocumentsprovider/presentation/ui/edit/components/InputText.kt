@@ -23,7 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.KeyEventType
@@ -31,6 +31,8 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -39,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
-import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.autofill
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnEnter
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.moveFocusOnTab
 
@@ -59,7 +60,7 @@ fun InputText(
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
     ),
-    autofillType: AutofillType? = null,
+    autofillType: ContentType? = null,
     @DrawableRes iconResource: Int? = null,
     onClickButton: () -> Unit = {},
     onChange: (String?) -> Unit,
@@ -108,10 +109,7 @@ fun InputText(
                 .align(Alignment.CenterVertically)
                 .moveFocusOnEnter(focusManager)
                 .moveFocusOnTab(focusManager)
-                .autofill(
-                    autofillTypes = autofillType?.let { listOf(it) } ?: emptyList(),
-                    onFill = { onChange(it) }
-                ),
+                .semantics { autofillType?.let { contentType = it } },
         )
         iconResource?.let { res ->
             Button(

@@ -1,14 +1,25 @@
 package com.wa2c.android.cifsdocumentsprovider.domain.repository
 
+import com.wa2c.android.cifsdocumentsprovider.common.exception.AppException
+import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
+import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
+import com.wa2c.android.cifsdocumentsprovider.common.values.ImportOption
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.UiTheme
-import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
+import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionIO
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingDao
 import com.wa2c.android.cifsdocumentsprovider.data.preference.AppPreferencesDataStore
+import com.wa2c.android.cifsdocumentsprovider.data.storage.manager.SshKeyManager
+import com.wa2c.android.cifsdocumentsprovider.domain.IoDispatcher
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDataModel
 import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toDomainModel
+import com.wa2c.android.cifsdocumentsprovider.domain.mapper.DomainMapper.toIndexModel
 import com.wa2c.android.cifsdocumentsprovider.domain.model.KnownHost
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +31,24 @@ class AppRepository @Inject internal constructor(
     private val appPreferences: AppPreferencesDataStore,
     private val sshKeyManager: SshKeyManager,
     private val connectionSettingDao: ConnectionSettingDao,
+    private val connectionIO: ConnectionIO,
+    @IoDispatcher private val dispatcher: CoroutineDispatcher,
 ) {
+    /** Connection flow */
+    val connectionListFlow = connectionSettingDao.getList().map { list ->
+        list.map { it.toIndexModel() }
+    }
+
+    /**
+     * Move connections order
+     */
+    suspend fun moveConnection(fromPosition: Int, toPosition: Int) {
+        logD("moveConnection: fromPosition=$fromPosition, toPosition=$toPosition")
+        withContext(dispatcher) {
+            connectionSettingDao.move(fromPosition, toPosition)
+        }
+    }
+
 
     /** UI Theme */
     val uiThemeFlow = appPreferences.uiThemeFlow
@@ -68,6 +96,75 @@ class AppRepository @Inject internal constructor(
      */
     fun deleteKnownHost(knownHost: KnownHost) {
         sshKeyManager.deleteKnownHost(knownHost.host, knownHost.type)
+    }
+
+    /**
+     * Export settings
+     */
+    suspend fun exportSettings(
+        uriText: String,
+        password: String,
+        checkedId: Set<String>,
+    ): Int {
+        return withContext(dispatcher) {
+            try {
+                val list = connectionSettingDao.getList().first().filter { checkedId.contains(it.id) }
+                connectionIO.exportConnections(uriText, password, list)
+                list.size
+            } catch (e: Exception) {
+                connectionIO.deleteConnection(uriText)
+                throw AppException.Settings.Export(e)
+            }
+        }
+    }
+
+    /**
+     * Import settings
+     */
+    suspend fun importSettings(
+        uriText: String,
+        password: String,
+        importOption: ImportOption,
+    ): Int {
+        return withContext(dispatcher) {
+            try {
+                val list = connectionIO.importConnections(uriText, password)
+                when (importOption) {
+                    ImportOption.Replace -> {
+                        connectionSettingDao.replace(list)
+                        list.size
+                    }
+
+                    ImportOption.Overwrite -> {
+                        connectionSettingDao.insertAll(list)
+                        list.size
+                    }
+
+                    ImportOption.Ignore -> {
+                        val idList = connectionSettingDao.getList().first().map { it.id }
+                        var maxId = connectionSettingDao.getMaxSortOrder() + 1
+                        val filteredList = list
+                            .filter { !idList.contains(it.id) }
+                            .map { it.copy(sortOrder = maxId++) }
+                        connectionSettingDao.insertAll(filteredList)
+                        filteredList.size
+                    }
+
+                    ImportOption.Append -> {
+                        val idList = connectionSettingDao.getList().first().map { it.id }
+                        var maxId = connectionSettingDao.getMaxSortOrder() + 1
+                        val newList = list.map {
+                            if (!idList.contains(it.id)) it
+                            else it.copy(id = generateUUID(), sortOrder = maxId++)
+                        }
+                        connectionSettingDao.insertAll(newList)
+                        newList.size
+                    }
+                }
+            } catch (e: Exception) {
+                throw AppException.Settings.Import(e)
+            }
+        }
     }
 
     /**

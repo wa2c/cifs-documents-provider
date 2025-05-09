@@ -45,6 +45,7 @@ fun CommonDialog(
                     confirmButtons.forEach {
                         Button(
                             onClick = it.onClick,
+                            enabled = it.enabled,
                             contentPadding = PaddingValues(Theme.Sizes.S),
                             modifier = Modifier.padding(start = Theme.Sizes.S)
                         ) {
@@ -75,8 +76,10 @@ fun CommonDialog(
 class DialogButton(
     /** Button label */
     val label: String,
+    /** enabled **/
+    val enabled: Boolean = true,
     /** Click event */
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
 )
 
 @Preview(

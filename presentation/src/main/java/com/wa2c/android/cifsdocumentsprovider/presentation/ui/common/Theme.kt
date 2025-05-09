@@ -78,6 +78,7 @@ object Theme {
         val LL = 32.dp
 
         val ScreenMargin = M
+        val Button = 48.dp
     }
 
 

@@ -4,6 +4,7 @@ import InputCheck
 import InputMultiSelect
 import InputOption
 import android.annotation.SuppressLint
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -43,14 +44,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalAutofillManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,17 +63,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.wa2c.android.cifsdocumentsprovider.common.exception.StorageException
 import com.wa2c.android.cifsdocumentsprovider.common.utils.fileName
 import com.wa2c.android.cifsdocumentsprovider.common.utils.logD
-import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
-import com.wa2c.android.cifsdocumentsprovider.presentation.ext.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ProtocolType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_AUTHORITY
 import com.wa2c.android.cifsdocumentsprovider.common.values.URI_START
+import com.wa2c.android.cifsdocumentsprovider.domain.model.ConnectionResult
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
 import com.wa2c.android.cifsdocumentsprovider.presentation.R
+import com.wa2c.android.cifsdocumentsprovider.presentation.ext.KeyInputType
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.collectIn
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.labelRes
 import com.wa2c.android.cifsdocumentsprovider.presentation.ext.messageRes
@@ -94,6 +96,7 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.Ke
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.SubsectionTitle
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.edit.components.UriText
+import kotlinx.coroutines.launch
 import java.nio.charset.Charset
 
 @Composable
@@ -109,7 +112,7 @@ fun EditScreen(
     val context: Context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBackConfirmationDialog by remember { mutableStateOf(false) }
     var showKeyInputDialog by remember { mutableStateOf(false) }
@@ -163,12 +166,14 @@ fun EditScreen(
         },
         onClickCheckConnection = { viewModel.onClickCheckConnection() },
         onCopyToClipboard = { text ->
-            clipboardManager.setText(AnnotatedString(text))
-            scope.showPopup(
-                snackbarHostState = snackbarHostState,
-                stringRes = R.string.general_copy_clipboard_message,
-                type = PopupMessageType.Success,
-            )
+            scope.launch {
+                clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("text", text)))
+                showPopup(
+                    snackbarHostState = snackbarHostState,
+                    stringRes = R.string.general_copy_clipboard_message,
+                    type = PopupMessageType.Success,
+                )
+            }
         },
         onClickSave = { viewModel.onClickSave() },
     )
@@ -512,6 +517,16 @@ private fun EditScreenContainer(
                         ) {
                             connectionState.value = connectionState.value.copy(enableDfs = it)
                         }
+
+                        if (connectionState.value.storage == StorageType.SMBJ) {
+                            InputCheck(
+                                title = stringResource(id = R.string.edit_enable_encryption_label),
+                                value = connectionState.value.enableEncryption,
+                                focusManager = focusManager,
+                            ) {
+                                connectionState.value = connectionState.value.copy(enableEncryption = it)
+                            }
+                        }
                     }
 
                     // User
@@ -525,7 +540,7 @@ private fun EditScreenContainer(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next,
                         ),
-                        autofillType = AutofillType.Username,
+                        autofillType = ContentType.Username,
                     ) {
                         connectionState.value = connectionState.value.copy(user = it)
                     }
@@ -541,7 +556,7 @@ private fun EditScreenContainer(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Next,
                         ),
-                        autofillType = AutofillType.Password,
+                        autofillType = ContentType.Password,
                     ) {
                         connectionState.value = connectionState.value.copy(password = it)
                     }
@@ -616,7 +631,7 @@ private fun EditScreenContainer(
                                 keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Next,
                             ),
-                            autofillType = AutofillType.Password,
+                            autofillType = ContentType.Password,
                         ) {
                             connectionState.value = connectionState.value.copy(keyPassphrase = it)
                         }

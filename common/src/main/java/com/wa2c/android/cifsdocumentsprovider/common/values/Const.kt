@@ -26,3 +26,6 @@ const val NOTIFICATION_CHANNEL_ID_PROVIDER = "notification_channel_provider"
 const val NOTIFICATION_ID_PROVIDER = 101
 
 const val DEFAULT_FTPS_IMPLICIT_PORT = 990
+
+const val PASSWORD_LENGTH_16 = 16
+const val PASSWORD_LENGTH_32 = 32

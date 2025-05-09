@@ -38,6 +38,7 @@
     <string name="edit_port_title">ポート</string>
     <string name="edit_port_hint">未入力の場合は標準ポート</string>
     <string name="edit_enable_dfs_label">DFS(Distributed File System)利用</string>
+    <string name="edit_enable_encryption_label">暗号化を有効にする</string>
     <string name="edit_directory_search_a11y">閲覧</string>
     <string name="edit_user_title">ユーザ名</string>
     <string name="edit_user_hint">匿名の場合は無効</string>
@@ -118,6 +119,23 @@
     <string name="settings_open_file_limit">開けるファイル上限\n(アプリの再起動が必要)</string>
     <string name="settings_set_use_foreground">ファイル利用時に通知を表示</string>
     <string name="settings_set_use_as_local">ローカルストレージとして使う\n(デバイスの再起動が必要)</string>
+    <string name="settings_section_transfer">エクスポート / インポート</string>
+    <string name="settings_transfer_export">接続設定のエクスポート</string>
+    <string name="settings_transfer_export_dialog_password">パスワード (1-32文字)</string>
+    <string name="settings_transfer_export_dialog_check">エクスポート対象</string>
+    <string name="settings_transfer_export_dialog_button">エクスポート</string>
+    <string name="settings_transfer_export_message">%1$d件のデータを書き出しました。</string>
+    <string name="settings_transfer_export_error">データの書き出しに失敗しました。</string>
+    <string name="settings_transfer_import">接続設定のインポート</string>
+    <string name="settings_transfer_import_dialog_password">パスワード (1-32文字)</string>
+    <string name="settings_transfer_import_dialog_option_replace">全データ置換え</string>
+    <string name="settings_transfer_import_dialog_option_duplicate">ID重複データ</string>
+    <string name="settings_transfer_import_dialog_option_overwrite">上書き</string>
+    <string name="settings_transfer_import_dialog_option_ignore">無視</string>
+    <string name="settings_transfer_import_dialog_option_append">ID変更 (共有URIが変わります)</string>
+    <string name="settings_transfer_import_dialog_button">インポート</string>
+    <string name="settings_transfer_import_message">%1$d件のデータを取り込みました。</string>
+    <string name="settings_transfer_import_error">データの取り込みに失敗しました。</string>
     <string name="settings_section_info">情報</string>
     <string name="settings_info_known_hosts">SSH 信頼済みホスト</string>
     <string name="settings_info_known_hosts_host">ホスト</string>
@@ -143,7 +161,7 @@
     <string name="send_overwrite_confirmation_message">%1$d件のファイルを上書きします。</string>
     
     <!-- DocumentsProvider -->
-    <string name="provider_error_message">エラーが発生しました</string>
+    <string name="provider_error_message">エラーが発生しました。</string>
     
     <!-- Notification -->
     <string name="notification_channel_name_provider">ファイルオープン</string>

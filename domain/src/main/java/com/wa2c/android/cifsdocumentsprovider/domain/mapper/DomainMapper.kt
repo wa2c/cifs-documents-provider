@@ -7,10 +7,12 @@ import com.wa2c.android.cifsdocumentsprovider.common.utils.generateUUID
 import com.wa2c.android.cifsdocumentsprovider.common.utils.mimeType
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
 import com.wa2c.android.cifsdocumentsprovider.common.values.ThumbnailType
+import com.wa2c.android.cifsdocumentsprovider.data.EncryptUtils
 import com.wa2c.android.cifsdocumentsprovider.data.db.ConnectionSettingEntity
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageConnection
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageFile
 import com.wa2c.android.cifsdocumentsprovider.data.storage.interfaces.StorageRequest
+import com.wa2c.android.cifsdocumentsprovider.domain.BuildConfig
 import com.wa2c.android.cifsdocumentsprovider.domain.model.DocumentId
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnection
 import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteConnectionIndex
@@ -18,7 +20,6 @@ import com.wa2c.android.cifsdocumentsprovider.domain.model.RemoteFile
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendData
 import com.wa2c.android.cifsdocumentsprovider.domain.model.SendDataState
 import com.wa2c.android.cifsdocumentsprovider.domain.model.StorageUri
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.Date
 
@@ -53,7 +54,7 @@ internal object DomainMapper {
      */
     fun ConnectionSettingEntity.toDataModel(): StorageConnection {
         val type = StorageType.findByValue(this.type) ?: StorageType.default
-        val json = EncryptUtils.decrypt(this.data)
+        val json = EncryptUtils.decrypt(this.data, BuildConfig.K)
         return jsonToStorageConnection(type, json)
     }
 
@@ -95,7 +96,7 @@ internal object DomainMapper {
             name = this.name,
             uri = this.uri,
             type = this.storage.value,
-            data = EncryptUtils.encrypt(formatter.encodeToString(this))  ,
+            data = EncryptUtils.encrypt(formatter.encodeToString(this), BuildConfig.K)  ,
             sortOrder = sortOrder,
             modifiedDate = modifiedDate.time
         )
@@ -125,6 +126,7 @@ internal object DomainMapper {
                     host = host,
                     port = port,
                     enableDfs = enableDfs,
+                    enableEncryption = enableEncryption,
                     folder = folder,
                     user = user,
                     password = password,
@@ -235,6 +237,7 @@ internal object DomainMapper {
                     extension = optionAddExtension,
                     domain = domain,
                     enableDfs = enableDfs,
+                    enableEncryption = enableEncryption,
                 )
             }
             StorageType.APACHE_FTP,

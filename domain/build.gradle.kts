@@ -9,13 +9,15 @@ plugins {
 
 val applicationId: String by rootProject.extra
 val javaVersion: JavaVersion by rootProject.extra
+val androidCompileSdk: Int by rootProject.extra
+val androidMinSdk: Int by rootProject.extra
 
 android {
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    compileSdk = androidCompileSdk
     namespace = "${applicationId}.domain"
 
     defaultConfig {
-        minSdk = libs.versions.androidMinSdk.get().toInt()
+        minSdk = androidMinSdk
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

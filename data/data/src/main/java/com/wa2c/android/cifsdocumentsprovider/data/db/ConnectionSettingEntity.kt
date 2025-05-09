@@ -5,7 +5,9 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.wa2c.android.cifsdocumentsprovider.common.values.StorageType
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(
     tableName = ConnectionSettingEntity.TABLE_NAME,
     indices = [

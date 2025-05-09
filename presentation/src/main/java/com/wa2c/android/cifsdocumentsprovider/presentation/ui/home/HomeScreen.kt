@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,10 +52,9 @@ import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.Theme
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.getAppTopAppBarColors
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showError
 import com.wa2c.android.cifsdocumentsprovider.presentation.ui.common.showPopup
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+
 
 /**
  * Home Screen
@@ -186,14 +186,15 @@ fun ConnectionList(
     onClickItem: (RemoteConnectionIndex) -> Unit,
     onDragAndDrop: (from: Int, to: Int) -> Unit,
 ) {
-    val state = rememberReorderableLazyListState(onMove = { from, to ->
-        onDragAndDrop(from.index, to.index)
-    })
+    val listState =  rememberLazyListState()
+    val state = rememberReorderableLazyListState(
+        lazyListState =listState,
+        onMove = { from, to ->
+            onDragAndDrop(from.index, to.index)
+        }
+    )
     LazyColumn(
-        state = state.listState,
-        modifier = Modifier
-            .reorderable(state)
-            .detectReorderAfterLongPress(state)
+        state = listState,
     ) {
         items(items = connectionList, { it }) { connection ->
             ReorderableItem(state, key = connection) { isDragging ->
@@ -202,7 +203,8 @@ fun ConnectionList(
                     connection = connection,
                     modifier = Modifier
                         .shadow(elevation.value)
-                        .background(MaterialTheme.colorScheme.surface),
+                        .background(MaterialTheme.colorScheme.surface)
+                        .longPressDraggableHandle(),
                     onClick = { onClickItem(connection) },
                 )
             }
