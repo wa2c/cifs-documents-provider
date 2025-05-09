@@ -38,6 +38,7 @@
     <string name="edit_port_title">بوابة</string>
     <string name="edit_port_hint">أهمل إن كان خاليا</string>
     <string name="edit_enable_dfs_label">فعّل - دي إف أس - ( نظام الملفات الموزعة )</string>
+    <string name="edit_enable_encryption_label">تمكين التشفير</string>
     <string name="edit_directory_search_a11y">تصفح</string>
     <string name="edit_user_title">المستخدم</string>
     <string name="edit_user_hint">باطل إذا كان مجهول</string>

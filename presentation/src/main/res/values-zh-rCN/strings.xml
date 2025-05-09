@@ -38,6 +38,7 @@
     <string name="edit_port_title">端口号</string>
     <string name="edit_port_hint">如果留空则为默认值</string>
     <string name="edit_enable_dfs_label">启用DFS（分布式文件系统）</string>
+    <string name="edit_enable_encryption_label">启用加密</string>
     <string name="edit_directory_search_a11y">浏览</string>
     <string name="edit_user_title">用户名</string>
     <string name="edit_user_hint">匿名访问时无效</string>

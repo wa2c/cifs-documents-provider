@@ -517,6 +517,16 @@ private fun EditScreenContainer(
                         ) {
                             connectionState.value = connectionState.value.copy(enableDfs = it)
                         }
+
+                        if (connectionState.value.storage == StorageType.SMBJ) {
+                            InputCheck(
+                                title = stringResource(id = R.string.edit_enable_encryption_label),
+                                value = connectionState.value.enableEncryption,
+                                focusManager = focusManager,
+                            ) {
+                                connectionState.value = connectionState.value.copy(enableEncryption = it)
+                            }
+                        }
                     }
 
                     // User

@@ -90,6 +90,7 @@ class SmbjClient(
         return if (!forced) { sessionCache[connection]?.takeIf { it.connection.isConnected } } else { null } ?: let {
             val config = SmbConfig.builder()
                 .withDfsEnabled(connection.enableDfs)
+                .withEncryptData(connection.enableEncryption)
                 .build()
             val client = SMBClient(config)
             val port = connection.port?.toIntOrNull()

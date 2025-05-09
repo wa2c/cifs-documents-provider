@@ -38,6 +38,7 @@
     <string name="edit_port_title">ဆိပ်ကမ်း</string>
     <string name="edit_port_hint"> ပုံသေ အလွတ်</string>
     <string name="edit_enable_dfs_label">DFS (ဖြန့်ဝေထားသောဖိုင်စနစ်) ကိုဖွင့်ပါ</string>
+    <string name="edit_enable_encryption_label">ကုဒ်ဝှက်ခြင်းကို ဖွင့်ပါ။</string>
     <string name="edit_directory_search_a11y">ဘရောက်ဆာ</string>
     <string name="edit_user_title">အသုံးပြုသူ</string>
     <string name="edit_user_hint">အမည်မသိလျှင် မမှန်ကန်ပါ</string>

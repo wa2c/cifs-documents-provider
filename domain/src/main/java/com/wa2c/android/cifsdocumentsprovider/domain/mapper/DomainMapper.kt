@@ -126,6 +126,7 @@ internal object DomainMapper {
                     host = host,
                     port = port,
                     enableDfs = enableDfs,
+                    enableEncryption = enableEncryption,
                     folder = folder,
                     user = user,
                     password = password,
@@ -236,6 +237,7 @@ internal object DomainMapper {
                     extension = optionAddExtension,
                     domain = domain,
                     enableDfs = enableDfs,
+                    enableEncryption = enableEncryption,
                 )
             }
             StorageType.APACHE_FTP,

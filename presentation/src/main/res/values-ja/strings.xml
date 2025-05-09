@@ -38,6 +38,7 @@
     <string name="edit_port_title">ポート</string>
     <string name="edit_port_hint">未入力の場合は標準ポート</string>
     <string name="edit_enable_dfs_label">DFS(Distributed File System)利用</string>
+    <string name="edit_enable_encryption_label">暗号化を有効にする</string>
     <string name="edit_directory_search_a11y">閲覧</string>
     <string name="edit_user_title">ユーザ名</string>
     <string name="edit_user_hint">匿名の場合は無効</string>

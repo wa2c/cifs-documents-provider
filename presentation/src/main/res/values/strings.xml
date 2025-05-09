@@ -38,6 +38,7 @@
     <string name="edit_port_title">Port</string>
     <string name="edit_port_hint">Default if empty</string>
     <string name="edit_enable_dfs_label">Enable DFS (Distributed File System)</string>
+    <string name="edit_enable_encryption_label">Enable Encryption</string>
     <string name="edit_directory_search_a11y">Browse</string>
     <string name="edit_user_title">User</string>
     <string name="edit_user_hint">Invalid if anonymous</string>
