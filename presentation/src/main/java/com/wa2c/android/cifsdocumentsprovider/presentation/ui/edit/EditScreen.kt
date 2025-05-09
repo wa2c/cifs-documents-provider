@@ -530,7 +530,7 @@ private fun EditScreenContainer(
                             keyboardType = KeyboardType.Email,
                             imeAction = ImeAction.Next,
                         ),
-                        autofillType = if (isNew) ContentType.NewUsername else ContentType.Username,
+                        autofillType = ContentType.Username,
                     ) {
                         connectionState.value = connectionState.value.copy(user = it)
                     }
@@ -546,7 +546,7 @@ private fun EditScreenContainer(
                             keyboardType = KeyboardType.Password,
                             imeAction = ImeAction.Next,
                         ),
-                        autofillType = if (isNew) ContentType.NewPassword else ContentType.Password,
+                        autofillType = ContentType.Password,
                     ) {
                         connectionState.value = connectionState.value.copy(password = it)
                     }
@@ -621,7 +621,7 @@ private fun EditScreenContainer(
                                 keyboardType = KeyboardType.Password,
                                 imeAction = ImeAction.Next,
                             ),
-                            autofillType = if (isNew) ContentType.NewPassword else ContentType.Password,
+                            autofillType = ContentType.Password,
                         ) {
                             connectionState.value = connectionState.value.copy(keyPassphrase = it)
                         }
