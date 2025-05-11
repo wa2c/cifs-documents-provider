@@ -80,6 +80,7 @@ fun Language.getLabel(context: Context): String {
         Language.SLOVAK -> R.string.enum_language_sk
         Language.CHINESE -> R.string.enum_language_zh_rcn
         Language.MYANMAR -> R.string.enum_language_my
+        Language.RUSSIAN -> R.string.enum_language_ru
     }.let {
         context.getString(it)
     }
