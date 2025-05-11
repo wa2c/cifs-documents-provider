@@ -17,6 +17,10 @@ class SshKeyManager @Inject constructor(
 
     /** JSch */
     private val jsch: JSch by lazy {
+        // Support ssh-rsa type keys
+        JSch.setConfig("server_host_key", JSch.getConfig("server_host_key") + ",ssh-rsa")
+        JSch.setConfig("PubkeyAcceptedAlgorithms", JSch.getConfig("PubkeyAcceptedAlgorithms") + ",ssh-rsa")
+        // Initialize
         JSch().apply {
             val file = File(context.filesDir, KNOWN_HOSTS_FILE)
             if (!file.exists()) file.createNewFile()
