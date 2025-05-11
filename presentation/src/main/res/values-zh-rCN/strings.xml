@@ -172,5 +172,5 @@
     <!-- Theme Enum -->
     <string name="enum_theme_default">默认</string>
     <string name="enum_theme_light">浅色主題</string>
-    <string name="enum_theme_dark">深色主题</string>
+    <string name="enum_theme_dark">深色主題</string>
 </resources>
