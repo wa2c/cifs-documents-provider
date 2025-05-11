@@ -21,6 +21,8 @@ enum class Language(
     CHINESE("zh"),
     /** Burmese */
     MYANMAR("my"),
+    /** Russian */
+    RUSSIAN("ru"),
     ;
 
     companion object {
