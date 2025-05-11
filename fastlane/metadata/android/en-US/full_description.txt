@@ -7,6 +7,7 @@
 * Supports SMB (Samba, Common Internet File System (CIFS), Windows Network Shared Folder), FTP, FTPS and SFTP.
 * Share and transfer files on online storage.
 * Multiple connection settings can be stored.
+* Supports connection settings export/import.
 * Supports dark mode.
 * Can be treated as local storage (configuration required)
 * Notifications can be displayed to prevent task kills. (configuration required)

@@ -1,1 +1,1 @@
-SMB/CIFS Documents Provider
+CIFS Documents Provider
