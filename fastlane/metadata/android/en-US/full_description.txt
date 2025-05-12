@@ -1,15 +1,15 @@
 <strong>CIFS Documents Provider</strong> is an Android app to provide access to shared online storage.
 
-<strong><font color="#339933">[Feature]</font></strong>
+<strong><font color="#339933">[Features]</font></strong>
 
-* Provide other apps with access to shared online storage via the Storage Access Framework (SAF).
+* Provide other apps with access to shared network storage via the Storage Access Framework (SAF).
 * Provides access to files and directories.
-* Supports SMB, FTP, FTPS and SFTP.
+* Supports SMB (Samba, Common Internet File System (CIFS), Windows Network Shared Folder), FTP, FTPS and SFTP.
 * Share and transfer files on online storage.
 * Multiple connection settings can be stored.
-* Supports multiple languages.
+* Supports connection settings export/import.
 * Supports dark mode.
-* Can be treated as local storage. (Configuration required)
+* Can be treated as local storage (configuration required)
 * Notifications can be displayed to prevent task kills. (configuration required)
 
 <strong><font color="#339933">[Objective]</font></strong>
@@ -31,12 +31,12 @@
 See the following page. (Japanese)
 https://github.com/wa2c/cifs-documents-provider/wiki/Manual-ja
 
-<strong><font color="#339933">[Source]</font></strong>
+<strong><font color="#339933">[Sources]</font></strong>
 
 GitHub
 https://github.com/wa2c/cifs-documents-provider
 
-<strong><font color="#339933">[Issue]</font></strong>
+<strong><font color="#339933">[Issues]</font></strong>
 
 GitHub Issue
 https://github.com/wa2c/cifs-documents-provider/issues
