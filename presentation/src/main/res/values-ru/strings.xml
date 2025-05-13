@@ -25,7 +25,7 @@
     <!-- Edit Screen -->
     <string name="edit_title">Соединение</string>
     <string name="edit_id_title">ID</string>
-    <string name="edit_id_hint">Уникальная строка (без \&quot;:\&quot;, \&quot;/\&quot;)</string>
+    <string name="edit_id_hint">Уникальная строка (без \":\", \"/\")</string>
     <string name="edit_name_title">Название</string>
     <string name="edit_name_hint">Хост пустой</string>
     <string name="edit_storage_title">Хранилище</string>
@@ -61,7 +61,7 @@
     <string name="edit_ftp_mode_title">Активный режим</string>
     <string name="edit_ftps_implicit_label">Неявный SSL/TLS режим</string>
     <string name="edit_folder_title">Папка</string>
-    <string name="edit_folder_hint">\&quot;/\&quot; если пусто</string>
+    <string name="edit_folder_hint">\"/\" если пусто</string>
     <string name="edit_option_section_title">Опции</string>
     <string name="edit_option_safe_transfer_label">Безопасная передача данных</string>
     <string name="edit_option_read_only_label">Только для чтения</string>
